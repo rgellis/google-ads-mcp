@@ -7,13 +7,23 @@ from google.ads.googleads.v23.services.services.keyword_plan_idea_service import
     KeywordPlanIdeaServiceClient,
 )
 from google.ads.googleads.v23.services.types.keyword_plan_idea_service import (
+    GenerateAdGroupThemesRequest,
+    GenerateAdGroupThemesResponse,
+    GenerateKeywordForecastMetricsRequest,
+    GenerateKeywordForecastMetricsResponse,
+    GenerateKeywordHistoricalMetricsRequest,
+    GenerateKeywordHistoricalMetricsResponse,
     GenerateKeywordIdeasRequest,
     GenerateKeywordIdeaResult,
+    CampaignToForecast,
+    ForecastAdGroup,
+    BiddableKeyword,
     KeywordAndUrlSeed,
     KeywordSeed,
     SiteSeed,
     UrlSeed,
 )
+from google.ads.googleads.v23.common.types.criteria import KeywordInfo
 from google.ads.googleads.v23.enums.types.keyword_plan_network import (
     KeywordPlanNetworkEnum,
 )
@@ -308,6 +318,223 @@ class KeywordPlanIdeaService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def generate_keyword_historical_metrics(
+        self,
+        ctx: Context,
+        customer_id: str,
+        keywords: List[str],
+        language: Optional[str] = None,
+        geo_target_constants: Optional[List[str]] = None,
+        keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
+        include_adult_keywords: bool = False,
+    ) -> Dict[str, Any]:
+        """Generate historical metrics for a list of keywords.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            keywords: List of keywords (up to 10,000; duplicates de-duped)
+            language: Language constant resource name (optional)
+            geo_target_constants: Geo target constant resource names (max 10, optional)
+            keyword_plan_network: Network type
+            include_adult_keywords: Whether to include adult keywords
+
+        Returns:
+            Historical metrics per keyword
+        """
+        try:
+            from src.utils import format_customer_id, serialize_proto_message
+
+            customer_id = format_customer_id(customer_id)
+
+            request = GenerateKeywordHistoricalMetricsRequest()
+            request.customer_id = customer_id
+            request.keywords = keywords
+            request.keyword_plan_network = keyword_plan_network
+            request.include_adult_keywords = include_adult_keywords
+
+            if language:
+                request.language = language
+            if geo_target_constants:
+                request.geo_target_constants = geo_target_constants
+
+            response: GenerateKeywordHistoricalMetricsResponse = (
+                self.client.generate_keyword_historical_metrics(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate keyword historical metrics: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def generate_ad_group_themes(
+        self,
+        ctx: Context,
+        customer_id: str,
+        keywords: List[str],
+        ad_groups: List[str],
+    ) -> Dict[str, Any]:
+        """Generate ad group themes by grouping keywords into existing ad groups.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            keywords: List of keywords to group
+            ad_groups: List of ad group resource names
+
+        Returns:
+            Keyword suggestions mapped to ad groups, plus unusable ad groups
+        """
+        try:
+            from src.utils import format_customer_id, serialize_proto_message
+
+            customer_id = format_customer_id(customer_id)
+
+            request = GenerateAdGroupThemesRequest()
+            request.customer_id = customer_id
+            request.keywords = keywords
+            request.ad_groups = ad_groups
+
+            response: GenerateAdGroupThemesResponse = (
+                self.client.generate_ad_group_themes(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate ad group themes: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def generate_keyword_forecast_metrics(
+        self,
+        ctx: Context,
+        customer_id: str,
+        keyword_plan_network: str,
+        biddable_keywords: List[Dict[str, Any]],
+        bidding_strategy: Dict[str, Any],
+        currency_code: Optional[str] = None,
+        forecast_start_date: Optional[str] = None,
+        forecast_end_date: Optional[str] = None,
+        negative_keywords: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
+        """Generate forecast metrics for keywords.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            keyword_plan_network: Network type (GOOGLE_SEARCH, GOOGLE_SEARCH_AND_PARTNERS)
+            biddable_keywords: List of dicts with 'text', 'match_type', and optional 'max_cpc_bid_micros'
+            bidding_strategy: Dict with 'type' (manual_cpc/maximize_clicks/maximize_conversions) and
+                type-specific fields (daily_budget_micros, max_cpc_bid_micros, daily_target_spend_micros)
+            currency_code: ISO 4217 currency code (optional)
+            forecast_start_date: Start date YYYY-MM-DD (optional, defaults to next Sunday)
+            forecast_end_date: End date YYYY-MM-DD (optional, defaults to next Saturday)
+            negative_keywords: List of dicts with 'text' and 'match_type' (optional)
+
+        Returns:
+            Forecast metrics including impressions, clicks, cost, conversions
+        """
+        try:
+            from google.ads.googleads.v23.enums.types.keyword_match_type import (
+                KeywordMatchTypeEnum,
+            )
+            from src.utils import format_customer_id, serialize_proto_message
+
+            customer_id = format_customer_id(customer_id)
+
+            campaign = CampaignToForecast()
+            campaign.keyword_plan_network = getattr(
+                KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+            )
+
+            # Build bidding strategy
+            strategy_type = bidding_strategy["type"]
+            if strategy_type == "manual_cpc":
+                campaign.manual_cpc_bidding_strategy.max_cpc_bid_micros = (
+                    bidding_strategy["max_cpc_bid_micros"]
+                )
+                if "daily_budget_micros" in bidding_strategy:
+                    campaign.manual_cpc_bidding_strategy.daily_budget_micros = (
+                        bidding_strategy["daily_budget_micros"]
+                    )
+            elif strategy_type == "maximize_clicks":
+                campaign.maximize_clicks_bidding_strategy.daily_target_spend_micros = (
+                    bidding_strategy["daily_target_spend_micros"]
+                )
+                if "max_cpc_bid_ceiling_micros" in bidding_strategy:
+                    campaign.maximize_clicks_bidding_strategy.max_cpc_bid_ceiling_micros = bidding_strategy[
+                        "max_cpc_bid_ceiling_micros"
+                    ]
+            elif strategy_type == "maximize_conversions":
+                campaign.maximize_conversions_bidding_strategy.daily_target_spend_micros = bidding_strategy[
+                    "daily_target_spend_micros"
+                ]
+
+            # Build ad group with biddable keywords
+            ad_group = ForecastAdGroup()
+            for kw_data in biddable_keywords:
+                bk = BiddableKeyword()
+                kw_info = KeywordInfo()
+                kw_info.text = kw_data["text"]
+                kw_info.match_type = getattr(
+                    KeywordMatchTypeEnum.KeywordMatchType, kw_data["match_type"]
+                )
+                bk.keyword = kw_info
+                if "max_cpc_bid_micros" in kw_data:
+                    bk.max_cpc_bid_micros = kw_data["max_cpc_bid_micros"]
+                ad_group.biddable_keywords.append(bk)
+
+            if negative_keywords:
+                for nk_data in negative_keywords:
+                    nk = KeywordInfo()
+                    nk.text = nk_data["text"]
+                    nk.match_type = getattr(
+                        KeywordMatchTypeEnum.KeywordMatchType, nk_data["match_type"]
+                    )
+                    ad_group.negative_keywords.append(nk)
+
+            campaign.ad_groups.append(ad_group)
+
+            request = GenerateKeywordForecastMetricsRequest()
+            request.customer_id = customer_id
+            request.campaign = campaign
+
+            if currency_code:
+                request.currency_code = currency_code
+            if forecast_start_date and forecast_end_date:
+                from google.ads.googleads.v23.common.types.dates import DateRange
+
+                request.forecast_period = DateRange(
+                    start_date=forecast_start_date,
+                    end_date=forecast_end_date,
+                )
+
+            response: GenerateKeywordForecastMetricsResponse = (
+                self.client.generate_keyword_forecast_metrics(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate keyword forecast metrics: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     def _format_keyword_idea(self, idea: GenerateKeywordIdeaResult) -> Dict[str, Any]:
         """Format a keyword idea result into a dictionary."""
         result = {
@@ -536,12 +763,116 @@ def create_keyword_plan_idea_tools(
             page_size=page_size,
         )
 
+    async def generate_keyword_historical_metrics(
+        ctx: Context,
+        customer_id: str,
+        keywords: List[str],
+        language: Optional[str] = None,
+        geo_target_constants: Optional[List[str]] = None,
+        keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
+        include_adult_keywords: bool = False,
+    ) -> Dict[str, Any]:
+        """Generate historical metrics for a list of keywords.
+
+        Args:
+            customer_id: The customer ID
+            keywords: List of keywords to get metrics for (up to 10,000)
+            language: Language constant resource name (optional)
+            geo_target_constants: Geo target constant resource names (max 10, optional)
+            keyword_plan_network: Network type - GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS
+            include_adult_keywords: Whether to include adult keywords
+
+        Returns:
+            Historical metrics per keyword including search volume, competition, bids
+        """
+        kw_network_enum = getattr(
+            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        )
+        return await service.generate_keyword_historical_metrics(
+            ctx=ctx,
+            customer_id=customer_id,
+            keywords=keywords,
+            language=language,
+            geo_target_constants=geo_target_constants,
+            keyword_plan_network=kw_network_enum,
+            include_adult_keywords=include_adult_keywords,
+        )
+
+    async def generate_ad_group_themes(
+        ctx: Context,
+        customer_id: str,
+        keywords: List[str],
+        ad_groups: List[str],
+    ) -> Dict[str, Any]:
+        """Generate ad group themes by grouping keywords into existing ad groups.
+
+        Args:
+            customer_id: The customer ID
+            keywords: List of keywords to group
+            ad_groups: List of ad group resource names (e.g. customers/{id}/adGroups/{id})
+
+        Returns:
+            Keyword suggestions mapped to ad groups, plus unusable ad groups
+        """
+        return await service.generate_ad_group_themes(
+            ctx=ctx,
+            customer_id=customer_id,
+            keywords=keywords,
+            ad_groups=ad_groups,
+        )
+
+    async def generate_keyword_forecast_metrics(
+        ctx: Context,
+        customer_id: str,
+        keyword_plan_network: str,
+        biddable_keywords: List[Dict[str, Any]],
+        bidding_strategy: Dict[str, Any],
+        currency_code: Optional[str] = None,
+        forecast_start_date: Optional[str] = None,
+        forecast_end_date: Optional[str] = None,
+        negative_keywords: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
+        """Generate forecast metrics (impressions, clicks, cost) for keywords.
+
+        Args:
+            customer_id: The customer ID
+            keyword_plan_network: GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS
+            biddable_keywords: List of dicts with 'text', 'match_type' (EXACT/BROAD/PHRASE),
+                and optional 'max_cpc_bid_micros'
+            bidding_strategy: Dict with 'type' (manual_cpc/maximize_clicks/maximize_conversions)
+                and type-specific fields:
+                - manual_cpc: max_cpc_bid_micros (required), daily_budget_micros (optional)
+                - maximize_clicks: daily_target_spend_micros (required), max_cpc_bid_ceiling_micros (optional)
+                - maximize_conversions: daily_target_spend_micros (required)
+            currency_code: ISO 4217 currency code (optional)
+            forecast_start_date: Start date YYYY-MM-DD (optional)
+            forecast_end_date: End date YYYY-MM-DD (optional)
+            negative_keywords: List of dicts with 'text' and 'match_type' (optional)
+
+        Returns:
+            Forecast metrics including impressions, clicks, cost, conversions, CTR, CPC
+        """
+        return await service.generate_keyword_forecast_metrics(
+            ctx=ctx,
+            customer_id=customer_id,
+            keyword_plan_network=keyword_plan_network,
+            biddable_keywords=biddable_keywords,
+            bidding_strategy=bidding_strategy,
+            currency_code=currency_code,
+            forecast_start_date=forecast_start_date,
+            forecast_end_date=forecast_end_date,
+            negative_keywords=negative_keywords,
+        )
+
     tools.extend(
         [
             generate_keyword_ideas_from_keywords,
             generate_keyword_ideas_from_url,
             generate_keyword_ideas_from_site,
             generate_keyword_ideas_from_keywords_and_url,
+            generate_keyword_historical_metrics,
+            generate_ad_group_themes,
+            generate_keyword_forecast_metrics,
         ]
     )
     return tools
