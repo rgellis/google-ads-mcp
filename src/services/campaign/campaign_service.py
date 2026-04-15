@@ -20,7 +20,11 @@ from google.ads.googleads.v23.services.services.campaign_service import (
     CampaignServiceClient,
 )
 from google.ads.googleads.v23.services.types.campaign_service import (
+    BrandCampaignAssets,
     CampaignOperation,
+    EnableOperation,
+    EnablePMaxBrandGuidelinesRequest,
+    EnablePMaxBrandGuidelinesResponse,
     MutateCampaignsRequest,
     MutateCampaignsResponse,
 )
@@ -102,9 +106,7 @@ class CampaignService:
             campaign.manual_cpc = manual_cpc
 
             # EU political advertising declaration (required by Google Ads API)
-            campaign.contains_eu_political_advertising = (
-                EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
-            )
+            campaign.contains_eu_political_advertising = EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
 
             # Set dates if provided
             if start_date:
@@ -218,6 +220,80 @@ class CampaignService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def enable_p_max_brand_guidelines(
+        self,
+        ctx: Context,
+        customer_id: str,
+        operations: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Enable Performance Max brand guidelines for campaigns.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            operations: List of dicts, each with:
+                - campaign: Campaign resource name (required)
+                - auto_populate_brand_assets: bool (required)
+                - brand_assets: dict with business_name_asset, logo_asset (list),
+                    landscape_logo_asset (optional list) - required if auto_populate is False
+                - final_uri_domain: str (optional)
+                - main_color: str (optional)
+                - accent_color: str (optional)
+                - font_family: str (optional)
+
+        Returns:
+            Enablement results per campaign
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            enable_ops = []
+            for op_data in operations:
+                enable_op = EnableOperation()
+                enable_op.campaign = op_data["campaign"]
+                enable_op.auto_populate_brand_assets = op_data[
+                    "auto_populate_brand_assets"
+                ]
+
+                if "brand_assets" in op_data:
+                    ba = op_data["brand_assets"]
+                    brand_assets = BrandCampaignAssets()
+                    brand_assets.business_name_asset = ba["business_name_asset"]
+                    brand_assets.logo_asset = ba["logo_asset"]
+                    if "landscape_logo_asset" in ba:
+                        brand_assets.landscape_logo_asset = ba["landscape_logo_asset"]
+                    enable_op.brand_assets = brand_assets
+
+                if "final_uri_domain" in op_data:
+                    enable_op.final_uri_domain = op_data["final_uri_domain"]
+                if "main_color" in op_data:
+                    enable_op.main_color = op_data["main_color"]
+                if "accent_color" in op_data:
+                    enable_op.accent_color = op_data["accent_color"]
+                if "font_family" in op_data:
+                    enable_op.font_family = op_data["font_family"]
+
+                enable_ops.append(enable_op)
+
+            request = EnablePMaxBrandGuidelinesRequest()
+            request.customer_id = customer_id
+            request.operations = enable_ops
+
+            response: EnablePMaxBrandGuidelinesResponse = (
+                self.client.enable_p_max_brand_guidelines(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to enable PMax brand guidelines: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_campaign_tools(
     service: CampaignService,
@@ -307,7 +383,37 @@ def create_campaign_tools(
             end_date=end_date,
         )
 
-    tools.extend([create_campaign, update_campaign])
+    async def enable_p_max_brand_guidelines(
+        ctx: Context,
+        customer_id: str,
+        operations: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Enable Performance Max brand guidelines for campaigns.
+
+        Max 10 operations per request.
+
+        Args:
+            customer_id: The customer ID
+            operations: List of dicts, each with:
+                - campaign: Campaign resource name (required)
+                - auto_populate_brand_assets: bool (required)
+                - brand_assets: dict with business_name_asset, logo_asset (list),
+                    landscape_logo_asset (optional list) - required if auto_populate is False
+                - final_uri_domain: str (optional)
+                - main_color: str (optional)
+                - accent_color: str (optional)
+                - font_family: str (optional)
+
+        Returns:
+            Enablement results per campaign
+        """
+        return await service.enable_p_max_brand_guidelines(
+            ctx=ctx,
+            customer_id=customer_id,
+            operations=operations,
+        )
+
+    tools.extend([create_campaign, update_campaign, enable_p_max_brand_guidelines])
     return tools
 
 
