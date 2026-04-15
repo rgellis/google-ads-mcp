@@ -8,14 +8,28 @@ from google.ads.googleads.v23.services.services.reach_plan_service import (
     ReachPlanServiceClient,
 )
 from google.ads.googleads.v23.services.types.reach_plan_service import (
+    GenerateConversionRatesRequest,
+    GenerateConversionRatesResponse,
+    GenerateReachForecastRequest,
+    GenerateReachForecastResponse,
     ListPlannableLocationsRequest,
     ListPlannableLocationsResponse,
     ListPlannableProductsRequest,
     ListPlannableProductsResponse,
+    ListPlannableUserInterestsRequest,
+    ListPlannableUserInterestsResponse,
+    ListPlannableUserListsRequest,
+    ListPlannableUserListsResponse,
+    CampaignDuration,
+    PlannedProduct,
+    Targeting,
+)
+from google.ads.googleads.v23.common.types.criteria import (
+    LocationInfo,
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import get_logger, serialize_proto_message
+from src.utils import format_customer_id, get_logger, serialize_proto_message
 
 logger = get_logger(__name__)
 
@@ -49,14 +63,10 @@ class ReachPlanService:
             List of plannable locations with details
         """
         try:
-            # Create request
             request = ListPlannableLocationsRequest()
-
-            # Make the API call
             response: ListPlannableLocationsResponse = (
                 self.client.list_plannable_locations(request=request)
             )
-
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
@@ -72,7 +82,7 @@ class ReachPlanService:
         self,
         ctx: Context,
         plannable_location_id: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         """List all plannable products for a given location.
 
         Args:
@@ -80,63 +90,17 @@ class ReachPlanService:
             plannable_location_id: The plannable location ID
 
         Returns:
-            List of plannable products for the location
+            Plannable products for the location
         """
         try:
-            # Create request
             request = ListPlannableProductsRequest()
             request.plannable_location_id = plannable_location_id
 
-            # Make the API call
             response: ListPlannableProductsResponse = (
                 self.client.list_plannable_products(request=request)
             )
 
-            # Process results
-            products = []
-            for product in response.product_metadata:
-                product_dict = {
-                    "plannable_product_code": product.plannable_product_code,
-                    "plannable_product_name": product.plannable_product_name,
-                    "plannable_targeting": {
-                        "age_ranges": [
-                            str(age_range)
-                            for age_range in product.plannable_targeting.age_ranges
-                        ]
-                        if product.plannable_targeting
-                        and product.plannable_targeting.age_ranges
-                        else [],
-                        "genders": [
-                            str(gender)
-                            for gender in product.plannable_targeting.genders
-                        ]
-                        if product.plannable_targeting
-                        and product.plannable_targeting.genders
-                        else [],
-                        "devices": [
-                            str(device)
-                            for device in product.plannable_targeting.devices
-                        ]
-                        if product.plannable_targeting
-                        and product.plannable_targeting.devices
-                        else [],
-                        "networks": [
-                            str(network)
-                            for network in product.plannable_targeting.networks
-                        ]
-                        if product.plannable_targeting
-                        and product.plannable_targeting.networks
-                        else [],
-                    },
-                }
-                products.append(product_dict)
-
-            await ctx.log(
-                level="info",
-                message=f"Found {len(products)} plannable products for location {plannable_location_id}",
-            )
-
-            return products
+            return serialize_proto_message(response)
 
         except GoogleAdsException as e:
             error_msg = f"Google Ads API error: {e.failure}"
@@ -147,34 +111,74 @@ class ReachPlanService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def generate_basic_reach_forecast(
+    async def generate_reach_forecast(
         self,
         ctx: Context,
         customer_id: str,
         plannable_location_id: str,
         currency_code: str,
-        budget_micros: int,
+        campaign_duration_days: int,
+        planned_products: List[Dict[str, Any]],
+        cookie_frequency_cap: Optional[int] = None,
+        min_effective_frequency: Optional[int] = None,
+        location_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Generate a basic reach forecast (simplified version due to v20 limitations).
+        """Generate a reach forecast.
 
         Args:
             ctx: FastMCP context
-            customer_id: The customer ID (can be with or without hyphens)
-            plannable_location_id: The plannable location ID
-            currency_code: The currency code (e.g., "USD")
-            budget_micros: Budget in micros
+            customer_id: The customer ID
+            plannable_location_id: Location ID for the forecast
+            currency_code: Currency code (e.g. "USD")
+            campaign_duration_days: Duration in days (1-90)
+            planned_products: List of dicts with plannable_product_code and budget_micros
+            cookie_frequency_cap: Max impressions per cookie (optional)
+            min_effective_frequency: Min effective frequency (optional)
+            location_ids: List of geo target constant resource names for targeting (optional)
 
         Returns:
-            Basic reach forecast information
+            Reach forecast with on-target reach, total reach, and curve data
         """
         try:
-            # Format customer ID
-            if "-" in customer_id:
-                customer_id = customer_id.replace("-", "")
+            customer_id = format_customer_id(customer_id)
 
-            # Note: GenerateReachForecastRequest requires complex types not available in v20
-            # This is a simplified implementation that returns basic information
-            raise NotImplementedError
+            request = GenerateReachForecastRequest()
+            request.customer_id = customer_id
+            request.currency_code = currency_code
+
+            duration = CampaignDuration()
+            duration.duration_in_days = campaign_duration_days
+            request.campaign_duration = duration
+
+            if cookie_frequency_cap is not None:
+                request.cookie_frequency_cap = cookie_frequency_cap
+            if min_effective_frequency is not None:
+                request.min_effective_frequency = min_effective_frequency
+
+            if location_ids:
+                targeting = Targeting()
+                targeting.plannable_location_id = plannable_location_id
+                for loc_id in location_ids:
+                    loc = LocationInfo()
+                    loc.geo_target_constant = loc_id
+                    targeting.plannable_location_ids.append(loc_id)
+                request.targeting = targeting
+            else:
+                targeting = Targeting()
+                targeting.plannable_location_id = plannable_location_id
+                request.targeting = targeting
+
+            for pp_data in planned_products:
+                pp = PlannedProduct()
+                pp.plannable_product_code = pp_data["plannable_product_code"]
+                pp.budget_micros = pp_data["budget_micros"]
+                request.planned_products.append(pp)
+
+            response: GenerateReachForecastResponse = (
+                self.client.generate_reach_forecast(request=request)
+            )
+
+            return serialize_proto_message(response)
 
         except GoogleAdsException as e:
             error_msg = f"Google Ads API error: {e.failure}"
@@ -185,15 +189,133 @@ class ReachPlanService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def generate_conversion_rates(
+        self,
+        ctx: Context,
+        customer_id: str,
+    ) -> Dict[str, Any]:
+        """Generate conversion rate suggestions for reach planning.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+
+        Returns:
+            Conversion rate suggestions per plannable product
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            request = GenerateConversionRatesRequest()
+            request.customer_id = customer_id
+
+            response: GenerateConversionRatesResponse = (
+                self.client.generate_conversion_rates(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate conversion rates: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def list_plannable_user_interests(
+        self,
+        ctx: Context,
+        customer_id: str,
+        taxonomy_types: Optional[List[str]] = None,
+        name_query: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """List plannable user interests for reach targeting.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            taxonomy_types: Optional filter - AFFINITY, IN_MARKET
+            name_query: Optional text filter on interest name (max 200 chars)
+
+        Returns:
+            List of plannable user interests
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            request = ListPlannableUserInterestsRequest()
+            request.customer_id = customer_id
+
+            if taxonomy_types:
+                from google.ads.googleads.v23.enums.types.user_interest_taxonomy_type import (
+                    UserInterestTaxonomyTypeEnum,
+                )
+
+                request.user_interest_taxonomy_types = [
+                    getattr(UserInterestTaxonomyTypeEnum.UserInterestTaxonomyType, t)
+                    for t in taxonomy_types
+                ]
+
+            if name_query:
+                request.name_query = name_query
+
+            response: ListPlannableUserInterestsResponse = (
+                self.client.list_plannable_user_interests(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to list plannable user interests: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def list_plannable_user_lists(
+        self,
+        ctx: Context,
+        customer_id: str,
+    ) -> Dict[str, Any]:
+        """List plannable user lists for reach targeting.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+
+        Returns:
+            List of plannable user lists
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            request = ListPlannableUserListsRequest()
+            request.customer_id = customer_id
+
+            response: ListPlannableUserListsResponse = (
+                self.client.list_plannable_user_lists(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to list plannable user lists: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_reach_plan_tools(
     service: ReachPlanService,
 ) -> List[Callable[..., Awaitable[Any]]]:
-    """Create tool functions for the reach plan service.
-
-    This returns a list of tool functions that can be registered with FastMCP.
-    This approach makes the tools testable by allowing service injection.
-    """
+    """Create tool functions for the reach plan service."""
     tools = []
 
     async def list_plannable_locations(
@@ -202,58 +324,132 @@ def create_reach_plan_tools(
         """List all available plannable locations for reach planning.
 
         Returns:
-            Response containing plannable locations with ID, name, country code, and location type
+            Plannable locations with ID, name, country code, and location type
         """
         return await service.list_plannable_locations(ctx=ctx)
 
     async def list_plannable_products(
         ctx: Context,
         plannable_location_id: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         """List all plannable products available for a specific location.
 
         Args:
             plannable_location_id: The plannable location ID to get products for
 
         Returns:
-            List of plannable products with codes, names, and targeting options
+            Plannable products with codes, names, and targeting options
         """
         return await service.list_plannable_products(
             ctx=ctx,
             plannable_location_id=plannable_location_id,
         )
 
-    async def generate_basic_reach_forecast(
+    async def generate_reach_forecast(
         ctx: Context,
         customer_id: str,
         plannable_location_id: str,
         currency_code: str,
-        budget_micros: int,
+        campaign_duration_days: int,
+        planned_products: List[Dict[str, Any]],
+        cookie_frequency_cap: Optional[int] = None,
+        min_effective_frequency: Optional[int] = None,
+        location_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Generate a basic reach forecast (simplified due to v20 limitations).
+        """Generate a reach forecast for planned campaigns.
 
         Args:
-            customer_id: The customer ID (can be with or without hyphens)
-            plannable_location_id: The plannable location ID for the forecast
-            currency_code: Currency code (e.g., "USD", "EUR")
-            budget_micros: Budget in micros (e.g., 1000000 for $1)
+            customer_id: The customer ID
+            plannable_location_id: Location ID for the forecast
+            currency_code: Currency code (e.g. "USD")
+            campaign_duration_days: Duration in days (1-90)
+            planned_products: List of dicts with plannable_product_code and budget_micros
+            cookie_frequency_cap: Max impressions per cookie (optional)
+            min_effective_frequency: Min effective frequency (optional)
+            location_ids: Geo target constant resource names for targeting (optional)
 
         Returns:
-            Basic reach forecast information (simplified due to API limitations)
+            Reach forecast with on-target reach, total reach, and curve data
         """
-        return await service.generate_basic_reach_forecast(
+        return await service.generate_reach_forecast(
             ctx=ctx,
             customer_id=customer_id,
             plannable_location_id=plannable_location_id,
             currency_code=currency_code,
-            budget_micros=budget_micros,
+            campaign_duration_days=campaign_duration_days,
+            planned_products=planned_products,
+            cookie_frequency_cap=cookie_frequency_cap,
+            min_effective_frequency=min_effective_frequency,
+            location_ids=location_ids,
+        )
+
+    async def generate_conversion_rates(
+        ctx: Context,
+        customer_id: str,
+    ) -> Dict[str, Any]:
+        """Generate conversion rate suggestions for reach planning.
+
+        Args:
+            customer_id: The customer ID
+
+        Returns:
+            Conversion rate suggestions per plannable product
+        """
+        return await service.generate_conversion_rates(
+            ctx=ctx,
+            customer_id=customer_id,
+        )
+
+    async def list_plannable_user_interests(
+        ctx: Context,
+        customer_id: str,
+        taxonomy_types: Optional[List[str]] = None,
+        name_query: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """List plannable user interests for reach targeting.
+
+        Args:
+            customer_id: The customer ID
+            taxonomy_types: Optional filter - AFFINITY, IN_MARKET
+            name_query: Optional text filter on interest name (max 200 chars)
+
+        Returns:
+            List of plannable user interests
+        """
+        return await service.list_plannable_user_interests(
+            ctx=ctx,
+            customer_id=customer_id,
+            taxonomy_types=taxonomy_types,
+            name_query=name_query,
+        )
+
+    async def list_plannable_user_lists(
+        ctx: Context,
+        customer_id: str,
+    ) -> Dict[str, Any]:
+        """List plannable user lists for reach targeting.
+
+        Lists user lists eligible for reach planning (size 10k-700k, 30+ day membership, 10+ days old).
+
+        Args:
+            customer_id: The customer ID
+
+        Returns:
+            List of plannable user lists with display name, type, and status
+        """
+        return await service.list_plannable_user_lists(
+            ctx=ctx,
+            customer_id=customer_id,
         )
 
     tools.extend(
         [
             list_plannable_locations,
             list_plannable_products,
-            generate_basic_reach_forecast,
+            generate_reach_forecast,
+            generate_conversion_rates,
+            list_plannable_user_interests,
+            list_plannable_user_lists,
         ]
     )
     return tools
@@ -267,7 +463,6 @@ def register_reach_plan_tools(mcp: FastMCP[Any]) -> ReachPlanService:
     service = ReachPlanService()
     tools = create_reach_plan_tools(service)
 
-    # Register each tool
     for tool in tools:
         mcp.tool(tool)
 
