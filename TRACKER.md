@@ -1,223 +1,289 @@
 # Google Ads MCP Service Implementation Tracker
 
 ## Overview
-This document tracks the implementation progress of all Google Ads API v20 services in the MCP server.
-Goal: 1:1 mapping of ALL Google Ads services with full type safety using generated protobuf types.
+This document tracks the implementation progress of all Google Ads API services in the MCP server.
+- **SDK version**: `google-ads==30.0.0` (supports v20-v23)
+- **All imports currently use**: `v23`
+- **Goal**: 1:1 mapping of ALL Google Ads services with full type safety using generated protobuf types.
 
 ## Progress Summary
-- Total Services: 103 (from google-ads-python v20)
-- ✅ Implemented: 90 (87.4%)
-- ❌ Not Implemented: 13 (12.6%)
+- **Total v23 services**: 111
+- **Implemented**: 87 service files (+ 5 convenience wrappers mapping to existing SDK services)
+- **Not implemented**: 24 services
+- **All code uses v23 imports** - no legacy v20/v21/v22 references remain.
 
-**Last Audit Date:** 2025-06-27
-**Audit Method:** Complete analysis of google-ads-python v20 services directory and cross-referenced with implementations
-**Latest Implementation:** `identity_verification`, `ad_group_criterion_customizer`, `ad_parameter`, `customer_conversion_goal` - Account verification, criterion customization, ad parameters, and customer-level conversion goals
+**Last Audit Date:** 2026-04-15
 
-## Type Safety Verification
-✅ **ALL implemented services use full v20 type safety:**
-- Proper imports from `google.ads.googleads.v20.services.types.*`
-- Enum types from `google.ads.googleads.v20.enums.types.*`
-- Resource types from `google.ads.googleads.v20.resources.types.*`
-- Type annotations on all methods and parameters
+---
 
-## Implementation Status by Service
+## Name Mapping (convenience wrappers)
 
-### Account Management (11 services)
-1. ✅ `account_budget_proposal` - Manage account budget proposals
-2. ✅ `account_link` - Manage account links between accounts
-3. ✅ `billing_setup` - Manage billing setup for accounts
-4. ✅ `customer` - Customer account management
-5. ✅ `customer_client_link` - Links between manager and client accounts
-6. ✅ `customer_manager_link` - Manager account relationships
-7. ✅ `customer_user_access` - User access management
-8. ✅ `customer_user_access_invitation` - User access invitations (NEWLY IMPLEMENTED)
-9. ✅ `invoice` - Access billing invoices
-10. ✅ `payments_account` - Payments account management (NEWLY IMPLEMENTED)
-11. ✅ `identity_verification` - Identity verification for accounts (NEWLY IMPLEMENTED)
+These are custom service files that wrap an existing SDK service under a friendlier name:
 
-### Ad Groups & Ads (15 services)
-1. ✅ `ad` - Ad management
-2. ✅ `ad_group` - Ad group management
-3. ✅ `ad_group_ad` - Ads within ad groups
-4. ✅ `ad_group_ad_label` - Labels for ad group ads (NEWLY IMPLEMENTED)
-5. ✅ `ad_group_asset` - Assets for ad groups
-6. ✅ `ad_group_asset_set` - Asset sets for ad groups (NEWLY IMPLEMENTED)
-7. ✅ `ad_group_bid_modifier` - Bid modifiers for ad groups
-8. ✅ `ad_group_criterion` - Ad group targeting criteria
-9. ✅ `ad_group_criterion_customizer` - Criterion customizers (NEWLY IMPLEMENTED)
-10. ✅ `ad_group_criterion_label` - Labels for criteria (NEWLY IMPLEMENTED)
-11. ✅ `ad_group_customizer` - Ad group customizers (NEWLY IMPLEMENTED)
-12. ✅ `ad_group_label` - Ad group labels
-13. ✅ `ad_parameter` - Ad customizer parameters (NEWLY IMPLEMENTED)
-14. ✅ `keyword` (part of ad_group_criterion) - Keyword management
-15. ✅ `keyword_sdk_server` (registered separately) - Additional keyword operations
+| Our name | SDK service it wraps | Notes |
+|---|---|---|
+| `budget` | `campaign_budget` | Same SDK client, different file name |
+| `conversion` | `conversion_action` | Same SDK client, different file name |
+| `keyword` | `ad_group_criterion` | Keyword-specific subset of criterion ops |
+| `search` | `google_ads` | Convenience GAQL search wrapper |
+| `smart_campaign` | `smart_campaign_suggest` | Only wraps suggest methods; `smart_campaign_setting` NOT covered |
 
-### Assets (10 services)
-1. ✅ `asset` - Asset management
-2. ✅ `asset_group` - Asset group management (Performance Max)
-3. ✅ `asset_group_asset` - Assets within asset groups
-4. ❌ `asset_group_listing_group_filter` - Listing filters for Performance Max
-5. ✅ `asset_group_signal` - Audience signals for asset groups (NEWLY IMPLEMENTED)
-6. ✅ `asset_set` - Asset set management
-7. ❌ `asset_set_asset` - Assets within asset sets
-8. ✅ `customer_asset` - Customer-level assets (NEWLY IMPLEMENTED)
-9. ❌ `customer_asset_set` - Customer asset sets
-10. ❌ `travel_asset_suggestion` - Travel-specific asset suggestions
+---
 
-### Audiences & Targeting (10 services)
-1. ✅ `audience` - Audience management
-2. ✅ `audience_insights` - Audience insights and analysis
-3. ✅ `custom_audience` - Custom audiences
-4. ✅ `custom_interest` - Custom interests
-5. ✅ `customer_negative_criterion` - Account-level negative criteria
-6. ✅ `geo_target_constant` - Geographic targeting constants
-7. ✅ `remarketing_action` - Remarketing actions/tags
-8. ✅ `user_list` - User lists for remarketing
-9. ❌ `user_list_customer_type` - Customer types for user lists
-10. ❌ `keyword_theme_constant` - Keyword theme constants
+## Implementation Status - Full Checklist
 
-### Bidding & Budgets (5 services)
-1. ✅ `bidding_data_exclusion` - Exclude data ranges from smart bidding
-2. ✅ `bidding_seasonality_adjustment` - Seasonal bid adjustments (NEWLY IMPLEMENTED)
-3. ✅ `bidding_strategy` - Bidding strategies
-4. ✅ `budget` (campaign_budget in our impl) - Campaign budget management
-5. ❌ `campaign_budget` - Separate campaign budget service (v20 has both)
+Legend:
+- **Implemented**: has a service file in `src/services/`
+- **v23 RPC methods**: the actual gRPC methods the SDK service exposes
+- **Our methods**: the MCP tool functions we expose
 
-### Campaigns (17 services)
-1. ✅ `campaign` - Campaign management
-2. ✅ `campaign_asset` - Campaign-level assets
-3. ✅ `campaign_asset_set` - Campaign asset sets (NEWLY IMPLEMENTED)
-4. ✅ `campaign_bid_modifier` - Campaign bid modifiers
-5. ✅ `campaign_conversion_goal` - Campaign-specific conversion goals
-6. ✅ `campaign_criterion` - Campaign targeting criteria
-7. ✅ `campaign_customizer` - Campaign customizers (NEWLY IMPLEMENTED)
-8. ✅ `campaign_draft` - Campaign drafts for testing
-9. ❌ `campaign_group` - Campaign groups (Performance Max)
-10. ✅ `campaign_label` - Campaign labels
-11. ❌ `campaign_lifecycle_goal` - Campaign lifecycle goals
-12. ✅ `campaign_shared_set` - Shared sets for campaigns
-13. ✅ `experiment` - Campaign experiments
-14. ✅ `experiment_arm` - Experiment arms/variants (NEWLY IMPLEMENTED)
-15. ✅ `smart_campaign_suggest` - Smart campaign suggestions
-16. ❌ `smart_campaign_setting` - Smart campaign settings
-17. ❌ `shareable_preview` - Shareable ad previews
+### Account Management
 
-### Conversions (11 services)
-1. ✅ `conversion` (conversion_action in API) - Conversion actions
-2. ✅ `conversion_adjustment_upload` - Upload conversion adjustments
-3. ✅ `conversion_custom_variable` - Custom variables for conversions
-4. ✅ `conversion_goal_campaign_config` - Campaign conversion goal configs (NEWLY IMPLEMENTED)
-5. ✅ `conversion_upload` - Upload conversions
-6. ✅ `conversion_value_rule` - Value rules for conversions
-7. ❌ `conversion_value_rule_set` - Value rule sets
-8. ✅ `custom_conversion_goal` - Custom conversion goals (NEWLY IMPLEMENTED)
-9. ✅ `customer_conversion_goal` - Customer-level conversion goals (NEWLY IMPLEMENTED)
-10. ❌ `customer_sk_ad_network_conversion_value_schema` - SK Ad Network schema
-11. ❌ `customer_lifecycle_goal` - Customer lifecycle goals
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 1 | `account_budget_proposal` | done | `mutate_account_budget_proposal` | create, update, remove, list | - |
+| 2 | `account_link` | done | `create_account_link`, `mutate_account_link` | create, update, remove, list | - |
+| 3 | `billing_setup` | done | `mutate_billing_setup` | create, get, list, list_payments | - |
+| 4 | `customer` | done | `create_customer_client`, `list_accessible_customers`, `mutate_customer` | create_customer_client, list_accessible_customers | - |
+| 5 | `customer_client_link` | done | `mutate_customer_client_link` | create, update, list | - |
+| 6 | `customer_customizer` | done | `mutate_customer_customizers` | create (text/number/price/percent), remove, mutate | - |
+| 7 | `customer_label` | done | `mutate_customer_labels` | create, remove | - |
+| 8 | `customer_manager_link` | done | `move_manager_link`, `mutate_customer_manager_link` | accept, decline, move, terminate, update | - |
+| 9 | `customer_user_access` | done | `mutate_customer_user_access` | list, update, revoke | - |
+| 10 | `customer_user_access_invitation` | done | `mutate_customer_user_access_invitation` | create, list, remove | - |
+| 11 | `identity_verification` | done | `get_identity_verification`, `start_identity_verification` | get, start | - |
+| 12 | `invoice` | done | `list_invoices` | list | - |
+| 13 | `payments_account` | done | `list_payments_accounts` | list | - |
 
-### Data Import & Jobs (5 services)
-1. ✅ `batch_job` - Batch job operations (NEWLY REGISTERED)
-2. ❌ `data_link` - Data link management
-3. ✅ `offline_user_data_job` - Offline user data uploads
-4. ✅ `user_data` - User data operations
-5. ❌ `local_services_lead` - Local services lead data
+### Ad Group & Ads
 
-### Labels & Organization (4 services)
-1. ✅ `label` - Label management
-2. ✅ `campaign_label_server` - Campaign label operations
-3. ✅ `customer_label` - Customer-level labels (NEWLY IMPLEMENTED)
-4. ✅ `customer_customizer` - Customer-level customizers (NEWLY IMPLEMENTED)
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 14 | `ad` | done | `mutate_ads` | create_responsive_search_ad, create_expanded_text_ad, update_status | - |
+| 15 | `ad_group` | done | `mutate_ad_groups` | create, update | - |
+| 16 | `ad_group_ad` | done | `mutate_ad_group_ads`, `remove_automatically_created_assets` | create, list, remove, update_status | **Missing**: `remove_automatically_created_assets` |
+| 17 | `ad_group_ad_label` | done | `mutate_ad_group_ad_labels` | create, list, remove | - |
+| 18 | `ad_group_asset` | done | `mutate_ad_group_assets` | link, link_multiple, list, remove, update_status | - |
+| 19 | `ad_group_asset_set` | done | `mutate_ad_group_asset_sets` | create, list, remove | - |
+| 20 | `ad_group_bid_modifier` | done | `mutate_ad_group_bid_modifiers` | create (device/hotel), list, remove, update | - |
+| 21 | `ad_group_criterion` | done | `mutate_ad_group_criteria` | add_keywords, add_audience, add_demographic, remove, update_bid | - |
+| 22 | `ad_group_criterion_customizer` | done | `mutate_ad_group_criterion_customizers` | mutate | - |
+| 23 | `ad_group_criterion_label` | done | `mutate_ad_group_criterion_labels` | assign, assign_multiple, remove, mutate | - |
+| 24 | `ad_group_customizer` | done | `mutate_ad_group_customizers` | create (text/number/price/percent), remove, mutate | - |
+| 25 | `ad_group_label` | done | `mutate_ad_group_labels` | apply, apply_bulk, list, remove | - |
+| 26 | `ad_parameter` | done | `mutate_ad_parameters` | mutate | - |
+| 27 | `keyword` (wrapper) | done | (uses `ad_group_criterion`) | add, remove, update_bid | convenience wrapper |
 
-### Metadata & Search (3 services)
-1. ✅ `google_ads` - Core search/mutate service
-2. ✅ `google_ads_field` - Field metadata
-3. ✅ `search` (custom implementation) - Enhanced search operations
+### Assets
 
-### Planning & Insights (9 services)
-1. ✅ `keyword_plan` - Keyword planning
-2. ✅ `keyword_plan_ad_group` - Keyword plan ad groups (NEWLY IMPLEMENTED)
-3. ✅ `keyword_plan_ad_group_keyword` - Keywords in plan ad groups (NEWLY IMPLEMENTED)
-4. ✅ `keyword_plan_campaign` - Keyword plan campaigns (NEWLY IMPLEMENTED)
-5. ✅ `keyword_plan_campaign_keyword` - Keywords in plan campaigns (NEWLY IMPLEMENTED)
-6. ✅ `keyword_plan_idea` - Keyword ideas and research
-7. ✅ `reach_plan` - Reach planning
-8. ✅ `recommendation` - Optimization recommendations
-9. ❌ `recommendation_subscription` - Recommendation subscriptions
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 28 | `asset` | done | `mutate_assets` | create_text, create_image, create_youtube, search | - |
+| 29 | `asset_generation` | **NOT IMPL** | `generate_images`, `generate_text` | - | v23-only service |
+| 30 | `asset_group` | done | `mutate_asset_groups` | create, list, remove, update | - |
+| 31 | `asset_group_asset` | done | `mutate_asset_group_assets` | create, remove, update_status | - |
+| 32 | `asset_group_listing_group_filter` | **NOT IMPL** | `mutate_asset_group_listing_group_filters` | - | PMax listing filters |
+| 33 | `asset_group_signal` | done | `mutate_asset_group_signals` | create_audience, create_search_theme, remove, mutate | - |
+| 34 | `asset_set` | done | `mutate_asset_sets` | create, list, remove, update | - |
+| 35 | `asset_set_asset` | **NOT IMPL** | `mutate_asset_set_assets` | - | Links assets to sets |
+| 36 | `automatically_created_asset_removal` | **NOT IMPL** | `remove_campaign_automatically_created_asset` | - | v23-only service |
+| 37 | `customer_asset` | done | `mutate_customer_assets` | create, remove, update_status, mutate | - |
+| 38 | `customer_asset_set` | **NOT IMPL** | `mutate_customer_asset_sets` | - | Customer-level asset sets |
 
-### Product Integration (5 services)
-1. ✅ `brand_suggestion` - Brand suggestions (NEWLY IMPLEMENTED)
-2. ❌ `content_creator_insights` - YouTube creator insights
-3. ✅ `product_link` - Product link management (NEWLY IMPLEMENTED)
-4. ❌ `product_link_invitation` - Product link invitations
-5. ❌ `third_party_app_analytics_link` - Third-party analytics links
+### Audiences & Targeting
 
-### Shared Resources (4 services)
-1. ✅ `shared_criterion` - Shared criteria
-2. ✅ `shared_set` - Shared sets
-3. ❌ `customizer_attribute` - Customizer attributes
-4. ✅ `customizer_attribute` (we have this implemented)
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 39 | `audience` | done | `mutate_audiences` | create_combined, list, remove, update | - |
+| 40 | `audience_insights` | done | `generate_audience_composition_insights`, `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_insights_finder_report`, `generate_suggested_targeting_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` | generate_composition, generate_finder_report, generate_suggested_targeting | **Missing**: `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` |
+| 41 | `custom_audience` | done | `mutate_custom_audiences` | create, get_details, list, update | - |
+| 42 | `custom_interest` | done | `mutate_custom_interests` | create, get_details, list, update | - |
+| 43 | `customer_negative_criterion` | done | `mutate_customer_negative_criteria` | add_keywords, add_placements, add_content_labels, list, remove | - |
+| 44 | `geo_target_constant` | done | `suggest_geo_target_constants` | search, suggest_by_address, suggest_by_location | - |
+| 45 | `remarketing_action` | done | `mutate_remarketing_actions` | create, get_tags, list, update | - |
+| 46 | `user_list` | done | `mutate_user_lists` | create_basic, create_crm, create_logical, create_similar, update | - |
+| 47 | `user_list_customer_type` | **NOT IMPL** | `mutate_user_list_customer_types` | - | Customer types for user lists |
 
-## API Coverage Analysis
+### Bidding & Budgets
 
-### Fully Implemented Services (1:1 API Coverage)
-Services that implement ALL operations from the Google Ads API:
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 48 | `bidding_data_exclusion` | done | `mutate_bidding_data_exclusions` | create, list, remove, update | - |
+| 49 | `bidding_seasonality_adjustment` | done | `mutate_bidding_seasonality_adjustments` | create, list, remove, update | - |
+| 50 | `bidding_strategy` | done | `mutate_bidding_strategies` | create_target_cpa, create_target_roas, create_maximize_conversions, create_target_impression_share | - |
+| 51 | `budget` (=`campaign_budget`) | done | `mutate_campaign_budgets` | create, update | - |
 
-1. ✅ `google_ads_service` - search, search_stream, mutate, mutate_operation
-2. ✅ `customer_service` - list_accessible_customers, create_customer_client, mutate_customer  
-3. ✅ `campaign_service` - mutate_campaigns (create, update, remove)
-4. ✅ `ad_group_service` - mutate_ad_groups (create, update, remove)
-5. ✅ `budget_service` - mutate_campaign_budgets (create, update, remove)
-6. ✅ `ad_service` - mutate_ads, get_ad
-7. ✅ `bidding_strategy_service` - mutate_bidding_strategies (create, update, remove)
-8. ✅ `conversion_action_service` - mutate_conversion_actions (create, update, remove)
-9. ✅ `asset_service` - mutate_assets (create, update)
-10. ✅ `user_list_service` - mutate_user_lists (create, update, remove)
+### Campaigns
 
-### Partially Implemented Services
-Services missing some operations:
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 52 | `campaign` | done | `mutate_campaigns`, `enable_p_max_brand_guidelines` | create, update | **Missing**: `enable_p_max_brand_guidelines` (v23-new) |
+| 53 | `campaign_asset` | done | `mutate_campaign_assets` | link, link_multiple, list, remove | - |
+| 54 | `campaign_asset_set` | done | `mutate_campaign_asset_sets` | link, link_multiple, unlink, mutate | - |
+| 55 | `campaign_bid_modifier` | done | `mutate_campaign_bid_modifiers` | create_interaction_type, list, remove, update | - |
+| 56 | `campaign_conversion_goal` | done | `mutate_campaign_conversion_goals` | update | - |
+| 57 | `campaign_criterion` | done | `mutate_campaign_criteria` | add_device, add_language, add_location, add_negative_keyword, remove | - |
+| 58 | `campaign_customizer` | done | `mutate_campaign_customizers` | create, remove | - |
+| 59 | `campaign_draft` | done | `list_campaign_draft_async_errors`, `mutate_campaign_drafts`, `promote_campaign_draft` | create, list, list_errors, promote, remove, update | - |
+| 60 | `campaign_goal_config` | **NOT IMPL** | `mutate_campaign_goal_configs` | - | v23-only service |
+| 61 | `campaign_group` | **NOT IMPL** | `mutate_campaign_groups` | - | Campaign grouping |
+| 62 | `campaign_label` | done | `mutate_campaign_labels` | apply, apply_bulk, list, remove | - |
+| 63 | `campaign_lifecycle_goal` | **NOT IMPL** | `configure_campaign_lifecycle_goals` | - | Lifecycle goal config |
+| 64 | `campaign_shared_set` | done | `mutate_campaign_shared_sets` | attach, attach_bulk, detach, get_campaigns, list, update_status | - |
 
-1. ⚠️ `keyword_plan_service` - Missing: generate_forecast_curve, generate_forecast_time_series, generate_forecast_metrics
-2. ⚠️ `reach_plan_service` - Missing: generate_reach_forecast
-3. ⚠️ `recommendation_service` - Missing: dismiss_recommendation
+### Conversions
 
-## Next Steps
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 65 | `conversion` (=`conversion_action`) | done | `mutate_conversion_actions` | create, update | - |
+| 66 | `conversion_adjustment_upload` | done | `upload_conversion_adjustments` | create_restatement, create_retraction, upload | - |
+| 67 | `conversion_custom_variable` | done | `mutate_conversion_custom_variables` | create, update | - |
+| 68 | `conversion_goal_campaign_config` | done | `mutate_conversion_goal_campaign_configs` | update, mutate | - |
+| 69 | `conversion_upload` | done | `upload_call_conversions`, `upload_click_conversions` | upload_call, upload_click | - |
+| 70 | `conversion_value_rule` | done | `mutate_conversion_value_rules` | create_basic, list, remove, update_basic | - |
+| 71 | `conversion_value_rule_set` | **NOT IMPL** | `mutate_conversion_value_rule_sets` | - | Rule set grouping |
+| 72 | `custom_conversion_goal` | done | `mutate_custom_conversion_goals` | create, remove, update, mutate | - |
+| 73 | `customer_conversion_goal` | done | `mutate_customer_conversion_goals` | mutate | - |
+| 74 | `customer_lifecycle_goal` | **NOT IMPL** | `configure_customer_lifecycle_goals` | - | Lifecycle goals |
+| 75 | `customer_sk_ad_network_conversion_value_schema` | **NOT IMPL** | `mutate_customer_sk_ad_network_conversion_value_schema` | - | iOS SKAdNetwork |
 
-### High Priority Implementations
-1. ✅ `campaign_customizer` - Dynamic ad customization (COMPLETED)
-2. ✅ `customer_label` - Account organization (COMPLETED)
-3. ✅ `bidding_seasonality_adjustment` - Seasonal bidding (COMPLETED)
-4. ✅ `customer_user_access_invitation` - User access invitations (COMPLETED)
-5. ✅ `payments_account` - Payments account management (COMPLETED)
-6. ✅ `batch_job` - Bulk operations (COMPLETED)
-7. `product_link` - Merchant Center integration
-8. `identity_verification` - Identity verification for accounts
+### Data Import & Jobs
 
-### Medium Priority
-1. Asset-related services for Performance Max
-2. Remaining label services
-3. Customizer services
-4. Experiment arms
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 76 | `batch_job` | done | `add_batch_job_operations`, `list_batch_job_results`, `mutate_batch_job`, `run_batch_job` | create, add_ops, list_results, list, get, run | - |
+| 77 | `data_link` | done | `create_data_link`, `remove_data_link`, `update_data_link` | create_basic, list | **Missing**: `remove_data_link`, `update_data_link` |
+| 78 | `offline_user_data_job` | done | `add_offline_user_data_job_operations`, `create_offline_user_data_job`, `run_offline_user_data_job` | create_customer_match, add_ops, get, list, run | - |
+| 79 | `user_data` | done | `upload_user_data` | upload_customer_match, upload_enhanced_conversions, upload_store_sales | - |
 
-### Low Priority
-1. Specialized services (local services, SK ad network)
-2. Beta features
-3. Less commonly used operations
+### Experiments
 
-## Implementation Guidelines
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 80 | `experiment` | done | `end_experiment`, `graduate_experiment`, `list_experiment_async_errors`, `mutate_experiments`, `promote_experiment`, `schedule_experiment` | create, list, end, promote, schedule | **Missing**: `graduate_experiment`, `list_experiment_async_errors` |
+| 81 | `experiment_arm` | done | `mutate_experiment_arms` | create, remove, update, mutate | - |
 
-1. **Type Safety**: ALL implementations MUST use v20 protobuf types
-2. **Testing**: Each service MUST have comprehensive tests
-3. **Structure**: Follow pattern in `src/sdk_services/<category>/<service>_service.py`
-4. **MCP Tools**: Create lightweight wrappers converting strings to enums
-5. **Documentation**: Include examples and operation descriptions
-6. **Error Handling**: Proper GoogleAdsException handling
+### Metadata & Search
 
-## Notes for Contributors
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 82 | `google_ads` | done | `mutate`, `search`, `search_stream` | mutate, search, search_stream | - |
+| 83 | `google_ads_field` | done | `get_google_ads_field`, `search_google_ads_fields` | get_field, get_resource_fields, search_fields, validate_query | - |
+| 84 | `search` (wrapper) | done | (uses `google_ads`) | execute_query, search_campaigns, search_ad_groups, search_keywords | convenience wrapper |
 
-When implementing a new service:
-1. Check the v20 service types in google-ads-python
-2. Implement ALL operations for 1:1 API coverage
-3. Use full type annotations with v20 types
-4. Write comprehensive tests
-5. Update this tracker immediately
-6. Run `uv run ruff format .` and `uv run pyright`
+### Labels & Organization
+
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 85 | `label` | done | `mutate_labels` | create, list, update, apply_to_campaigns, apply_to_ad_groups | - |
+| 86 | `shared_set` | done | `mutate_shared_sets` | create, list, update, attach_to_campaigns | - |
+| 87 | `shared_criterion` | done | `mutate_shared_criteria` | add_keywords, add_placements, list, remove | - |
+| 88 | `customizer_attribute` | done | `mutate_customizer_attributes` | create, list, remove, update | - |
+
+### Planning & Research
+
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 89 | `brand_suggestion` | done | `suggest_brands` | suggest_brands | - |
+| 90 | `keyword_plan` | done | `mutate_keyword_plans` | create, create_campaign, add_keywords, get_ideas | - |
+| 91 | `keyword_plan_ad_group` | done | `mutate_keyword_plan_ad_groups` | create, remove, update, mutate | - |
+| 92 | `keyword_plan_ad_group_keyword` | done | `mutate_keyword_plan_ad_group_keywords` | create, remove, update, mutate | - |
+| 93 | `keyword_plan_campaign` | done | `mutate_keyword_plan_campaigns` | create, remove, update, mutate | - |
+| 94 | `keyword_plan_campaign_keyword` | done | `mutate_keyword_plan_campaign_keywords` | create, remove, update, mutate | - |
+| 95 | `keyword_plan_idea` | done | `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics`, `generate_keyword_ideas` | generate_from_keywords, generate_from_url, generate_from_site, generate_from_keywords_and_url | **Missing**: `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics` |
+| 96 | `keyword_theme_constant` | **NOT IMPL** | `suggest_keyword_theme_constants` | - | Smart campaign themes |
+| 97 | `reach_plan` | done | `generate_conversion_rates`, `generate_reach_forecast`, `list_plannable_locations`, `list_plannable_products`, `list_plannable_user_interests`, `list_plannable_user_lists` | generate_basic_forecast, list_locations, list_products | **Missing**: `generate_conversion_rates`, `list_plannable_user_interests`, `list_plannable_user_lists` |
+| 98 | `recommendation` | done | `apply_recommendation`, `dismiss_recommendation`, `generate_recommendations` | apply, dismiss, get | **Missing**: `generate_recommendations` |
+| 99 | `recommendation_subscription` | **NOT IMPL** | `mutate_recommendation_subscription` | - | Auto-apply recommendations |
+
+### Product Integration
+
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 100 | `product_link` | done | `create_product_link`, `remove_product_link` | create (merchant/ads/data_partner), remove | - |
+| 101 | `product_link_invitation` | **NOT IMPL** | `create_product_link_invitation`, `remove_product_link_invitation`, `update_product_link_invitation` | - | Link invitations |
+| 102 | `content_creator_insights` | **NOT IMPL** | `generate_creator_insights`, `generate_trending_insights` | - | YouTube creator data |
+| 103 | `third_party_app_analytics_link` | **NOT IMPL** | `regenerate_shareable_link_id` | - | App analytics links |
+
+### Smart Campaigns
+
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 104 | `smart_campaign` (wrapper) | done | (uses `smart_campaign_suggest`) | suggest_ad, suggest_budget, suggest_keywords | Only wraps suggest service |
+| 105 | `smart_campaign_setting` | **NOT IMPL** | `get_smart_campaign_status`, `mutate_smart_campaign_settings` | - | Setting management |
+| 106 | `smart_campaign_suggest` | covered by wrapper | `suggest_keyword_themes`, `suggest_smart_campaign_ad`, `suggest_smart_campaign_budget_options` | - | Covered by `smart_campaign` |
+
+### Local & Travel
+
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 107 | `local_services_lead` | **NOT IMPL** | `append_lead_conversation`, `provide_lead_feedback` | - | Local services |
+| 108 | `travel_asset_suggestion` | **NOT IMPL** | `suggest_travel_assets` | - | Travel vertical |
+
+### v23-Only New Services
+
+| # | Service | Status | v23 RPC methods | Our methods | Gap? |
+|---|---------|--------|----------------|-------------|------|
+| 109 | `benchmarks` | **NOT IMPL** | `generate_benchmarks_metrics`, `list_benchmarks_available_dates`, `list_benchmarks_locations`, `list_benchmarks_products`, `list_benchmarks_sources` | - | v23-only |
+| 110 | `goal` | **NOT IMPL** | `mutate_goals` | - | v23-only |
+| 111 | `incentive` | **NOT IMPL** | `apply_incentive`, `fetch_incentive` | - | v23-only |
+| 112 | `reservation` | **NOT IMPL** | `book_campaigns`, `quote_campaigns` | - | v23-only |
+| 113 | `shareable_preview` | **NOT IMPL** | `generate_shareable_previews` | - | Exists since v20 |
+| 114 | `you_tube_video_upload` | **NOT IMPL** | `create_you_tube_video_upload`, `remove_you_tube_video_upload`, `update_you_tube_video_upload` | - | v23-only |
+
+---
+
+## Summary of Gaps in Implemented Services
+
+These services are implemented but are missing some v23 RPC methods:
+
+| Service | Missing RPC methods |
+|---------|-------------------|
+| `ad_group_ad` | `remove_automatically_created_assets` |
+| `audience_insights` | `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` |
+| `campaign` | `enable_p_max_brand_guidelines` (v23-new) |
+| `data_link` | `remove_data_link`, `update_data_link` |
+| `experiment` | `graduate_experiment`, `list_experiment_async_errors` |
+| `keyword_plan_idea` | `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics` |
+| `reach_plan` | `generate_conversion_rates`, `list_plannable_user_interests`, `list_plannable_user_lists` |
+| `recommendation` | `generate_recommendations` |
+
+## Not-Implemented Services (24 total)
+
+### Existed in v20 (should implement) - 16 services
+1. `asset_group_listing_group_filter` - PMax listing group filters
+2. `asset_set_asset` - Link assets to asset sets
+3. `campaign_group` - Campaign grouping
+4. `campaign_lifecycle_goal` - Campaign lifecycle goals
+5. `content_creator_insights` - YouTube creator insights
+6. `conversion_value_rule_set` - Value rule sets
+7. `customer_asset_set` - Customer-level asset sets
+8. `customer_lifecycle_goal` - Customer lifecycle goals
+9. `customer_sk_ad_network_conversion_value_schema` - iOS SKAdNetwork
+10. `keyword_theme_constant` - Smart campaign theme constants
+11. `local_services_lead` - Local services leads
+12. `product_link_invitation` - Product link invitations
+13. `recommendation_subscription` - Auto-apply recommendations
+14. `shareable_preview` - Shareable ad previews
+15. `smart_campaign_setting` - Smart campaign settings
+16. `third_party_app_analytics_link` - 3P app analytics
+17. `travel_asset_suggestion` - Travel asset suggestions
+18. `user_list_customer_type` - User list customer types
+
+### New in v23 only - 8 services
+1. `asset_generation` - AI-generated assets
+2. `automatically_created_asset_removal` - Remove auto-created assets
+3. `benchmarks` - Competitive benchmarking
+4. `campaign_goal_config` - Campaign goal configuration
+5. `goal` - Goal management
+6. `incentive` - Incentive management
+7. `reservation` - Reservation campaigns
+8. `you_tube_video_upload` - YouTube video uploads
+
+---
+
+## Current Task
+Auditing all services for v23 SDK compatibility. All imports are confirmed using v23. Next steps:
+1. Fill method gaps in existing services (see table above)
+2. Implement missing services that existed in v20
+3. Optionally implement new v23-only services
