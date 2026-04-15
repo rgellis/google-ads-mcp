@@ -13,10 +13,13 @@ from google.ads.googleads.v23.services.services.ad_group_ad_service import (
 from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
+from google.ads.googleads.v23.enums.types.asset_field_type import AssetFieldTypeEnum
 from google.ads.googleads.v23.services.types.ad_group_ad_service import (
     AdGroupAdOperation,
+    AssetsWithFieldType,
     MutateAdGroupAdsRequest,
     MutateAdGroupAdsResponse,
+    RemoveAutomaticallyCreatedAssetsRequest,
 )
 from google.protobuf import field_mask_pb2
 
@@ -285,6 +288,63 @@ class AdGroupAdService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_automatically_created_assets(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_ad_resource_name: str,
+        assets_with_field_type: List[Dict[str, str]],
+    ) -> Dict[str, Any]:
+        """Remove automatically created assets from an ad group ad.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_ad_resource_name: The resource name of the ad group ad
+            assets_with_field_type: List of dicts with 'asset' (resource name) and
+                'asset_field_type' (e.g. 'HEADLINE', 'DESCRIPTION')
+
+        Returns:
+            Status of the removal operation
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            assets = []
+            for item in assets_with_field_type:
+                asset_entry = AssetsWithFieldType()
+                asset_entry.asset = item["asset"]
+                asset_entry.asset_field_type = getattr(
+                    AssetFieldTypeEnum.AssetFieldType, item["asset_field_type"]
+                )
+                assets.append(asset_entry)
+
+            request = RemoveAutomaticallyCreatedAssetsRequest()
+            request.ad_group_ad = ad_group_ad_resource_name
+            request.assets_with_field_type = assets
+
+            self.client.remove_automatically_created_assets(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Removed {len(assets)} automatically created assets from {ad_group_ad_resource_name}",
+            )
+
+            return {
+                "status": "success",
+                "ad_group_ad": ad_group_ad_resource_name,
+                "assets_removed": len(assets),
+            }
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove automatically created assets: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_ad_group_ad_tools(
     service: AdGroupAdService,
@@ -397,12 +457,37 @@ def create_ad_group_ad_tools(
             ad_group_ad_resource_name=ad_group_ad_resource_name,
         )
 
+    async def remove_automatically_created_assets(
+        ctx: Context,
+        customer_id: str,
+        ad_group_ad_resource_name: str,
+        assets_with_field_type: List[Dict[str, str]],
+    ) -> Dict[str, Any]:
+        """Remove automatically created assets from an ad group ad.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_ad_resource_name: The resource name of the ad group ad
+            assets_with_field_type: List of dicts with 'asset' (resource name) and
+                'asset_field_type' (e.g. 'HEADLINE', 'DESCRIPTION')
+
+        Returns:
+            Status of the removal operation
+        """
+        return await service.remove_automatically_created_assets(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_ad_resource_name=ad_group_ad_resource_name,
+            assets_with_field_type=assets_with_field_type,
+        )
+
     tools.extend(
         [
             create_ad_group_ad,
             update_ad_group_ad_status,
             list_ad_group_ads,
             remove_ad_group_ad,
+            remove_automatically_created_assets,
         ]
     )
     return tools
