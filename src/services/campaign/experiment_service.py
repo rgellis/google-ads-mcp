@@ -14,8 +14,11 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
 from google.ads.googleads.v23.services.types.experiment_service import (
+    CampaignBudgetMapping,
     EndExperimentRequest,
     ExperimentOperation,
+    GraduateExperimentRequest,
+    ListExperimentAsyncErrorsRequest,
     MutateExperimentsRequest,
     MutateExperimentsResponse,
     PromoteExperimentRequest,
@@ -338,6 +341,113 @@ class ExperimentService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def graduate_experiment(
+        self,
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        experiment_campaign: str,
+        campaign_budget: str,
+        validate_only: bool = False,
+    ) -> Dict[str, Any]:
+        """Graduate an experiment, making the experiment campaign standalone with its own budget.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            experiment_id: The experiment ID to graduate
+            experiment_campaign: Resource name of the experiment campaign to graduate
+            campaign_budget: Resource name of the budget to assign to the graduated campaign
+            validate_only: Only validate without graduating
+
+        Returns:
+            Graduation status
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/experiments/{experiment_id}"
+
+            mapping = CampaignBudgetMapping()
+            mapping.experiment_campaign = experiment_campaign
+            mapping.campaign_budget = campaign_budget
+
+            request = GraduateExperimentRequest()
+            request.experiment = resource_name
+            request.campaign_budget_mappings = [mapping]
+            request.validate_only = validate_only
+
+            self.client.graduate_experiment(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"{'Validated graduating' if validate_only else 'Graduated'} experiment {experiment_id}",
+            )
+
+            return {
+                "status": "success",
+                "experiment": resource_name,
+                "graduated_campaign": experiment_campaign,
+                "assigned_budget": campaign_budget,
+                "validate_only": validate_only,
+            }
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to graduate experiment: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def list_experiment_async_errors(
+        self,
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        page_size: int = 100,
+    ) -> List[Dict[str, Any]]:
+        """List async errors from the most recent operation on an experiment.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            experiment_id: The experiment ID
+            page_size: Maximum results per page (max 1000)
+
+        Returns:
+            List of async error details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/experiments/{experiment_id}"
+
+            request = ListExperimentAsyncErrorsRequest()
+            request.resource_name = resource_name
+            request.page_size = page_size
+
+            pager = self.client.list_experiment_async_errors(request=request)
+
+            errors = []
+            for error in pager:
+                errors.append(serialize_proto_message(error))
+
+            await ctx.log(
+                level="info",
+                message=f"Found {len(errors)} async errors for experiment {experiment_id}",
+            )
+
+            return errors
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to list experiment async errors: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_experiment_tools(
     service: ExperimentService,
@@ -491,6 +601,62 @@ def create_experiment_tools(
             status_filter=status_filter,
         )
 
+    async def graduate_experiment(
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        experiment_campaign: str,
+        campaign_budget: str,
+        validate_only: bool = False,
+    ) -> Dict[str, Any]:
+        """Graduate an experiment, making the experiment campaign standalone.
+
+        This creates a standalone campaign from the experiment with its own budget.
+
+        Args:
+            customer_id: The customer ID
+            experiment_id: The experiment ID to graduate
+            experiment_campaign: Resource name of the experiment campaign
+            campaign_budget: Resource name of the budget to assign
+            validate_only: Only validate without graduating
+
+        Returns:
+            Graduation status
+        """
+        return await service.graduate_experiment(
+            ctx=ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+            experiment_campaign=experiment_campaign,
+            campaign_budget=campaign_budget,
+            validate_only=validate_only,
+        )
+
+    async def list_experiment_async_errors(
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        page_size: int = 100,
+    ) -> List[Dict[str, Any]]:
+        """List async errors from the most recent operation on an experiment.
+
+        Use this to check for errors after scheduling or promoting an experiment.
+
+        Args:
+            customer_id: The customer ID
+            experiment_id: The experiment ID
+            page_size: Maximum results per page (max 1000)
+
+        Returns:
+            List of async error details
+        """
+        return await service.list_experiment_async_errors(
+            ctx=ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+            page_size=page_size,
+        )
+
     tools.extend(
         [
             create_experiment,
@@ -498,6 +664,8 @@ def create_experiment_tools(
             end_experiment,
             promote_experiment,
             list_experiments,
+            graduate_experiment,
+            list_experiment_async_errors,
         ]
     )
     return tools
