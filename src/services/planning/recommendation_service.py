@@ -10,12 +10,20 @@ from google.ads.googleads.v23.services.services.recommendation_service import (
 from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
+from google.ads.googleads.v23.enums.types.advertising_channel_type import (
+    AdvertisingChannelTypeEnum,
+)
+from google.ads.googleads.v23.enums.types.recommendation_type import (
+    RecommendationTypeEnum,
+)
 from google.ads.googleads.v23.services.types.recommendation_service import (
     ApplyRecommendationOperation,
     ApplyRecommendationRequest,
     ApplyRecommendationResponse,
     DismissRecommendationRequest,
     DismissRecommendationResponse,
+    GenerateRecommendationsRequest,
+    GenerateRecommendationsResponse,
 )
 
 from src.sdk_client import get_sdk_client
@@ -309,6 +317,107 @@ class RecommendationService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def generate_recommendations(
+        self,
+        ctx: Context,
+        customer_id: str,
+        recommendation_types: List[str],
+        advertising_channel_type: str,
+        campaign_sitelink_count: Optional[int] = None,
+        conversion_tracking_status: Optional[str] = None,
+        bidding_info: Optional[Dict[str, Any]] = None,
+        ad_group_info: Optional[List[Dict[str, Any]]] = None,
+        seed_info: Optional[Dict[str, Any]] = None,
+        budget_info: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Generate recommendations for a customer.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            recommendation_types: List of types to generate (e.g. CAMPAIGN_BUDGET, KEYWORD,
+                MAXIMIZE_CLICKS_OPT_IN, SET_TARGET_CPA, SITELINK_ASSET, etc.)
+            advertising_channel_type: Channel type (SEARCH, PERFORMANCE_MAX)
+            campaign_sitelink_count: Number of sitelinks (needed for SITELINK_ASSET)
+            conversion_tracking_status: Conversion tracking status (for bidding opt-in types)
+            bidding_info: Dict with bidding_strategy_type and optional target_cpa_micros/target_roas
+            ad_group_info: List of ad group dicts with ad_group_type and keywords
+            seed_info: Dict with url_seed and/or keyword_seeds
+            budget_info: Dict with current_budget (micros)
+
+        Returns:
+            Generated recommendations
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            rec_type_enums = [
+                getattr(RecommendationTypeEnum.RecommendationType, t)
+                for t in recommendation_types
+            ]
+            channel_enum = getattr(
+                AdvertisingChannelTypeEnum.AdvertisingChannelType,
+                advertising_channel_type,
+            )
+
+            request = GenerateRecommendationsRequest()
+            request.customer_id = customer_id
+            request.recommendation_types = rec_type_enums
+            request.advertising_channel_type = channel_enum
+
+            if campaign_sitelink_count is not None:
+                request.campaign_sitelink_count = campaign_sitelink_count
+
+            if conversion_tracking_status is not None:
+                from google.ads.googleads.v23.enums.types.conversion_tracking_status_enum import (
+                    ConversionTrackingStatusEnum,
+                )
+
+                request.conversion_tracking_status = getattr(
+                    ConversionTrackingStatusEnum.ConversionTrackingStatus,
+                    conversion_tracking_status,
+                )
+
+            if bidding_info is not None:
+                from google.ads.googleads.v23.enums.types.bidding_strategy_type import (
+                    BiddingStrategyTypeEnum,
+                )
+
+                bi = request.bidding_info
+                bi.bidding_strategy_type = getattr(
+                    BiddingStrategyTypeEnum.BiddingStrategyType,
+                    bidding_info["bidding_strategy_type"],
+                )
+                if "target_cpa_micros" in bidding_info:
+                    bi.target_cpa_micros = bidding_info["target_cpa_micros"]
+                if "target_roas" in bidding_info:
+                    bi.target_roas = bidding_info["target_roas"]
+
+            if seed_info is not None:
+                si = request.seed_info
+                if "url_seed" in seed_info:
+                    si.url_seed = seed_info["url_seed"]
+                if "keyword_seeds" in seed_info:
+                    si.keyword_seeds = seed_info["keyword_seeds"]
+
+            if budget_info is not None:
+                request.budget_info.current_budget = budget_info["current_budget"]
+
+            response: GenerateRecommendationsResponse = (
+                self.client.generate_recommendations(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate recommendations: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_recommendation_tools(
     service: RecommendationService,
@@ -398,7 +507,56 @@ def create_recommendation_tools(
             recommendation_resource_names=recommendation_resource_names,
         )
 
-    tools.extend([get_recommendations, apply_recommendation, dismiss_recommendation])
+    async def generate_recommendations(
+        ctx: Context,
+        customer_id: str,
+        recommendation_types: List[str],
+        advertising_channel_type: str,
+        campaign_sitelink_count: Optional[int] = None,
+        conversion_tracking_status: Optional[str] = None,
+        bidding_info: Optional[Dict[str, Any]] = None,
+        seed_info: Optional[Dict[str, Any]] = None,
+        budget_info: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Generate optimization recommendations for a customer.
+
+        Args:
+            customer_id: The customer ID
+            recommendation_types: List of types to generate:
+                - CAMPAIGN_BUDGET, KEYWORD, MAXIMIZE_CLICKS_OPT_IN
+                - MAXIMIZE_CONVERSIONS_OPT_IN, MAXIMIZE_CONVERSION_VALUE_OPT_IN
+                - SET_TARGET_CPA, SET_TARGET_ROAS, SITELINK_ASSET
+                - TARGET_CPA_OPT_IN, TARGET_ROAS_OPT_IN
+            advertising_channel_type: Channel type - SEARCH or PERFORMANCE_MAX
+            campaign_sitelink_count: Number of sitelinks (for SITELINK_ASSET type)
+            conversion_tracking_status: Conversion tracking status (for bidding opt-in)
+            bidding_info: Dict with bidding_strategy_type and optional target_cpa_micros/target_roas
+            seed_info: Dict with url_seed and/or keyword_seeds for keyword generation
+            budget_info: Dict with current_budget (micros) for budget recommendations
+
+        Returns:
+            Generated recommendations
+        """
+        return await service.generate_recommendations(
+            ctx=ctx,
+            customer_id=customer_id,
+            recommendation_types=recommendation_types,
+            advertising_channel_type=advertising_channel_type,
+            campaign_sitelink_count=campaign_sitelink_count,
+            conversion_tracking_status=conversion_tracking_status,
+            bidding_info=bidding_info,
+            seed_info=seed_info,
+            budget_info=budget_info,
+        )
+
+    tools.extend(
+        [
+            get_recommendations,
+            apply_recommendation,
+            dismiss_recommendation,
+            generate_recommendations,
+        ]
+    )
     return tools
 
 
