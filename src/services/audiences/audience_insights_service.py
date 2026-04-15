@@ -7,16 +7,29 @@ from google.ads.googleads.v23.services.services.audience_insights_service import
     AudienceInsightsServiceClient,
 )
 from google.ads.googleads.v23.services.types.audience_insights_service import (
-    GenerateInsightsFinderReportRequest,
-    GenerateInsightsFinderReportResponse,
     GenerateAudienceCompositionInsightsRequest,
     GenerateAudienceCompositionInsightsResponse,
+    GenerateAudienceDefinitionRequest,
+    GenerateAudienceDefinitionResponse,
+    GenerateAudienceOverlapInsightsRequest,
+    GenerateAudienceOverlapInsightsResponse,
+    GenerateInsightsFinderReportRequest,
+    GenerateInsightsFinderReportResponse,
     GenerateSuggestedTargetingInsightsRequest,
     GenerateSuggestedTargetingInsightsResponse,
-    BasicInsightsAudience,
+    GenerateTargetingSuggestionMetricsRequest,
+    GenerateTargetingSuggestionMetricsResponse,
+    InsightsAudienceDescription,
+    ListAudienceInsightsAttributesRequest,
+    ListAudienceInsightsAttributesResponse,
+    ListInsightsEligibleDatesRequest,
+    ListInsightsEligibleDatesResponse,
     InsightsAudience,
     InsightsAudienceAttributeGroup,
     InsightsAudienceDefinition,
+)
+from google.ads.googleads.v23.common.types.audience_insights_attribute import (
+    AudienceInsightsAttribute,
 )
 from google.ads.googleads.v23.common.types.criteria import (
     AgeRangeInfo,
@@ -87,13 +100,13 @@ class AudienceInsightsService:
             customer_id = format_customer_id(customer_id)
 
             # Create baseline audience
-            baseline_audience = BasicInsightsAudience()
+            baseline_audience = InsightsAudience()
 
             # Add countries
             for country_id in baseline_audience_countries:
                 location = LocationInfo()
                 location.geo_target_constant = f"geoTargetConstants/{country_id}"
-                baseline_audience.country_location.append(location)
+                baseline_audience.country_locations.append(location)
 
             # Add age ranges if provided
             if baseline_audience_ages:
@@ -102,7 +115,7 @@ class AudienceInsightsService:
                     age_info.type_ = getattr(AgeRangeTypeEnum.AgeRangeType, age_range)
                     baseline_audience.age_ranges.append(age_info)
 
-            # Add gender if provided (BasicInsightsAudience only supports one gender)
+            # Add gender if provided
             if baseline_audience_genders and len(baseline_audience_genders) > 0:
                 gender_info = GenderInfo()
                 gender_info.type_ = getattr(
@@ -110,14 +123,14 @@ class AudienceInsightsService:
                 )
                 baseline_audience.gender = gender_info
 
-            # Create specific audience (also BasicInsightsAudience)
-            specific_audience = BasicInsightsAudience()
+            # Create specific audience
+            specific_audience = InsightsAudience()
 
             # Add countries
             for country_id in specific_audience_countries:
                 location = LocationInfo()
                 location.geo_target_constant = f"geoTargetConstants/{country_id}"
-                specific_audience.country_location.append(location)
+                specific_audience.country_locations.append(location)
 
             # Add age ranges if provided
             if specific_audience_ages:
@@ -126,7 +139,7 @@ class AudienceInsightsService:
                     age_info.type_ = getattr(AgeRangeTypeEnum.AgeRangeType, age_range)
                     specific_audience.age_ranges.append(age_info)
 
-            # Add gender if provided (BasicInsightsAudience only supports one gender)
+            # Add gender if provided
             if specific_audience_genders and len(specific_audience_genders) > 0:
                 gender_info = GenderInfo()
                 gender_info.type_ = getattr(
@@ -148,9 +161,6 @@ class AudienceInsightsService:
             request.customer_id = customer_id
             request.baseline_audience = baseline_audience
             request.specific_audience = specific_audience
-
-            # Note: In v20, GenerateInsightsFinderReportRequest doesn't have dimensions field
-            # The dimensions parameter is kept for API compatibility but not used
 
             # Make the API call
             response: GenerateInsightsFinderReportResponse = (
@@ -225,9 +235,6 @@ class AudienceInsightsService:
                     GenderTypeEnum.GenderType, audience_genders[0]
                 )
                 audience.gender = gender_info
-
-            # Note: In v20, user interests should be provided through topic_audience_combinations
-            # For simplicity, we skip user interests handling in this implementation
 
             # Add attribute groups if provided
             if audience_attribute_groups:
@@ -323,9 +330,6 @@ class AudienceInsightsService:
                 )
                 audience.gender = gender_info
 
-            # Note: In v20, user interests should be provided through topic_audience_combinations
-            # For simplicity, we skip user interests handling in this implementation
-
             # Create audience definition
             audience_definition = InsightsAudienceDefinition()
             audience_definition.audience = audience
@@ -354,6 +358,266 @@ class AudienceInsightsService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to generate suggested targeting insights: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def generate_audience_definition(
+        self,
+        ctx: Context,
+        customer_id: str,
+        audience_description: str,
+        country_locations: List[str],
+    ) -> Dict[str, Any]:
+        """Generate an audience definition from a free-text description.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            audience_description: Free-text description of the audience (max 2000 chars)
+            country_locations: List of country geo target constant resource names
+
+        Returns:
+            High and medium relevance attributes for the described audience
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            description = InsightsAudienceDescription()
+            description.audience_description = audience_description
+            for country in country_locations:
+                location = LocationInfo()
+                location.geo_target_constant = country
+                description.country_locations.append(location)
+
+            request = GenerateAudienceDefinitionRequest()
+            request.customer_id = customer_id
+            request.audience_description = description
+
+            response: GenerateAudienceDefinitionResponse = (
+                self.client.generate_audience_definition(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate audience definition: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def generate_audience_overlap_insights(
+        self,
+        ctx: Context,
+        customer_id: str,
+        country_location: str,
+        primary_attribute_type: str,
+        primary_attribute_value: str,
+        dimensions: List[str],
+    ) -> Dict[str, Any]:
+        """Generate audience overlap insights for a primary attribute.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            country_location: Country geo target constant resource name
+            primary_attribute_type: Type of primary attribute - 'user_interest' or 'age_range' or 'gender'
+            primary_attribute_value: Value - user interest resource name, age range, or gender
+            dimensions: Dimensions to analyze overlap - AFFINITY_USER_INTEREST,
+                IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER
+
+        Returns:
+            Overlap insights with potential YouTube reach intersections
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            country = LocationInfo()
+            country.geo_target_constant = country_location
+
+            primary_attr = AudienceInsightsAttribute()
+            if primary_attribute_type == "user_interest":
+                interest = UserInterestInfo()
+                interest.user_interest_category = primary_attribute_value
+                primary_attr.user_interest = interest
+            elif primary_attribute_type == "age_range":
+                age = AgeRangeInfo()
+                age.type_ = getattr(
+                    AgeRangeTypeEnum.AgeRangeType, primary_attribute_value
+                )
+                primary_attr.age_range = age
+            elif primary_attribute_type == "gender":
+                gender = GenderInfo()
+                gender.type_ = getattr(
+                    GenderTypeEnum.GenderType, primary_attribute_value
+                )
+                primary_attr.gender = gender
+
+            dim_enums = [
+                getattr(AudienceInsightsDimensionEnum.AudienceInsightsDimension, d)
+                for d in dimensions
+            ]
+
+            request = GenerateAudienceOverlapInsightsRequest()
+            request.customer_id = customer_id
+            request.country_location = country
+            request.primary_attribute = primary_attr
+            request.dimensions = dim_enums
+
+            response: GenerateAudienceOverlapInsightsResponse = (
+                self.client.generate_audience_overlap_insights(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate audience overlap insights: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def generate_targeting_suggestion_metrics(
+        self,
+        ctx: Context,
+        customer_id: str,
+        audiences: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Generate targeting suggestion metrics for audiences.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            audiences: List of audience dicts, each with:
+                - country_locations: List of geo target constant resource names
+                - age_ranges: Optional list of age range strings
+                - gender: Optional gender string
+
+        Returns:
+            Targeting suggestion metrics per audience
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            insights_audiences = []
+            for aud_data in audiences:
+                audience = InsightsAudience()
+                for country in aud_data.get("country_locations", []):
+                    location = LocationInfo()
+                    location.geo_target_constant = country
+                    audience.country_locations.append(location)
+                if "age_ranges" in aud_data:
+                    for age_range in aud_data["age_ranges"]:
+                        age_info = AgeRangeInfo()
+                        age_info.type_ = getattr(
+                            AgeRangeTypeEnum.AgeRangeType, age_range
+                        )
+                        audience.age_ranges.append(age_info)
+                if "gender" in aud_data:
+                    gender_info = GenderInfo()
+                    gender_info.type_ = getattr(
+                        GenderTypeEnum.GenderType, aud_data["gender"]
+                    )
+                    audience.gender = gender_info
+                insights_audiences.append(audience)
+
+            request = GenerateTargetingSuggestionMetricsRequest()
+            request.customer_id = customer_id
+            request.audiences = insights_audiences
+
+            response: GenerateTargetingSuggestionMetricsResponse = (
+                self.client.generate_targeting_suggestion_metrics(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to generate targeting suggestion metrics: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def list_audience_insights_attributes(
+        self,
+        ctx: Context,
+        customer_id: str,
+        dimensions: List[str],
+        query_text: str,
+    ) -> Dict[str, Any]:
+        """List audience insights attributes by searching.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            dimensions: Dimensions to search - CATEGORY, KNOWLEDGE_GRAPH, AFFINITY_USER_INTEREST,
+                IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER, etc.
+            query_text: Free text search query
+
+        Returns:
+            Matching audience insights attributes
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            dim_enums = [
+                getattr(AudienceInsightsDimensionEnum.AudienceInsightsDimension, d)
+                for d in dimensions
+            ]
+
+            request = ListAudienceInsightsAttributesRequest()
+            request.customer_id = customer_id
+            request.dimensions = dim_enums
+            request.query_text = query_text
+
+            response: ListAudienceInsightsAttributesResponse = (
+                self.client.list_audience_insights_attributes(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to list audience insights attributes: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def list_insights_eligible_dates(
+        self,
+        ctx: Context,
+    ) -> Dict[str, Any]:
+        """List eligible date ranges for audience insights reports.
+
+        Args:
+            ctx: FastMCP context
+
+        Returns:
+            Available data months and last 30 days date range
+        """
+        try:
+            request = ListInsightsEligibleDatesRequest()
+
+            response: ListInsightsEligibleDatesResponse = (
+                self.client.list_insights_eligible_dates(request=request)
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to list insights eligible dates: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -473,11 +737,129 @@ def create_audience_insights_tools(
             audience_user_interests=audience_user_interests,
         )
 
+    async def generate_audience_definition(
+        ctx: Context,
+        customer_id: str,
+        audience_description: str,
+        country_locations: List[str],
+    ) -> Dict[str, Any]:
+        """Generate an audience definition from a free-text description using AI.
+
+        Args:
+            customer_id: The customer ID
+            audience_description: Free-text description of the audience (max 2000 chars)
+            country_locations: List of country geo target constant resource names
+                (e.g., ["geoTargetConstants/2840"] for US)
+
+        Returns:
+            High and medium relevance attributes for the described audience
+        """
+        return await service.generate_audience_definition(
+            ctx=ctx,
+            customer_id=customer_id,
+            audience_description=audience_description,
+            country_locations=country_locations,
+        )
+
+    async def generate_audience_overlap_insights(
+        ctx: Context,
+        customer_id: str,
+        country_location: str,
+        primary_attribute_type: str,
+        primary_attribute_value: str,
+        dimensions: List[str],
+    ) -> Dict[str, Any]:
+        """Generate audience overlap insights for a primary attribute.
+
+        Args:
+            customer_id: The customer ID
+            country_location: Country geo target constant (e.g., "geoTargetConstants/2840")
+            primary_attribute_type: Type - 'user_interest', 'age_range', or 'gender'
+            primary_attribute_value: Resource name for user_interest, or enum name for age/gender
+            dimensions: Dimensions to overlap - AFFINITY_USER_INTEREST,
+                IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER
+
+        Returns:
+            Overlap insights with potential YouTube reach intersections
+        """
+        return await service.generate_audience_overlap_insights(
+            ctx=ctx,
+            customer_id=customer_id,
+            country_location=country_location,
+            primary_attribute_type=primary_attribute_type,
+            primary_attribute_value=primary_attribute_value,
+            dimensions=dimensions,
+        )
+
+    async def generate_targeting_suggestion_metrics(
+        ctx: Context,
+        customer_id: str,
+        audiences: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Generate targeting suggestion metrics for audiences.
+
+        Args:
+            customer_id: The customer ID
+            audiences: List of audience dicts, each with:
+                - country_locations: List of geo target constant resource names
+                - age_ranges: Optional list of age range strings
+                - gender: Optional gender string (MALE, FEMALE)
+
+        Returns:
+            Targeting suggestion metrics per audience (one per input, in order)
+        """
+        return await service.generate_targeting_suggestion_metrics(
+            ctx=ctx,
+            customer_id=customer_id,
+            audiences=audiences,
+        )
+
+    async def list_audience_insights_attributes(
+        ctx: Context,
+        customer_id: str,
+        dimensions: List[str],
+        query_text: str,
+    ) -> Dict[str, Any]:
+        """Search for audience insights attributes by text query.
+
+        Args:
+            customer_id: The customer ID
+            dimensions: Dimensions to search - CATEGORY, KNOWLEDGE_GRAPH,
+                AFFINITY_USER_INTEREST, IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER,
+                DEVICE, GEO_TARGET_COUNTRY, SUB_COUNTRY_LOCATION, YOUTUBE_LINEUP,
+                LIFE_EVENT_USER_INTEREST, PARENTAL_STATUS, INCOME_RANGE
+            query_text: Free text search query
+
+        Returns:
+            Matching audience insights attributes with metadata
+        """
+        return await service.list_audience_insights_attributes(
+            ctx=ctx,
+            customer_id=customer_id,
+            dimensions=dimensions,
+            query_text=query_text,
+        )
+
+    async def list_insights_eligible_dates(
+        ctx: Context,
+    ) -> Dict[str, Any]:
+        """List eligible date ranges for audience insights reports.
+
+        Returns:
+            Available data months (YYYY-MM format) and last 30 days date range
+        """
+        return await service.list_insights_eligible_dates(ctx=ctx)
+
     tools.extend(
         [
             generate_insights_finder_report,
             generate_audience_composition_insights,
             generate_suggested_targeting_insights,
+            generate_audience_definition,
+            generate_audience_overlap_insights,
+            generate_targeting_suggestion_metrics,
+            list_audience_insights_attributes,
+            list_insights_eligible_dates,
         ]
     )
     return tools
