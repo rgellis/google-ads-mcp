@@ -37,7 +37,9 @@ class GoogleAdsSdkClient:
         if has_oauth:
             for field in ["client_id", "client_secret"]:
                 if field not in config:
-                    raise ValueError(f"Missing required field for OAuth config: {field}")
+                    raise ValueError(
+                        f"Missing required field for OAuth config: {field}"
+                    )
         elif has_service_account:
             pass
         else:
