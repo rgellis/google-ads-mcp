@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.services.types.customer_label_service import (
+from google.ads.googleads.v23.services.types.customer_label_service import (
     MutateCustomerLabelsResponse,
     MutateCustomerLabelResult,
 )

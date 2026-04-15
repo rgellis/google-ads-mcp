@@ -4,22 +4,22 @@ import pytest
 from typing import Any
 from unittest.mock import Mock, patch
 
-from google.ads.googleads.v20.services.services.customer_asset_service import (
+from google.ads.googleads.v23.services.services.customer_asset_service import (
     CustomerAssetServiceClient,
 )
-from google.ads.googleads.v20.services.types.customer_asset_service import (
+from google.ads.googleads.v23.services.types.customer_asset_service import (
     CustomerAssetOperation,
     MutateCustomerAssetsRequest,
     MutateCustomerAssetsResponse,
     MutateCustomerAssetResult,
 )
-from google.ads.googleads.v20.enums.types.response_content_type import (
+from google.ads.googleads.v23.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.asset_field_type import (
+from google.ads.googleads.v23.enums.types.asset_field_type import (
     AssetFieldTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.asset_link_status import (
+from google.ads.googleads.v23.enums.types.asset_link_status import (
     AssetLinkStatusEnum,
 )
 from google.protobuf import field_mask_pb2

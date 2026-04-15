@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.audiences import (
+from google.ads.googleads.v23.common.types.audiences import (
     AgeDimension,
     AudienceDimension,
     AudienceExclusionDimension,
@@ -18,15 +18,15 @@ from google.ads.googleads.v20.common.types.audiences import (
     UserInterestSegment,
     UserListSegment,
 )
-from google.ads.googleads.v20.enums.types.audience_status import AudienceStatusEnum
-from google.ads.googleads.v20.resources.types.audience import Audience
-from google.ads.googleads.v20.services.services.audience_service import (
+from google.ads.googleads.v23.enums.types.audience_status import AudienceStatusEnum
+from google.ads.googleads.v23.resources.types.audience import Audience
+from google.ads.googleads.v23.services.services.audience_service import (
     AudienceServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.audience_service import (
+from google.ads.googleads.v23.services.types.audience_service import (
     AudienceOperation,
     MutateAudiencesRequest,
     MutateAudiencesResponse,
@@ -137,7 +137,7 @@ class AudienceService:
             age_ranges = config.get("age_ranges", [])
             for age_range in age_ranges:
                 # Create AgeSegment from age range specification
-                from google.ads.googleads.v20.common.types.audiences import AgeSegment
+                from google.ads.googleads.v23.common.types.audiences import AgeSegment
 
                 age_segment = AgeSegment()
 
@@ -176,7 +176,7 @@ class AudienceService:
             genders = config.get("genders", [])
 
             # Import enum for gender
-            from google.ads.googleads.v20.enums.types.gender_type import GenderTypeEnum
+            from google.ads.googleads.v23.enums.types.gender_type import GenderTypeEnum
 
             for gender in genders:
                 if isinstance(gender, str):
@@ -192,7 +192,7 @@ class AudienceService:
             income_ranges = config.get("income_ranges", [])
 
             # Import enum for income range
-            from google.ads.googleads.v20.enums.types.income_range_type import (
+            from google.ads.googleads.v23.enums.types.income_range_type import (
                 IncomeRangeTypeEnum,
             )
 
@@ -210,7 +210,7 @@ class AudienceService:
             parent_types = config.get("parent_types", [])
 
             # Import enum for parental status
-            from google.ads.googleads.v20.enums.types.parental_status_type import (
+            from google.ads.googleads.v23.enums.types.parental_status_type import (
                 ParentalStatusTypeEnum,
             )
 
@@ -229,7 +229,7 @@ class AudienceService:
             user_list_segment.user_list = config.get("user_list_resource")  # type: ignore
 
             # Create audience segment manually
-            from google.ads.googleads.v20.common.types.audiences import AudienceSegment
+            from google.ads.googleads.v23.common.types.audiences import AudienceSegment
 
             audience_segment = AudienceSegment()
             audience_segment.user_list = user_list_segment  # type: ignore
@@ -242,7 +242,7 @@ class AudienceService:
             interest_segment.user_interest_category = config.get("interest_resource")  # type: ignore
 
             # Create audience segment manually
-            from google.ads.googleads.v20.common.types.audiences import AudienceSegment
+            from google.ads.googleads.v23.common.types.audiences import AudienceSegment
 
             audience_segment = AudienceSegment()
             audience_segment.user_interest = interest_segment  # type: ignore
@@ -255,7 +255,7 @@ class AudienceService:
             custom_segment.custom_audience = config.get("custom_audience_resource")  # type: ignore
 
             # Create audience segment manually
-            from google.ads.googleads.v20.common.types.audiences import AudienceSegment
+            from google.ads.googleads.v23.common.types.audiences import AudienceSegment
 
             audience_segment = AudienceSegment()
             audience_segment.custom_audience = custom_segment  # type: ignore
@@ -268,7 +268,7 @@ class AudienceService:
             life_event_segment.life_event = config.get("life_event_resource")  # type: ignore
 
             # Create audience segment manually
-            from google.ads.googleads.v20.common.types.audiences import AudienceSegment
+            from google.ads.googleads.v23.common.types.audiences import AudienceSegment
 
             audience_segment = AudienceSegment()
             audience_segment.life_event = life_event_segment  # type: ignore
@@ -282,7 +282,7 @@ class AudienceService:
                 "demographic_resource"
             )  # type: ignore
             # Create audience segment manually since direct construction may not work
-            from google.ads.googleads.v20.common.types.audiences import AudienceSegment
+            from google.ads.googleads.v23.common.types.audiences import AudienceSegment
 
             audience_segment = AudienceSegment()
             audience_segment.detailed_demographic = demographic_segment  # type: ignore
@@ -303,7 +303,7 @@ class AudienceService:
         dimension_type = config.get("type")
 
         if dimension_type == "USER_LIST":
-            from google.ads.googleads.v20.common.types.audiences import ExclusionSegment
+            from google.ads.googleads.v23.common.types.audiences import ExclusionSegment
 
             exclusion_segment = ExclusionSegment()
             user_list_segment = UserListSegment()

@@ -4,11 +4,11 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.criteria import LocationInfo
-from google.ads.googleads.v20.services.services.smart_campaign_suggest_service import (
+from google.ads.googleads.v23.common.types.criteria import LocationInfo
+from google.ads.googleads.v23.services.services.smart_campaign_suggest_service import (
     SmartCampaignSuggestServiceClient,
 )
-from google.ads.googleads.v20.services.types.smart_campaign_suggest_service import (
+from google.ads.googleads.v23.services.types.smart_campaign_suggest_service import (
     SuggestKeywordThemesRequest,
     SuggestKeywordThemesResponse,
     SuggestSmartCampaignAdRequest,
@@ -265,7 +265,7 @@ class SmartCampaignService:
 
             # Add keyword themes if provided
             if keyword_themes:
-                from google.ads.googleads.v20.common.types.criteria import (
+                from google.ads.googleads.v23.common.types.criteria import (
                     KeywordThemeInfo,
                 )
 

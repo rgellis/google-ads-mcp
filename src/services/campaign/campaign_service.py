@@ -4,19 +4,22 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types import ManualCpc
-from google.ads.googleads.v20.enums.types.advertising_channel_type import (
+from google.ads.googleads.v23.common.types import ManualCpc
+from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_experiment_type import (
+from google.ads.googleads.v23.enums.types.campaign_experiment_type import (
     CampaignExperimentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
-from google.ads.googleads.v20.resources.types.campaign import Campaign
-from google.ads.googleads.v20.services.services.campaign_service import (
+from google.ads.googleads.v23.enums.types.eu_political_advertising_status import (
+    EuPoliticalAdvertisingStatusEnum,
+)
+from google.ads.googleads.v23.enums.types.campaign_status import CampaignStatusEnum
+from google.ads.googleads.v23.resources.types.campaign import Campaign
+from google.ads.googleads.v23.services.services.campaign_service import (
     CampaignServiceClient,
 )
-from google.ads.googleads.v20.services.types.campaign_service import (
+from google.ads.googleads.v23.services.types.campaign_service import (
     CampaignOperation,
     MutateCampaignsRequest,
     MutateCampaignsResponse,
@@ -97,6 +100,11 @@ class CampaignService:
             # Set manual CPC bidding strategy
             manual_cpc: ManualCpc = ManualCpc()
             campaign.manual_cpc = manual_cpc
+
+            # EU political advertising declaration (required by Google Ads API)
+            campaign.contains_eu_political_advertising = (
+                EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
+            )
 
             # Set dates if provided
             if start_date:

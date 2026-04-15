@@ -4,22 +4,22 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.text_label import TextLabel
-from google.ads.googleads.v20.enums.types.label_status import LabelStatusEnum
-from google.ads.googleads.v20.resources.types.label import Label
-from google.ads.googleads.v20.services.services.label_service import (
+from google.ads.googleads.v23.common.types.text_label import TextLabel
+from google.ads.googleads.v23.enums.types.label_status import LabelStatusEnum
+from google.ads.googleads.v23.resources.types.label import Label
+from google.ads.googleads.v23.services.services.label_service import (
     LabelServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.services.campaign_label_service import (
+from google.ads.googleads.v23.services.services.campaign_label_service import (
     CampaignLabelServiceClient,
 )
-from google.ads.googleads.v20.services.services.ad_group_label_service import (
+from google.ads.googleads.v23.services.services.ad_group_label_service import (
     AdGroupLabelServiceClient,
 )
-from google.ads.googleads.v20.services.types.label_service import (
+from google.ads.googleads.v23.services.types.label_service import (
     LabelOperation,
     MutateLabelsRequest,
     MutateLabelsResponse,
@@ -289,10 +289,10 @@ class LabelService:
                 sdk_client.client.get_service("CampaignLabelService")
             )
 
-            from google.ads.googleads.v20.resources.types.campaign_label import (
+            from google.ads.googleads.v23.resources.types.campaign_label import (
                 CampaignLabel,
             )
-            from google.ads.googleads.v20.services.types.campaign_label_service import (
+            from google.ads.googleads.v23.services.types.campaign_label_service import (
                 CampaignLabelOperation,
                 MutateCampaignLabelsRequest,
             )
@@ -367,10 +367,10 @@ class LabelService:
                 sdk_client.client.get_service("AdGroupLabelService")
             )
 
-            from google.ads.googleads.v20.resources.types.ad_group_label import (
+            from google.ads.googleads.v23.resources.types.ad_group_label import (
                 AdGroupLabel,
             )
-            from google.ads.googleads.v20.services.types.ad_group_label_service import (
+            from google.ads.googleads.v23.services.types.ad_group_label_service import (
                 AdGroupLabelOperation,
                 MutateAdGroupLabelsRequest,
             )

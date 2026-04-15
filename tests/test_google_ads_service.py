@@ -5,13 +5,13 @@ from typing import Any
 
 import pytest
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.response_content_type import (
+from google.ads.googleads.v23.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.summary_row_setting import (
+from google.ads.googleads.v23.enums.types.summary_row_setting import (
     SummaryRowSettingEnum,
 )
-from google.ads.googleads.v20.services.types.google_ads_service import (
+from google.ads.googleads.v23.services.types.google_ads_service import (
     GoogleAdsRow,
     MutateGoogleAdsResponse,
     MutateOperation,

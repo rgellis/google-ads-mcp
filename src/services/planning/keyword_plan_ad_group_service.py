@@ -7,13 +7,13 @@ Keyword plan ad groups organize keywords within keyword plan campaigns for plann
 from typing import Any, List, Optional
 
 from fastmcp import FastMCP
-from google.ads.googleads.v20.resources.types.keyword_plan_ad_group import (
+from google.ads.googleads.v23.resources.types.keyword_plan_ad_group import (
     KeywordPlanAdGroup,
 )
-from google.ads.googleads.v20.services.services.keyword_plan_ad_group_service import (
+from google.ads.googleads.v23.services.services.keyword_plan_ad_group_service import (
     KeywordPlanAdGroupServiceClient,
 )
-from google.ads.googleads.v20.services.types.keyword_plan_ad_group_service import (
+from google.ads.googleads.v23.services.types.keyword_plan_ad_group_service import (
     KeywordPlanAdGroupOperation,
     MutateKeywordPlanAdGroupsRequest,
     MutateKeywordPlanAdGroupsResponse,

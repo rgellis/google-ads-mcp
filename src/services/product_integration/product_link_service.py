@@ -7,16 +7,16 @@ Product links connect Google Ads accounts with other Google products like Mercha
 from typing import Any, Optional
 
 from fastmcp import FastMCP
-from google.ads.googleads.v20.resources.types.product_link import (
+from google.ads.googleads.v23.resources.types.product_link import (
     ProductLink,
     DataPartnerIdentifier,
     GoogleAdsIdentifier,
     MerchantCenterIdentifier,
 )
-from google.ads.googleads.v20.services.services.product_link_service import (
+from google.ads.googleads.v23.services.services.product_link_service import (
     ProductLinkServiceClient,
 )
-from google.ads.googleads.v20.services.types.product_link_service import (
+from google.ads.googleads.v23.services.types.product_link_service import (
     CreateProductLinkRequest,
     CreateProductLinkResponse,
     RemoveProductLinkRequest,
