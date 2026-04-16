@@ -351,28 +351,18 @@ class CustomInterestService:
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)
 
-            # Process result
+            # Process result — expect exactly one row for a specific ID
             for row in response:
-                ci = row.custom_interest
-
-                # Process members
-                members = []
-                for member in ci.members:
-                    member_dict = {
-                        "type": member.member_type.name
-                        if member.member_type
-                        else "UNKNOWN"
-                    }
-                    if member.HasField("parameter"):
-                        member_dict["value"] = member.parameter
-                    members.append(member_dict)
+                result = serialize_proto_message(row.custom_interest)
 
                 await ctx.log(
                     level="info",
                     message=f"Retrieved details for custom interest {custom_interest_id}",
                 )
 
-            return serialize_proto_message(response)
+                return result
+
+            raise Exception(f"Custom interest with ID {custom_interest_id} not found")
 
         except Exception as e:
             error_msg = f"Failed to get custom interest details: {str(e)}"
