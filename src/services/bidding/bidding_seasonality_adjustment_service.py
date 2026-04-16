@@ -17,6 +17,9 @@ from google.ads.googleads.v23.resources.types.bidding_seasonality_adjustment imp
 from google.ads.googleads.v23.enums.types.seasonality_event_scope import (
     SeasonalityEventScopeEnum,
 )
+from google.ads.googleads.v23.enums.types.seasonality_event_status import (
+    SeasonalityEventStatusEnum,
+)
 
 from google.ads.googleads.v23.enums.types.device import DeviceEnum
 from google.ads.googleads.v23.enums.types.advertising_channel_type import (
@@ -99,6 +102,9 @@ class BiddingSeasonalityAdjustmentService:
             adjustment.start_date_time = start_date_time
             adjustment.end_date_time = end_date_time
             adjustment.conversion_rate_modifier = conversion_rate_modifier
+            adjustment.status = getattr(
+                SeasonalityEventStatusEnum.SeasonalityEventStatus, status
+            )
 
             if description:
                 adjustment.description = description
