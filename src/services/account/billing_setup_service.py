@@ -45,10 +45,8 @@ class BillingSetupService:
         ctx: Context,
         customer_id: str,
         payments_account_id: str,
-        start_date: str,
-        end_date: Optional[str] = None,
+        start_date: Optional[str] = None,
         start_time_type: TimeTypeEnum.TimeType = TimeTypeEnum.TimeType.NOW,
-        end_time_type: TimeTypeEnum.TimeType = TimeTypeEnum.TimeType.FOREVER,
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
@@ -56,10 +54,8 @@ class BillingSetupService:
             ctx: FastMCP context
             customer_id: The customer ID
             payments_account_id: The payments account ID to link
-            start_date: Start date in YYYY-MM-DD format (ignored if start_time_type is NOW)
-            end_date: End date in YYYY-MM-DD format (optional, ignored if end_time_type is FOREVER)
-            start_time_type: Start time type enum value
-            end_time_type: End time type enum value
+            start_date: Start date in YYYY-MM-DD format (used when start_time_type is not NOW)
+            start_time_type: Start time type enum value (NOW or use start_date)
 
         Returns:
             Created billing setup details
@@ -67,25 +63,17 @@ class BillingSetupService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Create billing setup
             billing_setup = BillingSetup()
 
-            # Set payments account
             billing_setup.payments_account = (
                 f"customers/{customer_id}/paymentsAccounts/{payments_account_id}"
             )
 
-            # Set start date/time (these are mutually exclusive oneof fields)
+            # Set start date/time (mutually exclusive oneof fields)
             if start_time_type == TimeTypeEnum.TimeType.NOW:
                 billing_setup.start_time_type = start_time_type
-            else:
+            elif start_date:
                 billing_setup.start_date_time = start_date
-
-            # Set end date/time if provided
-            if end_time_type != TimeTypeEnum.TimeType.FOREVER:
-                billing_setup.end_time_type = end_time_type
-                if end_date and end_time_type != TimeTypeEnum.TimeType.NOW:
-                    billing_setup.end_date_time = end_date
 
             # Create operation
             operation = BillingSetupOperation()
@@ -361,36 +349,28 @@ def create_billing_setup_tools(
         ctx: Context,
         customer_id: str,
         payments_account_id: str,
-        start_date: str,
-        end_date: Optional[str] = None,
+        start_date: Optional[str] = None,
         start_time_type: str = "NOW",
-        end_time_type: str = "FOREVER",
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
         Args:
             customer_id: The customer ID
             payments_account_id: The payments account ID to link
-            start_date: Start date in YYYY-MM-DD format (ignored if start_time_type is NOW)
-            end_date: End date in YYYY-MM-DD format (optional, ignored if end_time_type is FOREVER)
-            start_time_type: Start time type - NOW or FOREVER
-            end_time_type: End time type - FOREVER, NOW, or specific date
+            start_date: Start date in YYYY-MM-DD format (used when start_time_type is not NOW)
+            start_time_type: Start time type - NOW (default) or provide start_date
 
         Returns:
             Created billing setup details
         """
-        # Convert string enums to proper enum types
         start_enum = getattr(TimeTypeEnum.TimeType, start_time_type)
-        end_enum = getattr(TimeTypeEnum.TimeType, end_time_type)
 
         return await service.create_billing_setup(
             ctx=ctx,
             customer_id=customer_id,
             payments_account_id=payments_account_id,
             start_date=start_date,
-            end_date=end_date,
             start_time_type=start_enum,
-            end_time_type=end_enum,
         )
 
     async def list_billing_setups(
