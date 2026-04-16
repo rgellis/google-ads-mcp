@@ -49,39 +49,41 @@ Tracks remaining work to bring the project to full v23 coverage with 100% test c
 
 ---
 
-## 2. Implement Remaining 26 Services
+## 2. Implement Remaining Services
 
-### Existed since v20 (18 services)
+**All 26 services DONE.**
 
-- [ ] `asset_group_listing_group_filter` — `mutate_asset_group_listing_group_filters` — PMax product feed targeting filters
-- [ ] `asset_set_asset` — `mutate_asset_set_assets` — Link assets to asset sets
-- [ ] `campaign_group` — `mutate_campaign_groups` — Campaign grouping/organization
-- [ ] `campaign_lifecycle_goal` — `configure_campaign_lifecycle_goals` — Campaign acquisition/retention goals
-- [ ] `content_creator_insights` — `generate_creator_insights`, `generate_trending_insights` — YouTube creator and trending data
-- [ ] `conversion_value_rule_set` — `mutate_conversion_value_rule_sets` — Group conversion value rules
-- [ ] `customer_asset_set` — `mutate_customer_asset_sets` — Customer-level asset set links
-- [ ] `customer_lifecycle_goal` — `configure_customer_lifecycle_goals` — Account-level lifecycle goals
-- [ ] `customer_sk_ad_network_conversion_value_schema` — `mutate_customer_sk_ad_network_conversion_value_schema` — iOS SKAdNetwork schema
-- [ ] `keyword_theme_constant` — `suggest_keyword_theme_constants` — Smart campaign theme suggestions
-- [ ] `local_services_lead` — `append_lead_conversation`, `provide_lead_feedback` — Local Services Ads lead management
-- [ ] `product_link_invitation` — `create_product_link_invitation`, `remove_product_link_invitation`, `update_product_link_invitation` — Product link invitation management
-- [ ] `recommendation_subscription` — `mutate_recommendation_subscription` — Auto-apply recommendation subscriptions
-- [ ] `shareable_preview` — `generate_shareable_previews` — Generate shareable ad preview URLs
-- [ ] `smart_campaign_setting` — `get_smart_campaign_status`, `mutate_smart_campaign_settings` — Smart campaign setting management
-- [ ] `third_party_app_analytics_link` — `regenerate_shareable_link_id` — Third-party app analytics links
-- [ ] `travel_asset_suggestion` — `suggest_travel_assets` — Travel campaign asset suggestions
-- [ ] `user_list_customer_type` — `mutate_user_list_customer_types` — User list customer type classifications
+### Existed since v20 (18 services) — ALL DONE
 
-### New in v23 only (8 services)
+- [x] `asset_group_listing_group_filter` — PMax product feed targeting filters
+- [x] `asset_set_asset` — Link assets to asset sets
+- [x] `campaign_group` — Campaign grouping/organization
+- [x] `campaign_lifecycle_goal` — Campaign acquisition/retention goals
+- [x] `content_creator_insights` — YouTube creator and trending data
+- [x] `conversion_value_rule_set` — Group conversion value rules
+- [x] `customer_asset_set` — Customer-level asset set links
+- [x] `customer_lifecycle_goal` — Account-level lifecycle goals
+- [x] `customer_sk_ad_network_conversion_value_schema` — iOS SKAdNetwork schema
+- [x] `keyword_theme_constant` — Smart campaign theme suggestions
+- [x] `local_services_lead` — Local Services Ads lead management
+- [x] `product_link_invitation` — Product link invitation management
+- [x] `recommendation_subscription` — Auto-apply recommendation subscriptions
+- [x] `shareable_preview` — Generate shareable ad preview URLs
+- [x] `smart_campaign_setting` — Smart campaign setting management
+- [x] `third_party_app_analytics_link` — Third-party app analytics links
+- [x] `travel_asset_suggestion` — Travel campaign asset suggestions
+- [x] `user_list_customer_type` — User list customer type classifications
 
-- [ ] `asset_generation` — `generate_images`, `generate_text` — AI-generated assets
-- [ ] `automatically_created_asset_removal` — `remove_campaign_automatically_created_asset` — Remove auto-created campaign assets
-- [ ] `benchmarks` — `generate_benchmarks_metrics`, `list_benchmarks_available_dates`, `list_benchmarks_locations`, `list_benchmarks_products`, `list_benchmarks_sources` — Competitive benchmarking
-- [ ] `campaign_goal_config` — `mutate_campaign_goal_configs` — Campaign goal configuration
-- [ ] `goal` — `mutate_goals` — Account-level goal management
-- [ ] `incentive` — `apply_incentive`, `fetch_incentive` — Promotional credits/incentives
-- [ ] `reservation` — `book_campaigns`, `quote_campaigns` — Guaranteed reservation campaigns
-- [ ] `you_tube_video_upload` — `create_you_tube_video_upload`, `remove_you_tube_video_upload`, `update_you_tube_video_upload` — YouTube video uploads via Ads API
+### New in v23 only — ALL DONE (7 of 8; 1 skipped)
+
+- [x] `asset_generation` — AI-generated text and image assets
+- [x] `automatically_created_asset_removal` — Remove auto-created campaign assets
+- [x] `benchmarks` — Competitive benchmarking (5 RPCs)
+- [x] `campaign_goal_config` — Campaign goal configuration
+- [x] `goal` — Account-level goal management
+- [x] `incentive` — Promotional credits/incentives
+- [x] `reservation` — Guaranteed reservation campaigns
+- [x] `you_tube_video_upload` — YouTube video uploads via Ads API (create/update/remove with file stream)
 
 ---
 
