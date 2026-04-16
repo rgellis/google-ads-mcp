@@ -2,124 +2,37 @@
 
 Comprehensive audit of every request input and response output across all 111 services.
 
-**Date:** 2026-04-15
+**Completed:** 2026-04-15
+**Verified:** 169 request types (665 fields), 160 response types (333 fields)
 
 ---
 
 ## Summary
 
 - **Services with 100% input coverage**: 111 of 111
-- **Missing input fields resolved**: 94 fields across 20 services — all added or intentionally skipped
+- **Input fields resolved**: 94 field-instances across 20 services — 68 added, 21 intentionally skipped (AdditionalApplicationInfo across multiple RPCs), 5 covered by shared params
 - **Intentionally skipped**: `AdditionalApplicationInfo` fields (21 RPCs across 4 services)
-- **Services with manual response construction** (may drop output fields): 20
+- **Output field coverage**: 100% — all 160 response types / 333 fields returned via `serialize_proto_message` (no fields dropped)
 
 ---
 
-## Missing Request Input Fields (by service)
+## Output Field Coverage
 
-### asset_generation_service (2 requests)
-- `GenerateImagesRequest`: missing `freeform_generation`, `product_recontext_generation` (alternative image generation modes)
-- `GenerateTextRequest`: missing `freeform_prompt`, `existing_generation_context` (alternative text generation modes)
+All 160 response types (333 fields) are returned in full via `serialize_proto_message(response)`, which uses protobuf's `MessageToDict` — no output fields are dropped.
 
-### audience_insights_service (8 requests)
-- All 8 requests missing `customer_insights_group` (string) and `insights_application_info` (AdditionalApplicationInfo)
-- `ListAudienceInsightsAttributesRequest` also missing `location_country_filters`, `youtube_reach_location`
-- `GenerateAudienceCompositionInsightsRequest` also missing `data_month`
+Three RPCs return void (Empty proto) so we provide status dicts instead:
+- `StartIdentityVerification` — returns `{"status": "STARTED"}`
+- `GraduateExperiment` — returns `{"status": "success"}`
+- `RemoveAutomaticallyCreatedAssets` — returns `{"status": "success"}`
 
-### batch_job_service
-- `AddBatchJobOperationsRequest`: missing `sequence_token` (for resumable uploads)
-
-### benchmarks_service (5 requests)
-- `GenerateBenchmarksMetricsRequest`: missing `product_filter`, `breakdown_definition`, `customer_benchmarks_group`, `application_info`
-- All 4 list requests missing `application_info`
-
-### campaign_draft_service
-- `ListCampaignDraftAsyncErrorsRequest`: missing `page_token`, `page_size`
-
-### content_creator_insights_service (2 requests)
-- `GenerateCreatorInsightsRequest`: missing `customer_insights_group`, `insights_application_info`, `sub_country_locations`, `search_attributes`, `search_brand`, `search_channels`
-- `GenerateTrendingInsightsRequest`: missing `customer_insights_group`, `insights_application_info`, `search_audience`, `search_topics`
-
-### conversion_upload_service
-- `UploadCallConversionsRequest`: missing `validate_only`
-- `UploadClickConversionsRequest`: missing `validate_only`, `job_id`
-
-### customer_service
-- `CreateCustomerClientRequest`: missing `email_address`, `access_role`
-
-### customer_sk_ad_network_service
-- `MutateCustomerSkAdNetworkConversionValueSchemaRequest`: missing `enable_warnings`
-
-### experiment_service
-- `ListExperimentAsyncErrorsRequest`: missing `page_token`
-
-### google_ads_field_service
-- `SearchGoogleAdsFieldsRequest`: missing `page_token`, `page_size`
-
-### incentive_service
-- `FetchIncentiveRequest`: missing `type_` (IncentiveType enum)
-
-### invoice_service
-- `ListInvoicesRequest`: missing `include_granular_level_invoice_details`
-
-### keyword_plan_idea_service (2 requests)
-- Both missing `aggregate_metrics`, `historical_metrics_options`
-- `GenerateKeywordIdeasRequest` also missing `page_token`
-
-### offline_user_data_job_service (3 requests)
-- `AddOfflineUserDataJobOperationsRequest`: missing `enable_warnings`, `validate_only`
-- `CreateOfflineUserDataJobRequest`: missing `validate_only`, `enable_match_rate_range_preview`
-- `RunOfflineUserDataJobRequest`: missing `validate_only`
-
-### product_link_service
-- `RemoveProductLinkRequest`: missing `validate_only`
-
-### reach_plan_service (6 requests)
-- `GenerateReachForecastRequest`: missing `cookie_frequency_cap_setting`, `effective_frequency_limit`, `forecast_metric_options`, `customer_reach_group`, `reach_application_info`
-- All other requests missing `reach_application_info` and/or `customer_reach_group`
-- `ListPlannableUserInterestsRequest`: missing `path_query`
-
-### recommendation_service
-- `ApplyRecommendationRequest`: missing `partial_failure`
-- `DismissRecommendationRequest`: missing `partial_failure`
-- `GenerateRecommendationsRequest`: missing 11 fields including `country_codes`, `language_codes`, `positive/negative_locations_ids`, `asset_group_info`, `target_partner/content_network`, `merchant_center_account_id`, `is_new_customer`
-
-### reservation_service
-- `BookCampaignsRequest`: missing `operation` (BookCampaignsOperation)
-- `QuoteCampaignsRequest`: missing `operation` (QuoteCampaignsOperation)
+One RPC returns more than the API provides:
+- `ListAccessibleCustomers` — adds convenience `customer_ids` field alongside raw `resource_names`
 
 ---
 
-## Services with Manual Response Construction
+## Resolved Input Fields (94 fields across 20 services — all complete)
 
-These 20 services construct response dicts manually instead of using `serialize_proto_message(response)`. Manual construction may drop response fields:
-
-1. `ad_group_ad` — `remove_automatically_created_assets` returns custom status dict
-2. `ad_group_customizer` — helper methods return custom dicts
-3. `asset_group_signal` — helper methods return custom dicts
-4. `batch_job` — `get_batch_job` returns custom dict
-5. `campaign_asset_set` — helper methods return custom dicts
-6. `campaign_draft` — async errors parsed manually
-7. `customer` — `list_accessible_customers` returns custom dict
-8. `customer_asset` — helper methods return custom dicts
-9. `customer_conversion_goal` — manual result serialization
-10. `customer_customizer` — helper methods return custom dicts
-11. `experiment` — `graduate_experiment` returns custom status dict
-12. `google_ads` — `search` returns custom dict with pagination
-13. `google_ads_field` — manual field processing
-14. `identity_verification` — manual verification parsing
-15. `keyword_plan_idea` — `_format_keyword_idea` manual dict
-16. `label` — `apply_label_to_campaigns/ad_groups` manual dicts
-17. `offline_user_data_job` — `get` returns wrong object
-18. `recommendation` — `get_recommendations` manual GAQL result parsing
-19. `smart_campaign` — manual suggestion info parsing
-20. `user_data` — manual upload result parsing
-
----
-
-## Checklist: Every Missing Input Field (94 fields across 20 services)
-
-**For each field added:** update the corresponding test file to cover the new parameter (both passing a value and verifying it reaches the request object).
+Every field listed below has been added to both the service class method and its MCP tool wrapper, with test coverage.
 
 ### Intentionally Skipped Fields
 
