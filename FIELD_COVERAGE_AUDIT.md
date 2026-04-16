@@ -126,12 +126,12 @@ These 20 services construct response dicts manually instead of using `serialize_
 ### 1. `asset_generation` — `src/services/assets/asset_generation_service.py` | test: `tests/test_asset_generation_service.py`
 
 **GenerateImagesRequest:**
-- [ ] `freeform_generation` (FreeformImageGenerationInput) — generate images from free-text prompt
-- [ ] `product_recontext_generation` (ProductRecontextGenerationImageInput) — recontextualize product images
+- [x] `freeform_generation` (FreeformImageGenerationInput) — generate images from free-text prompt **DONE**
+- [x] `product_recontext_generation` (ProductRecontextGenerationImageInput) — recontextualize product images **DONE**
 
 **GenerateTextRequest:**
-- [ ] `freeform_prompt` (string) — generate text from free-text prompt instead of URL
-- [ ] `existing_generation_context` (AssetGenerationExistingContext) — reference existing asset group/ad
+- [x] `freeform_prompt` (string) — generate text from free-text prompt instead of URL **DONE**
+- [x] `existing_generation_context` (AssetGenerationExistingContext) — reference existing asset group/ad **DONE**
 
 ### 2. `audience_insights` — `src/services/audiences/audience_insights_service.py` | test: `tests/test_audience_insights_service.py`
 

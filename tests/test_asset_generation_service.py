@@ -156,6 +156,119 @@ async def test_generate_images_error(
     assert "Test Google Ads Exception" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_generate_text_with_freeform_prompt(
+    service: AssetGenerationService,
+    mock_ctx: Context,
+) -> None:
+    """Test generating text assets from a freeform prompt."""
+    mock_client = service.client
+    mock_client.generate_text.return_value = Mock()  # type: ignore
+
+    expected_result = {"assets": [{"text_asset": {"text": "AI Generated"}}]}
+
+    with patch(
+        "src.services.assets.asset_generation_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await service.generate_text(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            asset_field_types=["HEADLINE"],
+            freeform_prompt="Write headlines for a shoe store",
+        )
+
+    assert result == expected_result
+    call_args = mock_client.generate_text.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.freeform_prompt == "Write headlines for a shoe store"
+    assert request.final_url == ""  # not set
+
+
+@pytest.mark.asyncio
+async def test_generate_text_with_existing_context(
+    service: AssetGenerationService,
+    mock_ctx: Context,
+) -> None:
+    """Test generating text with existing asset group context."""
+    mock_client = service.client
+    mock_client.generate_text.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.assets.asset_generation_service.serialize_proto_message",
+        return_value={"assets": []},
+    ):
+        result = await service.generate_text(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            asset_field_types=["DESCRIPTION"],
+            final_url="https://example.com",
+            existing_asset_group="customers/1234567890/assetGroups/111",
+        )
+
+    call_args = mock_client.generate_text.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert (
+        request.existing_generation_context.existing_asset_group
+        == "customers/1234567890/assetGroups/111"
+    )
+
+
+@pytest.mark.asyncio
+async def test_generate_images_with_freeform_prompt(
+    service: AssetGenerationService,
+    mock_ctx: Context,
+) -> None:
+    """Test generating images from a freeform prompt."""
+    mock_client = service.client
+    mock_client.generate_images.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.assets.asset_generation_service.serialize_proto_message",
+        return_value={"assets": []},
+    ):
+        result = await service.generate_images(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            asset_field_types=["MARKETING_IMAGE"],
+            freeform_prompt="A running shoe on a mountain trail",
+        )
+
+    call_args = mock_client.generate_images.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert (
+        request.freeform_generation.freeform_prompt
+        == "A running shoe on a mountain trail"
+    )
+
+
+@pytest.mark.asyncio
+async def test_generate_images_with_product_recontext(
+    service: AssetGenerationService,
+    mock_ctx: Context,
+) -> None:
+    """Test generating images with product recontextualization."""
+    mock_client = service.client
+    mock_client.generate_images.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.assets.asset_generation_service.serialize_proto_message",
+        return_value={"assets": []},
+    ):
+        result = await service.generate_images(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            asset_field_types=["MARKETING_IMAGE"],
+            product_recontext_prompt="Product on a beach",
+            product_recontext_source_images=[b"fake_image_bytes"],
+        )
+
+    call_args = mock_client.generate_images.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.product_recontext_generation.prompt == "Product on a beach"
+    assert len(request.product_recontext_generation.source_images) == 1
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()
