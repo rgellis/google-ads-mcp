@@ -14,7 +14,7 @@ This project provides an MCP server that wraps the Google Ads API v23, enabling 
 - **MCP Compliant**: Follows the Model Context Protocol specification for LLM integration
 - **Async Support**: Leverages FastMCP for asynchronous operations
 - **100% Test Coverage**: All 113 service files have tests (774+ tests passing)
-- **Intentionally Skipped Fields**: A small number of internal Google tracking fields (e.g. `insights_application_info`) are not exposed — see `FIELD_COVERAGE_AUDIT.md` for details
+- **Intentionally Skipped Fields**: `AdditionalApplicationInfo` fields (`insights_application_info`, `application_info`, `reach_application_info`) are not exposed across 21 RPCs in 4 services (audience_insights, benchmarks, content_creator_insights, reach_plan). These are internal Google application tracking metadata used to identify the calling application — not relevant for third-party MCP callers. See `FIELD_COVERAGE_AUDIT.md` for the full list.
 
 ## Installation
 

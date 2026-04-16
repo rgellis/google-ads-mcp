@@ -127,7 +127,7 @@ Some API fields are intentionally not exposed through the MCP server because the
 
 | Field | Services | Reason |
 |-------|----------|--------|
-| `insights_application_info` (AdditionalApplicationInfo) | audience_insights (8 RPCs), benchmarks (5 RPCs), content_creator_insights (2 RPCs), reach_plan (6 RPCs) | Internal Google application tracking metadata. Used by Google's own tools to identify the calling application. Not relevant for third-party MCP callers. |
+| `insights_application_info` / `application_info` / `reach_application_info` (AdditionalApplicationInfo) | audience_insights (8 RPCs), benchmarks (5 RPCs), content_creator_insights (2 RPCs), reach_plan (6 RPCs) | Internal Google application tracking metadata. Used by Google's own tools to identify the calling application. Not relevant for third-party MCP callers. |
 
 
 
