@@ -17,10 +17,18 @@ from google.ads.googleads.v23.resources.types.ad_group_ad import AdGroupAd
 from google.ads.googleads.v23.services.services.ad_group_ad_service import (
     AdGroupAdServiceClient,
 )
+from google.ads.googleads.v23.services.services.ad_service import (
+    AdServiceClient,
+)
 from google.ads.googleads.v23.services.types.ad_group_ad_service import (
     AdGroupAdOperation,
     MutateAdGroupAdsRequest,
     MutateAdGroupAdsResponse,
+)
+from google.ads.googleads.v23.services.types.ad_service import (
+    AdOperation,
+    MutateAdsRequest,
+    MutateAdsResponse,
 )
 from google.protobuf import field_mask_pb2
 
@@ -31,20 +39,35 @@ logger = get_logger(__name__)
 
 
 class AdService:
-    """Ad service for managing Google Ads ads."""
+    """Ad service for managing Google Ads ads.
+
+    Uses AdGroupAdServiceClient for create/remove/status (ads must be
+    associated with an ad group), and AdServiceClient for updating
+    ad content (headlines, descriptions, URLs).
+    """
 
     def __init__(self) -> None:
         """Initialize the ad service."""
         self._client: Optional[AdGroupAdServiceClient] = None
+        self._ad_client: Optional[AdServiceClient] = None
 
     @property
     def client(self) -> AdGroupAdServiceClient:
-        """Get the ad group ad service client."""
+        """Get the ad group ad service client (for create/remove/status)."""
         if self._client is None:
             sdk_client = get_sdk_client()
             self._client = sdk_client.client.get_service("AdGroupAdService")
         assert self._client is not None
         return self._client
+
+    @property
+    def ad_client(self) -> AdServiceClient:
+        """Get the ad service client (for updating ad content)."""
+        if self._ad_client is None:
+            sdk_client = get_sdk_client()
+            self._ad_client = sdk_client.client.get_service("AdService")
+        assert self._ad_client is not None
+        return self._ad_client
 
     async def create_responsive_search_ad(
         self,
@@ -296,6 +319,102 @@ class AdService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def update_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_resource_name: str,
+        headlines: Optional[List[str]] = None,
+        descriptions: Optional[List[str]] = None,
+        final_urls: Optional[List[str]] = None,
+        path1: Optional[str] = None,
+        path2: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update an existing ad's content via AdService.MutateAds.
+
+        This updates the ad itself (headlines, descriptions, URLs) without
+        changing its ad group association or status.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_resource_name: Resource name of the ad (e.g. customers/123/ads/456)
+            headlines: New headline texts (for responsive search ads)
+            descriptions: New description texts (for responsive search ads)
+            final_urls: New landing page URLs
+            path1: New first path component for display URL
+            path2: New second path component for display URL
+
+        Returns:
+            Updated ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            ad = Ad()
+            ad.resource_name = ad_resource_name
+
+            update_mask_fields = []
+
+            if final_urls is not None:
+                ad.final_urls[:] = final_urls
+                update_mask_fields.append("final_urls")
+
+            if (
+                headlines is not None
+                or descriptions is not None
+                or path1 is not None
+                or path2 is not None
+            ):
+                rsa = ResponsiveSearchAdInfo()
+                if headlines is not None:
+                    for text in headlines:
+                        asset = AdTextAsset()
+                        asset.text = text
+                        rsa.headlines.append(asset)
+                    update_mask_fields.append("responsive_search_ad.headlines")
+                if descriptions is not None:
+                    for text in descriptions:
+                        asset = AdTextAsset()
+                        asset.text = text
+                        rsa.descriptions.append(asset)
+                    update_mask_fields.append("responsive_search_ad.descriptions")
+                if path1 is not None:
+                    rsa.path1 = path1
+                    update_mask_fields.append("responsive_search_ad.path1")
+                if path2 is not None:
+                    rsa.path2 = path2
+                    update_mask_fields.append("responsive_search_ad.path2")
+                ad.responsive_search_ad = rsa
+
+            operation = AdOperation()
+            operation.update = ad
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            request = MutateAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+
+            response: MutateAdsResponse = self.ad_client.mutate_ads(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Updated ad content: {ad_resource_name}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
     """Create tool functions for the ad service.
@@ -425,8 +544,51 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status=status_enum,
         )
 
+    async def update_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_resource_name: str,
+        headlines: Optional[List[str]] = None,
+        descriptions: Optional[List[str]] = None,
+        final_urls: Optional[List[str]] = None,
+        path1: Optional[str] = None,
+        path2: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update an existing ad's content (headlines, descriptions, URLs).
+
+        Uses AdService.MutateAds to update the ad itself without changing
+        its ad group association or status.
+
+        Args:
+            customer_id: The customer ID
+            ad_resource_name: Resource name of the ad (e.g. customers/123/ads/456)
+            headlines: New headline texts (for responsive search ads)
+            descriptions: New description texts (for responsive search ads)
+            final_urls: New landing page URLs
+            path1: New first display URL path component
+            path2: New second display URL path component
+
+        Returns:
+            Updated ad details
+        """
+        return await service.update_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_resource_name=ad_resource_name,
+            headlines=headlines,
+            descriptions=descriptions,
+            final_urls=final_urls,
+            path1=path1,
+            path2=path2,
+        )
+
     tools.extend(
-        [create_responsive_search_ad, create_expanded_text_ad, update_ad_status]
+        [
+            create_responsive_search_ad,
+            create_expanded_text_ad,
+            update_ad_status,
+            update_ad,
+        ]
     )
     return tools
 
