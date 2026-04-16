@@ -270,7 +270,7 @@ class TestCampaignAssetSetService:
 class TestCampaignAssetSetMCPServer:
     """Test cases for Campaign Asset Set MCP server."""
 
-    @patch("src.sdk_servers.campaign_asset_set_server.get_client")
+    @patch("src.servers.campaign_asset_set_server.get_client")
     async def test_link_asset_set_to_campaign_tool(self, mock_get_client: Any):
         """Test link asset set to campaign MCP tool."""
         # Arrange
@@ -305,7 +305,7 @@ class TestCampaignAssetSetMCPServer:
         assert "customers/1234567890/campaignAssetSets/123~456" in response[0].text
         assert "link_asset_set" in response[0].text
 
-    @patch("src.sdk_servers.campaign_asset_set_server.get_client")
+    @patch("src.servers.campaign_asset_set_server.get_client")
     async def test_link_multiple_asset_sets_to_campaign_tool(
         self, mock_get_client: Any
     ):

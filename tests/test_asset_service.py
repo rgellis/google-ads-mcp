@@ -31,7 +31,7 @@ def asset_service(mock_sdk_client: Any) -> AssetService:
     mock_sdk_client.client.get_service.return_value = mock_asset_service_client  # type: ignore
 
     with patch(
-        "src.sdk_services.assets.asset_service.get_sdk_client",
+        "src.services.assets.asset_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = AssetService()
@@ -67,7 +67,7 @@ async def test_create_text_asset(
     }
 
     with patch(
-        "src.sdk_services.assets.asset_service.serialize_proto_message",
+        "src.services.assets.asset_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -120,7 +120,7 @@ async def test_create_text_asset_without_name(
     }
 
     with patch(
-        "src.sdk_services.assets.asset_service.serialize_proto_message",
+        "src.services.assets.asset_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -171,7 +171,7 @@ async def test_create_image_asset(
     }
 
     with patch(
-        "src.sdk_services.assets.asset_service.serialize_proto_message",
+        "src.services.assets.asset_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -227,7 +227,7 @@ async def test_create_youtube_video_asset(
     }
 
     with patch(
-        "src.sdk_services.assets.asset_service.serialize_proto_message",
+        "src.services.assets.asset_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -306,7 +306,7 @@ async def test_search_assets(
 
     # Act
     with patch(
-        "src.sdk_services.assets.asset_service.get_sdk_client",
+        "src.services.assets.asset_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         result = await asset_service.search_assets(

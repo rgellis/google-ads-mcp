@@ -35,7 +35,7 @@ def bidding_strategy_service(mock_sdk_client: Any) -> BiddingStrategyService:
     mock_sdk_client.client.get_service.return_value = mock_bidding_strategy_client  # type: ignore
 
     with patch(
-        "src.sdk_services.bidding.bidding_strategy_service.get_sdk_client",
+        "src.services.bidding.bidding_strategy_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = BiddingStrategyService()
@@ -74,7 +74,7 @@ async def test_create_target_cpa_strategy(
     }
 
     with patch(
-        "src.sdk_services.bidding.bidding_strategy_service.serialize_proto_message",
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -144,7 +144,7 @@ async def test_create_target_roas_strategy(
     }
 
     with patch(
-        "src.sdk_services.bidding.bidding_strategy_service.serialize_proto_message",
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -215,7 +215,7 @@ async def test_create_maximize_conversions_strategy(
     }
 
     with patch(
-        "src.sdk_services.bidding.bidding_strategy_service.serialize_proto_message",
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -285,7 +285,7 @@ async def test_create_maximize_conversions_strategy_without_target(
     }
 
     with patch(
-        "src.sdk_services.bidding.bidding_strategy_service.serialize_proto_message",
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -343,7 +343,7 @@ async def test_create_target_impression_share_strategy(
     }
 
     with patch(
-        "src.sdk_services.bidding.bidding_strategy_service.serialize_proto_message",
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act

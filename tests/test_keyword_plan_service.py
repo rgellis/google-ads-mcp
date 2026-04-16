@@ -32,7 +32,7 @@ def keyword_plan_service(mock_sdk_client: Any) -> KeywordPlanService:
     mock_sdk_client.client.get_service.return_value = mock_keyword_plan_client  # type: ignore
 
     with patch(
-        "src.sdk_services.planning.keyword_plan_service.get_sdk_client",
+        "src.services.planning.keyword_plan_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = KeywordPlanService()
@@ -68,7 +68,7 @@ async def test_create_keyword_plan(
     }
 
     with patch(
-        "src.sdk_services.planning.keyword_plan_service.serialize_proto_message",
+        "src.services.planning.keyword_plan_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -158,11 +158,11 @@ async def test_get_keyword_ideas(
 
     with (
         patch(
-            "src.sdk_services.planning.keyword_plan_service.get_sdk_client",
+            "src.services.planning.keyword_plan_service.get_sdk_client",
             return_value=mock_sdk_client,
         ),
         patch(
-            "src.sdk_services.planning.keyword_plan_service.serialize_proto_message",
+            "src.services.planning.keyword_plan_service.serialize_proto_message",
             side_effect=serialize_side_effect,
         ),
     ):
@@ -240,11 +240,11 @@ async def test_create_keyword_plan_campaign(
 
     with (
         patch(
-            "src.sdk_services.planning.keyword_plan_service.get_sdk_client",
+            "src.services.planning.keyword_plan_service.get_sdk_client",
             return_value=mock_sdk_client,
         ),
         patch(
-            "src.sdk_services.planning.keyword_plan_service.serialize_proto_message",
+            "src.services.planning.keyword_plan_service.serialize_proto_message",
             return_value=expected_result,
         ),
     ):
@@ -331,7 +331,7 @@ async def test_add_keywords_to_plan(
     mock_sdk_client.client.get_service.side_effect = get_service_side_effect  # type: ignore
 
     with patch(
-        "src.sdk_services.planning.keyword_plan_service.get_sdk_client",
+        "src.services.planning.keyword_plan_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         # Act

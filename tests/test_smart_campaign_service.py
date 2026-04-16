@@ -28,7 +28,7 @@ def smart_campaign_service(mock_sdk_client: Any) -> SmartCampaignService:
     mock_sdk_client.client.get_service.return_value = mock_smart_campaign_client  # type: ignore
 
     with patch(
-        "src.sdk_services.campaign.smart_campaign_service.get_sdk_client",
+        "src.services.campaign.smart_campaign_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = SmartCampaignService()
@@ -81,7 +81,7 @@ async def test_suggest_budget_options_existing_campaign(
     }
 
     with patch(
-        "src.sdk_services.campaign.smart_campaign_service.serialize_proto_message",
+        "src.services.campaign.smart_campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act

@@ -36,7 +36,7 @@ def ad_group_criterion_service(mock_sdk_client: Any) -> AdGroupCriterionService:
     mock_sdk_client.client.get_service.return_value = mock_ad_group_criterion_client  # type: ignore
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.get_sdk_client",
+        "src.services.ad_group.ad_group_criterion_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = AdGroupCriterionService()
@@ -87,7 +87,7 @@ async def test_add_keywords(
     }
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -174,7 +174,7 @@ async def test_add_negative_keywords(
     }
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -363,7 +363,7 @@ async def test_add_demographic_criteria(
     }
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -513,7 +513,7 @@ async def test_update_criterion_bid(
     expected_result = {"results": [{"resource_name": criterion_resource_name}]}
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -577,7 +577,7 @@ async def test_update_criterion_bid_partial(
     expected_result = {"results": [{"resource_name": criterion_resource_name}]}
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -628,7 +628,7 @@ async def test_remove_ad_group_criterion(
     expected_result = {"results": [{"resource_name": criterion_resource_name}]}
 
     with patch(
-        "src.sdk_services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act

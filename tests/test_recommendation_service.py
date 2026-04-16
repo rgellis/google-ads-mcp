@@ -27,7 +27,7 @@ def recommendation_service(mock_sdk_client: Any) -> RecommendationService:
     mock_sdk_client.client.get_service.return_value = mock_recommendation_client  # type: ignore
 
     with patch(
-        "src.sdk_services.planning.recommendation_service.get_sdk_client",
+        "src.services.planning.recommendation_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = RecommendationService()
@@ -149,7 +149,7 @@ async def test_get_recommendations(
 
     # Act
     with patch(
-        "src.sdk_services.planning.recommendation_service.get_sdk_client",
+        "src.services.planning.recommendation_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         result = await recommendation_service.get_recommendations(
@@ -211,7 +211,7 @@ async def test_apply_recommendation(
     expected_result = {"results": [{"resource_name": recommendation_resource_name}]}
 
     with patch(
-        "src.sdk_services.planning.recommendation_service.serialize_proto_message",
+        "src.services.planning.recommendation_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -271,7 +271,7 @@ async def test_dismiss_recommendation(
     }
 
     with patch(
-        "src.sdk_services.planning.recommendation_service.serialize_proto_message",
+        "src.services.planning.recommendation_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -321,7 +321,7 @@ async def test_get_recommendations_minimal(
 
     # Act
     with patch(
-        "src.sdk_services.planning.recommendation_service.get_sdk_client",
+        "src.services.planning.recommendation_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         result = await recommendation_service.get_recommendations(

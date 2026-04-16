@@ -26,7 +26,7 @@ def keyword_plan_idea_service(mock_sdk_client: Any) -> KeywordPlanIdeaService:
     mock_sdk_client.client.get_service.return_value = mock_idea_client  # type: ignore
 
     with patch(
-        "src.sdk_services.planning.keyword_plan_idea_service.get_sdk_client",
+        "src.services.planning.keyword_plan_idea_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = KeywordPlanIdeaService()

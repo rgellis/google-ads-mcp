@@ -117,6 +117,10 @@ Tracks remaining work to bring the project to full v23 coverage with 100% test c
 - [ ] `shared_criterion` — `src/services/shared/shared_criterion_service.py`
 - [ ] `customer_negative_criterion` — `src/services/targeting/customer_negative_criterion_service.py`
 
+### Systemic test fix: patch paths
+
+- [x] **Fixed `src.sdk_services.*` -> `src.services.*`** in 51 test files. All `patch()` targets were pointing at a non-existent module, causing mocks to silently no-op. Also fixed `src.sdk_servers.*` -> `src.servers.*` in 2 test files.
+
 ---
 
 ## For each service implementation

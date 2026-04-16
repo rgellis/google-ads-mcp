@@ -267,7 +267,7 @@ class TestCustomerAssetService:
 class TestCustomerAssetMCPServer:
     """Test cases for Customer Asset MCP server."""
 
-    @patch("src.sdk_servers.customer_asset_server.get_client")
+    @patch("src.servers.customer_asset_server.get_client")
     async def test_create_customer_asset_tool(self, mock_get_client: Any):
         """Test create customer asset MCP tool."""
         # Arrange
@@ -303,7 +303,7 @@ class TestCustomerAssetMCPServer:
         assert "customers/1234567890/customerAssets/123~LOGO" in response[0].text
         assert "create" in response[0].text
 
-    @patch("src.sdk_servers.customer_asset_server.get_client")
+    @patch("src.servers.customer_asset_server.get_client")
     async def test_update_customer_asset_status_tool(self, mock_get_client: Any):
         """Test update customer asset status MCP tool."""
         # Arrange

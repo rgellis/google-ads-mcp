@@ -32,7 +32,7 @@ def campaign_draft_service(mock_sdk_client: Any) -> CampaignDraftService:
     mock_sdk_client.client.get_service.return_value = mock_draft_client  # type: ignore
 
     with patch(
-        "src.sdk_services.campaign.campaign_draft_service.get_sdk_client",
+        "src.services.campaign.campaign_draft_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = CampaignDraftService()
@@ -77,7 +77,7 @@ async def test_create_campaign_draft(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_draft_service.serialize_proto_message",
+        "src.services.campaign.campaign_draft_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -225,7 +225,7 @@ async def test_list_campaign_drafts(
     mock_sdk_client.client.get_service.side_effect = get_service_side_effect  # type: ignore
 
     with patch(
-        "src.sdk_services.campaign.campaign_draft_service.get_sdk_client",
+        "src.services.campaign.campaign_draft_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         # Act

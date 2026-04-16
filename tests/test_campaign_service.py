@@ -33,7 +33,7 @@ def campaign_service(mock_sdk_client: Any) -> CampaignService:
     mock_sdk_client.client.get_service.return_value = mock_campaign_client  # type: ignore
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.get_sdk_client",
+        "src.services.campaign.campaign_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = CampaignService()
@@ -72,7 +72,7 @@ async def test_create_campaign(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -138,7 +138,7 @@ async def test_create_campaign_with_dates(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -196,7 +196,7 @@ async def test_create_campaign_shopping_channel(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -251,7 +251,7 @@ async def test_update_campaign(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -318,7 +318,7 @@ async def test_update_campaign_dates_only(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -369,7 +369,7 @@ async def test_update_campaign_no_changes(
     }
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -497,7 +497,7 @@ async def test_tool_wrapper_create_campaign(
     create_campaign_tool = tools[0]  # First tool
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
@@ -558,7 +558,7 @@ async def test_tool_wrapper_update_campaign(
     update_campaign_tool = tools[1]  # Second tool
 
     with patch(
-        "src.sdk_services.campaign.campaign_service.serialize_proto_message",
+        "src.services.campaign.campaign_service.serialize_proto_message",
         return_value=expected_result,
     ):
         # Act
