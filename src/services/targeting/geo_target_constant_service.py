@@ -58,7 +58,7 @@ class GeoTargetConstantService:
             request.locale = locale
 
             # Set location names
-            location_names_obj = request.LocationNames()
+            location_names_obj = SuggestGeoTargetConstantsRequest.LocationNames()
             location_names_obj.names.extend(location_names)
             request.location_names = location_names_obj
 
@@ -130,12 +130,10 @@ class GeoTargetConstantService:
             request = SuggestGeoTargetConstantsRequest()
             request.locale = locale
 
-            # Set address
-            address_obj = request.GeoTargets()
-            address_geo_target = address_obj.GeoTarget()
-            address_geo_target.address = address_text
-            address_obj.geo_targets.append(address_geo_target)
-            request.geo_targets = address_obj
+            # Use LocationNames with the address text as the search term
+            location_names_obj = SuggestGeoTargetConstantsRequest.LocationNames()
+            location_names_obj.names.append(address_text)
+            request.location_names = location_names_obj
 
             if country_code:
                 request.country_code = country_code
