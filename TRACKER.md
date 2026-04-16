@@ -9,8 +9,9 @@ This document tracks the implementation progress of all Google Ads API services 
 ## Progress Summary
 - **Total v23 services**: 111
 - **Implemented**: 87 service files (+ 5 convenience wrappers mapping to existing SDK services)
-- **Not implemented**: 24 services
-- **All code uses v23 imports** - no legacy v20/v21/v22 references remain.
+- **Not implemented**: 26 services
+- **Method gaps in implemented services**: 0 (all filled 2026-04-15)
+- **All code uses v23 imports** - no legacy v20/v21/v22 import references remain.
 
 **Last Audit Date:** 2026-04-15
 
@@ -61,7 +62,7 @@ Legend:
 |---|---------|--------|----------------|-------------|------|
 | 14 | `ad` | done | `mutate_ads` | create_responsive_search_ad, create_expanded_text_ad, update_status | - |
 | 15 | `ad_group` | done | `mutate_ad_groups` | create, update | - |
-| 16 | `ad_group_ad` | done | `mutate_ad_group_ads`, `remove_automatically_created_assets` | create, list, remove, update_status | **Missing**: `remove_automatically_created_assets` |
+| 16 | `ad_group_ad` | done | `mutate_ad_group_ads`, `remove_automatically_created_assets` | create, list, remove, update_status, remove_automatically_created_assets | - |
 | 17 | `ad_group_ad_label` | done | `mutate_ad_group_ad_labels` | create, list, remove | - |
 | 18 | `ad_group_asset` | done | `mutate_ad_group_assets` | link, link_multiple, list, remove, update_status | - |
 | 19 | `ad_group_asset_set` | done | `mutate_ad_group_asset_sets` | create, list, remove | - |
@@ -95,7 +96,7 @@ Legend:
 | # | Service | Status | v23 RPC methods | Our methods | Gap? |
 |---|---------|--------|----------------|-------------|------|
 | 39 | `audience` | done | `mutate_audiences` | create_combined, list, remove, update | - |
-| 40 | `audience_insights` | done | `generate_audience_composition_insights`, `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_insights_finder_report`, `generate_suggested_targeting_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` | generate_composition, generate_finder_report, generate_suggested_targeting | **Missing**: `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` |
+| 40 | `audience_insights` | done | `generate_audience_composition_insights`, `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_insights_finder_report`, `generate_suggested_targeting_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` | all 8 methods | - |
 | 41 | `custom_audience` | done | `mutate_custom_audiences` | create, get_details, list, update | - |
 | 42 | `custom_interest` | done | `mutate_custom_interests` | create, get_details, list, update | - |
 | 43 | `customer_negative_criterion` | done | `mutate_customer_negative_criteria` | add_keywords, add_placements, add_content_labels, list, remove | - |
@@ -117,7 +118,7 @@ Legend:
 
 | # | Service | Status | v23 RPC methods | Our methods | Gap? |
 |---|---------|--------|----------------|-------------|------|
-| 52 | `campaign` | done | `mutate_campaigns`, `enable_p_max_brand_guidelines` | create, update | **Missing**: `enable_p_max_brand_guidelines` (v23-new) |
+| 52 | `campaign` | done | `mutate_campaigns`, `enable_p_max_brand_guidelines` | create, update, enable_p_max_brand_guidelines | - |
 | 53 | `campaign_asset` | done | `mutate_campaign_assets` | link, link_multiple, list, remove | - |
 | 54 | `campaign_asset_set` | done | `mutate_campaign_asset_sets` | link, link_multiple, unlink, mutate | - |
 | 55 | `campaign_bid_modifier` | done | `mutate_campaign_bid_modifiers` | create_interaction_type, list, remove, update | - |
@@ -152,7 +153,7 @@ Legend:
 | # | Service | Status | v23 RPC methods | Our methods | Gap? |
 |---|---------|--------|----------------|-------------|------|
 | 76 | `batch_job` | done | `add_batch_job_operations`, `list_batch_job_results`, `mutate_batch_job`, `run_batch_job` | create, add_ops, list_results, list, get, run | - |
-| 77 | `data_link` | done | `create_data_link`, `remove_data_link`, `update_data_link` | create_basic, list | **Missing**: `remove_data_link`, `update_data_link` |
+| 77 | `data_link` | done | `create_data_link`, `remove_data_link`, `update_data_link` | create, remove, update, list | - |
 | 78 | `offline_user_data_job` | done | `add_offline_user_data_job_operations`, `create_offline_user_data_job`, `run_offline_user_data_job` | create_customer_match, add_ops, get, list, run | - |
 | 79 | `user_data` | done | `upload_user_data` | upload_customer_match, upload_enhanced_conversions, upload_store_sales | - |
 
@@ -160,7 +161,7 @@ Legend:
 
 | # | Service | Status | v23 RPC methods | Our methods | Gap? |
 |---|---------|--------|----------------|-------------|------|
-| 80 | `experiment` | done | `end_experiment`, `graduate_experiment`, `list_experiment_async_errors`, `mutate_experiments`, `promote_experiment`, `schedule_experiment` | create, list, end, promote, schedule | **Missing**: `graduate_experiment`, `list_experiment_async_errors` |
+| 80 | `experiment` | done | `end_experiment`, `graduate_experiment`, `list_experiment_async_errors`, `mutate_experiments`, `promote_experiment`, `schedule_experiment` | create, list, end, promote, schedule, graduate, list_async_errors | - |
 | 81 | `experiment_arm` | done | `mutate_experiment_arms` | create, remove, update, mutate | - |
 
 ### Metadata & Search
@@ -190,10 +191,10 @@ Legend:
 | 92 | `keyword_plan_ad_group_keyword` | done | `mutate_keyword_plan_ad_group_keywords` | create, remove, update, mutate | - |
 | 93 | `keyword_plan_campaign` | done | `mutate_keyword_plan_campaigns` | create, remove, update, mutate | - |
 | 94 | `keyword_plan_campaign_keyword` | done | `mutate_keyword_plan_campaign_keywords` | create, remove, update, mutate | - |
-| 95 | `keyword_plan_idea` | done | `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics`, `generate_keyword_ideas` | generate_from_keywords, generate_from_url, generate_from_site, generate_from_keywords_and_url | **Missing**: `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics` |
+| 95 | `keyword_plan_idea` | done | `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics`, `generate_keyword_ideas` | all 7 methods | - |
 | 96 | `keyword_theme_constant` | **NOT IMPL** | `suggest_keyword_theme_constants` | - | Smart campaign themes |
-| 97 | `reach_plan` | done | `generate_conversion_rates`, `generate_reach_forecast`, `list_plannable_locations`, `list_plannable_products`, `list_plannable_user_interests`, `list_plannable_user_lists` | generate_basic_forecast, list_locations, list_products | **Missing**: `generate_conversion_rates`, `list_plannable_user_interests`, `list_plannable_user_lists` |
-| 98 | `recommendation` | done | `apply_recommendation`, `dismiss_recommendation`, `generate_recommendations` | apply, dismiss, get | **Missing**: `generate_recommendations` |
+| 97 | `reach_plan` | done | `generate_conversion_rates`, `generate_reach_forecast`, `list_plannable_locations`, `list_plannable_products`, `list_plannable_user_interests`, `list_plannable_user_lists` | all 6 methods | - |
+| 98 | `recommendation` | done | `apply_recommendation`, `dismiss_recommendation`, `generate_recommendations` | apply, dismiss, get, generate | - |
 | 99 | `recommendation_subscription` | **NOT IMPL** | `mutate_recommendation_subscription` | - | Auto-apply recommendations |
 
 ### Product Integration
@@ -235,18 +236,18 @@ Legend:
 
 ## Summary of Gaps in Implemented Services
 
-These services are implemented but are missing some v23 RPC methods:
+All method gaps have been filled as of 2026-04-15. The following services were updated:
 
-| Service | Missing RPC methods |
-|---------|-------------------|
-| `ad_group_ad` | `remove_automatically_created_assets` |
-| `audience_insights` | `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` |
-| `campaign` | `enable_p_max_brand_guidelines` (v23-new) |
-| `data_link` | `remove_data_link`, `update_data_link` |
-| `experiment` | `graduate_experiment`, `list_experiment_async_errors` |
-| `keyword_plan_idea` | `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics` |
-| `reach_plan` | `generate_conversion_rates`, `list_plannable_user_interests`, `list_plannable_user_lists` |
-| `recommendation` | `generate_recommendations` |
+| Service | Methods added |
+|---------|--------------|
+| `ad_group_ad` | ✅ `remove_automatically_created_assets` |
+| `audience_insights` | ✅ `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates` |
+| `campaign` | ✅ `enable_p_max_brand_guidelines` |
+| `data_link` | ✅ `create_data_link`, `remove_data_link`, `update_data_link`, `list_data_links` (full rewrite from stubs) |
+| `experiment` | ✅ `graduate_experiment`, `list_experiment_async_errors` |
+| `keyword_plan_idea` | ✅ `generate_ad_group_themes`, `generate_keyword_forecast_metrics`, `generate_keyword_historical_metrics` |
+| `reach_plan` | ✅ `generate_reach_forecast`, `generate_conversion_rates`, `list_plannable_user_interests`, `list_plannable_user_lists` (full rewrite from stub) |
+| `recommendation` | ✅ `generate_recommendations` |
 
 ## Not-Implemented Services (24 total)
 
@@ -283,7 +284,4 @@ These services are implemented but are missing some v23 RPC methods:
 ---
 
 ## Current Task
-Auditing all services for v23 SDK compatibility. All imports are confirmed using v23. Next steps:
-1. Fill method gaps in existing services (see table above)
-2. Implement missing services that existed in v20
-3. Optionally implement new v23-only services
+All method gaps in implemented services have been filled. Remaining work tracked in `API_UPDATE.md`.
