@@ -69,7 +69,13 @@ class SmartCampaignService:
             if campaign_id:
                 request.campaign = f"customers/{customer_id}/campaigns/{campaign_id}"
             else:
-                # For new campaigns, provide targeting info
+                # For new campaigns, provide targeting info via suggestion_info
+                from google.ads.googleads.v23.services.types.smart_campaign_suggest_service import (
+                    SmartCampaignSuggestionInfo,
+                )
+
+                suggestion_info = SmartCampaignSuggestionInfo()
+
                 if country_code:
                     location_info = LocationInfo()
                     # Map country code to geo target constant
@@ -79,14 +85,16 @@ class SmartCampaignService:
                     location_info.geo_target_constant = (
                         f"geoTargetConstants/{location_id}"
                     )
-                    request.location_info = location_info
+                    suggestion_info.location_list.locations.append(location_info)
 
                 if language_code:
                     # Map language code to language constant
                     # en = 1000, es = 1003, etc.
                     language_map = {"en": "1000", "es": "1003", "fr": "1002"}
                     language_id = language_map.get(language_code, "1000")
-                    request.language_code = f"languageConstants/{language_id}"
+                    suggestion_info.language_code = f"languageConstants/{language_id}"
+
+                request.suggestion_info = suggestion_info
 
             # Make the API call
             response: SuggestSmartCampaignBudgetOptionsResponse = (
@@ -172,7 +180,13 @@ class SmartCampaignService:
                 request.suggestion_info.final_url = final_url
 
             if keyword_text:
-                request.suggestion_info.keyword_seed = keyword_text
+                from google.ads.googleads.v23.common.types.criteria import (
+                    KeywordThemeInfo,
+                )
+
+                theme_info = KeywordThemeInfo()
+                theme_info.free_form_keyword_theme = keyword_text
+                request.suggestion_info.keyword_themes.append(theme_info)
 
             # Set location and language
             if location_id:

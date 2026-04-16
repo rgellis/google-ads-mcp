@@ -19,9 +19,6 @@ from google.ads.googleads.v23.enums.types.conversion_action_status import (
 from google.ads.googleads.v23.enums.types.conversion_action_type import (
     ConversionActionTypeEnum,
 )
-from google.ads.googleads.v23.enums.types.data_driven_model_status import (
-    DataDrivenModelStatusEnum,
-)
 from google.ads.googleads.v23.resources.types.conversion_action import (
     ConversionAction,
 )
@@ -134,9 +131,6 @@ class ConversionService:
             attribution_settings = ConversionAction.AttributionModelSettings()
             attribution_settings.attribution_model = getattr(
                 AttributionModelEnum.AttributionModel, attribution_model
-            )
-            attribution_settings.data_driven_model_status = (
-                DataDrivenModelStatusEnum.DataDrivenModelStatus.AVAILABLE
             )
             conversion_action.attribution_model_settings = attribution_settings
 

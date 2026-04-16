@@ -18,6 +18,7 @@ from google.ads.googleads.v23.services.types.experiment_arm_service import (
 )
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class ExperimentArmService:
@@ -54,6 +55,7 @@ class ExperimentArmService:
         Returns:
             MutateExperimentArmsResponse: The response containing results
         """
+        customer_id = format_customer_id(customer_id)
         request = MutateExperimentArmsRequest(
             customer_id=customer_id,
             operations=operations,

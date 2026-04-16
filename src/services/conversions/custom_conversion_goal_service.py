@@ -26,6 +26,7 @@ from google.ads.googleads.v23.services.types.custom_conversion_goal_service impo
 )
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class CustomConversionGoalService:
@@ -64,6 +65,7 @@ class CustomConversionGoalService:
         Returns:
             MutateCustomConversionGoalsResponse: The response containing results
         """
+        customer_id = format_customer_id(customer_id)
         request = MutateCustomConversionGoalsRequest(
             customer_id=customer_id,
             operations=operations,

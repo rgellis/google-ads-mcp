@@ -37,10 +37,43 @@ class ProductLinkInvitationService:
         assert self._client is not None
         return self._client
 
-    async def create_invitation(self, ctx: Context, customer_id: str) -> Dict[str, Any]:
+    async def create_invitation(
+        self,
+        ctx: Context,
+        customer_id: str,
+        link_type: str,
+        linked_account: str,
+    ) -> Dict[str, Any]:
+        """Create a product link invitation.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            link_type: The type of link (e.g., "MERCHANT_CENTER", "GOOGLE_ADS", "DATA_PARTNER")
+            linked_account: The linked account identifier (e.g., Merchant Center ID, customer ID)
+        """
         try:
             customer_id = format_customer_id(customer_id)
             invitation = ProductLinkInvitation()
+
+            # Set the link target based on link_type
+            if link_type == "MERCHANT_CENTER":
+                from google.ads.googleads.v23.resources.types.product_link_invitation import (
+                    MerchantCenterLinkInvitationIdentifier,
+                )
+
+                invitation.merchant_center = MerchantCenterLinkInvitationIdentifier(
+                    merchant_center_id=int(linked_account)
+                )
+            elif link_type == "GOOGLE_ADS":
+                from google.ads.googleads.v23.resources.types.product_link_invitation import (
+                    GoogleAdsLinkInvitationIdentifier,
+                )
+
+                invitation.google_ads = GoogleAdsLinkInvitationIdentifier(
+                    customer=f"customers/{linked_account}"
+                )
+
             request = CreateProductLinkInvitationRequest()
             request.customer_id = customer_id
             request.product_link_invitation = invitation
@@ -122,14 +155,24 @@ def create_product_link_invitation_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def create_product_link_invitation(
-        ctx: Context, customer_id: str
+        ctx: Context,
+        customer_id: str,
+        link_type: str,
+        linked_account: str,
     ) -> Dict[str, Any]:
         """Create a product link invitation.
 
         Args:
             customer_id: The customer ID
+            link_type: The type of link (MERCHANT_CENTER, GOOGLE_ADS, DATA_PARTNER)
+            linked_account: The linked account identifier
         """
-        return await service.create_invitation(ctx=ctx, customer_id=customer_id)
+        return await service.create_invitation(
+            ctx=ctx,
+            customer_id=customer_id,
+            link_type=link_type,
+            linked_account=linked_account,
+        )
 
     async def update_product_link_invitation(
         ctx: Context, customer_id: str, resource_name: str, status: str

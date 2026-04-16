@@ -49,11 +49,10 @@ class CampaignLifecycleGoalService:
             operation = CampaignLifecycleGoalOperation()
             if operation_type == "create":
                 goal = CampaignLifecycleGoal()
-                goal.campaign = campaign_resource_name
                 operation.create = goal
             elif operation_type == "update":
                 goal = CampaignLifecycleGoal()
-                goal.campaign = campaign_resource_name
+                goal.resource_name = campaign_resource_name
                 operation.update = goal
                 operation.update_mask.CopyFrom(field_mask_pb2.FieldMask(paths=[]))
             request = ConfigureCampaignLifecycleGoalsRequest()

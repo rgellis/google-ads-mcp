@@ -4,7 +4,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v23.enums.types.shared_set_status import SharedSetStatusEnum
 from google.ads.googleads.v23.enums.types.shared_set_type import SharedSetTypeEnum
 from google.ads.googleads.v23.resources.types.shared_set import SharedSet
 from google.ads.googleads.v23.services.services.google_ads_service import (
@@ -51,7 +50,6 @@ class SharedSetService:
         customer_id: str,
         name: str,
         type: SharedSetTypeEnum.SharedSetType = SharedSetTypeEnum.SharedSetType.NEGATIVE_KEYWORDS,
-        status: SharedSetStatusEnum.SharedSetStatus = SharedSetStatusEnum.SharedSetStatus.ENABLED,
     ) -> Dict[str, Any]:
         """Create a new shared set.
 
@@ -60,7 +58,6 @@ class SharedSetService:
             customer_id: The customer ID
             name: The name of the shared set
             type: Type of shared set (NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS)
-            status: Status (ENABLED or REMOVED)
 
         Returns:
             Created shared set details
@@ -72,7 +69,6 @@ class SharedSetService:
             shared_set = SharedSet()
             shared_set.name = name
             shared_set.type_ = type
-            shared_set.status = status
 
             # Create operation
             operation = SharedSetOperation()
@@ -111,7 +107,6 @@ class SharedSetService:
         customer_id: str,
         shared_set_id: str,
         name: Optional[str] = None,
-        status: Optional[SharedSetStatusEnum.SharedSetStatus] = None,
     ) -> Dict[str, Any]:
         """Update an existing shared set.
 
@@ -120,7 +115,6 @@ class SharedSetService:
             customer_id: The customer ID
             shared_set_id: The shared set ID to update
             name: New name (optional)
-            status: New status (optional)
 
         Returns:
             Updated shared set details
@@ -139,10 +133,6 @@ class SharedSetService:
             if name is not None:
                 shared_set.name = name
                 update_mask_fields.append("name")
-
-            if status is not None:
-                shared_set.status = status
-                update_mask_fields.append("status")
 
             # Create operation
             operation = SharedSetOperation()
@@ -339,7 +329,6 @@ def create_shared_set_tools(
         customer_id: str,
         name: str,
         type: str = "NEGATIVE_KEYWORDS",
-        status: str = "ENABLED",
     ) -> Dict[str, Any]:
         """Create a new shared set for negative keywords or placements.
 
@@ -347,21 +336,18 @@ def create_shared_set_tools(
             customer_id: The customer ID
             name: The name of the shared set
             type: Type of shared set - NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS
-            status: Status - ENABLED or REMOVED
 
         Returns:
             Created shared set details with resource_name and shared_set_id
         """
         # Convert string enums to proper enum types
         type_enum = getattr(SharedSetTypeEnum.SharedSetType, type)
-        status_enum = getattr(SharedSetStatusEnum.SharedSetStatus, status)
 
         return await service.create_shared_set(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
             type=type_enum,
-            status=status_enum,
         )
 
     async def update_shared_set(
@@ -369,7 +355,6 @@ def create_shared_set_tools(
         customer_id: str,
         shared_set_id: str,
         name: Optional[str] = None,
-        status: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing shared set.
 
@@ -377,22 +362,15 @@ def create_shared_set_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID to update
             name: New name (optional)
-            status: New status - ENABLED or REMOVED (optional)
 
         Returns:
             Updated shared set details with updated_fields list
         """
-        # Convert string enum to proper enum type if provided
-        status_enum = (
-            getattr(SharedSetStatusEnum.SharedSetStatus, status) if status else None
-        )
-
         return await service.update_shared_set(
             ctx=ctx,
             customer_id=customer_id,
             shared_set_id=shared_set_id,
             name=name,
-            status=status_enum,
         )
 
     async def list_shared_sets(

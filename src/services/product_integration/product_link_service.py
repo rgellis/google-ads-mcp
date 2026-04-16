@@ -24,6 +24,7 @@ from google.ads.googleads.v23.services.types.product_link_service import (
 )
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class ProductLinkService:
@@ -56,6 +57,7 @@ class ProductLinkService:
         Returns:
             CreateProductLinkResponse: The response containing the created product link resource name
         """
+        customer_id = format_customer_id(customer_id)
         request = CreateProductLinkRequest(
             customer_id=customer_id,
             product_link=product_link,
@@ -76,6 +78,7 @@ class ProductLinkService:
         Returns:
             RemoveProductLinkResponse: The response containing the removed product link resource name
         """
+        customer_id = format_customer_id(customer_id)
         request = RemoveProductLinkRequest(
             customer_id=customer_id,
             resource_name=resource_name,

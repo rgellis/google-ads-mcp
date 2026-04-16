@@ -30,7 +30,7 @@ from google.ads.googleads.v23.enums.types.keyword_plan_network import (
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
-from src.utils import get_logger
+from src.utils import format_customer_id, get_logger
 
 logger = get_logger(__name__)
 
@@ -78,6 +78,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -144,6 +145,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -210,6 +212,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -278,6 +281,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id

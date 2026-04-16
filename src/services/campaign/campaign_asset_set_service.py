@@ -21,6 +21,7 @@ from google.ads.googleads.v23.enums.types.response_content_type import (
 )
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class CampaignAssetSetService:
@@ -68,6 +69,7 @@ class CampaignAssetSetService:
             Exception: If the request fails.
         """
         try:
+            customer_id = format_customer_id(customer_id)
             request = MutateCampaignAssetSetsRequest(
                 customer_id=customer_id,
                 operations=operations,

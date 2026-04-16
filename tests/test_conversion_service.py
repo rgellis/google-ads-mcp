@@ -20,9 +20,6 @@ from google.ads.googleads.v23.enums.types.conversion_action_status import (
 from google.ads.googleads.v23.enums.types.conversion_action_type import (
     ConversionActionTypeEnum,
 )
-from google.ads.googleads.v23.enums.types.data_driven_model_status import (
-    DataDrivenModelStatusEnum,
-)
 from google.ads.googleads.v23.services.services.conversion_action_service import (
     ConversionActionServiceClient,
 )
@@ -147,10 +144,7 @@ async def test_create_conversion_action(
         operation.create.attribution_model_settings.attribution_model
         == AttributionModelEnum.AttributionModel.GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN
     )
-    assert (
-        operation.create.attribution_model_settings.data_driven_model_status
-        == DataDrivenModelStatusEnum.DataDrivenModelStatus.AVAILABLE
-    )
+    # data_driven_model_status is output-only, so it should not be set
 
     # Check lookback windows
     assert operation.create.click_through_lookback_window_days == 30

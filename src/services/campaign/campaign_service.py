@@ -8,9 +8,6 @@ from google.ads.googleads.v23.common.types import ManualCpc
 from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
 )
-from google.ads.googleads.v23.enums.types.campaign_experiment_type import (
-    CampaignExperimentTypeEnum,
-)
 from google.ads.googleads.v23.enums.types.eu_political_advertising_status import (
     EuPoliticalAdvertisingStatusEnum,
 )
@@ -97,10 +94,6 @@ class CampaignService:
             # Set status
             campaign.status = status
 
-            # Set campaign experiment type
-            campaign.experiment_type = (
-                CampaignExperimentTypeEnum.CampaignExperimentType.BASE
-            )
             # Set manual CPC bidding strategy
             manual_cpc: ManualCpc = ManualCpc()
             campaign.manual_cpc = manual_cpc

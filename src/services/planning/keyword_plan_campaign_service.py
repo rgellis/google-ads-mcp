@@ -24,6 +24,7 @@ from google.ads.googleads.v23.services.types.keyword_plan_campaign_service impor
 )
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class KeywordPlanCampaignService:
@@ -60,6 +61,7 @@ class KeywordPlanCampaignService:
         Returns:
             MutateKeywordPlanCampaignsResponse: The response containing results
         """
+        customer_id = format_customer_id(customer_id)
         request = MutateKeywordPlanCampaignsRequest(
             customer_id=customer_id,
             operations=operations,

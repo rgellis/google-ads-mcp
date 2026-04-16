@@ -8,7 +8,6 @@ from google.ads.googleads.v23.common.types.criteria import (
     KeywordInfo,
     PlacementInfo,
 )
-from google.ads.googleads.v23.enums.types.criterion_type import CriterionTypeEnum
 from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
 from google.ads.googleads.v23.resources.types.shared_criterion import SharedCriterion
 from google.ads.googleads.v23.services.services.shared_criterion_service import (
@@ -73,7 +72,6 @@ class SharedCriterionService:
                 # Create shared criterion
                 shared_criterion = SharedCriterion()
                 shared_criterion.shared_set = shared_set_resource
-                shared_criterion.type_ = CriterionTypeEnum.CriterionType.KEYWORD
 
                 # Create keyword info
                 keyword_info = KeywordInfo()
@@ -160,7 +158,6 @@ class SharedCriterionService:
                 # Create shared criterion
                 shared_criterion = SharedCriterion()
                 shared_criterion.shared_set = shared_set_resource
-                shared_criterion.type_ = CriterionTypeEnum.CriterionType.PLACEMENT
 
                 # Create placement info
                 placement_info = PlacementInfo()

@@ -93,7 +93,7 @@ class RecommendationService:
                     recommendation.text_ad_recommendation,
                     recommendation.target_cpa_opt_in_recommendation,
                     recommendation.responsive_search_ad_recommendation,
-                    recommendation.sitelink_extension_recommendation
+                    recommendation.sitelink_asset_recommendation
                 FROM recommendation
             """
 

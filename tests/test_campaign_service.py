@@ -8,9 +8,6 @@ from fastmcp import Context
 from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
 )
-from google.ads.googleads.v23.enums.types.campaign_experiment_type import (
-    CampaignExperimentTypeEnum,
-)
 from google.ads.googleads.v23.enums.types.campaign_status import CampaignStatusEnum
 from google.ads.googleads.v23.services.services.campaign_service import (
     CampaignServiceClient,
@@ -100,10 +97,7 @@ async def test_create_campaign(
     assert operation.create.campaign_budget == budget_resource_name
     assert operation.create.advertising_channel_type == advertising_channel_type
     assert operation.create.status == status
-    assert (
-        operation.create.experiment_type
-        == CampaignExperimentTypeEnum.CampaignExperimentType.BASE
-    )
+    # experiment_type is output-only, so it should not be set
 
 
 @pytest.mark.asyncio

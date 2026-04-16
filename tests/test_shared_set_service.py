@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v23.enums.types.shared_set_status import SharedSetStatusEnum
 from google.ads.googleads.v23.enums.types.shared_set_type import SharedSetTypeEnum
 from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
@@ -51,7 +50,6 @@ async def test_create_shared_set(
     customer_id = "1234567890"
     name = "Test Negative Keywords"
     type_enum = SharedSetTypeEnum.SharedSetType.NEGATIVE_KEYWORDS
-    status_enum = SharedSetStatusEnum.SharedSetStatus.ENABLED
 
     # Create mock response
     mock_response = Mock(spec=MutateSharedSetsResponse)
@@ -79,7 +77,6 @@ async def test_create_shared_set(
             customer_id=customer_id,
             name=name,
             type=type_enum,
-            status=status_enum,
         )
 
     # Assert
@@ -96,7 +93,6 @@ async def test_create_shared_set(
     shared_set = operation.create
     assert shared_set.name == name
     assert shared_set.type_ == type_enum
-    assert shared_set.status == status_enum
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -116,7 +112,6 @@ async def test_create_shared_set_negative_placements(
     customer_id = "1234567890"
     name = "Test Negative Placements"
     type_enum = SharedSetTypeEnum.SharedSetType.NEGATIVE_PLACEMENTS
-    status_enum = SharedSetStatusEnum.SharedSetStatus.ENABLED
 
     # Create mock response
     mock_response = Mock(spec=MutateSharedSetsResponse)
@@ -144,7 +139,6 @@ async def test_create_shared_set_negative_placements(
             customer_id=customer_id,
             name=name,
             type=type_enum,
-            status=status_enum,
         )
 
     # Assert
@@ -157,7 +151,6 @@ async def test_create_shared_set_negative_placements(
     shared_set = operation.create
     assert shared_set.name == name
     assert shared_set.type_ == type_enum
-    assert shared_set.status == status_enum
 
 
 @pytest.mark.asyncio
@@ -230,76 +223,16 @@ async def test_update_shared_set_name_only(
 
 
 @pytest.mark.asyncio
-async def test_update_shared_set_status_only(
+async def test_update_shared_set_name_only(
     shared_set_service: SharedSetService,
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test updating shared set status only."""
-    # Arrange
-    customer_id = "1234567890"
-    shared_set_id = "123456"
-    new_status = SharedSetStatusEnum.SharedSetStatus.REMOVED
-
-    # Create mock response
-    mock_response = Mock(spec=MutateSharedSetsResponse)
-    mock_response.results = []
-    result = Mock()
-    result.resource_name = f"customers/{customer_id}/sharedSets/{shared_set_id}"
-    mock_response.results.append(result)  # type: ignore
-
-    # Get the mocked shared set service client
-    mock_shared_set_client = shared_set_service.client  # type: ignore
-    mock_shared_set_client.mutate_shared_sets.return_value = mock_response  # type: ignore
-
-    # Mock serialize_proto_message
-    expected_result = {
-        "results": [
-            {"resource_name": f"customers/{customer_id}/sharedSets/{shared_set_id}"}
-        ]
-    }
-
-    with patch(
-        "src.services.shared.shared_set_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        # Act
-        result = await shared_set_service.update_shared_set(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            shared_set_id=shared_set_id,
-            status=new_status,
-        )
-
-    # Assert
-    assert result == expected_result
-
-    # Verify the API call
-    call_args = mock_shared_set_client.mutate_shared_sets.call_args  # type: ignore
-    request = call_args[1]["request"]
-    operation = request.operations[0]
-    shared_set = operation.update
-    assert (
-        shared_set.resource_name
-        == f"customers/{customer_id}/sharedSets/{shared_set_id}"
-    )
-    assert shared_set.status == new_status
-    assert "status" in operation.update_mask.paths
-    assert "name" not in operation.update_mask.paths
-
-
-@pytest.mark.asyncio
-async def test_update_shared_set_both_fields(
-    shared_set_service: SharedSetService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test updating both name and status of shared set."""
+    """Test updating shared set name only (status is output-only)."""
     # Arrange
     customer_id = "1234567890"
     shared_set_id = "123456"
     new_name = "Updated List"
-    new_status = SharedSetStatusEnum.SharedSetStatus.ENABLED
 
     # Create mock response
     mock_response = Mock(spec=MutateSharedSetsResponse)
@@ -329,7 +262,6 @@ async def test_update_shared_set_both_fields(
             customer_id=customer_id,
             shared_set_id=shared_set_id,
             name=new_name,
-            status=new_status,
         )
 
     # Assert
@@ -345,9 +277,7 @@ async def test_update_shared_set_both_fields(
         == f"customers/{customer_id}/sharedSets/{shared_set_id}"
     )
     assert shared_set.name == new_name
-    assert shared_set.status == new_status
     assert "name" in operation.update_mask.paths
-    assert "status" in operation.update_mask.paths
 
 
 @pytest.mark.asyncio

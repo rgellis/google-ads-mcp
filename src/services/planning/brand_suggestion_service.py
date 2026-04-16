@@ -16,6 +16,7 @@ from google.ads.googleads.v23.services.types.brand_suggestion_service import (
 )
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class BrandSuggestionService:
@@ -50,6 +51,7 @@ class BrandSuggestionService:
         Returns:
             SuggestBrandsResponse: The response containing brand suggestions
         """
+        customer_id = format_customer_id(customer_id)
         request = SuggestBrandsRequest(
             customer_id=customer_id,
             brand_prefix=brand_prefix,

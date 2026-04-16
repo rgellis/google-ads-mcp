@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v23.enums.types.label_status import LabelStatusEnum
 from google.ads.googleads.v23.services.services.label_service import (
     LabelServiceClient,
 )
@@ -74,7 +73,6 @@ async def test_create_label(
             name=name,
             description=description,
             background_color=background_color,
-            status=LabelStatusEnum.LabelStatus.ENABLED,
         )
 
     # Assert
@@ -89,7 +87,6 @@ async def test_create_label(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert operation.create.status == LabelStatusEnum.LabelStatus.ENABLED
     assert operation.create.text_label.description == description
     assert operation.create.text_label.background_color == background_color
 
@@ -146,7 +143,6 @@ async def test_create_label_minimal(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert operation.create.status == LabelStatusEnum.LabelStatus.ENABLED  # Default
 
 
 @pytest.mark.asyncio
@@ -161,7 +157,6 @@ async def test_update_label(
     label_id = "123"
     new_name = "Updated Label"
     new_description = "Updated description"
-    new_status = LabelStatusEnum.LabelStatus.REMOVED
 
     # Create mock response
     mock_response = Mock(spec=MutateLabelsResponse)
@@ -190,7 +185,6 @@ async def test_update_label(
             label_id=label_id,
             name=new_name,
             description=new_description,
-            status=new_status,
         )
 
     # Assert
@@ -208,10 +202,8 @@ async def test_update_label(
         operation.update.resource_name == f"customers/{customer_id}/labels/{label_id}"
     )
     assert operation.update.name == new_name
-    assert operation.update.status == new_status
     assert operation.update.text_label.description == new_description
     assert "name" in operation.update_mask.paths
-    assert "status" in operation.update_mask.paths
     assert "text_label.description" in operation.update_mask.paths
 
     # Verify logging

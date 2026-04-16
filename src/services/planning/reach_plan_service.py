@@ -24,10 +24,6 @@ from google.ads.googleads.v23.services.types.reach_plan_service import (
     PlannedProduct,
     Targeting,
 )
-from google.ads.googleads.v23.common.types.criteria import (
-    LocationInfo,
-)
-
 from src.sdk_client import get_sdk_client
 from src.utils import format_customer_id, get_logger, serialize_proto_message
 
@@ -159,8 +155,6 @@ class ReachPlanService:
                 targeting = Targeting()
                 targeting.plannable_location_id = plannable_location_id
                 for loc_id in location_ids:
-                    loc = LocationInfo()
-                    loc.geo_target_constant = loc_id
                     targeting.plannable_location_ids.append(loc_id)
                 request.targeting = targeting
             else:

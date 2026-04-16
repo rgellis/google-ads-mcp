@@ -70,12 +70,11 @@ class CampaignGoalConfigService:
                 operation.create = config
             elif operation_type == "update":
                 config = CampaignGoalConfig()
-                config.campaign = campaign_resource_name
-                if goal_resource_name:
-                    config.goal = goal_resource_name
+                config.resource_name = campaign_resource_name
                 operation.update = config
-                operation.update_mask.CopyFrom(field_mask_pb2.FieldMask(paths=["goal"]))
+                operation.update_mask.CopyFrom(field_mask_pb2.FieldMask(paths=[]))
             elif operation_type == "remove":
+                # resource_name should be a campaign_goal_config resource name
                 operation.remove = campaign_resource_name
 
             request = MutateCampaignGoalConfigsRequest()

@@ -5,7 +5,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.text_label import TextLabel
-from google.ads.googleads.v23.enums.types.label_status import LabelStatusEnum
 from google.ads.googleads.v23.resources.types.label import Label
 from google.ads.googleads.v23.services.services.label_service import (
     LabelServiceClient,
@@ -55,7 +54,6 @@ class LabelService:
         name: str,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
-        status: LabelStatusEnum.LabelStatus = LabelStatusEnum.LabelStatus.ENABLED,
     ) -> Dict[str, Any]:
         """Create a new label.
 
@@ -65,7 +63,6 @@ class LabelService:
             name: The label name
             description: Optional description
             background_color: Optional hex color (e.g., "#FF0000")
-            status: Status (ENABLED or REMOVED)
 
         Returns:
             Created label details
@@ -76,7 +73,6 @@ class LabelService:
             # Create label
             label = Label()
             label.name = name
-            label.status = status
 
             # Create text label
             text_label = TextLabel()
@@ -123,7 +119,6 @@ class LabelService:
         name: Optional[str] = None,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
-        status: Optional[LabelStatusEnum.LabelStatus] = None,
     ) -> Dict[str, Any]:
         """Update an existing label.
 
@@ -134,7 +129,6 @@ class LabelService:
             name: New name (optional)
             description: New description (optional)
             background_color: New background color (optional)
-            status: New status (optional)
 
         Returns:
             Updated label details
@@ -153,10 +147,6 @@ class LabelService:
             if name is not None:
                 label.name = name
                 update_mask_fields.append("name")
-
-            if status is not None:
-                label.status = status
-                update_mask_fields.append("status")
 
             # Update text label fields
             if description is not None or background_color is not None:
@@ -433,7 +423,6 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         name: str,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
-        status: str = "ENABLED",
     ) -> Dict[str, Any]:
         """Create a new label for organizing campaigns, ad groups, and ads.
 
@@ -442,21 +431,16 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name: The label name
             description: Optional description for the label
             background_color: Optional hex color code (e.g., "#FF0000" for red)
-            status: Status - ENABLED or REMOVED
 
         Returns:
             Created label details with resource_name and label_id
         """
-        # Convert string enum to proper enum type
-        status_enum = getattr(LabelStatusEnum.LabelStatus, status)
-
         return await service.create_label(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
             description=description,
             background_color=background_color,
-            status=status_enum,
         )
 
     async def update_label(
@@ -466,7 +450,6 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         name: Optional[str] = None,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
-        status: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing label.
 
@@ -476,14 +459,10 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name: New name (optional)
             description: New description (optional)
             background_color: New hex color code (optional)
-            status: New status - ENABLED or REMOVED (optional)
 
         Returns:
             Updated label details with updated_fields list
         """
-        # Convert string enum to proper enum type if provided
-        status_enum = getattr(LabelStatusEnum.LabelStatus, status) if status else None
-
         return await service.update_label(
             ctx=ctx,
             customer_id=customer_id,
@@ -491,7 +470,6 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name=name,
             description=description,
             background_color=background_color,
-            status=status_enum,
         )
 
     async def list_labels(
