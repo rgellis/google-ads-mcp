@@ -101,21 +101,21 @@ Tracks remaining work to bring the project to full v23 coverage with 100% test c
 
 ### Services completely missing tests (15 files)
 
-- [ ] `customer_customizer` — `src/services/account/customer_customizer_service.py`
-- [ ] `customer_user_access_invitation` — `src/services/account/customer_user_access_invitation_service.py`
-- [ ] `identity_verification` — `src/services/account/identity_verification_service.py`
-- [ ] `payments_account` — `src/services/account/payments_account_service.py`
-- [ ] `ad_group_ad_label` — `src/services/ad_group/ad_group_ad_label_service.py`
-- [ ] `ad_group_asset_set` — `src/services/ad_group/ad_group_asset_set_service.py`
-- [ ] `bidding_seasonality_adjustment` — `src/services/bidding/bidding_seasonality_adjustment_service.py`
-- [ ] `conversion_adjustment_upload` — `src/services/conversions/conversion_adjustment_upload_service.py`
-- [ ] `conversion_value_rule` — `src/services/conversions/conversion_value_rule_service.py`
-- [ ] `custom_conversion_goal` — `src/services/conversions/custom_conversion_goal_service.py`
-- [ ] `data_link` — `src/services/data_import/data_link_service.py`
-- [ ] `offline_user_data_job` — `src/services/data_import/offline_user_data_job_service.py`
-- [ ] `customizer_attribute` — `src/services/shared/customizer_attribute_service.py`
-- [ ] `shared_criterion` — `src/services/shared/shared_criterion_service.py`
-- [ ] `customer_negative_criterion` — `src/services/targeting/customer_negative_criterion_service.py`
+- [x] `customer_customizer` — **DONE**
+- [x] `customer_user_access_invitation` — **DONE**
+- [x] `identity_verification` — **DONE**
+- [x] `payments_account` — **DONE**
+- [x] `ad_group_ad_label` — **DONE**
+- [x] `ad_group_asset_set` — **DONE**
+- [x] `bidding_seasonality_adjustment` — **DONE**
+- [x] `conversion_adjustment_upload` — **DONE**
+- [x] `conversion_value_rule` — **DONE**
+- [x] `custom_conversion_goal` — **DONE**
+- [x] `data_link` — **DONE**
+- [x] `offline_user_data_job` — **DONE**
+- [x] `customizer_attribute` — **DONE**
+- [x] `shared_criterion` — **DONE**
+- [x] `customer_negative_criterion` — **DONE**
 
 ### Systemic test fix: patch paths
 

@@ -1,0 +1,68 @@
+"""Tests for SharedCriterionService."""
+
+from typing import Any
+from unittest.mock import Mock, patch
+import pytest
+from fastmcp import Context
+from src.services.shared.shared_criterion_service import (
+    SharedCriterionService,
+    register_shared_criterion_tools,
+)
+
+
+@pytest.fixture
+def service(mock_sdk_client: Any) -> SharedCriterionService:
+    mock_client = Mock()
+    mock_sdk_client.client.get_service.return_value = mock_client
+    with patch(
+        "src.services.shared.shared_criterion_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        svc = SharedCriterionService()
+        _ = svc.client
+        return svc
+
+
+@pytest.mark.asyncio
+async def test_add_keywords_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_client.mutate_shared_criteria.return_value = Mock()
+    with patch(
+        "src.services.shared.shared_criterion_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        result = await service.add_keywords_to_shared_set(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            shared_set_id="111",
+            keywords=["keyword1", "keyword2"],
+        )
+    assert result == {"results": []}
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_remove_shared_criterion(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_client.mutate_shared_criteria.return_value = Mock()
+    with patch(
+        "src.services.shared.shared_criterion_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        result = await service.remove_shared_criterion(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            shared_criterion_resource_name="customers/1234567890/sharedCriteria/111~222",
+        )
+    assert result == {"results": []}
+
+
+def test_register_tools() -> None:
+    mock_mcp = Mock()
+    service = register_shared_criterion_tools(mock_mcp)
+    assert isinstance(service, SharedCriterionService)
+    assert mock_mcp.tool.call_count > 0
