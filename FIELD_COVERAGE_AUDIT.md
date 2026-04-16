@@ -200,11 +200,11 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 7. `conversion_upload` — `src/services/conversions/conversion_upload_service.py` | test: `tests/test_conversion_upload_service.py`
 
 **UploadCallConversionsRequest:**
-- [ ] `validate_only` (bool) — validate without uploading
+- [x] `validate_only` (bool) — validate without uploading **DONE**
 
 **UploadClickConversionsRequest:**
-- [ ] `validate_only` (bool) — validate without uploading
-- [ ] `job_id` (int32) — deduplication job identifier
+- [x] `validate_only` (bool) — validate without uploading **DONE**
+- [x] `job_id` (int32) — deduplication job identifier **DONE**
 
 ### 8. `customer` — `src/services/account/customer_service.py` | test: `tests/test_customer_service.py`
 

@@ -67,6 +67,8 @@ class ConversionUploadService:
         customer_id: str,
         conversions: List[Dict[str, Any]],
         partial_failure: bool = True,
+        validate_only: bool = False,
+        job_id: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Upload click conversions from offline sources.
 
@@ -83,6 +85,8 @@ class ConversionUploadService:
                 - user_identifiers: User identifiers for enhanced conversions (optional)
                     Can include: email, phone_number, address info
             partial_failure: Whether to process valid conversions if some fail
+            validate_only: If true, validate without uploading
+            job_id: Optional job ID for deduplication across multiple upload calls
 
         Returns:
             Upload results including successful and failed conversions
@@ -148,6 +152,9 @@ class ConversionUploadService:
             request.customer_id = customer_id
             request.conversions = click_conversions
             request.partial_failure = partial_failure
+            request.validate_only = validate_only
+            if job_id is not None:
+                request.job_id = job_id
 
             # Make the API call
             response: UploadClickConversionsResponse = (
@@ -176,6 +183,7 @@ class ConversionUploadService:
         customer_id: str,
         conversions: List[Dict[str, Any]],
         partial_failure: bool = True,
+        validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Upload call conversions from offline sources.
 
@@ -219,6 +227,7 @@ class ConversionUploadService:
             request.customer_id = customer_id
             request.conversions = call_conversions
             request.partial_failure = partial_failure
+            request.validate_only = validate_only
 
             # Make the API call
             response: UploadCallConversionsResponse = (
@@ -257,6 +266,8 @@ def create_conversion_upload_tools(
         customer_id: str,
         conversions: List[Dict[str, Any]],
         partial_failure: bool = True,
+        validate_only: bool = False,
+        job_id: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Upload click conversions from offline sources.
 
@@ -278,19 +289,16 @@ def create_conversion_upload_tools(
                     - {"address": {"first_name": "John", "last_name": "Doe",
                                    "postal_code": "12345", "country_code": "US"}}
             partial_failure: Process valid conversions even if some fail
-
-        Returns:
-            Upload results with:
-            - successful_conversions: Count of successful uploads
-            - failed_conversions: Count of failed uploads
-            - results: Details for each conversion
-            - partial_failure_error: Error details if any
+            validate_only: Validate the request without uploading
+            job_id: Optional deduplication job ID for multiple upload calls
         """
         return await service.upload_click_conversions(
             ctx=ctx,
             customer_id=customer_id,
             conversions=conversions,
             partial_failure=partial_failure,
+            validate_only=validate_only,
+            job_id=job_id,
         )
 
     async def upload_call_conversions(
@@ -298,6 +306,7 @@ def create_conversion_upload_tools(
         customer_id: str,
         conversions: List[Dict[str, Any]],
         partial_failure: bool = True,
+        validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Upload call conversions from offline sources.
 
@@ -329,6 +338,7 @@ def create_conversion_upload_tools(
             customer_id=customer_id,
             conversions=conversions,
             partial_failure=partial_failure,
+            validate_only=validate_only,
         )
 
     tools.extend([upload_click_conversions, upload_call_conversions])

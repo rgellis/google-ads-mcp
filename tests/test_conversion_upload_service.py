@@ -619,6 +619,84 @@ async def test_error_handling_generic_exception(
     )
 
 
+@pytest.mark.asyncio
+async def test_upload_click_conversions_validate_only(
+    conversion_upload_service: ConversionUploadService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test click conversion upload with validate_only and job_id."""
+    customer_id = "1234567890"
+    conversions = [
+        {
+            "gclid": "test_gclid_123",
+            "conversion_action_id": "111",
+            "conversion_date_time": "2024-01-15 10:30:00-08:00",
+        }
+    ]
+
+    mock_upload_client = conversion_upload_service.client  # type: ignore
+    mock_upload_client.upload_click_conversions.return_value = Mock()  # type: ignore
+
+    expected_result = {"results": []}
+
+    with patch(
+        "src.services.conversions.conversion_upload_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await conversion_upload_service.upload_click_conversions(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            conversions=conversions,
+            validate_only=True,
+            job_id=42,
+        )
+
+    assert result == expected_result
+    call_args = mock_upload_client.upload_click_conversions.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.validate_only is True
+    assert request.job_id == 42
+
+
+@pytest.mark.asyncio
+async def test_upload_call_conversions_validate_only(
+    conversion_upload_service: ConversionUploadService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test call conversion upload with validate_only."""
+    customer_id = "1234567890"
+    conversions = [
+        {
+            "caller_id": "+1234567890",
+            "call_start_date_time": "2024-01-15 10:30:00-08:00",
+            "conversion_action_id": "111",
+            "conversion_date_time": "2024-01-15 10:45:00-08:00",
+        }
+    ]
+
+    mock_upload_client = conversion_upload_service.client  # type: ignore
+    mock_upload_client.upload_call_conversions.return_value = Mock()  # type: ignore
+
+    expected_result = {"results": []}
+
+    with patch(
+        "src.services.conversions.conversion_upload_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await conversion_upload_service.upload_call_conversions(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            conversions=conversions,
+            validate_only=True,
+        )
+
+    call_args = mock_upload_client.upload_call_conversions.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.validate_only is True
+
+
 def test_register_conversion_upload_tools() -> None:
     """Test tool registration."""
     # Arrange
