@@ -32,7 +32,7 @@ async def test_generate_creator_insights(
     service: ContentCreatorInsightsService,
     mock_ctx: Context,
 ) -> None:
-    """Test generating creator insights."""
+    """Test generating creator insights with required fields only."""
     mock_client = service.client
     mock_client.generate_creator_insights.return_value = Mock()  # type: ignore
 
@@ -53,31 +53,37 @@ async def test_generate_creator_insights(
     call_args = mock_client.generate_creator_insights.call_args  # type: ignore
     request = call_args[1]["request"]
     assert request.customer_id == "1234567890"
+    assert len(request.country_locations) == 1
 
 
 @pytest.mark.asyncio
-async def test_generate_creator_insights_multiple_locations(
+async def test_generate_creator_insights_with_all_options(
     service: ContentCreatorInsightsService,
     mock_ctx: Context,
 ) -> None:
-    """Test generating creator insights with multiple locations."""
+    """Test creator insights with channels, brands, audience, sub-locations, and group."""
     mock_client = service.client
     mock_client.generate_creator_insights.return_value = Mock()  # type: ignore
 
-    expected_result = {"creator_insights": []}
-
     with patch(
         "src.services.audiences.content_creator_insights_service.serialize_proto_message",
-        return_value=expected_result,
+        return_value={"creator_insights": []},
     ):
         result = await service.generate_creator_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
-            country_locations=["geoTargetConstants/2840", "geoTargetConstants/2826"],
+            country_locations=["geoTargetConstants/2840"],
+            sub_country_locations=["geoTargetConstants/21167"],
+            search_channel_ids=["UC12345"],
+            customer_insights_group="my_analysis",
         )
 
-    assert result == expected_result
-    mock_client.generate_creator_insights.assert_called_once()  # type: ignore
+    call_args = mock_client.generate_creator_insights.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.country_locations) == 1
+    assert len(request.sub_country_locations) == 1
+    assert len(request.search_channels.youtube_channels) == 1
+    assert request.customer_insights_group == "my_analysis"
 
 
 @pytest.mark.asyncio
@@ -105,7 +111,7 @@ async def test_generate_trending_insights(
     service: ContentCreatorInsightsService,
     mock_ctx: Context,
 ) -> None:
-    """Test generating trending insights."""
+    """Test generating trending insights with required fields only."""
     mock_client = service.client
     mock_client.generate_trending_insights.return_value = Mock()  # type: ignore
 
@@ -123,9 +129,33 @@ async def test_generate_trending_insights(
 
     assert result == expected_result
     mock_client.generate_trending_insights.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_trending_insights_with_all_options(
+    service: ContentCreatorInsightsService,
+    mock_ctx: Context,
+) -> None:
+    """Test trending insights with topics, audience interests, and group."""
+    mock_client = service.client
+    mock_client.generate_trending_insights.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.audiences.content_creator_insights_service.serialize_proto_message",
+        return_value={"trending_insights": []},
+    ):
+        result = await service.generate_trending_insights(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            country_location="geoTargetConstants/2840",
+            search_topic_names=["/m/027x7n"],
+            customer_insights_group="trend_check",
+        )
+
     call_args = mock_client.generate_trending_insights.call_args  # type: ignore
     request = call_args[1]["request"]
-    assert request.customer_id == "1234567890"
+    assert len(request.search_topics.entities) == 1
+    assert request.customer_insights_group == "trend_check"
 
 
 @pytest.mark.asyncio

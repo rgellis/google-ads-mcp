@@ -182,18 +182,20 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 6. `content_creator_insights` — `src/services/audiences/content_creator_insights_service.py` | test: `tests/test_content_creator_insights_service.py`
 
 **GenerateCreatorInsightsRequest:**
-- [ ] `customer_insights_group` (string) — user-defined grouping label
-- [ ] `insights_application_info` (AdditionalApplicationInfo) — application context
-- [ ] `sub_country_locations` (LocationInfo) — sub-country location filter
-- [ ] `search_attributes` (SearchAttributes) — search by audience attributes
-- [ ] `search_brand` (SearchBrand) — search by brand
-- [ ] `search_channels` (YouTubeChannels) — search specific YouTube channels
+- [x] `customer_insights_group` (string) — user-defined grouping label **DONE**
+- N/A `insights_application_info` — intentionally skipped (see above)
+- [x] `sub_country_locations` (LocationInfo) — sub-country location filter **DONE**
+- [x] `search_attributes` — exposed as `search_audience_interests` (knowledge graph IDs) **DONE**
+- [x] `search_brand` — exposed as `search_brand_names` (knowledge graph IDs) **DONE**
+- [x] `search_channels` — exposed as `search_channel_ids` (YouTube channel IDs) **DONE**
+- NOTE: search_channels, search_brand, search_attributes are mutually exclusive (proto oneof)
 
 **GenerateTrendingInsightsRequest:**
-- [ ] `customer_insights_group` (string) — user-defined grouping label
-- [ ] `insights_application_info` (AdditionalApplicationInfo) — application context
-- [ ] `search_audience` (SearchAudience) — audience filter for trends
-- [ ] `search_topics` (SearchTopics) — topic filter for trends
+- [x] `customer_insights_group` (string) — user-defined grouping label **DONE**
+- N/A `insights_application_info` — intentionally skipped (see above)
+- [x] `search_audience` — exposed as `search_audience_interests` (knowledge graph IDs) **DONE**
+- [x] `search_topics` — exposed as `search_topic_names` (knowledge graph IDs) **DONE**
+- NOTE: search_topics and search_audience are mutually exclusive (proto oneof)
 
 ### 7. `conversion_upload` — `src/services/conversions/conversion_upload_service.py` | test: `tests/test_conversion_upload_service.py`
 
