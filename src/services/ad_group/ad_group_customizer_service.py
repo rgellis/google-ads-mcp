@@ -27,6 +27,7 @@ from google.ads.googleads.v23.enums.types.customizer_attribute_type import (
 from google.ads.googleads.v23.common.types.customizer_value import CustomizerValue
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class AdGroupCustomizerService:
@@ -74,6 +75,7 @@ class AdGroupCustomizerService:
             Exception: If the request fails.
         """
         try:
+            customer_id = format_customer_id(customer_id)
             request = MutateAdGroupCustomizersRequest(
                 customer_id=customer_id,
                 operations=operations,

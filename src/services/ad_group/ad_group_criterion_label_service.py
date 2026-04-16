@@ -20,7 +20,7 @@ from google.ads.googleads.v23.services.types.ad_group_criterion_label_service im
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import serialize_proto_message
+from src.utils import format_customer_id, serialize_proto_message
 
 # Exception handling
 
@@ -68,6 +68,7 @@ class AdGroupCriterionLabelService:
             GoogleAdsException: If the request fails.
         """
         try:
+            customer_id = format_customer_id(customer_id)
             request = MutateAdGroupCriterionLabelsRequest(
                 customer_id=customer_id,
                 operations=operations,

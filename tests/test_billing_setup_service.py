@@ -49,10 +49,7 @@ async def test_create_billing_setup(
     # Arrange
     customer_id = "1234567890"
     payments_account_id = "987654321"
-    start_date = "2024-01-01"
-    end_date = "2024-12-31"
     start_time_type = TimeTypeEnum.TimeType.NOW
-    end_time_type = TimeTypeEnum.TimeType.FOREVER
 
     # Create mock response
     mock_response = Mock(spec=MutateBillingSetupResponse)
@@ -77,10 +74,7 @@ async def test_create_billing_setup(
             ctx=mock_ctx,
             customer_id=customer_id,
             payments_account_id=payments_account_id,
-            start_date=start_date,
-            end_date=end_date,
             start_time_type=start_time_type,
-            end_time_type=end_time_type,
         )
 
     # Assert
@@ -119,8 +113,7 @@ async def test_create_billing_setup_with_specific_start_date(
     customer_id = "1234567890"
     payments_account_id = "987654321"
     start_date = "2024-03-01"
-    start_time_type = TimeTypeEnum.TimeType.FOREVER  # Not NOW
-    end_time_type = TimeTypeEnum.TimeType.FOREVER
+    start_time_type = TimeTypeEnum.TimeType.FOREVER  # Not NOW — use start_date
 
     # Create mock response
     mock_response = Mock(spec=MutateBillingSetupResponse)
@@ -147,7 +140,6 @@ async def test_create_billing_setup_with_specific_start_date(
             payments_account_id=payments_account_id,
             start_date=start_date,
             start_time_type=start_time_type,
-            end_time_type=end_time_type,
         )
 
     # Assert
@@ -158,60 +150,6 @@ async def test_create_billing_setup_with_specific_start_date(
     request = call_args[1]["request"]
     billing_setup = request.operation.create
     assert billing_setup.start_date_time == start_date
-
-
-@pytest.mark.asyncio
-async def test_create_billing_setup_with_end_date(
-    billing_setup_service: BillingSetupService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test creating a billing setup with a specific end date."""
-    # Arrange
-    customer_id = "1234567890"
-    payments_account_id = "987654321"
-    start_date = "2024-01-01"
-    end_date = "2024-12-31"
-    start_time_type = TimeTypeEnum.TimeType.NOW
-    end_time_type = TimeTypeEnum.TimeType.NOW  # Not FOREVER
-
-    # Create mock response
-    mock_response = Mock(spec=MutateBillingSetupResponse)
-    mock_response.result = Mock()
-    mock_response.result.resource_name = "customers/1234567890/billingSetups/111222333"  # type: ignore
-
-    # Get the mocked billing setup service client
-    mock_billing_setup_client = billing_setup_service.client  # type: ignore
-    mock_billing_setup_client.mutate_billing_setup.return_value = mock_response  # type: ignore
-
-    # Mock serialize_proto_message
-    expected_result = {
-        "result": {"resource_name": "customers/1234567890/billingSetups/111222333"}
-    }
-
-    with patch(
-        "src.services.account.billing_setup_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        # Act
-        result = await billing_setup_service.create_billing_setup(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            payments_account_id=payments_account_id,
-            start_date=start_date,
-            end_date=end_date,
-            start_time_type=start_time_type,
-            end_time_type=end_time_type,
-        )
-
-    # Assert
-    assert result == expected_result
-
-    # Verify the end date was set
-    call_args = mock_billing_setup_client.mutate_billing_setup.call_args  # type: ignore
-    request = call_args[1]["request"]
-    billing_setup = request.operation.create
-    assert billing_setup.end_time_type == end_time_type
 
 
 @pytest.mark.asyncio

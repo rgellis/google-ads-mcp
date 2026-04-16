@@ -28,6 +28,7 @@ from google.ads.googleads.v23.enums.types.asset_link_status import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 
 class CustomerAssetService:
@@ -75,6 +76,7 @@ class CustomerAssetService:
             GoogleAdsException: If the request fails.
         """
         try:
+            customer_id = format_customer_id(customer_id)
             request = MutateCustomerAssetsRequest(
                 customer_id=customer_id,
                 operations=operations,

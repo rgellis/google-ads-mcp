@@ -137,7 +137,7 @@ class AdGroupAssetSetService:
                     ad_group.name,
                     asset_set.id,
                     asset_set.name,
-                    asset_set.type_
+                    asset_set.type
                 FROM ad_group_asset_set
             """
 

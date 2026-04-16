@@ -71,6 +71,7 @@ class AutomaticallyCreatedAssetRemovalService:
             request = RemoveCampaignAutomaticallyCreatedAssetRequest()
             request.customer_id = customer_id
             request.operations = removal_ops
+            request.partial_failure = False
 
             response: RemoveCampaignAutomaticallyCreatedAssetResponse = (
                 self.client.remove_campaign_automatically_created_asset(request=request)

@@ -23,6 +23,7 @@ from google.ads.googleads.v23.common.types.criteria import AudienceInfo, SearchT
 from google.ads.googleads.v23.common.types.policy import PolicyViolationKey
 
 from src.sdk_client import get_sdk_client
+from src.utils import format_customer_id
 
 # Exception handling
 
@@ -72,6 +73,7 @@ class AssetGroupSignalService:
             GoogleAdsException: If the request fails.
         """
         try:
+            customer_id = format_customer_id(customer_id)
             request = MutateAssetGroupSignalsRequest(
                 customer_id=customer_id,
                 operations=operations,

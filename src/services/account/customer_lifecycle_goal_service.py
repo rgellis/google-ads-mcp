@@ -46,9 +46,8 @@ class CustomerLifecycleGoalService:
                 operation.create = goal
             elif operation_type == "update":
                 goal = CustomerLifecycleGoal()
-                goal.resource_name = f"customers/{customer_id}/customerLifecycleGoals"
+                goal.resource_name = f"customers/{customer_id}/customerLifecycleGoal"
                 operation.update = goal
-                operation.update_mask.CopyFrom(field_mask_pb2.FieldMask(paths=[]))
             request = ConfigureCustomerLifecycleGoalsRequest()
             request.customer_id = customer_id
             request.operation = operation

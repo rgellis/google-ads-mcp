@@ -51,6 +51,10 @@ class CustomerSkAdNetworkService:
         try:
             customer_id = format_customer_id(customer_id)
             cvs = CustomerSkAdNetworkConversionValueSchema()
+            if "app_id" in schema:
+                cvs.schema.app_id = schema["app_id"]
+            if "measurement_window_hours" in schema:
+                cvs.schema.measurement_window_hours = schema["measurement_window_hours"]
             operation = CustomerSkAdNetworkConversionValueSchemaOperation()
             operation.update = cvs
             request = MutateCustomerSkAdNetworkConversionValueSchemaRequest()

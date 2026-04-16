@@ -124,13 +124,13 @@ For 100% API field coverage, every mutate service's tool wrapper should expose:
 ### Specific service fixes needed
 
 - [x] Fix `billing_setup.create_billing_setup` — remove `end_date_time` and `end_time_type` parameters (output-only fields) **DONE**
-- [ ] Fix `customer_lifecycle_goal` — correct resource name format to singular `customerLifecycleGoal`; populate `update_mask` fields
-- [ ] Fix `customer_sk_ad_network` — actually apply the `schema` dict to the proto object
-- [ ] Fix `ad_group_asset_set` — GAQL query `asset_set.type_` should be `asset_set.type`
-- [ ] Fix `ad_group_criterion_label` — add `format_customer_id()` call
-- [ ] Fix `ad_group_customizer` — add `format_customer_id()` call
-- [ ] Fix `asset_group_signal` — add `format_customer_id()` call
-- [ ] Fix `customer_asset` — add `format_customer_id()` call
-- [ ] Fix `automatically_created_asset_removal` — set required `partial_failure` field on request
+- [x] Fix `customer_lifecycle_goal` — correct resource name to singular `customerLifecycleGoal` **DONE**
+- [x] Fix `customer_sk_ad_network` — apply `schema` dict fields to proto object **DONE**
+- [x] Fix `ad_group_asset_set` — GAQL `asset_set.type_` → `asset_set.type` **DONE**
+- [x] Fix `ad_group_criterion_label` — add `format_customer_id()` call **DONE**
+- [x] Fix `ad_group_customizer` — add `format_customer_id()` call **DONE**
+- [x] Fix `asset_group_signal` — add `format_customer_id()` call **DONE**
+- [x] Fix `customer_asset` — add `format_customer_id()` call **DONE**
+- [x] Fix `automatically_created_asset_removal` — set required `partial_failure` field **DONE**
 - [ ] Add `partial_failure`, `validate_only`, `response_content_type` params to all mutate tool wrappers
 - [ ] Audit services 57-111 for similar issues (in progress)
