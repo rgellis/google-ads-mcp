@@ -161,9 +161,64 @@ from src.servers.shared_criterion_server import shared_criterion_server
 from src.servers.shared_set_server import shared_set_server
 from src.servers.smart_campaign_server import smart_campaign_server
 
-# from src.sdk_servers.extension_feed_item_server import extension_feed_item_sdk_server  # Not available in v23
 from src.servers.user_data_server import user_data_server
 from src.servers.user_list_server import user_list_server
+
+# New v23 services
+from src.servers.asset_generation_server import asset_generation_server
+from src.servers.asset_group_listing_group_filter_server import (
+    asset_group_listing_group_filter_server,
+)
+from src.servers.asset_set_asset_server import asset_set_asset_server
+from src.servers.automatically_created_asset_removal_server import (
+    automatically_created_asset_removal_server,
+)
+from src.servers.benchmarks_server import benchmarks_server
+from src.servers.campaign_goal_config_server import campaign_goal_config_server
+from src.servers.campaign_group_server import campaign_group_server
+from src.servers.campaign_lifecycle_goal_server import (
+    campaign_lifecycle_goal_server,
+)
+from src.servers.content_creator_insights_server import (
+    content_creator_insights_server,
+)
+from src.servers.conversion_value_rule_set_server import (
+    conversion_value_rule_set_server,
+)
+from src.servers.customer_asset_set_server import customer_asset_set_server
+from src.servers.customer_lifecycle_goal_server import (
+    customer_lifecycle_goal_server,
+)
+from src.servers.customer_sk_ad_network_server import (
+    customer_sk_ad_network_server,
+)
+from src.servers.goal_server import goal_server
+from src.servers.incentive_server import incentive_server
+from src.servers.keyword_theme_constant_server import (
+    keyword_theme_constant_server,
+)
+from src.servers.local_services_lead_server import local_services_lead_server
+from src.servers.product_link_invitation_server import (
+    product_link_invitation_server,
+)
+from src.servers.recommendation_subscription_server import (
+    recommendation_subscription_server,
+)
+from src.servers.reservation_server import reservation_server
+from src.servers.shareable_preview_server import shareable_preview_server
+from src.servers.smart_campaign_setting_server import (
+    smart_campaign_setting_server,
+)
+from src.servers.third_party_app_analytics_link_server import (
+    third_party_app_analytics_link_server,
+)
+from src.servers.travel_asset_suggestion_server import (
+    travel_asset_suggestion_server,
+)
+from src.servers.user_list_customer_type_server import (
+    user_list_customer_type_server,
+)
+from src.servers.youtube_video_upload_server import youtube_video_upload_server
 from src.utils import get_logger, load_dotenv
 
 logger = get_logger(__name__)
@@ -291,12 +346,18 @@ SERVER_GROUPS = {
         ("asset_group", asset_group_server),
         ("assetgrp_asset", asset_group_asset_server),
         ("assetgrp_signal", asset_group_signal_server),
+        ("assetgrp_lgf", asset_group_listing_group_filter_server),
         ("asset_set", asset_set_server),
+        ("asset_set_asset", asset_set_asset_server),
         ("ag_asset", ad_group_asset_server),
         ("ag_asset_set", ad_group_asset_set_server),
         ("camp_asset", campaign_asset_server),
         ("camp_asset_set", campaign_asset_set_server),
         ("cust_asset", customer_asset_server),
+        ("cust_asset_set", customer_asset_set_server),
+        ("asset_gen", asset_generation_server),
+        ("auto_asset_rm", automatically_created_asset_removal_server),
+        ("yt_upload", youtube_video_upload_server),
     ],
     "targeting": [
         ("camp_criterion", campaign_criterion_server),
@@ -307,6 +368,7 @@ SERVER_GROUPS = {
         ("custom_interest", custom_interest_server),
         ("custom_audience", custom_audience_server),
         ("user_list", user_list_server),
+        ("ul_cust_type", user_list_customer_type_server),
     ],
     "bidding": [
         ("bid_strategy", bidding_strategy_server),
@@ -324,6 +386,10 @@ SERVER_GROUPS = {
         ("kw_plan_camp_kw", keyword_plan_campaign_keyword_server),
         ("reach_plan", reach_plan_server),
         ("brand_suggest", brand_suggestion_server),
+        ("kw_theme", keyword_theme_constant_server),
+        ("travel_suggest", travel_asset_suggestion_server),
+        ("rec_sub", recommendation_subscription_server),
+        ("benchmarks", benchmarks_server),
     ],
     "experiments": [
         ("experiment", experiment_server),
@@ -336,11 +402,14 @@ SERVER_GROUPS = {
         ("recommend", recommendation_server),
         ("invoice", invoice_server),
         ("aud_insights", audience_insights_server),
+        ("share_preview", shareable_preview_server),
+        ("creator_ins", content_creator_insights_server),
     ],
     "conversion": [
         ("conv_upload", conversion_upload_server),
         ("conv_adj_upload", conversion_adjustment_upload_server),
         ("conv_value_rule", conversion_value_rule_server),
+        ("conv_rule_set", conversion_value_rule_set_server),
         ("conv_custom_var", conversion_custom_variable_server),
         ("conv_goal_config", conversion_goal_campaign_config_server),
         ("custom_conv_goal", custom_conversion_goal_server),
@@ -379,12 +448,24 @@ SERVER_GROUPS = {
         ("payments", payments_account_server),
         ("id_verify", identity_verification_server),
         ("product_link", product_link_server),
+        ("prod_link_inv", product_link_invitation_server),
         ("data_link", data_link_server),
+        ("goal", goal_server),
+        ("incentive", incentive_server),
+        ("cust_lifecycle", customer_lifecycle_goal_server),
+        ("sk_ad_network", customer_sk_ad_network_server),
+        ("app_analytics", third_party_app_analytics_link_server),
     ],
     "other": [
         ("smart_camp", smart_campaign_server),
+        ("smart_setting", smart_campaign_setting_server),
         ("batch_job", batch_job_server),
         ("user_data", user_data_server),
+        ("local_lead", local_services_lead_server),
+        ("camp_group", campaign_group_server),
+        ("camp_goal_cfg", campaign_goal_config_server),
+        ("camp_lifecycle", campaign_lifecycle_goal_server),
+        ("reservation", reservation_server),
     ],
 }
 
