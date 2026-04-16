@@ -53,7 +53,7 @@ class YouTubeVideoUploadService:
         video_title: str,
         video_file_path: str,
         video_description: Optional[str] = None,
-        video_privacy: str = "PRIVATE",
+        video_privacy: str = "UNLISTED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -67,7 +67,7 @@ class YouTubeVideoUploadService:
             video_title: Title for the video
             video_file_path: Path to the video file
             video_description: Optional description
-            video_privacy: Privacy setting (PRIVATE, PUBLIC, UNLISTED)
+            video_privacy: Privacy setting (PUBLIC, UNLISTED)
 
         Returns:
             Created video upload details
@@ -268,7 +268,7 @@ def create_youtube_video_upload_tools(
         video_title: str,
         video_file_path: str,
         video_description: Optional[str] = None,
-        video_privacy: str = "PRIVATE",
+        video_privacy: str = "UNLISTED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -281,7 +281,7 @@ def create_youtube_video_upload_tools(
             video_title: Title for the video
             video_file_path: Path to the video file
             video_description: Optional description
-            video_privacy: PRIVATE, PUBLIC, or UNLISTED
+            video_privacy: PUBLIC, UNLISTED
         """
         return await service.create_youtube_video_upload(
             ctx=ctx,
@@ -314,7 +314,7 @@ def create_youtube_video_upload_tools(
             resource_name: Resource name of the video upload
             video_title: New title
             video_description: New description
-            video_privacy: PRIVATE, PUBLIC, or UNLISTED
+            video_privacy: PUBLIC, UNLISTED
         """
         return await service.update_youtube_video_upload(
             ctx=ctx,

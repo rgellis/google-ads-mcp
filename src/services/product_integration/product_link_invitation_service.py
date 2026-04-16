@@ -70,13 +70,13 @@ class ProductLinkInvitationService:
                 invitation.merchant_center = MerchantCenterLinkInvitationIdentifier(
                     merchant_center_id=int(linked_account)
                 )
-            elif link_type == "GOOGLE_ADS":
+            elif link_type == "HOTEL_CENTER":
                 from google.ads.googleads.v23.resources.types.product_link_invitation import (
-                    GoogleAdsLinkInvitationIdentifier,
+                    HotelCenterLinkInvitationIdentifier,
                 )
 
-                invitation.google_ads = GoogleAdsLinkInvitationIdentifier(
-                    customer=f"customers/{linked_account}"
+                invitation.hotel_center = HotelCenterLinkInvitationIdentifier(
+                    hotel_center_id=int(linked_account)
                 )
 
             request = CreateProductLinkInvitationRequest()
