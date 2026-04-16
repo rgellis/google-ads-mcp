@@ -323,6 +323,27 @@ async def test_error_handling(
     )
 
 
+@pytest.mark.asyncio
+async def test_search_fields_page_token(
+    google_ads_field_service: GoogleAdsFieldService,
+    mock_field_service_client: Mock,
+    mock_ctx: Context,
+) -> None:
+    """Test page_token and page_size reach the request."""
+    mock_field_service_client.search_google_ads_fields.return_value = []  # type: ignore
+
+    await google_ads_field_service.search_fields(
+        ctx=mock_ctx,
+        page_token="token123",
+        page_size=500,
+    )
+
+    call_args = mock_field_service_client.search_google_ads_fields.call_args[1]  # type: ignore
+    request = call_args["request"]
+    assert request.page_token == "token123"
+    assert request.page_size == 500
+
+
 def test_register_google_ads_field_tools() -> None:
     """Test tool registration."""
     # Arrange

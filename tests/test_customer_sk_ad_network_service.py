@@ -107,6 +107,35 @@ async def test_mutate_schema_error(
     assert "Test Google Ads Exception" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_mutate_schema_enable_warnings(
+    service: CustomerSkAdNetworkService,
+    mock_ctx: Context,
+) -> None:
+    """Test enable_warnings parameter reaches the request."""
+    mock_client = service.client
+    mock_client.mutate_customer_sk_ad_network_conversion_value_schema.return_value = (
+        Mock()
+    )  # type: ignore
+
+    with patch(
+        "src.services.account.customer_sk_ad_network_service.serialize_proto_message",
+        return_value={"result": {}},
+    ):
+        await service.mutate_schema(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            schema={},
+            enable_warnings=True,
+        )
+
+    call_args = (
+        mock_client.mutate_customer_sk_ad_network_conversion_value_schema.call_args
+    )  # type: ignore
+    request = call_args[1]["request"]
+    assert request.enable_warnings is True
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()

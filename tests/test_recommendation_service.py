@@ -430,3 +430,70 @@ async def test_generate_recommendations(
 
     assert result == expected_result
     mock_rec_client.generate_recommendations.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_apply_recommendation_partial_failure(
+    recommendation_service: RecommendationService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test partial_failure reaches the ApplyRecommendation request."""
+    customer_id = "1234567890"
+    resource_name = f"customers/{customer_id}/recommendations/1000"
+
+    mock_response = Mock(spec=ApplyRecommendationResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = resource_name
+
+    mock_rec_client = recommendation_service.client  # type: ignore
+    mock_rec_client.apply_recommendation.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.planning.recommendation_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await recommendation_service.apply_recommendation(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            recommendation_resource_name=resource_name,
+            partial_failure=True,
+        )
+
+    call_args = mock_rec_client.apply_recommendation.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.partial_failure is True
+
+
+@pytest.mark.asyncio
+async def test_generate_recommendations_new_fields(
+    recommendation_service: RecommendationService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test new fields reach the GenerateRecommendations request."""
+    mock_rec_client = recommendation_service.client  # type: ignore
+    mock_response = Mock()
+    mock_rec_client.generate_recommendations.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.planning.recommendation_service.serialize_proto_message",
+        return_value={"recommendations": []},
+    ):
+        await recommendation_service.generate_recommendations(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            recommendation_types=["CAMPAIGN_BUDGET"],
+            advertising_channel_type="SEARCH",
+            campaign_image_asset_count=3,
+            country_codes=["US", "CA"],
+            target_content_network=True,
+            merchant_center_account_id=12345,
+        )
+
+    call_args = mock_rec_client.generate_recommendations.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.campaign_image_asset_count == 3
+    assert list(request.country_codes) == ["US", "CA"]
+    assert request.target_content_network is True
+    assert request.merchant_center_account_id == 12345

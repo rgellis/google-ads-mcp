@@ -68,12 +68,14 @@ class ProductLinkService:
         self,
         customer_id: str,
         resource_name: str,
+        validate_only: bool = False,
     ) -> RemoveProductLinkResponse:
         """Remove a product link.
 
         Args:
             customer_id: The customer ID
             resource_name: The product link resource name to remove
+            validate_only: Whether to only validate the request
 
         Returns:
             RemoveProductLinkResponse: The response containing the removed product link resource name
@@ -83,6 +85,8 @@ class ProductLinkService:
             customer_id=customer_id,
             resource_name=resource_name,
         )
+        if validate_only:
+            request.validate_only = validate_only
         return self.client.remove_product_link(request=request)
 
     def create_merchant_center_link(  # pyright: ignore[reportUnusedFunction]
@@ -232,12 +236,14 @@ def register_product_link_tools(mcp: FastMCP[Any]) -> None:
     async def remove_product_link(  # pyright: ignore[reportUnusedFunction]
         customer_id: str,
         resource_name: str,
+        validate_only: bool = False,
     ) -> str:
         """Remove a product link.
 
         Args:
             customer_id: The customer ID
             resource_name: The product link resource name to remove
+            validate_only: Whether to only validate the request
 
         Returns:
             Success message
@@ -247,6 +253,7 @@ def register_product_link_tools(mcp: FastMCP[Any]) -> None:
         response = service.remove_product_link(
             customer_id=customer_id,
             resource_name=resource_name,
+            validate_only=validate_only,
         )
 
         return f"Removed product link: {response.resource_name}"

@@ -51,6 +51,7 @@ class CustomerSkAdNetworkService:
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
+        enable_warnings: bool = False,
     ) -> Dict[str, Any]:
         """Update the SKAdNetwork conversion value schema.
 
@@ -71,6 +72,8 @@ class CustomerSkAdNetworkService:
             request = MutateCustomerSkAdNetworkConversionValueSchemaRequest()
             request.customer_id = customer_id
             request.operation = operation
+            if enable_warnings:
+                request.enable_warnings = enable_warnings
             set_request_options(
                 request,
                 partial_failure=partial_failure,
@@ -108,12 +111,14 @@ def create_customer_sk_ad_network_tools(
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
+        enable_warnings: bool = False,
     ) -> Dict[str, Any]:
         """Update the iOS SKAdNetwork conversion value schema.
 
         Args:
             customer_id: The customer ID
             schema: Schema data
+            enable_warnings: Whether to enable warnings
         """
         return await service.mutate_schema(
             ctx=ctx,
@@ -122,6 +127,7 @@ def create_customer_sk_ad_network_tools(
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
+            enable_warnings=enable_warnings,
         )
 
     tools.append(mutate_sk_ad_network_schema)

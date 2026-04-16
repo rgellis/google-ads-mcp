@@ -420,6 +420,7 @@ class ExperimentService:
         customer_id: str,
         experiment_id: str,
         page_size: int = 100,
+        page_token: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List async errors from the most recent operation on an experiment.
 
@@ -428,6 +429,7 @@ class ExperimentService:
             customer_id: The customer ID
             experiment_id: The experiment ID
             page_size: Maximum results per page (max 1000)
+            page_token: Token for pagination
 
         Returns:
             List of async error details
@@ -439,6 +441,8 @@ class ExperimentService:
             request = ListExperimentAsyncErrorsRequest()
             request.resource_name = resource_name
             request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
 
             pager = self.client.list_experiment_async_errors(request=request)
 
@@ -657,6 +661,7 @@ def create_experiment_tools(
         customer_id: str,
         experiment_id: str,
         page_size: int = 100,
+        page_token: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List async errors from the most recent operation on an experiment.
 
@@ -666,6 +671,7 @@ def create_experiment_tools(
             customer_id: The customer ID
             experiment_id: The experiment ID
             page_size: Maximum results per page (max 1000)
+            page_token: Token for pagination
 
         Returns:
             List of async error details
@@ -675,6 +681,7 @@ def create_experiment_tools(
             customer_id=customer_id,
             experiment_id=experiment_id,
             page_size=page_size,
+            page_token=page_token,
         )
 
     tools.extend(

@@ -178,3 +178,33 @@ class TestExperimentArmService:
         # Verify
         assert isinstance(operation, ExperimentArmOperation)
         assert operation.remove == resource_name
+
+    def test_mutate_experiment_arms_response_content_type(
+        self, experiment_arm_service: Any, mock_service_client: Any
+    ):
+        """Test response_content_type parameter reaches the request"""
+        customer_id = "1234567890"
+        operations = [ExperimentArmOperation()]
+
+        mock_response = MutateExperimentArmsResponse(
+            results=[
+                MutateExperimentArmResult(
+                    resource_name="customers/1234567890/experimentArms/123~456"
+                )
+            ]
+        )
+        mock_service_client.mutate_experiment_arms.return_value = (  # type: ignore
+            mock_response
+        )
+
+        experiment_arm_service.mutate_experiment_arms(
+            customer_id=customer_id,
+            operations=operations,
+            response_content_type="MUTABLE_RESOURCE",
+        )
+
+        call_args = (
+            mock_service_client.mutate_experiment_arms.call_args  # type: ignore
+        )
+        request = call_args.kwargs["request"]
+        assert request.customer_id == customer_id

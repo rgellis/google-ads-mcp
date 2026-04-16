@@ -8,9 +8,9 @@ Comprehensive audit of every request input and response output across all 111 se
 
 ## Summary
 
-- **Services with 100% input coverage**: 66 of 111
-- **Services with missing optional input fields**: 45
-- **Total missing input fields**: 94
+- **Services with 100% input coverage**: 111 of 111
+- **Missing input fields resolved**: 94 fields across 20 services — all added or intentionally skipped
+- **Intentionally skipped**: `AdditionalApplicationInfo` fields (21 RPCs) + `asset_group_info` (1 RPC)
 - **Services with manual response construction** (may drop output fields): 20
 
 ---
@@ -215,115 +215,115 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 9. `customer_sk_ad_network` — `src/services/account/customer_sk_ad_network_service.py` | test: `tests/test_customer_sk_ad_network_service.py`
 
 **MutateCustomerSkAdNetworkConversionValueSchemaRequest:**
-- [ ] `enable_warnings` (bool) — return warnings in response
+- [x] `enable_warnings` (bool) — return warnings in response **DONE**
 
 ### 10. `experiment_arm` — `src/services/campaign/experiment_arm_service.py` | test: `tests/test_experiment_arm_service.py`
 
 **MutateExperimentArmsRequest:**
-- [ ] `response_content_type` (ResponseContentType) — control response verbosity
+- [x] `response_content_type` (ResponseContentType) — control response verbosity **DONE**
 
 ### 11. `experiment` — `src/services/campaign/experiment_service.py` | test: `tests/test_experiment_service.py`
 
 **ListExperimentAsyncErrorsRequest:**
-- [ ] `page_token` (string) — pagination token
+- [x] `page_token` (string) — pagination token **DONE**
 
 ### 12. `google_ads_field` — `src/services/metadata/google_ads_field_service.py` | test: `tests/test_google_ads_field_service.py`
 
 **SearchGoogleAdsFieldsRequest:**
-- [ ] `page_token` (string) — pagination token
-- [ ] `page_size` (int32) — results per page
+- [x] `page_token` (string) — pagination token **DONE**
+- [x] `page_size` (int32) — results per page **DONE**
 
 ### 13. `incentive` — `src/services/account/incentive_service.py` | test: `tests/test_incentive_service.py`
 
 **FetchIncentiveRequest:**
-- [ ] `type_` (IncentiveType) — filter by incentive type
+- [x] `type_` (IncentiveType) — filter by incentive type **DONE**
 
 ### 14. `invoice` — `src/services/account/invoice_service.py` | test: `tests/test_invoice_service.py`
 
 **ListInvoicesRequest:**
-- [ ] `include_granular_level_invoice_details` (bool) — include campaign-level cost breakdowns
+- [x] `include_granular_level_invoice_details` (bool) — include campaign-level cost breakdowns **DONE**
 
 ### 15. `keyword_plan_idea` — `src/services/planning/keyword_plan_idea_service.py` | test: `tests/test_keyword_plan_idea_service.py`
 
 **GenerateKeywordHistoricalMetricsRequest:**
-- [ ] `aggregate_metrics` (KeywordPlanAggregateMetrics) — aggregate metric types to return
-- [ ] `historical_metrics_options` (HistoricalMetricsOptions) — date range and competition options
+- [x] `aggregate_metrics` (KeywordPlanAggregateMetrics) — aggregate metric types **DONE**
+- [x] `historical_metrics_options` (HistoricalMetricsOptions) — date range and competition options **DONE**
 
 **GenerateKeywordIdeasRequest:**
-- [ ] `page_token` (string) — pagination token
-- [ ] `aggregate_metrics` (KeywordPlanAggregateMetrics) — aggregate metric types
-- [ ] `historical_metrics_options` (HistoricalMetricsOptions) — date range and competition options
+- [x] `page_token` (string) — pagination token **DONE**
+- [x] `aggregate_metrics` (KeywordPlanAggregateMetrics) — aggregate metric types **DONE**
+- [x] `historical_metrics_options` (HistoricalMetricsOptions) — date range and competition options **DONE**
 
 ### 16. `offline_user_data_job` — `src/services/data_import/offline_user_data_job_service.py` | test: `tests/test_offline_user_data_job_service.py`
 
 **AddOfflineUserDataJobOperationsRequest:**
-- [ ] `enable_warnings` (bool) — return warnings in response
-- [ ] `validate_only` (bool) — validate without executing
+- [x] `enable_warnings` (bool) — return warnings in response **DONE**
+- [x] `validate_only` (bool) — validate without executing **DONE**
 
 **CreateOfflineUserDataJobRequest:**
-- [ ] `validate_only` (bool) — validate without creating
-- [ ] `enable_match_rate_range_preview` (bool) — preview match rate range
+- [x] `validate_only` (bool) — validate without executing **DONE**
+- [x] `enable_match_rate_range_preview` (bool) — preview match rate range **DONE**
 
 **RunOfflineUserDataJobRequest:**
-- [ ] `validate_only` (bool) — validate without running
+- [x] `validate_only` (bool) — validate without executing **DONE**
 
 ### 17. `product_link` — `src/services/product_integration/product_link_service.py` | test: `tests/test_product_link_service.py`
 
 **RemoveProductLinkRequest:**
-- [ ] `validate_only` (bool) — validate without removing
+- [x] `validate_only` (bool) — validate without executing **DONE**
 
 ### 18. `reach_plan` — `src/services/planning/reach_plan_service.py` | test: `tests/test_reach_plan_service.py`
 
 **GenerateReachForecastRequest:**
-- [ ] `cookie_frequency_cap_setting` (FrequencyCap) — advanced frequency cap settings
-- [ ] `effective_frequency_limit` (EffectiveFrequencyLimit) — effective frequency bounds
-- [ ] `forecast_metric_options` (ForecastMetricOptions) — which forecast metrics to return
-- [ ] `customer_reach_group` (string) — user-defined grouping label
-- [ ] `reach_application_info` (AdditionalApplicationInfo) — application context
+- [x] `cookie_frequency_cap_setting` (FrequencyCap) — advanced frequency cap settings **DONE**
+- [x] `effective_frequency_limit` (EffectiveFrequencyLimit) — effective frequency bounds **DONE**
+- [x] `forecast_metric_options` (ForecastMetricOptions) — which forecast metrics to return **DONE**
+- [x] `customer_reach_group` (string) — user-defined grouping label **DONE**
+- N/A `reach_application_info` — intentionally skipped (see above)
 
 **GenerateConversionRatesRequest:**
-- [ ] `customer_reach_group` (string) — user-defined grouping label
-- [ ] `reach_application_info` (AdditionalApplicationInfo) — application context
+- [x] `customer_reach_group` (string) — user-defined grouping label **DONE**
+- N/A `reach_application_info` — intentionally skipped (see above)
 
 **ListPlannableLocationsRequest:**
-- [ ] `reach_application_info` (AdditionalApplicationInfo) — application context
+- N/A `reach_application_info` — intentionally skipped (see above)
 
 **ListPlannableProductsRequest:**
-- [ ] `reach_application_info` (AdditionalApplicationInfo) — application context
+- N/A `reach_application_info` — intentionally skipped (see above)
 
 **ListPlannableUserInterestsRequest:**
-- [ ] `path_query` (string) — filter by interest path substring
-- [ ] `reach_application_info` (AdditionalApplicationInfo) — application context
+- [x] `path_query` (string) — filter by interest path substring **DONE**
+- N/A `reach_application_info` — intentionally skipped (see above)
 
 **ListPlannableUserListsRequest:**
-- [ ] `customer_reach_group` (string) — user-defined grouping label
-- [ ] `reach_application_info` (AdditionalApplicationInfo) — application context
+- [x] `customer_reach_group` (string) — user-defined grouping label **DONE**
+- N/A `reach_application_info` — intentionally skipped (see above)
 
 ### 19. `recommendation` — `src/services/planning/recommendation_service.py` | test: `tests/test_recommendation_service.py`
 
 **ApplyRecommendationRequest:**
-- [ ] `partial_failure` (bool) — allow partial success
+- [x] `partial_failure` (bool) — allow partial success **DONE**
 
 **DismissRecommendationRequest:**
-- [ ] `partial_failure` (bool) — allow partial success
+- [x] `partial_failure` (bool) — allow partial success **DONE**
 
 **GenerateRecommendationsRequest:**
-- [ ] `campaign_image_asset_count` (int32) — number of image assets in campaign
-- [ ] `campaign_call_asset_count` (int32) — number of call assets
-- [ ] `country_codes` (string) — target country codes
-- [ ] `language_codes` (string) — target language codes
-- [ ] `positive_locations_ids` (int64) — included location IDs
-- [ ] `negative_locations_ids` (int64) — excluded location IDs
-- [ ] `asset_group_info` (AssetGroupInfo) — PMax asset group details
-- [ ] `target_partner_search_network` (bool) — target partner search network
-- [ ] `target_content_network` (bool) — target content network
-- [ ] `merchant_center_account_id` (int64) — linked Merchant Center account
-- [ ] `is_new_customer` (bool) — whether this is a new customer
+- [x] `campaign_image_asset_count` (int32) — number of image assets in campaign **DONE**
+- [x] `campaign_call_asset_count` (int32) — number of call assets **DONE**
+- [x] `country_codes` (string) — target country codes **DONE**
+- [x] `language_codes` (string) — target language codes **DONE**
+- [x] `positive_locations_ids` (int64) — included location IDs **DONE**
+- [x] `negative_locations_ids` (int64) — excluded location IDs **DONE**
+- N/A `asset_group_info` (AssetGroupInfo) — complex PMax type, skipped
+- [x] `target_partner_search_network` (bool) — target partner search network **DONE**
+- [x] `target_content_network` (bool) — target content network **DONE**
+- [x] `merchant_center_account_id` (int64) — linked Merchant Center account **DONE**
+- [x] `is_new_customer` (bool) — whether this is a new customer **DONE**
 
 ### 20. `reservation` — `src/services/campaign/reservation_service.py` | test: `tests/test_reservation_service.py`
 
 **BookCampaignsRequest:**
-- [ ] `operation` (BookCampaignsOperation) — **REQUIRED** — the booking operation details
+- [x] `operation` (BookCampaignsOperation) — booking operation details **DONE**
 
 **QuoteCampaignsRequest:**
-- [ ] `operation` (QuoteCampaignsOperation) — **REQUIRED** — the quote operation details
+- [x] `operation` (QuoteCampaignsOperation) — quote operation details **DONE**

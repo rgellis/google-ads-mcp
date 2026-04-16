@@ -121,6 +121,68 @@ async def test_book_campaigns_error(
     assert "Test Google Ads Exception" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_quote_campaigns_with_operation(
+    service: ReservationService,
+    mock_ctx: Context,
+) -> None:
+    """Test operation parameter reaches the request."""
+    mock_client = service.client
+    mock_client.quote_campaigns.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.campaign.reservation_service.serialize_proto_message",
+        return_value={"quote": {}},
+    ):
+        await service.quote_campaigns(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            operation={
+                "campaigns": ["customers/1234567890/campaigns/111"],
+                "quote_signature": "sig123",
+            },
+        )
+
+    call_args = mock_client.quote_campaigns.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.operation is not None
+    assert len(request.operation.campaigns) == 1
+    assert (
+        request.operation.campaigns[0].campaign == "customers/1234567890/campaigns/111"
+    )
+    assert request.operation.quote_signature == "sig123"
+
+
+@pytest.mark.asyncio
+async def test_book_campaigns_with_operation(
+    service: ReservationService,
+    mock_ctx: Context,
+) -> None:
+    """Test operation parameter reaches the BookCampaigns request."""
+    mock_client = service.client
+    mock_client.book_campaigns.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.campaign.reservation_service.serialize_proto_message",
+        return_value={"booked": {}},
+    ):
+        await service.book_campaigns(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            operation={
+                "campaigns": ["customers/1234567890/campaigns/222"],
+            },
+        )
+
+    call_args = mock_client.book_campaigns.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.operation is not None
+    assert len(request.operation.campaigns) == 1
+    assert (
+        request.operation.campaigns[0].campaign == "customers/1234567890/campaigns/222"
+    )
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()

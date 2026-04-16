@@ -33,13 +33,27 @@ class IncentiveService:
         return self._client
 
     async def fetch_incentive(
-        self, ctx: Context, language_code: str, country_code: str, email: str
+        self,
+        ctx: Context,
+        language_code: str,
+        country_code: str,
+        email: str,
+        incentive_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         try:
             request = FetchIncentiveRequest()
             request.language_code = language_code
             request.country_code = country_code
             request.email = email
+            if incentive_type:
+                from google.ads.googleads.v23.services.types.incentive_service import (
+                    FetchIncentiveRequest as _FIR,
+                )
+
+                # IncentiveType enum is accessible from the request's type_ field
+                r_tmp = _FIR()
+                enum_cls = type(r_tmp.type_)
+                request.type_ = enum_cls[incentive_type]
             response: FetchIncentiveResponse = self.client.fetch_incentive(
                 request=request
             )
@@ -90,7 +104,11 @@ def create_incentive_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def fetch_incentive(
-        ctx: Context, language_code: str, country_code: str, email: str
+        ctx: Context,
+        language_code: str,
+        country_code: str,
+        email: str,
+        incentive_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Fetch available incentive offers.
 
@@ -98,9 +116,14 @@ def create_incentive_tools(
             language_code: Language code (e.g. "en")
             country_code: Country code (e.g. "US")
             email: Email address
+            incentive_type: Optional incentive type (e.g. "ACQUISITION")
         """
         return await service.fetch_incentive(
-            ctx=ctx, language_code=language_code, country_code=country_code, email=email
+            ctx=ctx,
+            language_code=language_code,
+            country_code=country_code,
+            email=email,
+            incentive_type=incentive_type,
         )
 
     async def apply_incentive(

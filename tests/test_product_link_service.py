@@ -169,3 +169,23 @@ class TestProductLinkService:
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
         assert request.product_link.data_partner.data_partner_id == data_partner_id
+
+    def test_remove_product_link_validate_only(
+        self, product_link_service: Any, mock_service_client: Any
+    ):
+        """Test validate_only reaches the RemoveProductLink request"""
+        customer_id = "1234567890"
+        resource_name = "customers/1234567890/productLinks/123"
+
+        mock_response = RemoveProductLinkResponse(resource_name=resource_name)
+        mock_service_client.remove_product_link.return_value = mock_response  # type: ignore
+
+        product_link_service.remove_product_link(
+            customer_id=customer_id,
+            resource_name=resource_name,
+            validate_only=True,
+        )
+
+        call_args = mock_service_client.remove_product_link.call_args  # type: ignore
+        request = call_args.kwargs["request"]
+        assert request.validate_only is True

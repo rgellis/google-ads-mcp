@@ -18,7 +18,7 @@ from google.ads.googleads.v23.services.types.experiment_arm_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, set_request_options
 
 
 class ExperimentArmService:
@@ -43,6 +43,7 @@ class ExperimentArmService:
         operations: List[ExperimentArmOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> MutateExperimentArmsResponse:
         """Mutate experiment arms.
 
@@ -51,6 +52,7 @@ class ExperimentArmService:
             operations: List of experiment arm operations
             partial_failure: Whether to enable partial failure
             validate_only: Whether to only validate the request
+            response_content_type: Response content type enum value
 
         Returns:
             MutateExperimentArmsResponse: The response containing results
@@ -59,8 +61,12 @@ class ExperimentArmService:
         request = MutateExperimentArmsRequest(
             customer_id=customer_id,
             operations=operations,
+        )
+        set_request_options(
+            request,
             partial_failure=partial_failure,
             validate_only=validate_only,
+            response_content_type=response_content_type,
         )
         return self.client.mutate_experiment_arms(request=request)
 
@@ -153,6 +159,7 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> str:
         """Create, update, or remove experiment arms.
 
@@ -200,6 +207,7 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
         return (

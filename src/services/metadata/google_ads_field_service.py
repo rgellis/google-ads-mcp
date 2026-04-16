@@ -85,6 +85,8 @@ class GoogleAdsFieldService:
         ] = None,
         selectable_only: bool = False,
         limit: int = 100,
+        page_token: Optional[str] = None,
+        page_size: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for Google Ads fields based on criteria.
 
@@ -118,6 +120,9 @@ class GoogleAdsFieldService:
             # Create request
             request = SearchGoogleAdsFieldsRequest()
             request.query = search_query
+            request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
 
             # Make the API call - returns a pager
             pager = self.client.search_google_ads_fields(request=request)
@@ -303,6 +308,8 @@ def create_google_ads_field_tools(
         category_filter: Optional[str] = None,
         selectable_only: bool = False,
         limit: int = 100,
+        page_token: Optional[str] = None,
+        page_size: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for Google Ads fields based on criteria.
 
@@ -331,6 +338,8 @@ def create_google_ads_field_tools(
             category_filter=category_filter_enum,
             selectable_only=selectable_only,
             limit=limit,
+            page_token=page_token,
+            page_size=page_size,
         )
 
     async def get_resource_fields(

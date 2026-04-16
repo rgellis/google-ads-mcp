@@ -57,6 +57,47 @@ async def test_run_offline_user_data_job(
     assert result["job_resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
 
 
+@pytest.mark.asyncio
+async def test_create_customer_match_job_validate_only(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    """Test validate_only and enable_match_rate_range_preview reach the request."""
+    mock_client = service.client
+    mock_client.create_offline_user_data_job.return_value = Mock()
+    with patch(
+        "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
+        return_value={"resource_name": "test"},
+    ):
+        await service.create_customer_match_job(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            validate_only=True,
+            enable_match_rate_range_preview=True,
+        )
+    call_args = mock_client.create_offline_user_data_job.call_args
+    request = call_args[1]["request"]
+    assert request.validate_only is True
+    assert request.enable_match_rate_range_preview is True
+
+
+@pytest.mark.asyncio
+async def test_run_offline_user_data_job_validate_only(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    """Test validate_only reaches the RunOfflineUserDataJob request."""
+    mock_client = service.client
+    mock_client.run_offline_user_data_job.return_value = Mock()
+    await service.run_offline_user_data_job(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        job_resource_name="customers/1234567890/offlineUserDataJobs/1",
+        validate_only=True,
+    )
+    call_args = mock_client.run_offline_user_data_job.call_args
+    request = call_args[1]["request"]
+    assert request.validate_only is True
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_offline_user_data_job_tools(mock_mcp)

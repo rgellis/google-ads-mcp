@@ -692,3 +692,33 @@ async def test_list_experiment_async_errors(
 
     assert result == []
     mock_experiment_client.list_experiment_async_errors.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_list_experiment_async_errors_with_page_token(
+    experiment_service: ExperimentService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test page_token parameter reaches the request."""
+    customer_id = "1234567890"
+    experiment_id = "555"
+    page_token = "abc123"
+
+    mock_experiment_client = experiment_service.client  # type: ignore
+    mock_experiment_client.list_experiment_async_errors.return_value = iter([])  # type: ignore
+
+    with patch(
+        "src.services.campaign.experiment_service.serialize_proto_message",
+        return_value={},
+    ):
+        await experiment_service.list_experiment_async_errors(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+            page_token=page_token,
+        )
+
+    call_args = mock_experiment_client.list_experiment_async_errors.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.page_token == page_token

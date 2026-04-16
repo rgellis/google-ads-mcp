@@ -8,6 +8,9 @@ from google.ads.googleads.v23.services.services.reach_plan_service import (
     ReachPlanServiceClient,
 )
 from google.ads.googleads.v23.services.types.reach_plan_service import (
+    EffectiveFrequencyLimit,
+    ForecastMetricOptions,
+    FrequencyCap,
     GenerateConversionRatesRequest,
     GenerateConversionRatesResponse,
     GenerateReachForecastRequest,
@@ -118,6 +121,10 @@ class ReachPlanService:
         cookie_frequency_cap: Optional[int] = None,
         min_effective_frequency: Optional[int] = None,
         location_ids: Optional[List[str]] = None,
+        customer_reach_group: Optional[str] = None,
+        cookie_frequency_cap_setting: Optional[Dict[str, Any]] = None,
+        effective_frequency_limit: Optional[int] = None,
+        forecast_metric_options: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Generate a reach forecast.
 
@@ -168,6 +175,32 @@ class ReachPlanService:
                 pp.budget_micros = pp_data["budget_micros"]
                 request.planned_products.append(pp)
 
+            if customer_reach_group:
+                request.customer_reach_group = customer_reach_group
+            if cookie_frequency_cap_setting:
+                fc = FrequencyCap()
+                if "impressions" in cookie_frequency_cap_setting:
+                    fc.impressions = cookie_frequency_cap_setting["impressions"]
+                if "time_unit" in cookie_frequency_cap_setting:
+                    from google.ads.googleads.v23.enums.types.frequency_cap_time_unit import (
+                        FrequencyCapTimeUnitEnum,
+                    )
+
+                    fc.time_unit = getattr(
+                        FrequencyCapTimeUnitEnum.FrequencyCapTimeUnit,
+                        cookie_frequency_cap_setting["time_unit"],
+                    )
+                request.cookie_frequency_cap_setting = fc
+            if effective_frequency_limit is not None:
+                efl = EffectiveFrequencyLimit()
+                efl.effective_frequency_breakdown_limit = effective_frequency_limit
+                request.effective_frequency_limit = efl
+            if forecast_metric_options:
+                fmo = ForecastMetricOptions()
+                if "include_coview" in forecast_metric_options:
+                    fmo.include_coview = forecast_metric_options["include_coview"]
+                request.forecast_metric_options = fmo
+
             response: GenerateReachForecastResponse = (
                 self.client.generate_reach_forecast(request=request)
             )
@@ -187,6 +220,7 @@ class ReachPlanService:
         self,
         ctx: Context,
         customer_id: str,
+        customer_reach_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate conversion rate suggestions for reach planning.
 
@@ -202,6 +236,8 @@ class ReachPlanService:
 
             request = GenerateConversionRatesRequest()
             request.customer_id = customer_id
+            if customer_reach_group:
+                request.customer_reach_group = customer_reach_group
 
             response: GenerateConversionRatesResponse = (
                 self.client.generate_conversion_rates(request=request)
@@ -224,6 +260,7 @@ class ReachPlanService:
         customer_id: str,
         taxonomy_types: Optional[List[str]] = None,
         name_query: Optional[str] = None,
+        path_query: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List plannable user interests for reach targeting.
 
@@ -254,6 +291,8 @@ class ReachPlanService:
 
             if name_query:
                 request.name_query = name_query
+            if path_query:
+                request.path_query = path_query
 
             response: ListPlannableUserInterestsResponse = (
                 self.client.list_plannable_user_interests(request=request)
@@ -274,6 +313,7 @@ class ReachPlanService:
         self,
         ctx: Context,
         customer_id: str,
+        customer_reach_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List plannable user lists for reach targeting.
 
@@ -289,6 +329,8 @@ class ReachPlanService:
 
             request = ListPlannableUserListsRequest()
             request.customer_id = customer_id
+            if customer_reach_group:
+                request.customer_reach_group = customer_reach_group
 
             response: ListPlannableUserListsResponse = (
                 self.client.list_plannable_user_lists(request=request)
@@ -349,6 +391,10 @@ def create_reach_plan_tools(
         cookie_frequency_cap: Optional[int] = None,
         min_effective_frequency: Optional[int] = None,
         location_ids: Optional[List[str]] = None,
+        customer_reach_group: Optional[str] = None,
+        cookie_frequency_cap_setting: Optional[Dict[str, Any]] = None,
+        effective_frequency_limit: Optional[int] = None,
+        forecast_metric_options: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Generate a reach forecast for planned campaigns.
 
@@ -361,6 +407,10 @@ def create_reach_plan_tools(
             cookie_frequency_cap: Max impressions per cookie (optional)
             min_effective_frequency: Min effective frequency (optional)
             location_ids: Geo target constant resource names for targeting (optional)
+            customer_reach_group: Customer reach group (optional)
+            cookie_frequency_cap_setting: Dict with impressions and time_unit (optional)
+            effective_frequency_limit: Effective frequency breakdown limit (optional)
+            forecast_metric_options: Dict with include_coview (optional)
 
         Returns:
             Reach forecast with on-target reach, total reach, and curve data
@@ -375,16 +425,22 @@ def create_reach_plan_tools(
             cookie_frequency_cap=cookie_frequency_cap,
             min_effective_frequency=min_effective_frequency,
             location_ids=location_ids,
+            customer_reach_group=customer_reach_group,
+            cookie_frequency_cap_setting=cookie_frequency_cap_setting,
+            effective_frequency_limit=effective_frequency_limit,
+            forecast_metric_options=forecast_metric_options,
         )
 
     async def generate_conversion_rates(
         ctx: Context,
         customer_id: str,
+        customer_reach_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate conversion rate suggestions for reach planning.
 
         Args:
             customer_id: The customer ID
+            customer_reach_group: Customer reach group (optional)
 
         Returns:
             Conversion rate suggestions per plannable product
@@ -392,6 +448,7 @@ def create_reach_plan_tools(
         return await service.generate_conversion_rates(
             ctx=ctx,
             customer_id=customer_id,
+            customer_reach_group=customer_reach_group,
         )
 
     async def list_plannable_user_interests(
@@ -399,6 +456,7 @@ def create_reach_plan_tools(
         customer_id: str,
         taxonomy_types: Optional[List[str]] = None,
         name_query: Optional[str] = None,
+        path_query: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List plannable user interests for reach targeting.
 
@@ -406,6 +464,7 @@ def create_reach_plan_tools(
             customer_id: The customer ID
             taxonomy_types: Optional filter - AFFINITY, IN_MARKET
             name_query: Optional text filter on interest name (max 200 chars)
+            path_query: Optional path query filter
 
         Returns:
             List of plannable user interests
@@ -415,11 +474,13 @@ def create_reach_plan_tools(
             customer_id=customer_id,
             taxonomy_types=taxonomy_types,
             name_query=name_query,
+            path_query=path_query,
         )
 
     async def list_plannable_user_lists(
         ctx: Context,
         customer_id: str,
+        customer_reach_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List plannable user lists for reach targeting.
 
@@ -427,6 +488,7 @@ def create_reach_plan_tools(
 
         Args:
             customer_id: The customer ID
+            customer_reach_group: Customer reach group (optional)
 
         Returns:
             List of plannable user lists with display name, type, and status
@@ -434,6 +496,7 @@ def create_reach_plan_tools(
         return await service.list_plannable_user_lists(
             ctx=ctx,
             customer_id=customer_id,
+            customer_reach_group=customer_reach_group,
         )
 
     tools.extend(

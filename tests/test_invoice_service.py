@@ -475,6 +475,36 @@ async def test_tool_wrapper_list_invoices_case_insensitive(
     assert request.issue_month == MonthOfYearEnum.MonthOfYear.DECEMBER
 
 
+@pytest.mark.asyncio
+async def test_list_invoices_with_granular_details(
+    invoice_service: InvoiceService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test include_granular_level_invoice_details reaches the request."""
+    mock_response = Mock(spec=ListInvoicesResponse)
+    mock_response.invoices = []
+    mock_invoice_client = invoice_service.client  # type: ignore
+    mock_invoice_client.list_invoices.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.account.invoice_service.serialize_proto_message",
+        return_value={"invoices": []},
+    ):
+        await invoice_service.list_invoices(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            billing_setup="customers/1234567890/billingSetups/999",
+            issue_year="2024",
+            issue_month=MonthOfYearEnum.MonthOfYear.JANUARY,
+            include_granular_level_invoice_details=True,
+        )
+
+    call_args = mock_invoice_client.list_invoices.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.include_granular_level_invoice_details is True
+
+
 def test_register_invoice_tools() -> None:
     """Test tool registration."""
     # Arrange

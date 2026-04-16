@@ -386,3 +386,65 @@ async def test_list_plannable_user_lists(
 
     assert result == expected_result
     mock_reach_client.list_plannable_user_lists.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_reach_forecast_with_new_params(
+    reach_plan_service: ReachPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test new params reach the GenerateReachForecast request."""
+    mock_reach_client = reach_plan_service.client  # type: ignore
+    mock_response = Mock()
+    mock_reach_client.generate_reach_forecast.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value={"on_target_reach": 1000},
+    ):
+        await reach_plan_service.generate_reach_forecast(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            plannable_location_id="2840",
+            currency_code="USD",
+            campaign_duration_days=30,
+            planned_products=[
+                {"plannable_product_code": "YOUTUBE", "budget_micros": 1000000}
+            ],
+            customer_reach_group="test_group",
+            effective_frequency_limit=5,
+            forecast_metric_options={"include_coview": True},
+        )
+
+    call_args = mock_reach_client.generate_reach_forecast.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_reach_group == "test_group"
+    assert request.effective_frequency_limit.effective_frequency_breakdown_limit == 5
+    assert request.forecast_metric_options.include_coview is True
+
+
+@pytest.mark.asyncio
+async def test_generate_conversion_rates_with_reach_group(
+    reach_plan_service: ReachPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test customer_reach_group reaches the request."""
+    mock_reach_client = reach_plan_service.client  # type: ignore
+    mock_response = Mock()
+    mock_reach_client.generate_conversion_rates.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value={},
+    ):
+        await reach_plan_service.generate_conversion_rates(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            customer_reach_group="test_group",
+        )
+
+    call_args = mock_reach_client.generate_conversion_rates.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_reach_group == "test_group"

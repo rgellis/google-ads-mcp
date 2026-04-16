@@ -133,6 +133,33 @@ async def test_apply_incentive_error(
     assert "Test Google Ads Exception" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_fetch_incentive_with_type(
+    service: IncentiveService,
+    mock_ctx: Context,
+) -> None:
+    """Test incentive_type parameter reaches the request."""
+    mock_client = service.client
+    mock_client.fetch_incentive.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.account.incentive_service.serialize_proto_message",
+        return_value={"incentives": []},
+    ):
+        await service.fetch_incentive(
+            ctx=mock_ctx,
+            language_code="en",
+            country_code="US",
+            email="test@example.com",
+            incentive_type="ACQUISITION",
+        )
+
+    call_args = mock_client.fetch_incentive.call_args  # type: ignore
+    request = call_args[1]["request"]
+    # The type_ should be set to ACQUISITION enum value
+    assert request.type_ != 0  # Not UNSPECIFIED
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()

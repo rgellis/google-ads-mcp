@@ -2,6 +2,10 @@
 
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
+from google.ads.googleads.v23.enums.types.keyword_plan_keyword_annotation import (
+    KeywordPlanKeywordAnnotationEnum,
+)
+
 from fastmcp import Context, FastMCP
 from google.ads.googleads.v23.services.services.keyword_plan_idea_service import (
     KeywordPlanIdeaServiceClient,
@@ -61,6 +65,9 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from seed keywords.
 
@@ -93,6 +100,10 @@ class KeywordPlanIdeaService:
             keyword_seed = KeywordSeed()
             keyword_seed.keywords.extend(keywords)
             request.keyword_seed = keyword_seed
+
+            self._set_advanced_options(
+                request, page_token, aggregate_metrics, historical_metrics_options
+            )
 
             # Generate ideas
             response = self.client.generate_keyword_ideas(request=request)
@@ -128,6 +139,9 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from a URL.
 
@@ -160,6 +174,10 @@ class KeywordPlanIdeaService:
             url_seed = UrlSeed()
             url_seed.url = page_url
             request.url_seed = url_seed
+
+            self._set_advanced_options(
+                request, page_token, aggregate_metrics, historical_metrics_options
+            )
 
             # Generate ideas
             response = self.client.generate_keyword_ideas(request=request)
@@ -195,6 +213,9 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from an entire website.
 
@@ -227,6 +248,10 @@ class KeywordPlanIdeaService:
             site_seed = SiteSeed()
             site_seed.site = site_url
             request.site_seed = site_seed
+
+            self._set_advanced_options(
+                request, page_token, aggregate_metrics, historical_metrics_options
+            )
 
             # Generate ideas
             response = self.client.generate_keyword_ideas(request=request)
@@ -263,6 +288,9 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from both keywords and a URL.
 
@@ -297,6 +325,10 @@ class KeywordPlanIdeaService:
             keyword_and_url_seed.keywords.extend(keywords)
             keyword_and_url_seed.url = page_url
             request.keyword_and_url_seed = keyword_and_url_seed
+
+            self._set_advanced_options(
+                request, page_token, aggregate_metrics, historical_metrics_options
+            )
 
             # Generate ideas
             response = self.client.generate_keyword_ideas(request=request)
@@ -539,6 +571,42 @@ class KeywordPlanIdeaService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    def _set_advanced_options(
+        self,
+        request: GenerateKeywordIdeasRequest,
+        page_token: Optional[str],
+        aggregate_metrics: Optional[List[str]],
+        historical_metrics_options: Optional[Dict[str, Any]],
+    ) -> None:
+        """Set page_token, aggregate_metrics, and historical_metrics_options on a request."""
+        if page_token:
+            request.page_token = page_token
+        if aggregate_metrics:
+            request.aggregate_metrics = [
+                getattr(
+                    KeywordPlanKeywordAnnotationEnum.KeywordPlanKeywordAnnotation, m
+                )
+                for m in aggregate_metrics
+            ]
+        if historical_metrics_options:
+            if "year_month_range" in historical_metrics_options:
+                ymr = historical_metrics_options["year_month_range"]
+                from google.ads.googleads.v23.common.types.dates import YearMonth
+                from google.ads.googleads.v23.services.types.keyword_plan_idea_service import (
+                    HistoricalMetricsOptions,
+                )
+
+                hmo = HistoricalMetricsOptions()
+                if "start" in ymr:
+                    hmo.year_month_range.start = YearMonth(
+                        year=ymr["start"]["year"], month=ymr["start"]["month"]
+                    )
+                if "end" in ymr:
+                    hmo.year_month_range.end = YearMonth(
+                        year=ymr["end"]["year"], month=ymr["end"]["month"]
+                    )
+                request.historical_metrics_options = hmo
+
     def _format_keyword_idea(self, idea: GenerateKeywordIdeaResult) -> Dict[str, Any]:
         """Format a keyword idea result into a dictionary."""
         result = {
@@ -610,6 +678,9 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from seed keywords.
 
@@ -642,6 +713,9 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
+            aggregate_metrics=aggregate_metrics,
+            historical_metrics_options=historical_metrics_options,
         )
 
     async def generate_keyword_ideas_from_url(
@@ -653,6 +727,9 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from a specific URL/page.
 
@@ -682,6 +759,9 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
+            aggregate_metrics=aggregate_metrics,
+            historical_metrics_options=historical_metrics_options,
         )
 
     async def generate_keyword_ideas_from_site(
@@ -693,6 +773,9 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from an entire website.
 
@@ -722,6 +805,9 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
+            aggregate_metrics=aggregate_metrics,
+            historical_metrics_options=historical_metrics_options,
         )
 
     async def generate_keyword_ideas_from_keywords_and_url(
@@ -734,6 +820,9 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
+        page_token: Optional[str] = None,
+        aggregate_metrics: Optional[List[str]] = None,
+        historical_metrics_options: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Generate keyword ideas from both keywords and a URL.
 
@@ -765,6 +854,9 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
+            aggregate_metrics=aggregate_metrics,
+            historical_metrics_options=historical_metrics_options,
         )
 
     async def generate_keyword_historical_metrics(

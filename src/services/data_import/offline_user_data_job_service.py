@@ -57,6 +57,8 @@ class OfflineUserDataJobService:
         ctx: Context,
         customer_id: str,
         job_name: Optional[str] = None,
+        validate_only: bool = False,
+        enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
         """Create a customer match job for uploading user data.
 
@@ -81,6 +83,12 @@ class OfflineUserDataJobService:
             request = CreateOfflineUserDataJobRequest()
             request.customer_id = customer_id
             request.job = job
+            if validate_only:
+                request.validate_only = validate_only
+            if enable_match_rate_range_preview:
+                request.enable_match_rate_range_preview = (
+                    enable_match_rate_range_preview
+                )
 
             # Make the API call
             response: CreateOfflineUserDataJobResponse = (
@@ -110,6 +118,8 @@ class OfflineUserDataJobService:
         job_resource_name: str,
         user_data_list: List[Dict[str, Any]],
         enable_partial_failure: bool = True,
+        validate_only: bool = False,
+        enable_warnings: bool = False,
     ) -> Dict[str, Any]:
         """Add user data operations to an offline user data job.
 
@@ -201,6 +211,10 @@ class OfflineUserDataJobService:
             request.resource_name = job_resource_name
             request.enable_partial_failure = enable_partial_failure
             request.operations = operations
+            if validate_only:
+                request.validate_only = validate_only
+            if enable_warnings:
+                request.enable_warnings = enable_warnings
 
             # Make the API call
             response: AddOfflineUserDataJobOperationsResponse = (
@@ -237,6 +251,7 @@ class OfflineUserDataJobService:
         ctx: Context,
         customer_id: str,
         job_resource_name: str,
+        validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Run an offline user data job.
 
@@ -254,6 +269,8 @@ class OfflineUserDataJobService:
             # Create request
             request = RunOfflineUserDataJobRequest()
             request.resource_name = job_resource_name
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             operation = self.client.run_offline_user_data_job(request=request)
@@ -438,12 +455,16 @@ def create_offline_user_data_job_tools(
         ctx: Context,
         customer_id: str,
         job_name: Optional[str] = None,
+        validate_only: bool = False,
+        enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
         """Create a customer match job for uploading user data.
 
         Args:
             customer_id: The customer ID
             job_name: Optional name for the job
+            validate_only: Whether to only validate the request
+            enable_match_rate_range_preview: Whether to enable match rate range preview
 
         Returns:
             Created job details with resource_name and status
@@ -452,6 +473,8 @@ def create_offline_user_data_job_tools(
             ctx=ctx,
             customer_id=customer_id,
             job_name=job_name,
+            validate_only=validate_only,
+            enable_match_rate_range_preview=enable_match_rate_range_preview,
         )
 
     async def add_user_data_operations(
@@ -460,6 +483,8 @@ def create_offline_user_data_job_tools(
         job_resource_name: str,
         user_data_list: List[Dict[str, Any]],
         enable_partial_failure: bool = True,
+        validate_only: bool = False,
+        enable_warnings: bool = False,
     ) -> Dict[str, Any]:
         """Add user data operations to an offline user data job.
 
@@ -475,6 +500,8 @@ def create_offline_user_data_job_tools(
                     - address_info: Address information with hashed fields
                 - transaction_attribute: Optional transaction data for enhanced conversions
             enable_partial_failure: Whether to enable partial failure
+            validate_only: Whether to only validate the request
+            enable_warnings: Whether to enable warnings
 
         Returns:
             Result of adding operations with success/failure details
@@ -485,18 +512,22 @@ def create_offline_user_data_job_tools(
             job_resource_name=job_resource_name,
             user_data_list=user_data_list,
             enable_partial_failure=enable_partial_failure,
+            validate_only=validate_only,
+            enable_warnings=enable_warnings,
         )
 
     async def run_offline_user_data_job(
         ctx: Context,
         customer_id: str,
         job_resource_name: str,
+        validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Run an offline user data job to process uploaded data.
 
         Args:
             customer_id: The customer ID
             job_resource_name: The offline user data job resource name
+            validate_only: Whether to only validate the request
 
         Returns:
             Job execution details with long running operation name
@@ -505,6 +536,7 @@ def create_offline_user_data_job_tools(
             ctx=ctx,
             customer_id=customer_id,
             job_resource_name=job_resource_name,
+            validate_only=validate_only,
         )
 
     async def get_offline_user_data_job(

@@ -42,6 +42,7 @@ class InvoiceService:
         billing_setup: str,
         issue_year: str,
         issue_month: MonthOfYearEnum.MonthOfYear,
+        include_granular_level_invoice_details: bool = False,
     ) -> Dict[str, Any]:
         """List invoices for a specific billing setup and date range.
 
@@ -64,6 +65,10 @@ class InvoiceService:
             request.billing_setup = billing_setup
             request.issue_year = issue_year
             request.issue_month = issue_month
+            if include_granular_level_invoice_details:
+                request.include_granular_level_invoice_details = (
+                    include_granular_level_invoice_details
+                )
 
             # Make the API call
             response: ListInvoicesResponse = self.client.list_invoices(request=request)
@@ -101,6 +106,7 @@ def create_invoice_tools(
         billing_setup: str,
         issue_year: str,
         issue_month: str,
+        include_granular_level_invoice_details: bool = False,
     ) -> Dict[str, Any]:
         """List invoices for a specific billing setup and date range.
 
@@ -109,6 +115,7 @@ def create_invoice_tools(
             billing_setup: Resource name of the billing setup (e.g., customers/123/billingSetups/456)
             issue_year: Year of invoice issue (YYYY format, e.g., "2024")
             issue_month: Month of invoice issue (JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER)
+            include_granular_level_invoice_details: Whether to include granular level invoice details
 
         Returns:
             List invoices response with comprehensive details including amounts, dates, and account summaries
@@ -122,6 +129,7 @@ def create_invoice_tools(
             billing_setup=billing_setup,
             issue_year=issue_year,
             issue_month=month_enum,
+            include_granular_level_invoice_details=include_granular_level_invoice_details,
         )
 
     tools.extend([list_invoices])

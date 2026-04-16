@@ -219,6 +219,7 @@ class RecommendationService:
         ctx: Context,
         customer_id: str,
         recommendation_resource_name: str,
+        partial_failure: bool = False,
     ) -> Dict[str, Any]:
         """Apply a recommendation.
 
@@ -241,6 +242,8 @@ class RecommendationService:
             request = ApplyRecommendationRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            if partial_failure:
+                request.partial_failure = partial_failure
 
             # Make the API call
             response: ApplyRecommendationResponse = self.client.apply_recommendation(
@@ -268,6 +271,7 @@ class RecommendationService:
         ctx: Context,
         customer_id: str,
         recommendation_resource_names: List[str],
+        partial_failure: bool = False,
     ) -> Dict[str, Any]:
         """Dismiss one or more recommendations.
 
@@ -295,6 +299,8 @@ class RecommendationService:
             request = DismissRecommendationRequest()
             request.customer_id = customer_id
             request.operations = operations
+            if partial_failure:
+                request.partial_failure = partial_failure
 
             # Make the API call
             response: DismissRecommendationResponse = (
@@ -329,6 +335,16 @@ class RecommendationService:
         ad_group_info: Optional[List[Dict[str, Any]]] = None,
         seed_info: Optional[Dict[str, Any]] = None,
         budget_info: Optional[Dict[str, Any]] = None,
+        campaign_image_asset_count: Optional[int] = None,
+        campaign_call_asset_count: Optional[int] = None,
+        country_codes: Optional[List[str]] = None,
+        language_codes: Optional[List[str]] = None,
+        positive_locations_ids: Optional[List[int]] = None,
+        negative_locations_ids: Optional[List[int]] = None,
+        target_partner_search_network: Optional[bool] = None,
+        target_content_network: Optional[bool] = None,
+        merchant_center_account_id: Optional[int] = None,
+        is_new_customer: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Generate recommendations for a customer.
 
@@ -403,6 +419,27 @@ class RecommendationService:
             if budget_info is not None:
                 request.budget_info.current_budget = budget_info["current_budget"]
 
+            if campaign_image_asset_count is not None:
+                request.campaign_image_asset_count = campaign_image_asset_count
+            if campaign_call_asset_count is not None:
+                request.campaign_call_asset_count = campaign_call_asset_count
+            if country_codes is not None:
+                request.country_codes = country_codes
+            if language_codes is not None:
+                request.language_codes = language_codes
+            if positive_locations_ids is not None:
+                request.positive_locations_ids = positive_locations_ids
+            if negative_locations_ids is not None:
+                request.negative_locations_ids = negative_locations_ids
+            if target_partner_search_network is not None:
+                request.target_partner_search_network = target_partner_search_network
+            if target_content_network is not None:
+                request.target_content_network = target_content_network
+            if merchant_center_account_id is not None:
+                request.merchant_center_account_id = merchant_center_account_id
+            if is_new_customer is not None:
+                request.is_new_customer = is_new_customer
+
             response: GenerateRecommendationsResponse = (
                 self.client.generate_recommendations(request=request)
             )
@@ -471,12 +508,14 @@ def create_recommendation_tools(
         ctx: Context,
         customer_id: str,
         recommendation_resource_name: str,
+        partial_failure: bool = False,
     ) -> Dict[str, Any]:
         """Apply a specific recommendation.
 
         Args:
             customer_id: The customer ID
             recommendation_resource_name: The full resource name of the recommendation to apply
+            partial_failure: Whether to enable partial failure
 
         Returns:
             Applied recommendation details
@@ -485,18 +524,21 @@ def create_recommendation_tools(
             ctx=ctx,
             customer_id=customer_id,
             recommendation_resource_name=recommendation_resource_name,
+            partial_failure=partial_failure,
         )
 
     async def dismiss_recommendation(
         ctx: Context,
         customer_id: str,
         recommendation_resource_names: List[str],
+        partial_failure: bool = False,
     ) -> Dict[str, Any]:
         """Dismiss one or more recommendations.
 
         Args:
             customer_id: The customer ID
             recommendation_resource_names: List of recommendation resource names to dismiss
+            partial_failure: Whether to enable partial failure
 
         Returns:
             Dismissal result with count and status
@@ -505,6 +547,7 @@ def create_recommendation_tools(
             ctx=ctx,
             customer_id=customer_id,
             recommendation_resource_names=recommendation_resource_names,
+            partial_failure=partial_failure,
         )
 
     async def generate_recommendations(
@@ -517,22 +560,38 @@ def create_recommendation_tools(
         bidding_info: Optional[Dict[str, Any]] = None,
         seed_info: Optional[Dict[str, Any]] = None,
         budget_info: Optional[Dict[str, Any]] = None,
+        campaign_image_asset_count: Optional[int] = None,
+        campaign_call_asset_count: Optional[int] = None,
+        country_codes: Optional[List[str]] = None,
+        language_codes: Optional[List[str]] = None,
+        positive_locations_ids: Optional[List[int]] = None,
+        negative_locations_ids: Optional[List[int]] = None,
+        target_partner_search_network: Optional[bool] = None,
+        target_content_network: Optional[bool] = None,
+        merchant_center_account_id: Optional[int] = None,
+        is_new_customer: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Generate optimization recommendations for a customer.
 
         Args:
             customer_id: The customer ID
-            recommendation_types: List of types to generate:
-                - CAMPAIGN_BUDGET, KEYWORD, MAXIMIZE_CLICKS_OPT_IN
-                - MAXIMIZE_CONVERSIONS_OPT_IN, MAXIMIZE_CONVERSION_VALUE_OPT_IN
-                - SET_TARGET_CPA, SET_TARGET_ROAS, SITELINK_ASSET
-                - TARGET_CPA_OPT_IN, TARGET_ROAS_OPT_IN
+            recommendation_types: List of types to generate
             advertising_channel_type: Channel type - SEARCH or PERFORMANCE_MAX
             campaign_sitelink_count: Number of sitelinks (for SITELINK_ASSET type)
             conversion_tracking_status: Conversion tracking status (for bidding opt-in)
             bidding_info: Dict with bidding_strategy_type and optional target_cpa_micros/target_roas
             seed_info: Dict with url_seed and/or keyword_seeds for keyword generation
             budget_info: Dict with current_budget (micros) for budget recommendations
+            campaign_image_asset_count: Number of image assets in the campaign
+            campaign_call_asset_count: Number of call assets in the campaign
+            country_codes: List of country codes for targeting
+            language_codes: List of language codes for targeting
+            positive_locations_ids: List of positive location IDs for targeting
+            negative_locations_ids: List of negative location IDs for targeting
+            target_partner_search_network: Whether to target partner search network
+            target_content_network: Whether to target content network
+            merchant_center_account_id: Merchant Center account ID
+            is_new_customer: Whether this is a new customer
 
         Returns:
             Generated recommendations
@@ -547,6 +606,16 @@ def create_recommendation_tools(
             bidding_info=bidding_info,
             seed_info=seed_info,
             budget_info=budget_info,
+            campaign_image_asset_count=campaign_image_asset_count,
+            campaign_call_asset_count=campaign_call_asset_count,
+            country_codes=country_codes,
+            language_codes=language_codes,
+            positive_locations_ids=positive_locations_ids,
+            negative_locations_ids=negative_locations_ids,
+            target_partner_search_network=target_partner_search_network,
+            target_content_network=target_content_network,
+            merchant_center_account_id=merchant_center_account_id,
+            is_new_customer=is_new_customer,
         )
 
     tools.extend(

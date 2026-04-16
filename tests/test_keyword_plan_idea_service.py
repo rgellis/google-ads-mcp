@@ -461,6 +461,30 @@ async def test_generate_ad_group_themes(
 
 
 @pytest.mark.asyncio
+async def test_generate_keyword_ideas_with_page_token(
+    keyword_plan_idea_service: KeywordPlanIdeaService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test page_token parameter reaches the request."""
+    mock_idea_client = keyword_plan_idea_service.client  # type: ignore
+    mock_idea_client.generate_keyword_ideas.return_value = []  # type: ignore
+
+    await keyword_plan_idea_service.generate_keyword_ideas_from_keywords(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        keywords=["test"],
+        language="languageConstants/1000",
+        geo_target_constants=["geoTargetConstants/2840"],
+        page_token="next_page_token",
+    )
+
+    call_args = mock_idea_client.generate_keyword_ideas.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.page_token == "next_page_token"
+
+
+@pytest.mark.asyncio
 async def test_generate_keyword_forecast_metrics(
     keyword_plan_idea_service: KeywordPlanIdeaService,
     mock_sdk_client: Any,
