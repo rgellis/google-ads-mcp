@@ -1,4 +1,4 @@
-"""Google Ads service implementation with full v20 type safety."""
+"""Google Ads service implementation with full v23 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
@@ -345,7 +345,46 @@ def create_google_ads_tools(
             summary_row_setting=summary_row_setting,
         )
 
-    tools.extend([search_google_ads, search_google_ads_stream])
+    async def mutate_google_ads(
+        ctx: Context,
+        customer_id: str,
+        operations: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+    ) -> Dict[str, Any]:
+        """Execute multiple mutate operations across different resource types.
+
+        This is the most flexible mutation method, allowing operations on
+        multiple resource types in a single atomic request.
+
+        Args:
+            customer_id: The customer ID
+            operations: List of mutate operation dicts. Each dict should have
+                exactly one key matching a resource type (e.g. 'campaign_operation',
+                'ad_group_operation') with the operation details as value.
+            partial_failure: If true, valid operations succeed even if others fail
+            validate_only: If true, only validates without executing
+
+        Returns:
+            Mutation results with per-operation responses
+        """
+        mutate_ops = []
+        for op_data in operations:
+            mutate_op = MutateOperation()
+            for key, value in op_data.items():
+                if hasattr(mutate_op, key):
+                    setattr(mutate_op, key, value)
+            mutate_ops.append(mutate_op)
+
+        return await service.mutate(
+            ctx=ctx,
+            customer_id=customer_id,
+            operations=mutate_ops,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+        )
+
+    tools.extend([search_google_ads, search_google_ads_stream, mutate_google_ads])
     return tools
 
 
