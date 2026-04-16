@@ -690,3 +690,116 @@ async def test_list_insights_eligible_dates(
 
     assert result == expected_result
     mock_ai_client.list_insights_eligible_dates.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_customer_insights_group_is_set(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test that customer_insights_group is passed through to the request."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.generate_audience_overlap_insights.return_value = mock_response  # type: ignore
+
+    expected_result = {"dimension_results": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.generate_audience_overlap_insights(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            country_location="geoTargetConstants/2840",
+            primary_attribute_type="age_range",
+            primary_attribute_value="AGE_RANGE_25_34",
+            dimensions=["AFFINITY_USER_INTEREST"],
+            customer_insights_group="my-group-label",
+        )
+
+    assert result == expected_result
+    mock_ai_client.generate_audience_overlap_insights.assert_called_once()  # type: ignore
+    call_args = mock_ai_client.generate_audience_overlap_insights.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_insights_group == "my-group-label"
+
+
+@pytest.mark.asyncio
+async def test_data_month_on_generate_audience_composition_insights(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test that data_month is passed through to GenerateAudienceCompositionInsightsRequest."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock(spec=GenerateAudienceCompositionInsightsResponse)
+    mock_response.sections = []
+    mock_ai_client.generate_audience_composition_insights.return_value = mock_response  # type: ignore
+
+    expected_result = {"sections": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.generate_audience_composition_insights(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            audience_countries=["2840"],
+            dimensions=["AGE_RANGE"],
+            data_month="2026-01",
+        )
+
+    assert result == expected_result
+    mock_ai_client.generate_audience_composition_insights.assert_called_once()  # type: ignore
+    call_args = mock_ai_client.generate_audience_composition_insights.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.data_month == "2026-01"
+
+
+@pytest.mark.asyncio
+async def test_location_country_filters_on_list_audience_insights_attributes(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test that location_country_filters are built and passed to ListAudienceInsightsAttributesRequest."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.list_audience_insights_attributes.return_value = mock_response  # type: ignore
+
+    expected_result = {"attributes": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.list_audience_insights_attributes(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            dimensions=["AFFINITY_USER_INTEREST"],
+            query_text="fitness",
+            location_country_filters=[
+                "geoTargetConstants/2840",
+                "geoTargetConstants/2826",
+            ],
+        )
+
+    assert result == expected_result
+    mock_ai_client.list_audience_insights_attributes.assert_called_once()  # type: ignore
+    call_args = mock_ai_client.list_audience_insights_attributes.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.location_country_filters) == 2
+    assert (
+        request.location_country_filters[0].geo_target_constant
+        == "geoTargetConstants/2840"
+    )
+    assert (
+        request.location_country_filters[1].geo_target_constant
+        == "geoTargetConstants/2826"
+    )

@@ -78,6 +78,7 @@ class AudienceInsightsService:
         specific_audience_ages: Optional[List[str]] = None,
         specific_audience_genders: Optional[List[str]] = None,
         specific_audience_user_interests: Optional[List[str]] = None,
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate insights finder report comparing two audiences.
 
@@ -92,6 +93,7 @@ class AudienceInsightsService:
             specific_audience_ages: Optional age ranges for specific audience
             specific_audience_genders: Optional genders for specific audience
             specific_audience_user_interests: Optional user interest IDs for specific audience
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Insights report with audience comparisons
@@ -169,6 +171,8 @@ class AudienceInsightsService:
             request.customer_id = customer_id
             request.baseline_audience = baseline_audience
             request.specific_audience = specific_audience
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
 
             # Make the API call
             response: GenerateInsightsFinderReportResponse = (
@@ -202,6 +206,8 @@ class AudienceInsightsService:
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
         audience_attribute_groups: Optional[List[Dict[str, Any]]] = None,
+        customer_insights_group: Optional[str] = None,
+        data_month: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate audience composition insights for a specific audience.
 
@@ -214,6 +220,8 @@ class AudienceInsightsService:
             audience_genders: Optional genders
             audience_user_interests: Optional user interest IDs
             audience_attribute_groups: Optional custom attribute groups
+            customer_insights_group: Optional user-defined grouping label
+            data_month: Optional specific month in YYYY-MM format
 
         Returns:
             Audience composition insights
@@ -267,6 +275,10 @@ class AudienceInsightsService:
                         dimension,
                     )
                 )
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
+            if data_month:
+                request.data_month = data_month
 
             # Make the API call
             response: GenerateAudienceCompositionInsightsResponse = (
@@ -298,6 +310,7 @@ class AudienceInsightsService:
         audience_ages: Optional[List[str]] = None,
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate suggested targeting insights for reaching similar audiences.
 
@@ -308,6 +321,7 @@ class AudienceInsightsService:
             audience_ages: Optional age ranges
             audience_genders: Optional genders
             audience_user_interests: Optional user interest IDs
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Suggested targeting insights
@@ -346,6 +360,8 @@ class AudienceInsightsService:
             request = GenerateSuggestedTargetingInsightsRequest()
             request.customer_id = customer_id
             request.audience_definition = audience_definition
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
 
             # Make the API call
             response: GenerateSuggestedTargetingInsightsResponse = (
@@ -375,6 +391,7 @@ class AudienceInsightsService:
         customer_id: str,
         audience_description: str,
         country_locations: List[str],
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate an audience definition from a free-text description.
 
@@ -383,6 +400,7 @@ class AudienceInsightsService:
             customer_id: The customer ID
             audience_description: Free-text description of the audience (max 2000 chars)
             country_locations: List of country geo target constant resource names
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             High and medium relevance attributes for the described audience
@@ -400,6 +418,8 @@ class AudienceInsightsService:
             request = GenerateAudienceDefinitionRequest()
             request.customer_id = customer_id
             request.audience_description = description
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
 
             response: GenerateAudienceDefinitionResponse = (
                 self.client.generate_audience_definition(request=request)
@@ -424,6 +444,7 @@ class AudienceInsightsService:
         primary_attribute_type: str,
         primary_attribute_value: str,
         dimensions: List[str],
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate audience overlap insights for a primary attribute.
 
@@ -435,6 +456,7 @@ class AudienceInsightsService:
             primary_attribute_value: Value - user interest resource name, age range, or gender
             dimensions: Dimensions to analyze overlap - AFFINITY_USER_INTEREST,
                 IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Overlap insights with potential YouTube reach intersections
@@ -473,6 +495,8 @@ class AudienceInsightsService:
             request.country_location = country
             request.primary_attribute = primary_attr
             request.dimensions = dim_enums
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
 
             response: GenerateAudienceOverlapInsightsResponse = (
                 self.client.generate_audience_overlap_insights(request=request)
@@ -494,6 +518,7 @@ class AudienceInsightsService:
         ctx: Context,
         customer_id: str,
         audiences: List[Dict[str, Any]],
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate targeting suggestion metrics for audiences.
 
@@ -504,6 +529,7 @@ class AudienceInsightsService:
                 - country_locations: List of geo target constant resource names
                 - age_ranges: Optional list of age range strings
                 - gender: Optional gender string
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Targeting suggestion metrics per audience
@@ -536,6 +562,8 @@ class AudienceInsightsService:
             request = GenerateTargetingSuggestionMetricsRequest()
             request.customer_id = customer_id
             request.audiences = insights_audiences
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
 
             response: GenerateTargetingSuggestionMetricsResponse = (
                 self.client.generate_targeting_suggestion_metrics(request=request)
@@ -558,6 +586,9 @@ class AudienceInsightsService:
         customer_id: str,
         dimensions: List[str],
         query_text: str,
+        customer_insights_group: Optional[str] = None,
+        location_country_filters: Optional[List[str]] = None,
+        youtube_reach_location: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List audience insights attributes by searching.
 
@@ -567,6 +598,9 @@ class AudienceInsightsService:
             dimensions: Dimensions to search - CATEGORY, KNOWLEDGE_GRAPH, AFFINITY_USER_INTEREST,
                 IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER, etc.
             query_text: Free text search query
+            customer_insights_group: Optional user-defined grouping label
+            location_country_filters: Optional list of geo target constant resource names for location filtering
+            youtube_reach_location: Optional geo target constant resource name for YouTube reach
 
         Returns:
             Matching audience insights attributes
@@ -583,6 +617,17 @@ class AudienceInsightsService:
             request.customer_id = customer_id
             request.dimensions = dim_enums
             request.query_text = query_text
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
+            if location_country_filters:
+                for resource_name in location_country_filters:
+                    location = LocationInfo()
+                    location.geo_target_constant = resource_name
+                    request.location_country_filters.append(location)
+            if youtube_reach_location:
+                location = LocationInfo()
+                location.geo_target_constant = youtube_reach_location
+                request.youtube_reach_location = location
 
             response: ListAudienceInsightsAttributesResponse = (
                 self.client.list_audience_insights_attributes(request=request)
@@ -602,17 +647,21 @@ class AudienceInsightsService:
     async def list_insights_eligible_dates(
         self,
         ctx: Context,
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List eligible date ranges for audience insights reports.
 
         Args:
             ctx: FastMCP context
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Available data months and last 30 days date range
         """
         try:
             request = ListInsightsEligibleDatesRequest()
+            if customer_insights_group:
+                request.customer_insights_group = customer_insights_group
 
             response: ListInsightsEligibleDatesResponse = (
                 self.client.list_insights_eligible_dates(request=request)
@@ -651,6 +700,7 @@ def create_audience_insights_tools(
         specific_audience_ages: Optional[List[str]] = None,
         specific_audience_genders: Optional[List[str]] = None,
         specific_audience_user_interests: Optional[List[str]] = None,
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate insights finder report comparing baseline and specific audiences.
 
@@ -664,6 +714,7 @@ def create_audience_insights_tools(
             specific_audience_ages: Age ranges for specific audience
             specific_audience_genders: Genders for specific audience
             specific_audience_user_interests: User interest IDs for specific audience
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Insights report with saved_report_url for downloading results
@@ -679,6 +730,7 @@ def create_audience_insights_tools(
             specific_audience_ages=specific_audience_ages,
             specific_audience_genders=specific_audience_genders,
             specific_audience_user_interests=specific_audience_user_interests,
+            customer_insights_group=customer_insights_group,
         )
 
     async def generate_audience_composition_insights(
@@ -690,6 +742,8 @@ def create_audience_insights_tools(
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
         audience_attribute_groups: Optional[List[Dict[str, Any]]] = None,
+        customer_insights_group: Optional[str] = None,
+        data_month: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate detailed composition insights for a specific audience.
 
@@ -701,6 +755,8 @@ def create_audience_insights_tools(
             audience_genders: Optional genders
             audience_user_interests: Optional user interest IDs
             audience_attribute_groups: Optional custom attribute groups
+            customer_insights_group: Optional user-defined grouping label
+            data_month: Optional specific month in YYYY-MM format
 
         Returns:
             Detailed audience composition with affinity scores and demographic breakdowns
@@ -714,6 +770,8 @@ def create_audience_insights_tools(
             audience_genders=audience_genders,
             audience_user_interests=audience_user_interests,
             audience_attribute_groups=audience_attribute_groups,
+            customer_insights_group=customer_insights_group,
+            data_month=data_month,
         )
 
     async def generate_suggested_targeting_insights(
@@ -723,6 +781,7 @@ def create_audience_insights_tools(
         audience_ages: Optional[List[str]] = None,
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate targeting suggestions for reaching similar audiences.
 
@@ -732,6 +791,7 @@ def create_audience_insights_tools(
             audience_ages: Optional age ranges
             audience_genders: Optional genders
             audience_user_interests: Optional user interest IDs
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Suggested user interests and targeting options for similar audiences
@@ -743,6 +803,7 @@ def create_audience_insights_tools(
             audience_ages=audience_ages,
             audience_genders=audience_genders,
             audience_user_interests=audience_user_interests,
+            customer_insights_group=customer_insights_group,
         )
 
     async def generate_audience_definition(
@@ -750,6 +811,7 @@ def create_audience_insights_tools(
         customer_id: str,
         audience_description: str,
         country_locations: List[str],
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate an audience definition from a free-text description using AI.
 
@@ -758,6 +820,7 @@ def create_audience_insights_tools(
             audience_description: Free-text description of the audience (max 2000 chars)
             country_locations: List of country geo target constant resource names
                 (e.g., ["geoTargetConstants/2840"] for US)
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             High and medium relevance attributes for the described audience
@@ -767,6 +830,7 @@ def create_audience_insights_tools(
             customer_id=customer_id,
             audience_description=audience_description,
             country_locations=country_locations,
+            customer_insights_group=customer_insights_group,
         )
 
     async def generate_audience_overlap_insights(
@@ -776,6 +840,7 @@ def create_audience_insights_tools(
         primary_attribute_type: str,
         primary_attribute_value: str,
         dimensions: List[str],
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate audience overlap insights for a primary attribute.
 
@@ -786,6 +851,7 @@ def create_audience_insights_tools(
             primary_attribute_value: Resource name for user_interest, or enum name for age/gender
             dimensions: Dimensions to overlap - AFFINITY_USER_INTEREST,
                 IN_MARKET_USER_INTEREST, AGE_RANGE, GENDER
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Overlap insights with potential YouTube reach intersections
@@ -797,12 +863,14 @@ def create_audience_insights_tools(
             primary_attribute_type=primary_attribute_type,
             primary_attribute_value=primary_attribute_value,
             dimensions=dimensions,
+            customer_insights_group=customer_insights_group,
         )
 
     async def generate_targeting_suggestion_metrics(
         ctx: Context,
         customer_id: str,
         audiences: List[Dict[str, Any]],
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate targeting suggestion metrics for audiences.
 
@@ -812,6 +880,7 @@ def create_audience_insights_tools(
                 - country_locations: List of geo target constant resource names
                 - age_ranges: Optional list of age range strings
                 - gender: Optional gender string (MALE, FEMALE)
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Targeting suggestion metrics per audience (one per input, in order)
@@ -820,6 +889,7 @@ def create_audience_insights_tools(
             ctx=ctx,
             customer_id=customer_id,
             audiences=audiences,
+            customer_insights_group=customer_insights_group,
         )
 
     async def list_audience_insights_attributes(
@@ -827,6 +897,9 @@ def create_audience_insights_tools(
         customer_id: str,
         dimensions: List[str],
         query_text: str,
+        customer_insights_group: Optional[str] = None,
+        location_country_filters: Optional[List[str]] = None,
+        youtube_reach_location: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Search for audience insights attributes by text query.
 
@@ -837,6 +910,9 @@ def create_audience_insights_tools(
                 DEVICE, GEO_TARGET_COUNTRY, SUB_COUNTRY_LOCATION, YOUTUBE_LINEUP,
                 LIFE_EVENT_USER_INTEREST, PARENTAL_STATUS, INCOME_RANGE
             query_text: Free text search query
+            customer_insights_group: Optional user-defined grouping label
+            location_country_filters: Optional list of geo target constant resource names for location filtering
+            youtube_reach_location: Optional geo target constant resource name for YouTube reach
 
         Returns:
             Matching audience insights attributes with metadata
@@ -846,17 +922,27 @@ def create_audience_insights_tools(
             customer_id=customer_id,
             dimensions=dimensions,
             query_text=query_text,
+            customer_insights_group=customer_insights_group,
+            location_country_filters=location_country_filters,
+            youtube_reach_location=youtube_reach_location,
         )
 
     async def list_insights_eligible_dates(
         ctx: Context,
+        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List eligible date ranges for audience insights reports.
+
+        Args:
+            customer_insights_group: Optional user-defined grouping label
 
         Returns:
             Available data months (YYYY-MM format) and last 30 days date range
         """
-        return await service.list_insights_eligible_dates(ctx=ctx)
+        return await service.list_insights_eligible_dates(
+            ctx=ctx,
+            customer_insights_group=customer_insights_group,
+        )
 
     tools.extend(
         [

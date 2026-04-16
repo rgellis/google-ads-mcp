@@ -135,16 +135,16 @@ These 20 services construct response dicts manually instead of using `serialize_
 
 ### 2. `audience_insights` — `src/services/audiences/audience_insights_service.py` | test: `tests/test_audience_insights_service.py`
 
-**All 8 requests missing these common fields:**
-- [ ] `customer_insights_group` (string) — user-defined grouping label
-- [ ] `insights_application_info` (AdditionalApplicationInfo) — application context
+**All 8 requests:**
+- [x] `customer_insights_group` (string) — user-defined grouping label **DONE**
+- N/A `insights_application_info` (AdditionalApplicationInfo) — internal Google tracking field, not useful for MCP callers
 
-**ListAudienceInsightsAttributesRequest also missing:**
-- [ ] `location_country_filters` (LocationInfo) — filter SUB_COUNTRY_LOCATION by country
-- [ ] `youtube_reach_location` (LocationInfo) — return YouTube reach for this market
+**ListAudienceInsightsAttributesRequest:**
+- [x] `location_country_filters` (LocationInfo) — filter SUB_COUNTRY_LOCATION by country **DONE**
+- [x] `youtube_reach_location` (LocationInfo) — return YouTube reach for this market **DONE**
 
-**GenerateAudienceCompositionInsightsRequest also missing:**
-- [ ] `data_month` (string) — specific month for composition data (YYYY-MM)
+**GenerateAudienceCompositionInsightsRequest:**
+- [x] `data_month` (string) — specific month for composition data (YYYY-MM) **DONE**
 
 ### 3. `batch_job` — `src/services/data_import/batch_job_service.py` | test: `tests/test_batch_job_service.py`
 
