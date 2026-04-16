@@ -157,7 +157,7 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 3. `batch_job` — `src/services/data_import/batch_job_service.py` | test: `tests/test_batch_job_service.py`
 
 **AddBatchJobOperationsRequest:**
-- [ ] `sequence_token` (string) — for resumable batch uploads across multiple calls
+- [x] `sequence_token` (string) — for resumable batch uploads across multiple calls **DONE**
 
 ### 4. `benchmarks` — `src/services/planning/benchmarks_service.py` | test: `tests/test_benchmarks_service.py`
 

@@ -469,6 +469,41 @@ async def test_error_handling(
     )
 
 
+@pytest.mark.asyncio
+async def test_add_operations_with_sequence_token(
+    batch_job_service: BatchJobService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding operations with a sequence token for resumable uploads."""
+    customer_id = "1234567890"
+    batch_job_resource_name = f"customers/{customer_id}/batchJobs/123"
+    sequence_token = "abc123token"
+
+    mock_batch_client = batch_job_service.client  # type: ignore
+    mock_batch_client.add_batch_job_operations.return_value = Mock()  # type: ignore
+
+    expected_result = {"next_sequence_token": "def456token"}
+
+    with patch(
+        "src.services.data_import.batch_job_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await batch_job_service.add_operations_to_batch_job(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            batch_job_resource_name=batch_job_resource_name,
+            operations_data=[],
+            sequence_token=sequence_token,
+        )
+
+    assert result == expected_result
+    mock_batch_client.add_batch_job_operations.assert_called_once()  # type: ignore
+    call_args = mock_batch_client.add_batch_job_operations.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.sequence_token == sequence_token
+
+
 def test_register_batch_job_tools() -> None:
     """Test tool registration."""
     # Arrange

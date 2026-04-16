@@ -178,6 +178,7 @@ class BatchJobService:
         customer_id: str,
         batch_job_resource_name: str,
         operations_data: List[Dict[str, Any]],
+        sequence_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add operations to a batch job.
 
@@ -186,6 +187,8 @@ class BatchJobService:
             customer_id: The customer ID
             batch_job_resource_name: The batch job resource name
             operations_data: List of operation data (simplified format)
+            sequence_token: Token for resumable uploads across multiple calls.
+                Use the next_sequence_token from the previous response.
 
         Returns:
             Result of adding operations
@@ -204,6 +207,8 @@ class BatchJobService:
             request = AddBatchJobOperationsRequest()
             request.resource_name = batch_job_resource_name
             request.mutate_operations = operations
+            if sequence_token:
+                request.sequence_token = sequence_token
 
             # Make the API call
             response: AddBatchJobOperationsResponse = (
@@ -447,6 +452,7 @@ def create_batch_job_tools(
         customer_id: str,
         batch_job_resource_name: str,
         operations_data: List[Dict[str, Any]],
+        sequence_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add operations to a batch job.
 
@@ -454,15 +460,17 @@ def create_batch_job_tools(
             customer_id: The customer ID
             batch_job_resource_name: The batch job resource name
             operations_data: List of operation data in simplified format
+            sequence_token: Token for resumable uploads (from previous response's next_sequence_token)
 
         Returns:
-            Result of adding operations with sequence token
+            Result of adding operations with next_sequence_token for continuation
         """
         return await service.add_operations_to_batch_job(
             ctx=ctx,
             customer_id=customer_id,
             batch_job_resource_name=batch_job_resource_name,
             operations_data=operations_data,
+            sequence_token=sequence_token,
         )
 
     async def run_batch_job(
