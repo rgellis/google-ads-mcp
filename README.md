@@ -4,16 +4,17 @@ An unofficial Model Context Protocol (MCP) server implementation for Google Ads 
 
 ## Overview
 
-This project provides an MCP server that wraps the Google Ads API v20, enabling Large Language Models (LLMs) to interact with Google Ads accounts through a standardized interface. The server uses the official Google Ads Python SDK with full type annotations for robust and reliable API interactions.
+This project provides an MCP server that wraps the Google Ads API v23, enabling Large Language Models (LLMs) to interact with Google Ads accounts through a standardized interface. The server uses the official Google Ads Python SDK (`google-ads==30.0.0`) with full type annotations for robust and reliable API interactions.
 
 ## Features
 
 - **Full Type Safety**: Implemented with strict type annotations using pyright
 - **SDK-Based**: Built on top of the official Google Ads Python SDK for reliability
-- **Comprehensive Coverage**: Implements 89 Google Ads services for campaign management
+- **100% API Coverage**: Implements all 111 Google Ads v23 services with every RPC method
 - **MCP Compliant**: Follows the Model Context Protocol specification for LLM integration
 - **Async Support**: Leverages FastMCP for asynchronous operations
-- **Extensive Test Coverage**: 72 services have test coverage
+- **100% Test Coverage**: All 113 service files have tests (774+ tests passing)
+- **Intentionally Skipped Fields**: A small number of internal Google tracking fields (e.g. `insights_application_info`) are not exposed — see `FIELD_COVERAGE_AUDIT.md` for details
 
 ## Installation
 

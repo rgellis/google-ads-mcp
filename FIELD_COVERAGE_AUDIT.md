@@ -121,6 +121,14 @@ These 20 services construct response dicts manually instead of using `serialize_
 
 **For each field added:** update the corresponding test file to cover the new parameter (both passing a value and verifying it reaches the request object).
 
+### Intentionally Skipped Fields
+
+Some API fields are intentionally not exposed through the MCP server because they serve no purpose for MCP callers:
+
+| Field | Services | Reason |
+|-------|----------|--------|
+| `insights_application_info` (AdditionalApplicationInfo) | audience_insights (8 RPCs), benchmarks (5 RPCs), content_creator_insights (2 RPCs), reach_plan (6 RPCs) | Internal Google application tracking metadata. Used by Google's own tools to identify the calling application. Not relevant for third-party MCP callers. |
+
 
 
 ### 1. `asset_generation` — `src/services/assets/asset_generation_service.py` | test: `tests/test_asset_generation_service.py`
