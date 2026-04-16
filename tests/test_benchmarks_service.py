@@ -256,6 +256,61 @@ async def test_generate_benchmarks_metrics_error(
     assert "Test Google Ads Exception" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_generate_benchmarks_with_optional_fields(
+    service: BenchmarksService,
+    mock_ctx: Context,
+) -> None:
+    """Test generate_benchmarks_metrics with product_filter, breakdown, and group."""
+    mock_client = service.client
+    mock_client.generate_benchmarks_metrics.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.planning.benchmarks_service.serialize_proto_message",
+        return_value={"metrics": {}},
+    ):
+        result = await service.generate_benchmarks_metrics(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            industry_vertical_id=12345,
+            location_resource_name="geoTargetConstants/2840",
+            start_date="2024-01-01",
+            end_date="2024-03-31",
+            product_codes=["VIDEO_TRUEVIEW"],
+            date_breakdown="MONTH",
+            customer_benchmarks_group="my_group",
+        )
+
+    call_args = mock_client.generate_benchmarks_metrics.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_benchmarks_group == "my_group"
+    assert request.breakdown_definition is not None
+    assert request.product_filter is not None
+
+
+@pytest.mark.asyncio
+async def test_list_benchmarks_sources_with_filter(
+    service: BenchmarksService,
+    mock_ctx: Context,
+) -> None:
+    """Test list_benchmarks_sources with source type filter."""
+    mock_client = service.client
+    mock_client.list_benchmarks_sources.return_value = Mock()  # type: ignore
+
+    with patch(
+        "src.services.planning.benchmarks_service.serialize_proto_message",
+        return_value={"sources": []},
+    ):
+        result = await service.list_benchmarks_sources(
+            ctx=mock_ctx,
+            benchmarks_source_types=["INDUSTRY_VERTICAL"],
+        )
+
+    call_args = mock_client.list_benchmarks_sources.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.benchmarks_sources) == 1
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()

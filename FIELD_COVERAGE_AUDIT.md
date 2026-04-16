@@ -162,13 +162,16 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 4. `benchmarks` — `src/services/planning/benchmarks_service.py` | test: `tests/test_benchmarks_service.py`
 
 **GenerateBenchmarksMetricsRequest:**
-- [ ] `product_filter` (ProductFilter) — filter which products to benchmark
-- [ ] `breakdown_definition` (BreakdownDefinition) — date granularity for breakdown
-- [ ] `customer_benchmarks_group` (string) — user-defined grouping label
-- [ ] `application_info` (AdditionalApplicationInfo) — application context
+- [x] `product_filter` (ProductFilter) — filter which products to benchmark **DONE**
+- [x] `breakdown_definition` (BreakdownDefinition) — date granularity for breakdown **DONE**
+- [x] `customer_benchmarks_group` (string) — user-defined grouping label **DONE**
+- N/A `application_info` (AdditionalApplicationInfo) — intentionally skipped (see above)
 
-**All 4 list requests missing:**
-- [ ] `application_info` (AdditionalApplicationInfo) — application context
+**ListBenchmarksSourcesRequest:**
+- [x] `benchmarks_sources` (BenchmarksSourceType) — filter by source type **DONE**
+
+**All 4 list requests:**
+- N/A `application_info` (AdditionalApplicationInfo) — intentionally skipped (see above)
 
 ### 5. `campaign_draft` — `src/services/campaign/campaign_draft_service.py` | test: `tests/test_campaign_draft_service.py`
 

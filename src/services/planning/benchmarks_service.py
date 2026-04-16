@@ -65,9 +65,26 @@ class BenchmarksService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def list_benchmarks_sources(self, ctx: Context) -> Dict[str, Any]:
+    async def list_benchmarks_sources(
+        self, ctx: Context, benchmarks_source_types: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """List available benchmark sources (industry verticals).
+
+        Args:
+            ctx: FastMCP context
+            benchmarks_source_types: Optional filter by source type
+        """
         try:
             request = ListBenchmarksSourcesRequest()
+            if benchmarks_source_types:
+                from google.ads.googleads.v23.enums.types.benchmarks_source_type import (
+                    BenchmarksSourceTypeEnum,
+                )
+
+                request.benchmarks_sources = [
+                    getattr(BenchmarksSourceTypeEnum.BenchmarksSourceType, t)
+                    for t in benchmarks_source_types
+                ]
             response: ListBenchmarksSourcesResponse = (
                 self.client.list_benchmarks_sources(request=request)
             )
@@ -98,7 +115,24 @@ class BenchmarksService:
         start_date: str,
         end_date: str,
         currency_code: Optional[str] = None,
+        product_codes: Optional[List[str]] = None,
+        date_breakdown: Optional[str] = None,
+        customer_benchmarks_group: Optional[str] = None,
     ) -> Dict[str, Any]:
+        """Generate competitive benchmark metrics.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            industry_vertical_id: Industry vertical ID from list_benchmarks_sources
+            location_resource_name: Geo target constant resource name
+            start_date: Start date (YYYY-MM-DD)
+            end_date: End date (YYYY-MM-DD)
+            currency_code: Optional currency code (e.g. USD)
+            product_codes: Optional list of product codes to filter benchmarks
+            date_breakdown: Optional time granularity (WEEK, MONTH, QUARTER)
+            customer_benchmarks_group: Optional user-defined grouping label
+        """
         try:
             customer_id = format_customer_id(customer_id)
             request = GenerateBenchmarksMetricsRequest()
@@ -115,6 +149,30 @@ class BenchmarksService:
             request.date_range = date_range
             if currency_code:
                 request.currency_code = currency_code
+            if product_codes:
+                from google.ads.googleads.v23.services.types.benchmarks_service import (
+                    ProductFilter,
+                )
+
+                product_filter = ProductFilter()
+                product_filter.product_list.product_codes = product_codes
+                request.product_filter = product_filter
+            if date_breakdown:
+                from google.ads.googleads.v23.services.types.benchmarks_service import (
+                    BreakdownDefinition,
+                )
+                from google.ads.googleads.v23.enums.types.benchmarks_time_granularity import (
+                    BenchmarksTimeGranularityEnum,
+                )
+
+                breakdown = BreakdownDefinition()
+                breakdown.date_breakdown = getattr(
+                    BenchmarksTimeGranularityEnum.BenchmarksTimeGranularity,
+                    date_breakdown,
+                )
+                request.breakdown_definition = breakdown
+            if customer_benchmarks_group:
+                request.customer_benchmarks_group = customer_benchmarks_group
             response: GenerateBenchmarksMetricsResponse = (
                 self.client.generate_benchmarks_metrics(request=request)
             )
@@ -143,9 +201,17 @@ def create_benchmarks_tools(
         """List available benchmark products."""
         return await service.list_benchmarks_products(ctx=ctx)
 
-    async def list_benchmarks_sources(ctx: Context) -> Dict[str, Any]:
-        """List available benchmark sources (industry verticals)."""
-        return await service.list_benchmarks_sources(ctx=ctx)
+    async def list_benchmarks_sources(
+        ctx: Context, benchmarks_source_types: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """List available benchmark sources (industry verticals).
+
+        Args:
+            benchmarks_source_types: Optional filter by source type
+        """
+        return await service.list_benchmarks_sources(
+            ctx=ctx, benchmarks_source_types=benchmarks_source_types
+        )
 
     async def list_benchmarks_available_dates(ctx: Context) -> Dict[str, Any]:
         """List available date ranges for benchmarks."""
@@ -159,6 +225,9 @@ def create_benchmarks_tools(
         start_date: str,
         end_date: str,
         currency_code: Optional[str] = None,
+        product_codes: Optional[List[str]] = None,
+        date_breakdown: Optional[str] = None,
+        customer_benchmarks_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate competitive benchmark metrics.
 
@@ -169,6 +238,9 @@ def create_benchmarks_tools(
             start_date: Start date (YYYY-MM-DD)
             end_date: End date (YYYY-MM-DD)
             currency_code: Optional currency code (e.g. USD)
+            product_codes: Optional product codes to filter benchmarks
+            date_breakdown: Optional time granularity (WEEK, MONTH, QUARTER)
+            customer_benchmarks_group: Optional user-defined grouping label
         """
         return await service.generate_benchmarks_metrics(
             ctx=ctx,
@@ -178,6 +250,9 @@ def create_benchmarks_tools(
             start_date=start_date,
             end_date=end_date,
             currency_code=currency_code,
+            product_codes=product_codes,
+            date_breakdown=date_breakdown,
+            customer_benchmarks_group=customer_benchmarks_group,
         )
 
     tools.extend(
