@@ -34,7 +34,10 @@ async def test_create_customizer_attribute(
         return_value={"results": []},
     ):
         result = await service.create_customizer_attribute(
-            ctx=mock_ctx, customer_id="1234567890", name="test_attr", type_="TEXT"
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name="test_attr",
+            attribute_type="TEXT",
         )
     assert result == {"results": []}
     mock_client.mutate_customizer_attributes.assert_called_once()
@@ -53,7 +56,7 @@ async def test_remove_customizer_attribute(
         result = await service.remove_customizer_attribute(
             ctx=mock_ctx,
             customer_id="1234567890",
-            customizer_attribute_resource_name="customers/1234567890/customizerAttributes/1",
+            attribute_resource_name="customers/1234567890/customizerAttributes/1",
         )
     assert result == {"results": []}
 

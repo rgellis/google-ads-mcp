@@ -160,8 +160,8 @@ async def test_create_campaign_with_dates(
     call_args = mock_campaign_client.mutate_campaigns.call_args  # type: ignore
     request = call_args[1]["request"]
     operation = request.operations[0]
-    assert operation.create.start_date == "20240301"
-    assert operation.create.end_date == "20240331"
+    assert operation.create.start_date_time == "20240301"
+    assert operation.create.end_date_time == "20240331"
 
 
 @pytest.mark.asyncio
@@ -337,9 +337,9 @@ async def test_update_campaign_dates_only(
     call_args = mock_campaign_client.mutate_campaigns.call_args  # type: ignore
     request = call_args[1]["request"]
     operation = request.operations[0]
-    assert operation.update.start_date == "20240401"
-    assert operation.update.end_date == "20240430"
-    assert set(operation.update_mask.paths) == {"start_date", "end_date"}
+    assert operation.update.start_date_time == "20240401"
+    assert operation.update.end_date_time == "20240430"
+    assert set(operation.update_mask.paths) == {"start_date_time", "end_date_time"}
 
 
 @pytest.mark.asyncio

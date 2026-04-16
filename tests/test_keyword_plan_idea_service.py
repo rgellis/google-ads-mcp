@@ -418,7 +418,7 @@ async def test_generate_keyword_historical_metrics(
     expected_result = {"results": []}
 
     with patch(
-        "src.services.planning.keyword_plan_idea_service.serialize_proto_message",
+        "src.utils.serialize_proto_message",
         return_value=expected_result,
     ):
         result = await keyword_plan_idea_service.generate_keyword_historical_metrics(
@@ -446,7 +446,7 @@ async def test_generate_ad_group_themes(
     expected_result = {"ad_group_keyword_suggestions": []}
 
     with patch(
-        "src.services.planning.keyword_plan_idea_service.serialize_proto_message",
+        "src.utils.serialize_proto_message",
         return_value=expected_result,
     ):
         result = await keyword_plan_idea_service.generate_ad_group_themes(
@@ -475,7 +475,7 @@ async def test_generate_keyword_forecast_metrics(
     expected_result = {"campaign_forecast_metrics": {}}
 
     with patch(
-        "src.services.planning.keyword_plan_idea_service.serialize_proto_message",
+        "src.utils.serialize_proto_message",
         return_value=expected_result,
     ):
         result = await keyword_plan_idea_service.generate_keyword_forecast_metrics(

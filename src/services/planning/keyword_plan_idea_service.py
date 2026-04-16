@@ -461,23 +461,23 @@ class KeywordPlanIdeaService:
             # Build bidding strategy
             strategy_type = bidding_strategy["type"]
             if strategy_type == "manual_cpc":
-                campaign.manual_cpc_bidding_strategy.max_cpc_bid_micros = (
-                    bidding_strategy["max_cpc_bid_micros"]
-                )
+                campaign.bidding_strategy.manual_cpc_bidding_strategy.max_cpc_bid_micros = bidding_strategy[
+                    "max_cpc_bid_micros"
+                ]
                 if "daily_budget_micros" in bidding_strategy:
-                    campaign.manual_cpc_bidding_strategy.daily_budget_micros = (
-                        bidding_strategy["daily_budget_micros"]
-                    )
+                    campaign.bidding_strategy.manual_cpc_bidding_strategy.daily_budget_micros = bidding_strategy[
+                        "daily_budget_micros"
+                    ]
             elif strategy_type == "maximize_clicks":
-                campaign.maximize_clicks_bidding_strategy.daily_target_spend_micros = (
-                    bidding_strategy["daily_target_spend_micros"]
-                )
+                campaign.bidding_strategy.maximize_clicks_bidding_strategy.daily_target_spend_micros = bidding_strategy[
+                    "daily_target_spend_micros"
+                ]
                 if "max_cpc_bid_ceiling_micros" in bidding_strategy:
-                    campaign.maximize_clicks_bidding_strategy.max_cpc_bid_ceiling_micros = bidding_strategy[
+                    campaign.bidding_strategy.maximize_clicks_bidding_strategy.max_cpc_bid_ceiling_micros = bidding_strategy[
                         "max_cpc_bid_ceiling_micros"
                     ]
             elif strategy_type == "maximize_conversions":
-                campaign.maximize_conversions_bidding_strategy.daily_target_spend_micros = bidding_strategy[
+                campaign.bidding_strategy.maximize_conversions_bidding_strategy.daily_target_spend_micros = bidding_strategy[
                     "daily_target_spend_micros"
                 ]
 

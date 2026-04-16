@@ -17,22 +17,19 @@ class TestExperimentArmService:
     """Test cases for ExperimentArmService"""
 
     @pytest.fixture
-    def mock_client(self) -> Any:
-        """Create a mock Google Ads client"""
-        client = Mock()
-        service = Mock()
-        client.get_service.return_value = service  # type: ignore
-        return client
+    def mock_service_client(self) -> Any:
+        """Create a mock ExperimentArm service client"""
+        return Mock()
 
     @pytest.fixture
-    def experiment_arm_service(self, mock_client: Any) -> Any:
+    def experiment_arm_service(self, mock_service_client: Any) -> Any:
         """Create ExperimentArmService instance with mock client"""
         service = ExperimentArmService()
-        service._client = mock_client  # type: ignore # Need to set private attribute for testing
+        service._client = mock_service_client  # type: ignore # Need to set private attribute for testing
         return service
 
     def test_mutate_experiment_arms(
-        self, experiment_arm_service: Any, mock_client: Any
+        self, experiment_arm_service: Any, mock_service_client: Any
     ):
         """Test mutating experiment arms"""
         # Setup
@@ -46,7 +43,7 @@ class TestExperimentArmService:
                 )
             ]
         )
-        mock_client.get_service.return_value.mutate_experiment_arms.return_value = (  # type: ignore
+        mock_service_client.mutate_experiment_arms.return_value = (  # type: ignore
             mock_response
         )
 
@@ -60,11 +57,10 @@ class TestExperimentArmService:
 
         # Verify
         assert response == mock_response
-        mock_client.get_service.assert_called_with("ExperimentArmService")  # type: ignore
 
         # Verify request
         call_args = (
-            mock_client.get_service.return_value.mutate_experiment_arms.call_args  # type: ignore
+            mock_service_client.mutate_experiment_arms.call_args  # type: ignore
         )
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id

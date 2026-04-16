@@ -24,19 +24,21 @@ def service(mock_sdk_client: Any) -> CustomerNegativeCriterionService:
 
 
 @pytest.mark.asyncio
-async def test_add_negative_keywords(
+async def test_add_placement_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
     mock_client = service.client
-    mock_client.mutate_customer_negative_criteria.return_value = Mock()
-    with patch(
-        "src.services.targeting.customer_negative_criterion_service.serialize_proto_message",
-        return_value={"results": []},
-    ):
-        result = await service.add_negative_keywords(
-            ctx=mock_ctx, customer_id="1234567890", keywords=["bad keyword"]
-        )
-    assert result == {"results": []}
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/1"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_customer_negative_criteria.return_value = mock_response
+    result = await service.add_placement_exclusions(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        placement_urls=["badsite.com"],
+    )
+    assert isinstance(result, list)
     mock_client.mutate_customer_negative_criteria.assert_called_once()
 
 

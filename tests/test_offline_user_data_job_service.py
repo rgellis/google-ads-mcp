@@ -36,7 +36,7 @@ async def test_create_customer_match_job(
         result = await service.create_customer_match_job(
             ctx=mock_ctx,
             customer_id="1234567890",
-            user_list_resource_name="customers/1234567890/userLists/1",
+            job_name="customers/1234567890/userLists/1",
         )
     assert result == {"resource_name": "test"}
     mock_client.create_offline_user_data_job.assert_called_once()
@@ -48,16 +48,13 @@ async def test_run_offline_user_data_job(
 ) -> None:
     mock_client = service.client
     mock_client.run_offline_user_data_job.return_value = Mock()
-    with patch(
-        "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
-        return_value={"status": "running"},
-    ):
-        result = await service.run_offline_user_data_job(
-            ctx=mock_ctx,
-            customer_id="1234567890",
-            job_resource_name="customers/1234567890/offlineUserDataJobs/1",
-        )
-    assert result == {"status": "running"}
+    result = await service.run_offline_user_data_job(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        job_resource_name="customers/1234567890/offlineUserDataJobs/1",
+    )
+    assert result["status"] == "RUNNING"
+    assert result["job_resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
 
 
 def test_register_tools() -> None:

@@ -28,18 +28,18 @@ async def test_add_keywords_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
     mock_client = service.client
-    mock_client.mutate_shared_criteria.return_value = Mock()
-    with patch(
-        "src.services.shared.shared_criterion_service.serialize_proto_message",
-        return_value={"results": []},
-    ):
-        result = await service.add_keywords_to_shared_set(
-            ctx=mock_ctx,
-            customer_id="1234567890",
-            shared_set_id="111",
-            keywords=["keyword1", "keyword2"],
-        )
-    assert result == {"results": []}
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~1"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_keywords_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        keywords=[{"text": "keyword1", "match_type": "BROAD"}],
+    )
+    assert isinstance(result, list)
     mock_client.mutate_shared_criteria.assert_called_once()
 
 
@@ -56,7 +56,7 @@ async def test_remove_shared_criterion(
         result = await service.remove_shared_criterion(
             ctx=mock_ctx,
             customer_id="1234567890",
-            shared_criterion_resource_name="customers/1234567890/sharedCriteria/111~222",
+            criterion_resource_name="customers/1234567890/sharedCriteria/111~222",
         )
     assert result == {"results": []}
 

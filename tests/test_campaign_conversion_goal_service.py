@@ -122,7 +122,7 @@ class TestCampaignConversionGoalService:
         request = mock_client.mutate_campaign_conversion_goals.call_args[1]["request"]  # type: ignore
         operation = request.operations[0]
         assert operation.update.resource_name == (
-            "customers/1234567890/campaignConversionGoals/1111111111~LEAD~APP"
+            "customers/1234567890/campaignConversionGoals/1111111111~IMPORTED_LEAD~APP"
         )
         assert (
             operation.update.category
@@ -249,12 +249,12 @@ class TestCampaignConversionGoalTools:
         with patch.object(service, "update_campaign_conversion_goal") as mock_update:
             mock_update.return_value = {"results": [{"resource_name": "test"}]}  # type: ignore
 
-            # Test with LEAD/APP
+            # Test with IMPORTED_LEAD/APP
             await update_tool(
                 ctx=mock_context,
                 customer_id="1234567890",
                 campaign_id="1111111111",
-                category="LEAD",
+                category="IMPORTED_LEAD",
                 origin="APP",
                 biddable=False,
                 validate_only=True,

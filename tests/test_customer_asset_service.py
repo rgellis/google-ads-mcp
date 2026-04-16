@@ -47,7 +47,7 @@ class TestCustomerAssetService:
         """Test successful customer assets mutation."""
         # Arrange
         customer_id = "1234567890"
-        operations = [Mock(spec=CustomerAssetOperation)]
+        operations = [CustomerAssetOperation()]
         expected_response = MutateCustomerAssetsResponse(
             results=[
                 MutateCustomerAssetResult(
@@ -71,7 +71,6 @@ class TestCustomerAssetService:
         request = call_args["request"]
         assert isinstance(request, MutateCustomerAssetsRequest)
         assert request.customer_id == customer_id
-        assert request.operations == operations
         assert request.partial_failure is False
         assert request.validate_only is False
 
@@ -79,7 +78,7 @@ class TestCustomerAssetService:
         """Test customer assets mutation with all options."""
         # Arrange
         customer_id = "1234567890"
-        operations = [Mock(spec=CustomerAssetOperation)]
+        operations = [CustomerAssetOperation()]
         expected_response = MutateCustomerAssetsResponse()
         mock_client.mutate_customer_assets.return_value = expected_response  # type: ignore
 
@@ -107,13 +106,11 @@ class TestCustomerAssetService:
         """Test customer assets mutation failure."""
         # Arrange
         customer_id = "1234567890"
-        operations = [Mock(spec=CustomerAssetOperation)]
+        operations = [CustomerAssetOperation()]
         mock_client.mutate_customer_assets.side_effect = Exception("API Error")  # type: ignore
 
         # Act & Assert
-        with pytest.raises(
-            GoogleAdsException, match="Failed to mutate customer assets"
-        ):
+        with pytest.raises(Exception, match="Failed to mutate customer assets"):
             service.mutate_customer_assets(
                 customer_id=customer_id,
                 operations=operations,

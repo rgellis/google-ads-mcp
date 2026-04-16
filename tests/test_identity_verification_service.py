@@ -34,7 +34,7 @@ async def test_start_identity_verification(
         customer_id="1234567890",
         verification_program="ADVERTISER_IDENTITY_VERIFICATION",
     )
-    assert result["status"] == "started"
+    assert result["status"] == "STARTED"
 
 
 @pytest.mark.asyncio
@@ -48,7 +48,7 @@ async def test_get_identity_verification(
     result = await service.get_identity_verification(
         ctx=mock_ctx, customer_id="1234567890"
     )
-    assert isinstance(result, dict)
+    assert isinstance(result, list)
 
 
 def test_register_tools() -> None:

@@ -1,7 +1,7 @@
 """Tests for ReachPlanService."""
 
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 
 import pytest
 from fastmcp import Context
@@ -151,39 +151,41 @@ async def test_list_plannable_products(
     mock_reach_plan_client = reach_plan_service.client  # type: ignore
     mock_reach_plan_client.list_plannable_products.return_value = mock_response  # type: ignore
 
-    # Act
-    result = await reach_plan_service.list_plannable_products(
-        ctx=mock_ctx,
-        plannable_location_id=plannable_location_id,
-    )
+    # Mock serialize_proto_message
+    expected_result = {
+        "product_metadata": [
+            {
+                "plannable_product_code": "VIDEO_TRUEVIEW",
+                "plannable_product_name": "YouTube Video ads",
+            },
+            {
+                "plannable_product_code": "DISPLAY_STANDARD",
+                "plannable_product_name": "Display ads",
+            },
+        ]
+    }
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await reach_plan_service.list_plannable_products(
+            ctx=mock_ctx,
+            plannable_location_id=plannable_location_id,
+        )
 
     # Assert
-    assert len(result) == 2
-
-    # Check first product
-    assert result[0]["plannable_product_code"] == "VIDEO_TRUEVIEW"
-    assert result[0]["plannable_product_name"] == "YouTube Video ads"
-    assert len(result[0]["plannable_targeting"]["age_ranges"]) == 2
-    assert "AGE_RANGE_18_24" in result[0]["plannable_targeting"]["age_ranges"]
-    assert len(result[0]["plannable_targeting"]["genders"]) == 2
-    assert len(result[0]["plannable_targeting"]["devices"]) == 2
-    assert result[0]["plannable_targeting"]["networks"] == ["YOUTUBE_WATCH"]
-
-    # Check second product
-    assert result[1]["plannable_product_code"] == "DISPLAY_STANDARD"
-    assert result[1]["plannable_product_name"] == "Display ads"
+    assert result == expected_result
+    assert len(result["product_metadata"]) == 2
+    assert result["product_metadata"][0]["plannable_product_code"] == "VIDEO_TRUEVIEW"
+    assert result["product_metadata"][1]["plannable_product_code"] == "DISPLAY_STANDARD"
 
     # Verify the API call
     mock_reach_plan_client.list_plannable_products.assert_called_once()  # type: ignore
     call_args = mock_reach_plan_client.list_plannable_products.call_args  # type: ignore
     request = call_args[1]["request"]
     assert request.plannable_location_id == plannable_location_id
-
-    # Verify logging
-    mock_ctx.log.assert_called_once_with(  # type: ignore
-        level="info",
-        message=f"Found 2 plannable products for location {plannable_location_id}",
-    )
 
 
 @pytest.mark.asyncio

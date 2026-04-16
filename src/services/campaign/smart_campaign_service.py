@@ -166,7 +166,7 @@ class SmartCampaignService:
 
             # Set business info
             if business_name:
-                request.suggestion_info.business_info.business_name = business_name
+                request.suggestion_info.business_context.business_name = business_name
 
             if final_url:
                 request.suggestion_info.final_url = final_url
@@ -257,7 +257,7 @@ class SmartCampaignService:
             request.customer_id = customer_id
 
             # Set business info
-            request.suggestion_info.business_info.business_name = business_name
+            request.suggestion_info.business_context.business_name = business_name
             request.suggestion_info.final_url = final_url
             request.suggestion_info.language_code = (
                 f"languageConstants/{language_id or '1000'}"

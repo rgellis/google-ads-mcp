@@ -110,7 +110,14 @@ async def test_list_accessible_customers(
     result = await customer_service.list_accessible_customers(ctx=mock_ctx)
 
     # Verify the result
-    assert result == ["1111111111", "2222222222", "3333333333"]
+    assert result == {
+        "resource_names": [
+            "customers/1111111111",
+            "customers/2222222222",
+            "customers/3333333333",
+        ],
+        "customer_ids": ["1111111111", "2222222222", "3333333333"],
+    }
 
     # Verify the API was called correctly
     mock_customer_service.list_accessible_customers.assert_called_once()  # type: ignore
@@ -126,10 +133,11 @@ def test_create_customer_tools() -> None:
     service = MagicMock()
     tools = create_customer_tools(service)
 
-    # Should have 2 tools
-    assert len(tools) == 2
+    # Should have 3 tools
+    assert len(tools) == 3
 
     # Check tool names
     tool_names = [tool.__name__ for tool in tools]
     assert "create_customer_client" in tool_names
     assert "list_accessible_customers" in tool_names
+    assert "mutate_customer" in tool_names

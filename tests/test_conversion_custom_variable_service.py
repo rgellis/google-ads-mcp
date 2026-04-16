@@ -71,7 +71,7 @@ class TestConversionCustomVariableService:
         mock_custom_var.id = 123456
         mock_custom_var.name = "Product Category"
         mock_custom_var.tag = "product_category"
-        mock_result.conversion_custom_variable.CopyFrom(mock_custom_var)  # type: ignore
+        mock_result.conversion_custom_variable = mock_custom_var  # type: ignore
 
         mock_response = MutateConversionCustomVariablesResponse()
         mock_response.results.append(mock_result)  # type: ignore

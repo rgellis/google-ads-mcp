@@ -36,7 +36,19 @@ async def test_upload_conversion_adjustments(
         result = await service.upload_conversion_adjustments(
             ctx=mock_ctx,
             customer_id="1234567890",
-            adjustments=[Mock()],
+            adjustments=[
+                {
+                    "conversion_action": "customers/1234567890/conversionActions/1",
+                    "adjustment_type": "RESTATEMENT",
+                    "gclid": "test_gclid",
+                    "conversion_date_time": "2025-12-01 00:00:00",
+                    "adjustment_date_time": "2026-01-01 00:00:00",
+                    "restatement_value": {
+                        "adjusted_value": 50.0,
+                        "currency_code": "USD",
+                    },
+                }
+            ],
             partial_failure=True,
         )
     assert result == {"results": []}
@@ -56,10 +68,13 @@ async def test_create_restatement_adjustment(
         result = await service.create_restatement_adjustment(
             ctx=mock_ctx,
             customer_id="1234567890",
-            conversion_action_resource_name="customers/1234567890/conversionActions/1",
-            order_id="order123",
+            conversion_action="customers/1234567890/conversionActions/1",
+            gclid="test_gclid",
+            conversion_date_time="2025-12-01 00:00:00",
             adjustment_date_time="2026-01-01 00:00:00",
-            restated_value=50.0,
+            adjusted_value=50.0,
+            currency_code="USD",
+            order_id="order123",
         )
     assert result == {"results": []}
 

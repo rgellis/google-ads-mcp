@@ -110,9 +110,9 @@ class CampaignService:
 
             # Set dates if provided
             if start_date:
-                campaign.start_date = start_date.replace("-", "")
+                campaign.start_date_time = start_date.replace("-", "")
             if end_date:
-                campaign.end_date = end_date.replace("-", "")
+                campaign.end_date_time = end_date.replace("-", "")
 
             # Create the operation
             operation = CampaignOperation()
@@ -182,12 +182,12 @@ class CampaignService:
                 update_mask_fields.append("status")
 
             if start_date is not None:
-                campaign.start_date = start_date.replace("-", "")
-                update_mask_fields.append("start_date")
+                campaign.start_date_time = start_date.replace("-", "")
+                update_mask_fields.append("start_date_time")
 
             if end_date is not None:
-                campaign.end_date = end_date.replace("-", "")
-                update_mask_fields.append("end_date")
+                campaign.end_date_time = end_date.replace("-", "")
+                update_mask_fields.append("end_date_time")
 
             # Create the operation
             operation = CampaignOperation()
