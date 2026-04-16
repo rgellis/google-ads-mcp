@@ -11,9 +11,13 @@ from google.ads.googleads.v23.services.services.customer_service import (
 from google.ads.googleads.v23.services.types.customer_service import (
     CreateCustomerClientRequest,
     CreateCustomerClientResponse,
+    CustomerOperation,
     ListAccessibleCustomersRequest,
     ListAccessibleCustomersResponse,
+    MutateCustomerRequest,
+    MutateCustomerResponse,
 )
+from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import format_customer_id, get_logger, serialize_proto_message
@@ -97,44 +101,37 @@ class CustomerService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def list_accessible_customers(
-        self, ctx: Context
-    ) -> ListAccessibleCustomersResponse:
+    async def list_accessible_customers(self, ctx: Context) -> Dict[str, Any]:
         """List all accessible customers for the authenticated user.
 
         Args:
             ctx: FastMCP context
 
         Returns:
-            List of accessible customer IDs
+            List of accessible customer resource names and IDs
         """
         try:
-            # Create the request
             request = ListAccessibleCustomersRequest()
 
-            # Make the API call
             response: ListAccessibleCustomersResponse = (
                 self.client.list_accessible_customers(request=request)
             )
-            await ctx.log(
-                level="info",
-                message=f"ListAccessibleCustomersResponse: {response.resource_names}",
-            )
-            return response
 
-            customer_ids = response.resource_names
+            customer_ids = [
+                resource_name.split("/")[-1]
+                for resource_name in response.resource_names
+                if resource_name
+            ]
 
             await ctx.log(
                 level="info",
                 message=f"Found {len(customer_ids)} accessible customers",
             )
 
-            # Extract customer IDs from resource names
-            return [
-                resource_name.split("/")[-1]
-                for resource_name in customer_ids
-                if resource_name
-            ]
+            return {
+                "resource_names": list(response.resource_names),
+                "customer_ids": customer_ids,
+            }
 
         except GoogleAdsException as e:
             error_msg = f"Google Ads API error: {e.failure}"
@@ -142,6 +139,76 @@ class CustomerService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list accessible customers: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def mutate_customer(
+        self,
+        ctx: Context,
+        customer_id: str,
+        descriptive_name: Optional[str] = None,
+        auto_tagging_enabled: Optional[bool] = None,
+        tracking_url_template: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update a customer's settings.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID to update
+            descriptive_name: New descriptive name (optional)
+            auto_tagging_enabled: Enable/disable auto-tagging (optional)
+            tracking_url_template: New tracking URL template (optional)
+
+        Returns:
+            Updated customer details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            customer = Customer()
+            customer.resource_name = f"customers/{customer_id}"
+
+            update_mask_fields = []
+
+            if descriptive_name is not None:
+                customer.descriptive_name = descriptive_name
+                update_mask_fields.append("descriptive_name")
+
+            if auto_tagging_enabled is not None:
+                customer.auto_tagging_enabled = auto_tagging_enabled
+                update_mask_fields.append("auto_tagging_enabled")
+
+            if tracking_url_template is not None:
+                customer.tracking_url_template = tracking_url_template
+                update_mask_fields.append("tracking_url_template")
+
+            operation = CustomerOperation()
+            operation.update = customer
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            request = MutateCustomerRequest()
+            request.customer_id = customer_id
+            request.operation = operation
+
+            response: MutateCustomerResponse = self.client.mutate_customer(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate customer: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -186,12 +253,37 @@ def create_customer_tools(
         """List all accessible customers for the authenticated user.
 
         Returns:
-            List of accessible customer IDs
+            List of accessible customer resource names and IDs
         """
-        response = await service.list_accessible_customers(ctx=ctx)
-        return serialize_proto_message(response)
+        return await service.list_accessible_customers(ctx=ctx)
 
-    tools.extend([create_customer_client, list_accessible_customers])
+    async def mutate_customer(
+        ctx: Context,
+        customer_id: str,
+        descriptive_name: Optional[str] = None,
+        auto_tagging_enabled: Optional[bool] = None,
+        tracking_url_template: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update a customer's settings.
+
+        Args:
+            customer_id: The customer ID to update
+            descriptive_name: New descriptive name (optional)
+            auto_tagging_enabled: Enable/disable auto-tagging (optional)
+            tracking_url_template: New tracking URL template (optional)
+
+        Returns:
+            Updated customer details
+        """
+        return await service.mutate_customer(
+            ctx=ctx,
+            customer_id=customer_id,
+            descriptive_name=descriptive_name,
+            auto_tagging_enabled=auto_tagging_enabled,
+            tracking_url_template=tracking_url_template,
+        )
+
+    tools.extend([create_customer_client, list_accessible_customers, mutate_customer])
     return tools
 
 
