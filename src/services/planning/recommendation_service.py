@@ -345,6 +345,7 @@ class RecommendationService:
         target_content_network: Optional[bool] = None,
         merchant_center_account_id: Optional[int] = None,
         is_new_customer: Optional[bool] = None,
+        asset_group_info: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
         """Generate recommendations for a customer.
 
@@ -360,6 +361,7 @@ class RecommendationService:
             ad_group_info: List of ad group dicts with ad_group_type and keywords
             seed_info: Dict with url_seed and/or keyword_seeds
             budget_info: Dict with current_budget (micros)
+            asset_group_info: List of PMax asset group dicts with final_url, headline, description
 
         Returns:
             Generated recommendations
@@ -439,6 +441,16 @@ class RecommendationService:
                 request.merchant_center_account_id = merchant_center_account_id
             if is_new_customer is not None:
                 request.is_new_customer = is_new_customer
+            if asset_group_info is not None:
+                for ag in asset_group_info:
+                    agi = GenerateRecommendationsRequest.AssetGroupInfo()
+                    if "final_url" in ag:
+                        agi.final_url = ag["final_url"]
+                    if "headline" in ag:
+                        agi.headline = ag["headline"]
+                    if "description" in ag:
+                        agi.description = ag["description"]
+                    request.asset_group_info.append(agi)
 
             response: GenerateRecommendationsResponse = (
                 self.client.generate_recommendations(request=request)
@@ -570,6 +582,7 @@ def create_recommendation_tools(
         target_content_network: Optional[bool] = None,
         merchant_center_account_id: Optional[int] = None,
         is_new_customer: Optional[bool] = None,
+        asset_group_info: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
         """Generate optimization recommendations for a customer.
 
@@ -592,6 +605,7 @@ def create_recommendation_tools(
             target_content_network: Whether to target content network
             merchant_center_account_id: Merchant Center account ID
             is_new_customer: Whether this is a new customer
+            asset_group_info: List of PMax asset groups, each with final_url, headline, description
 
         Returns:
             Generated recommendations
@@ -616,6 +630,7 @@ def create_recommendation_tools(
             target_content_network=target_content_network,
             merchant_center_account_id=merchant_center_account_id,
             is_new_customer=is_new_customer,
+            asset_group_info=asset_group_info,
         )
 
     tools.extend(

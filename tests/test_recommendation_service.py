@@ -374,6 +374,43 @@ async def test_error_handling(
     )
 
 
+@pytest.mark.asyncio
+async def test_generate_recommendations_with_asset_group_info(
+    recommendation_service: RecommendationService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generate_recommendations with asset_group_info for PMax."""
+    mock_rec_client = recommendation_service.client  # type: ignore
+    mock_response = Mock()
+    mock_rec_client.generate_recommendations.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.planning.recommendation_service.serialize_proto_message",
+        return_value={"recommendations": []},
+    ):
+        result = await recommendation_service.generate_recommendations(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            recommendation_types=["KEYWORD"],
+            advertising_channel_type="PERFORMANCE_MAX",
+            asset_group_info=[
+                {
+                    "final_url": "https://example.com",
+                    "headline": "Great Products",
+                    "description": "Shop our selection",
+                },
+            ],
+        )
+
+    call_args = mock_rec_client.generate_recommendations.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.asset_group_info) == 1
+    assert request.asset_group_info[0].final_url == "https://example.com"
+    assert request.asset_group_info[0].headline == "Great Products"
+    assert request.asset_group_info[0].description == "Shop our selection"
+
+
 def test_register_recommendation_tools() -> None:
     """Test tool registration."""
     # Arrange

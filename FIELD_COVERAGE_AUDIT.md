@@ -10,7 +10,7 @@ Comprehensive audit of every request input and response output across all 111 se
 
 - **Services with 100% input coverage**: 111 of 111
 - **Missing input fields resolved**: 94 fields across 20 services — all added or intentionally skipped
-- **Intentionally skipped**: `AdditionalApplicationInfo` fields (21 RPCs) + `asset_group_info` (1 RPC)
+- **Intentionally skipped**: `AdditionalApplicationInfo` fields (21 RPCs across 4 services)
 - **Services with manual response construction** (may drop output fields): 20
 
 ---
@@ -314,7 +314,7 @@ Some API fields are intentionally not exposed through the MCP server because the
 - [x] `language_codes` (string) — target language codes **DONE**
 - [x] `positive_locations_ids` (int64) — included location IDs **DONE**
 - [x] `negative_locations_ids` (int64) — excluded location IDs **DONE**
-- N/A `asset_group_info` (AssetGroupInfo) — complex PMax type, skipped
+- [x] `asset_group_info` (AssetGroupInfo) — PMax asset groups with final_url, headline, description **DONE**
 - [x] `target_partner_search_network` (bool) — target partner search network **DONE**
 - [x] `target_content_network` (bool) — target content network **DONE**
 - [x] `merchant_center_account_id` (int64) — linked Merchant Center account **DONE**
