@@ -2,7 +2,7 @@
 
 import pytest
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 from google.ads.googleads.v23.resources.types.product_link import (
     ProductLink,
@@ -12,7 +12,11 @@ from google.ads.googleads.v23.services.types.product_link_service import (
     RemoveProductLinkResponse,
 )
 
-from src.services.product_integration.product_link_service import ProductLinkService
+from src.services.product_integration.product_link_service import (
+    ProductLinkService,
+    create_product_link_tools,
+    register_product_link_tools,
+)
 
 
 class TestProductLinkService:
@@ -24,17 +28,27 @@ class TestProductLinkService:
         return Mock()
 
     @pytest.fixture
-    def product_link_service(self, mock_service_client: Any) -> Any:
+    def product_link_service(self, mock_service_client: Any) -> ProductLinkService:
         """Create ProductLinkService instance with mock client"""
         service = ProductLinkService()
         service._client = mock_service_client  # type: ignore
         return service
 
-    def test_create_product_link(
-        self, product_link_service: Any, mock_service_client: Any
-    ):
+    @pytest.fixture
+    def mock_ctx(self) -> AsyncMock:
+        """Create a mock FastMCP context."""
+        ctx = AsyncMock()
+        ctx.log = AsyncMock()
+        return ctx
+
+    @pytest.mark.asyncio
+    async def test_create_product_link(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
         """Test creating a product link"""
-        # Setup
         customer_id = "1234567890"
         product_link = ProductLink()
 
@@ -43,51 +57,52 @@ class TestProductLinkService:
         )
         mock_service_client.create_product_link.return_value = mock_response  # type: ignore
 
-        # Execute
-        response = product_link_service.create_product_link(
-            customer_id=customer_id, product_link=product_link
+        response = await product_link_service.create_product_link(
+            ctx=mock_ctx, customer_id=customer_id, product_link=product_link
         )
 
-        # Verify
-        assert response == mock_response
+        assert isinstance(response, dict)
         mock_service_client.create_product_link.assert_called_once()  # type: ignore
+        mock_ctx.log.assert_called()
 
-        # Verify request
         call_args = mock_service_client.create_product_link.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
         assert request.product_link == product_link
 
-    def test_remove_product_link(
-        self, product_link_service: Any, mock_service_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_remove_product_link(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
         """Test removing a product link"""
-        # Setup
         customer_id = "1234567890"
         resource_name = "customers/1234567890/productLinks/123"
 
         mock_response = RemoveProductLinkResponse(resource_name=resource_name)
         mock_service_client.remove_product_link.return_value = mock_response  # type: ignore
 
-        # Execute
-        response = product_link_service.remove_product_link(
-            customer_id=customer_id, resource_name=resource_name
+        response = await product_link_service.remove_product_link(
+            ctx=mock_ctx, customer_id=customer_id, resource_name=resource_name
         )
 
-        # Verify
-        assert response == mock_response
+        assert isinstance(response, dict)
 
-        # Verify request
         call_args = mock_service_client.remove_product_link.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
         assert request.resource_name == resource_name
 
-    def test_create_merchant_center_link(
-        self, product_link_service: Any, mock_service_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_create_merchant_center_link(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
         """Test creating a Merchant Center link"""
-        # Setup
         customer_id = "1234567890"
         merchant_center_id = 123456789
 
@@ -96,15 +111,12 @@ class TestProductLinkService:
         )
         mock_service_client.create_product_link.return_value = mock_response  # type: ignore
 
-        # Execute
-        response = product_link_service.create_merchant_center_link(
-            customer_id=customer_id, merchant_center_id=merchant_center_id
+        response = await product_link_service.create_merchant_center_link(
+            ctx=mock_ctx, customer_id=customer_id, merchant_center_id=merchant_center_id
         )
 
-        # Verify
-        assert response == mock_response
+        assert isinstance(response, dict)
 
-        # Verify request
         call_args = mock_service_client.create_product_link.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
@@ -113,11 +125,14 @@ class TestProductLinkService:
             == merchant_center_id
         )
 
-    def test_create_google_ads_link(
-        self, product_link_service: Any, mock_service_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_create_google_ads_link(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
         """Test creating a Google Ads link"""
-        # Setup
         customer_id = "1234567890"
         linked_customer_id = 9876543210
 
@@ -126,15 +141,12 @@ class TestProductLinkService:
         )
         mock_service_client.create_product_link.return_value = mock_response  # type: ignore
 
-        # Execute
-        response = product_link_service.create_google_ads_link(
-            customer_id=customer_id, linked_customer_id=linked_customer_id
+        response = await product_link_service.create_google_ads_link(
+            ctx=mock_ctx, customer_id=customer_id, linked_customer_id=linked_customer_id
         )
 
-        # Verify
-        assert response == mock_response
+        assert isinstance(response, dict)
 
-        # Verify request
         call_args = mock_service_client.create_product_link.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
@@ -143,11 +155,14 @@ class TestProductLinkService:
             == f"customers/{linked_customer_id}"
         )
 
-    def test_create_data_partner_link(
-        self, product_link_service: Any, mock_service_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_create_data_partner_link(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
         """Test creating a data partner link"""
-        # Setup
         customer_id = "1234567890"
         data_partner_id = 555666777
 
@@ -156,23 +171,24 @@ class TestProductLinkService:
         )
         mock_service_client.create_product_link.return_value = mock_response  # type: ignore
 
-        # Execute
-        response = product_link_service.create_data_partner_link(
-            customer_id=customer_id, data_partner_id=data_partner_id
+        response = await product_link_service.create_data_partner_link(
+            ctx=mock_ctx, customer_id=customer_id, data_partner_id=data_partner_id
         )
 
-        # Verify
-        assert response == mock_response
+        assert isinstance(response, dict)
 
-        # Verify request
         call_args = mock_service_client.create_product_link.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
         assert request.product_link.data_partner.data_partner_id == data_partner_id
 
-    def test_remove_product_link_validate_only(
-        self, product_link_service: Any, mock_service_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_remove_product_link_validate_only(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
         """Test validate_only reaches the RemoveProductLink request"""
         customer_id = "1234567890"
         resource_name = "customers/1234567890/productLinks/123"
@@ -180,7 +196,8 @@ class TestProductLinkService:
         mock_response = RemoveProductLinkResponse(resource_name=resource_name)
         mock_service_client.remove_product_link.return_value = mock_response  # type: ignore
 
-        product_link_service.remove_product_link(
+        await product_link_service.remove_product_link(
+            ctx=mock_ctx,
             customer_id=customer_id,
             resource_name=resource_name,
             validate_only=True,
@@ -189,3 +206,27 @@ class TestProductLinkService:
         call_args = mock_service_client.remove_product_link.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.validate_only is True
+
+    @pytest.mark.asyncio
+    async def test_create_product_link_failure(
+        self,
+        product_link_service: ProductLinkService,
+        mock_service_client: Any,
+        mock_ctx: AsyncMock,
+    ) -> None:
+        """Test product link creation failure."""
+        mock_service_client.create_product_link.side_effect = Exception("API Error")
+
+        with pytest.raises(Exception, match="Failed to create product link"):
+            await product_link_service.create_product_link(
+                ctx=mock_ctx,
+                customer_id="1234567890",
+                product_link=ProductLink(),
+            )
+
+    def test_register_tools(self) -> None:
+        """Test registering tools."""
+        mock_mcp = Mock()
+        service = register_product_link_tools(mock_mcp)
+        assert isinstance(service, ProductLinkService)
+        assert mock_mcp.tool.call_count > 0

@@ -2,8 +2,9 @@
 
 import pytest
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
+from fastmcp import Context
 from google.ads.googleads.v23.services.types.keyword_plan_ad_group_service import (
     KeywordPlanAdGroupOperation,
     MutateKeywordPlanAdGroupsResponse,
@@ -15,162 +16,150 @@ from src.services.planning.keyword_plan_ad_group_service import (
 )
 
 
-class TestKeywordPlanAdGroupService:
-    """Test cases for KeywordPlanAdGroupService"""
+@pytest.fixture
+def mock_service_client() -> Any:
+    """Create a mock service client"""
+    return Mock()
 
-    @pytest.fixture
-    def mock_service_client(self) -> Any:
-        """Create a mock service client"""
-        return Mock()
 
-    @pytest.fixture
-    def keyword_plan_ad_group_service(self, mock_service_client: Any) -> Any:
-        """Create KeywordPlanAdGroupService instance with mock client"""
-        service = KeywordPlanAdGroupService()
-        service._client = mock_service_client  # type: ignore # Need to set private attribute for testing
-        return service
+@pytest.fixture
+def keyword_plan_ad_group_service(
+    mock_service_client: Any,
+) -> KeywordPlanAdGroupService:
+    """Create KeywordPlanAdGroupService instance with mock client"""
+    service = KeywordPlanAdGroupService()
+    service._client = mock_service_client  # type: ignore
+    return service
 
-    def test_mutate_keyword_plan_ad_groups(
-        self, keyword_plan_ad_group_service: Any, mock_service_client: Any
+
+@pytest.mark.asyncio
+async def test_mutate_keyword_plan_ad_groups(
+    keyword_plan_ad_group_service: KeywordPlanAdGroupService,
+    mock_service_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test mutating keyword plan ad groups"""
+    customer_id = "1234567890"
+    operations = [KeywordPlanAdGroupOperation()]
+
+    mock_response = MutateKeywordPlanAdGroupsResponse(
+        results=[
+            MutateKeywordPlanAdGroupResult(
+                resource_name="customers/1234567890/keywordPlanAdGroups/123"
+            )
+        ]
+    )
+    mock_service_client.mutate_keyword_plan_ad_groups.return_value = mock_response  # type: ignore
+
+    expected_result = {
+        "results": [{"resource_name": "customers/1234567890/keywordPlanAdGroups/123"}]
+    }
+
+    with patch(
+        "src.services.planning.keyword_plan_ad_group_service.serialize_proto_message",
+        return_value=expected_result,
     ):
-        """Test mutating keyword plan ad groups"""
-        # Setup
-        customer_id = "1234567890"
-        operations = [KeywordPlanAdGroupOperation()]
-
-        mock_response = MutateKeywordPlanAdGroupsResponse(
-            results=[
-                MutateKeywordPlanAdGroupResult(
-                    resource_name="customers/1234567890/keywordPlanAdGroups/123"
-                )
-            ]
-        )
-        mock_service_client.mutate_keyword_plan_ad_groups.return_value = mock_response  # type: ignore
-
-        # Execute
-        response = keyword_plan_ad_group_service.mutate_keyword_plan_ad_groups(
+        response = await keyword_plan_ad_group_service.mutate_keyword_plan_ad_groups(
+            ctx=mock_ctx,
             customer_id=customer_id,
             operations=operations,
             partial_failure=True,
             validate_only=False,
         )
 
-        # Verify
-        assert response == mock_response
+    assert response == expected_result
 
-        # Verify request
-        call_args = (
-            mock_service_client.mutate_keyword_plan_ad_groups.call_args  # type: ignore
-        )
-        request = call_args.kwargs["request"]
-        assert request.customer_id == customer_id
-        assert request.operations == operations
-        assert request.partial_failure == True
-        assert request.validate_only == False
+    call_args = (
+        mock_service_client.mutate_keyword_plan_ad_groups.call_args  # type: ignore
+    )
+    request = call_args.kwargs["request"]
+    assert request.customer_id == customer_id
+    assert request.operations == operations
+    assert request.partial_failure == True
+    assert request.validate_only == False
 
-    def test_create_keyword_plan_ad_group_operation(
-        self, keyword_plan_ad_group_service: Any
-    ):
-        """Test creating keyword plan ad group operation for creation"""
-        # Setup
-        keyword_plan_campaign = "customers/1234567890/keywordPlanCampaigns/123"
-        name = "Test Keyword Plan Ad Group"
-        cpc_bid_micros = 1000000
 
-        # Execute
-        operation = (
-            keyword_plan_ad_group_service.create_keyword_plan_ad_group_operation(
-                keyword_plan_campaign=keyword_plan_campaign,
-                name=name,
-                cpc_bid_micros=cpc_bid_micros,
-            )
-        )
+def test_create_keyword_plan_ad_group_operation(
+    keyword_plan_ad_group_service: KeywordPlanAdGroupService,
+) -> None:
+    """Test creating keyword plan ad group operation for creation"""
+    keyword_plan_campaign = "customers/1234567890/keywordPlanCampaigns/123"
+    name = "Test Keyword Plan Ad Group"
+    cpc_bid_micros = 1000000
 
-        # Verify
-        assert isinstance(operation, KeywordPlanAdGroupOperation)
-        assert operation.create.keyword_plan_campaign == keyword_plan_campaign
-        assert operation.create.name == name
-        assert operation.create.cpc_bid_micros == cpc_bid_micros
+    operation = keyword_plan_ad_group_service.create_keyword_plan_ad_group_operation(
+        keyword_plan_campaign=keyword_plan_campaign,
+        name=name,
+        cpc_bid_micros=cpc_bid_micros,
+    )
 
-    def test_create_keyword_plan_ad_group_operation_without_bid(
-        self, keyword_plan_ad_group_service: Any
-    ):
-        """Test creating keyword plan ad group operation without CPC bid"""
-        # Setup
-        keyword_plan_campaign = "customers/1234567890/keywordPlanCampaigns/123"
-        name = "Test Keyword Plan Ad Group"
+    assert isinstance(operation, KeywordPlanAdGroupOperation)
+    assert operation.create.keyword_plan_campaign == keyword_plan_campaign
+    assert operation.create.name == name
+    assert operation.create.cpc_bid_micros == cpc_bid_micros
 
-        # Execute
-        operation = (
-            keyword_plan_ad_group_service.create_keyword_plan_ad_group_operation(
-                keyword_plan_campaign=keyword_plan_campaign, name=name
-            )
-        )
 
-        # Verify
-        assert isinstance(operation, KeywordPlanAdGroupOperation)
-        assert operation.create.keyword_plan_campaign == keyword_plan_campaign
-        assert operation.create.name == name
-        # cpc_bid_micros should not be set when not provided
+def test_create_keyword_plan_ad_group_operation_without_bid(
+    keyword_plan_ad_group_service: KeywordPlanAdGroupService,
+) -> None:
+    """Test creating keyword plan ad group operation without CPC bid"""
+    keyword_plan_campaign = "customers/1234567890/keywordPlanCampaigns/123"
+    name = "Test Keyword Plan Ad Group"
 
-    def test_update_keyword_plan_ad_group_operation(
-        self, keyword_plan_ad_group_service: Any
-    ):
-        """Test creating keyword plan ad group operation for update"""
-        # Setup
-        resource_name = "customers/1234567890/keywordPlanAdGroups/123"
-        name = "Updated Keyword Plan Ad Group"
-        cpc_bid_micros = 2000000
+    operation = keyword_plan_ad_group_service.create_keyword_plan_ad_group_operation(
+        keyword_plan_campaign=keyword_plan_campaign, name=name
+    )
 
-        # Execute
-        operation = (
-            keyword_plan_ad_group_service.update_keyword_plan_ad_group_operation(
-                resource_name=resource_name, name=name, cpc_bid_micros=cpc_bid_micros
-            )
-        )
+    assert isinstance(operation, KeywordPlanAdGroupOperation)
+    assert operation.create.keyword_plan_campaign == keyword_plan_campaign
+    assert operation.create.name == name
 
-        # Verify
-        assert isinstance(operation, KeywordPlanAdGroupOperation)
-        assert operation.update.resource_name == resource_name
-        assert operation.update.name == name
-        assert operation.update.cpc_bid_micros == cpc_bid_micros
-        assert set(operation.update_mask.paths) == {"name", "cpc_bid_micros"}
 
-    def test_update_keyword_plan_ad_group_operation_partial(
-        self, keyword_plan_ad_group_service: Any
-    ):
-        """Test creating keyword plan ad group operation for partial update"""
-        # Setup
-        resource_name = "customers/1234567890/keywordPlanAdGroups/123"
-        name = "Updated Keyword Plan Ad Group"
+def test_update_keyword_plan_ad_group_operation(
+    keyword_plan_ad_group_service: KeywordPlanAdGroupService,
+) -> None:
+    """Test creating keyword plan ad group operation for update"""
+    resource_name = "customers/1234567890/keywordPlanAdGroups/123"
+    name = "Updated Keyword Plan Ad Group"
+    cpc_bid_micros = 2000000
 
-        # Execute
-        operation = (
-            keyword_plan_ad_group_service.update_keyword_plan_ad_group_operation(
-                resource_name=resource_name, name=name
-            )
-        )
+    operation = keyword_plan_ad_group_service.update_keyword_plan_ad_group_operation(
+        resource_name=resource_name, name=name, cpc_bid_micros=cpc_bid_micros
+    )
 
-        # Verify
-        assert isinstance(operation, KeywordPlanAdGroupOperation)
-        assert operation.update.resource_name == resource_name
-        assert operation.update.name == name
-        assert operation.update_mask.paths == ["name"]
+    assert isinstance(operation, KeywordPlanAdGroupOperation)
+    assert operation.update.resource_name == resource_name
+    assert operation.update.name == name
+    assert operation.update.cpc_bid_micros == cpc_bid_micros
+    assert set(operation.update_mask.paths) == {"name", "cpc_bid_micros"}
 
-    def test_remove_keyword_plan_ad_group_operation(
-        self, keyword_plan_ad_group_service: Any
-    ):
-        """Test creating keyword plan ad group operation for removal"""
-        # Setup
-        resource_name = "customers/1234567890/keywordPlanAdGroups/123"
 
-        # Execute
-        operation = (
-            keyword_plan_ad_group_service.remove_keyword_plan_ad_group_operation(
-                resource_name
-            )
-        )
+def test_update_keyword_plan_ad_group_operation_partial(
+    keyword_plan_ad_group_service: KeywordPlanAdGroupService,
+) -> None:
+    """Test creating keyword plan ad group operation for partial update"""
+    resource_name = "customers/1234567890/keywordPlanAdGroups/123"
+    name = "Updated Keyword Plan Ad Group"
 
-        # Verify
-        assert isinstance(operation, KeywordPlanAdGroupOperation)
-        assert operation.remove == resource_name
+    operation = keyword_plan_ad_group_service.update_keyword_plan_ad_group_operation(
+        resource_name=resource_name, name=name
+    )
+
+    assert isinstance(operation, KeywordPlanAdGroupOperation)
+    assert operation.update.resource_name == resource_name
+    assert operation.update.name == name
+    assert operation.update_mask.paths == ["name"]
+
+
+def test_remove_keyword_plan_ad_group_operation(
+    keyword_plan_ad_group_service: KeywordPlanAdGroupService,
+) -> None:
+    """Test creating keyword plan ad group operation for removal"""
+    resource_name = "customers/1234567890/keywordPlanAdGroups/123"
+
+    operation = keyword_plan_ad_group_service.remove_keyword_plan_ad_group_operation(
+        resource_name
+    )
+
+    assert isinstance(operation, KeywordPlanAdGroupOperation)
+    assert operation.remove == resource_name

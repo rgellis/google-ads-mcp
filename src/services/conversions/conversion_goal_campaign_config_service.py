@@ -4,9 +4,10 @@ This module provides functionality for managing conversion goal campaign configu
 Conversion goal campaign configs define how campaigns use conversion goals for optimization.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.enums.types.goal_config_level import GoalConfigLevelEnum
 from google.ads.googleads.v23.enums.types.response_content_type import (
     ResponseContentTypeEnum,
@@ -20,11 +21,12 @@ from google.ads.googleads.v23.services.services.conversion_goal_campaign_config_
 from google.ads.googleads.v23.services.types.conversion_goal_campaign_config_service import (
     ConversionGoalCampaignConfigOperation,
     MutateConversionGoalCampaignConfigsRequest,
-    MutateConversionGoalCampaignConfigsResponse,
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class ConversionGoalCampaignConfigService:
@@ -45,37 +47,55 @@ class ConversionGoalCampaignConfigService:
         assert self._client is not None
         return self._client
 
-    def mutate_conversion_goal_campaign_configs(
+    async def mutate_conversion_goal_campaign_configs(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[ConversionGoalCampaignConfigOperation],
         validate_only: bool = False,
         response_content_type: Optional[
             ResponseContentTypeEnum.ResponseContentType
         ] = None,
-    ) -> MutateConversionGoalCampaignConfigsResponse:
+    ) -> Dict[str, Any]:
         """Mutate conversion goal campaign configurations.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of conversion goal campaign config operations
             validate_only: Whether to only validate the request
             response_content_type: The response content type setting
 
         Returns:
-            MutateConversionGoalCampaignConfigsResponse: The response containing results
+            Serialized response containing results
         """
-        customer_id = format_customer_id(customer_id)
-        request = MutateConversionGoalCampaignConfigsRequest(
-            customer_id=customer_id,
-            operations=operations,
-            validate_only=validate_only,
-        )
+        try:
+            customer_id = format_customer_id(customer_id)
+            request = MutateConversionGoalCampaignConfigsRequest(
+                customer_id=customer_id,
+                operations=operations,
+                validate_only=validate_only,
+            )
 
-        if response_content_type is not None:
-            request.response_content_type = response_content_type
+            if response_content_type is not None:
+                request.response_content_type = response_content_type
 
-        return self.client.mutate_conversion_goal_campaign_configs(request=request)
+            response = self.client.mutate_conversion_goal_campaign_configs(
+                request=request
+            )
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(response.results)} conversion goal campaign configs",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate conversion goal campaign configs: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def update_conversion_goal_campaign_config_operation(
         self,
@@ -113,38 +133,40 @@ class ConversionGoalCampaignConfigService:
         )
 
 
-def register_conversion_goal_campaign_config_tools(mcp: FastMCP[Any]) -> None:
-    """Register conversion goal campaign config tools with the MCP server."""
+def create_conversion_goal_campaign_config_tools(
+    service: ConversionGoalCampaignConfigService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create conversion goal campaign config tools for MCP."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_conversion_goal_campaign_configs(  # pyright: ignore[reportUnusedFunction]
+    def _get_goal_config_level_enum(
+        level_str: str,
+    ) -> GoalConfigLevelEnum.GoalConfigLevel:
+        """Convert string to goal config level enum."""
+        if level_str == "CUSTOMER":
+            return GoalConfigLevelEnum.GoalConfigLevel.CUSTOMER
+        elif level_str == "CAMPAIGN":
+            return GoalConfigLevelEnum.GoalConfigLevel.CAMPAIGN
+        else:
+            raise ValueError(f"Invalid goal config level: {level_str}")
+
+    async def mutate_conversion_goal_campaign_configs(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         validate_only: bool = False,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create or update conversion goal campaign configurations.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of conversion goal campaign config operations
             validate_only: Only validate the request
 
         Returns:
-            Success message with operation count
+            Serialized response with operation results
         """
-        service = ConversionGoalCampaignConfigService()
-
-        def _get_goal_config_level_enum(
-            level_str: str,
-        ) -> GoalConfigLevelEnum.GoalConfigLevel:
-            """Convert string to goal config level enum."""
-            if level_str == "CUSTOMER":
-                return GoalConfigLevelEnum.GoalConfigLevel.CUSTOMER
-            elif level_str == "CAMPAIGN":
-                return GoalConfigLevelEnum.GoalConfigLevel.CAMPAIGN
-            else:
-                raise ValueError(f"Invalid goal config level: {level_str}")
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -166,45 +188,34 @@ def register_conversion_goal_campaign_config_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_conversion_goal_campaign_configs(
+        return await service.mutate_conversion_goal_campaign_configs(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             validate_only=validate_only,
         )
 
-        return f"Successfully processed {len(response.results)} conversion goal campaign config operations"
+    tools.append(mutate_conversion_goal_campaign_configs)
 
-    @mcp.tool
-    async def update_conversion_goal_campaign_config(  # pyright: ignore[reportUnusedFunction]
+    async def update_conversion_goal_campaign_config(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         goal_config_level: Optional[str] = None,
         custom_conversion_goal: Optional[str] = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Update a conversion goal campaign configuration.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The conversion goal campaign config resource name
             goal_config_level: The level of goal config (CUSTOMER or CAMPAIGN)
             custom_conversion_goal: The custom conversion goal resource name
 
         Returns:
-            The updated conversion goal campaign config resource name
+            Serialized response with updated conversion goal campaign config details
         """
-        service = ConversionGoalCampaignConfigService()
-
-        def _get_goal_config_level_enum(
-            level_str: str,
-        ) -> GoalConfigLevelEnum.GoalConfigLevel:
-            """Convert string to goal config level enum."""
-            if level_str == "CUSTOMER":
-                return GoalConfigLevelEnum.GoalConfigLevel.CUSTOMER
-            elif level_str == "CAMPAIGN":
-                return GoalConfigLevelEnum.GoalConfigLevel.CAMPAIGN
-            else:
-                raise ValueError(f"Invalid goal config level: {level_str}")
-
         goal_config_level_enum = None
         if goal_config_level is not None:
             goal_config_level_enum = _get_goal_config_level_enum(goal_config_level)
@@ -215,9 +226,21 @@ def register_conversion_goal_campaign_config_tools(mcp: FastMCP[Any]) -> None:
             custom_conversion_goal=custom_conversion_goal,
         )
 
-        response = service.mutate_conversion_goal_campaign_configs(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_conversion_goal_campaign_configs(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Updated conversion goal campaign config: {result.resource_name}"
+    tools.append(update_conversion_goal_campaign_config)
+
+    return tools
+
+
+def register_conversion_goal_campaign_config_tools(
+    mcp: FastMCP[Any],
+) -> ConversionGoalCampaignConfigService:
+    """Register conversion goal campaign config tools with the MCP server."""
+    service = ConversionGoalCampaignConfigService()
+    tools = create_conversion_goal_campaign_config_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

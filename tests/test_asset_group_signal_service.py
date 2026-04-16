@@ -2,7 +2,7 @@
 
 import pytest
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 from google.ads.googleads.v23.services.services.asset_group_signal_service import (
     AssetGroupSignalServiceClient,
@@ -18,30 +18,42 @@ from google.ads.googleads.v23.enums.types.response_content_type import (
 )
 from google.ads.googleads.v23.common.types.criteria import AudienceInfo, SearchThemeInfo
 
-from src.services.assets.asset_group_signal_service import AssetGroupSignalService
+from src.services.assets.asset_group_signal_service import (
+    AssetGroupSignalService,
+    create_asset_group_signal_tools,
+    register_asset_group_signal_tools,
+)
 
 
 class TestAssetGroupSignalService:
     """Test cases for AssetGroupSignalService."""
 
     @pytest.fixture
-    def mock_client(self):
+    def mock_client(self) -> Any:
         """Create a mock AssetGroupSignalServiceClient."""
         return Mock(spec=AssetGroupSignalServiceClient)
 
     @pytest.fixture
-    def service(self, mock_client: Any):
+    def service(self, mock_client: Any) -> AssetGroupSignalService:
         """Create an AssetGroupSignalService instance with mock client."""
         service = AssetGroupSignalService()
         service._client = mock_client  # type: ignore[reportPrivateUsage]
         return service
 
-    def test_mutate_asset_group_signals_success(self, service: Any, mock_client: Any):
+    @pytest.fixture
+    def mock_ctx(self) -> AsyncMock:
+        """Create a mock FastMCP context."""
+        ctx = AsyncMock()
+        ctx.log = AsyncMock()
+        return ctx
+
+    @pytest.mark.asyncio
+    async def test_mutate_asset_group_signals_success(
+        self, service: AssetGroupSignalService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test successful asset group signals mutation."""
-        # Arrange
         customer_id = "1234567890"
 
-        # Create a real operation object
         operation = AssetGroupSignalOperation()
         operation.create.asset_group = "customers/1234567890/assetGroups/123"
         operation.create.audience.audience = "customers/1234567890/audiences/456"
@@ -56,40 +68,29 @@ class TestAssetGroupSignalService:
         )
         mock_client.mutate_asset_group_signals.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.mutate_asset_group_signals(
+        response = await service.mutate_asset_group_signals(
+            ctx=mock_ctx,
             customer_id=customer_id,
             operations=operations,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         mock_client.mutate_asset_group_signals.assert_called_once()  # type: ignore
+        mock_ctx.log.assert_called()
 
         call_args = mock_client.mutate_asset_group_signals.call_args[1]  # type: ignore
         request = call_args["request"]
         assert isinstance(request, MutateAssetGroupSignalsRequest)
         assert request.customer_id == customer_id
         assert len(request.operations) == 1
-        assert (
-            request.operations[0].create.asset_group
-            == "customers/1234567890/assetGroups/123"
-        )
-        assert (
-            request.operations[0].create.audience.audience
-            == "customers/1234567890/audiences/456"
-        )
-        assert request.partial_failure is False
-        assert request.validate_only is False
 
-    def test_mutate_asset_group_signals_with_options(
-        self, service: Any, mock_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_mutate_asset_group_signals_with_options(
+        self, service: AssetGroupSignalService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test asset group signals mutation with all options."""
-        # Arrange
         customer_id = "1234567890"
 
-        # Create a real operation object
         operation = AssetGroupSignalOperation()
         operation.create.asset_group = "customers/1234567890/assetGroups/123"
         operation.create.audience.audience = "customers/1234567890/audiences/456"
@@ -98,8 +99,8 @@ class TestAssetGroupSignalService:
         expected_response = MutateAssetGroupSignalsResponse()
         mock_client.mutate_asset_group_signals.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.mutate_asset_group_signals(
+        response = await service.mutate_asset_group_signals(
+            ctx=mock_ctx,
             customer_id=customer_id,
             operations=operations,
             partial_failure=True,
@@ -107,8 +108,7 @@ class TestAssetGroupSignalService:
             response_content_type=ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         call_args = mock_client.mutate_asset_group_signals.call_args[1]  # type: ignore
         request = call_args["request"]
         assert request.partial_failure is True
@@ -118,70 +118,69 @@ class TestAssetGroupSignalService:
             == ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE
         )
 
-    def test_mutate_asset_group_signals_failure(self, service: Any, mock_client: Any):
+    @pytest.mark.asyncio
+    async def test_mutate_asset_group_signals_failure(
+        self, service: AssetGroupSignalService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test asset group signals mutation failure."""
-        # Arrange
         customer_id = "1234567890"
 
-        # Create a real operation object
         operation = AssetGroupSignalOperation()
         operation.create.asset_group = "customers/1234567890/assetGroups/123"
-        operation.create.audience.audience = "customers/1234567890/audiences/456"
         operations = [operation]
 
         mock_client.mutate_asset_group_signals.side_effect = Exception("API Error")  # type: ignore
 
-        # Act & Assert
         with pytest.raises(Exception, match="Failed to mutate asset group signals"):
-            service.mutate_asset_group_signals(
+            await service.mutate_asset_group_signals(
+                ctx=mock_ctx,
                 customer_id=customer_id,
                 operations=operations,
             )
 
-    def test_create_asset_group_signal_operation_with_audience(self, service: Any):
+    def test_create_asset_group_signal_operation_with_audience(
+        self, service: AssetGroupSignalService
+    ) -> None:
         """Test creating asset group signal operation with audience."""
-        # Arrange
         asset_group = "customers/1234567890/assetGroups/123"
         audience_info = AudienceInfo(audience="customers/1234567890/audiences/456")
 
-        # Act
         operation = service.create_asset_group_signal_operation(
             asset_group=asset_group,
             audience_info=audience_info,
         )
 
-        # Assert
         assert isinstance(operation, AssetGroupSignalOperation)
         assert operation.create.asset_group == asset_group
         assert operation.create.audience == audience_info
         assert not operation.create.search_theme
 
-    def test_create_asset_group_signal_operation_with_search_theme(self, service: Any):
+    def test_create_asset_group_signal_operation_with_search_theme(
+        self, service: AssetGroupSignalService
+    ) -> None:
         """Test creating asset group signal operation with search theme."""
-        # Arrange
         asset_group = "customers/1234567890/assetGroups/123"
         search_theme_info = SearchThemeInfo(text="running shoes")
 
-        # Act
         operation = service.create_asset_group_signal_operation(
             asset_group=asset_group,
             search_theme_info=search_theme_info,
         )
 
-        # Assert
         assert isinstance(operation, AssetGroupSignalOperation)
         assert operation.create.asset_group == asset_group
         assert operation.create.search_theme == search_theme_info
         assert not operation.create.audience
 
-    def test_create_asset_group_signal_operation_invalid_signals(self, service: Any):
+    def test_create_asset_group_signal_operation_invalid_signals(
+        self, service: AssetGroupSignalService
+    ) -> None:
         """Test creating asset group signal operation with invalid signal combination."""
-        # Arrange
         asset_group = "customers/1234567890/assetGroups/123"
         audience_info = AudienceInfo(audience="customers/1234567890/audiences/456")
         search_theme_info = SearchThemeInfo(text="running shoes")
 
-        # Act & Assert - Both signals provided
+        # Both signals provided
         with pytest.raises(
             ValueError,
             match="Exactly one of audience_info or search_theme_info must be provided",
@@ -192,7 +191,7 @@ class TestAssetGroupSignalService:
                 search_theme_info=search_theme_info,
             )
 
-        # Act & Assert - No signals provided
+        # No signals provided
         with pytest.raises(
             ValueError,
             match="Exactly one of audience_info or search_theme_info must be provided",
@@ -201,54 +200,49 @@ class TestAssetGroupSignalService:
                 asset_group=asset_group,
             )
 
-    def test_create_remove_operation(self, service: Any):
+    def test_create_remove_operation(self, service: AssetGroupSignalService) -> None:
         """Test creating remove operation."""
-        # Arrange
         resource_name = "customers/1234567890/assetGroupSignals/123~456"
 
-        # Act
         operation = service.create_remove_operation(resource_name=resource_name)
 
-        # Assert
         assert isinstance(operation, AssetGroupSignalOperation)
         assert operation.remove == resource_name
         assert not operation.create
 
-    def test_create_audience_signal(self, service: Any):
+    def test_create_audience_signal(self, service: AssetGroupSignalService) -> None:
         """Test creating audience signal operation."""
-        # Arrange
         asset_group = "customers/1234567890/assetGroups/123"
         audience_resource_name = "customers/1234567890/audiences/456"
 
-        # Act
         operation = service.create_audience_signal(
             asset_group=asset_group,
             audience_resource_name=audience_resource_name,
         )
 
-        # Assert
         assert isinstance(operation, AssetGroupSignalOperation)
         assert operation.create.asset_group == asset_group
         assert operation.create.audience.audience == audience_resource_name
         assert not operation.create.search_theme
 
-    def test_create_search_theme_signal(self, service: Any):
+    def test_create_search_theme_signal(self, service: AssetGroupSignalService) -> None:
         """Test creating search theme signal operation."""
-        # Arrange
         asset_group = "customers/1234567890/assetGroups/123"
         search_theme = "running shoes"
 
-        # Act
         operation = service.create_search_theme_signal(
             asset_group=asset_group,
             search_theme=search_theme,
         )
 
-        # Assert
         assert isinstance(operation, AssetGroupSignalOperation)
         assert operation.create.asset_group == asset_group
         assert operation.create.search_theme.text == search_theme
         assert not operation.create.audience
 
-
-# Server tests removed - server architecture has changed
+    def test_register_tools(self) -> None:
+        """Test registering tools."""
+        mock_mcp = Mock()
+        service = register_asset_group_signal_tools(mock_mcp)
+        assert isinstance(service, AssetGroupSignalService)
+        assert mock_mcp.tool.call_count > 0

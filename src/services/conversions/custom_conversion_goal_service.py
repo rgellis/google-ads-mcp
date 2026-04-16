@@ -4,9 +4,10 @@ This module provides functionality for managing custom conversion goals in Googl
 Custom conversion goals allow making arbitrary conversion actions biddable.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.enums.types.custom_conversion_goal_status import (
     CustomConversionGoalStatusEnum,
 )
@@ -22,11 +23,12 @@ from google.ads.googleads.v23.services.services.custom_conversion_goal_service i
 from google.ads.googleads.v23.services.types.custom_conversion_goal_service import (
     CustomConversionGoalOperation,
     MutateCustomConversionGoalsRequest,
-    MutateCustomConversionGoalsResponse,
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class CustomConversionGoalService:
@@ -45,37 +47,53 @@ class CustomConversionGoalService:
         assert self._client is not None
         return self._client
 
-    def mutate_custom_conversion_goals(
+    async def mutate_custom_conversion_goals(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[CustomConversionGoalOperation],
         validate_only: bool = False,
         response_content_type: Optional[
             ResponseContentTypeEnum.ResponseContentType
         ] = None,
-    ) -> MutateCustomConversionGoalsResponse:
+    ) -> Dict[str, Any]:
         """Mutate custom conversion goals.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of custom conversion goal operations
             validate_only: Whether to only validate the request
             response_content_type: The response content type setting
 
         Returns:
-            MutateCustomConversionGoalsResponse: The response containing results
+            Serialized response containing results
         """
-        customer_id = format_customer_id(customer_id)
-        request = MutateCustomConversionGoalsRequest(
-            customer_id=customer_id,
-            operations=operations,
-            validate_only=validate_only,
-        )
+        try:
+            customer_id = format_customer_id(customer_id)
+            request = MutateCustomConversionGoalsRequest(
+                customer_id=customer_id,
+                operations=operations,
+                validate_only=validate_only,
+            )
 
-        if response_content_type is not None:
-            request.response_content_type = response_content_type
+            if response_content_type is not None:
+                request.response_content_type = response_content_type
 
-        return self.client.mutate_custom_conversion_goals(request=request)
+            response = self.client.mutate_custom_conversion_goals(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(response.results)} custom conversion goals",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate custom conversion goals: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def create_custom_conversion_goal_operation(
         self,
@@ -153,38 +171,40 @@ class CustomConversionGoalService:
         return CustomConversionGoalOperation(remove=resource_name)
 
 
-def register_custom_conversion_goal_tools(mcp: FastMCP[Any]) -> None:
-    """Register custom conversion goal tools with the MCP server."""
+def create_custom_conversion_goal_tools(
+    service: CustomConversionGoalService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create custom conversion goal tools for MCP."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_custom_conversion_goals(  # pyright: ignore[reportUnusedFunction]
+    def _get_status_enum(
+        status_str: str,
+    ) -> CustomConversionGoalStatusEnum.CustomConversionGoalStatus:
+        """Convert string to custom conversion goal status enum."""
+        if status_str == "ENABLED":
+            return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED
+        elif status_str == "REMOVED":
+            return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.REMOVED
+        else:
+            raise ValueError(f"Invalid custom conversion goal status: {status_str}")
+
+    async def mutate_custom_conversion_goals(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         validate_only: bool = False,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create, update, or remove custom conversion goals.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of custom conversion goal operations
             validate_only: Only validate the request
 
         Returns:
-            Success message with operation count
+            Serialized response with operation results
         """
-        service = CustomConversionGoalService()
-
-        def _get_status_enum(
-            status_str: str,
-        ) -> CustomConversionGoalStatusEnum.CustomConversionGoalStatus:
-            """Convert string to custom conversion goal status enum."""
-            if status_str == "ENABLED":
-                return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED
-            elif status_str == "REMOVED":
-                return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.REMOVED
-            else:
-                raise ValueError(f"Invalid custom conversion goal status: {status_str}")
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -202,15 +222,15 @@ def register_custom_conversion_goal_tools(mcp: FastMCP[Any]) -> None:
                     status=status,
                 )
             elif op_type == "update":
-                status = None
+                status_val = None
                 if "status" in op_data:
-                    status = _get_status_enum(op_data["status"])
+                    status_val = _get_status_enum(op_data["status"])
 
                 operation = service.update_custom_conversion_goal_operation(
                     resource_name=op_data["resource_name"],
                     name=op_data.get("name"),
                     conversion_actions=op_data.get("conversion_actions"),
-                    status=status,
+                    status=status_val,
                 )
             elif op_type == "remove":
                 operation = service.remove_custom_conversion_goal_operation(
@@ -221,69 +241,58 @@ def register_custom_conversion_goal_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_custom_conversion_goals(
+        return await service.mutate_custom_conversion_goals(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             validate_only=validate_only,
         )
 
-        return f"Successfully processed {len(response.results)} custom conversion goal operations"
+    tools.append(mutate_custom_conversion_goals)
 
-    @mcp.tool
-    async def create_custom_conversion_goal(  # pyright: ignore[reportUnusedFunction]
+    async def create_custom_conversion_goal(
+        ctx: Context,
         customer_id: str,
         name: str,
         conversion_actions: list[str],
         status: str = "ENABLED",
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create a new custom conversion goal.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             name: The name for this custom conversion goal
             conversion_actions: List of conversion action resource names
             status: The status (ENABLED or REMOVED)
 
         Returns:
-            The created custom conversion goal resource name
+            Serialized response with created custom conversion goal details
         """
-        service = CustomConversionGoalService()
-
-        def _get_status_enum(
-            status_str: str,
-        ) -> CustomConversionGoalStatusEnum.CustomConversionGoalStatus:
-            """Convert string to custom conversion goal status enum."""
-            if status_str == "ENABLED":
-                return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED
-            elif status_str == "REMOVED":
-                return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.REMOVED
-            else:
-                raise ValueError(f"Invalid custom conversion goal status: {status_str}")
-
         operation = service.create_custom_conversion_goal_operation(
             name=name,
             conversion_actions=conversion_actions,
             status=_get_status_enum(status),
         )
 
-        response = service.mutate_custom_conversion_goals(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_custom_conversion_goals(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Created custom conversion goal: {result.resource_name}"
+    tools.append(create_custom_conversion_goal)
 
-    @mcp.tool
-    async def update_custom_conversion_goal(  # pyright: ignore[reportUnusedFunction]
+    async def update_custom_conversion_goal(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         name: Optional[str] = None,
         conversion_actions: Optional[list[str]] = None,
         status: Optional[str] = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Update an existing custom conversion goal.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The custom conversion goal resource name
             name: The name for this custom conversion goal
@@ -291,21 +300,8 @@ def register_custom_conversion_goal_tools(mcp: FastMCP[Any]) -> None:
             status: The status (ENABLED or REMOVED)
 
         Returns:
-            The updated custom conversion goal resource name
+            Serialized response with updated custom conversion goal details
         """
-        service = CustomConversionGoalService()
-
-        def _get_status_enum(
-            status_str: str,
-        ) -> CustomConversionGoalStatusEnum.CustomConversionGoalStatus:
-            """Convert string to custom conversion goal status enum."""
-            if status_str == "ENABLED":
-                return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED
-            elif status_str == "REMOVED":
-                return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.REMOVED
-            else:
-                raise ValueError(f"Invalid custom conversion goal status: {status_str}")
-
         status_enum = None
         if status is not None:
             status_enum = _get_status_enum(status)
@@ -317,35 +313,46 @@ def register_custom_conversion_goal_tools(mcp: FastMCP[Any]) -> None:
             status=status_enum,
         )
 
-        response = service.mutate_custom_conversion_goals(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_custom_conversion_goals(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Updated custom conversion goal: {result.resource_name}"
+    tools.append(update_custom_conversion_goal)
 
-    @mcp.tool
-    async def remove_custom_conversion_goal(  # pyright: ignore[reportUnusedFunction]
+    async def remove_custom_conversion_goal(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Remove a custom conversion goal.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The custom conversion goal resource name
 
         Returns:
-            Success message
+            Serialized response confirming removal
         """
-        service = CustomConversionGoalService()
-
         operation = service.remove_custom_conversion_goal_operation(
             resource_name=resource_name
         )
 
-        service.mutate_custom_conversion_goals(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_custom_conversion_goals(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        return f"Removed custom conversion goal: {resource_name}"
+    tools.append(remove_custom_conversion_goal)
+
+    return tools
+
+
+def register_custom_conversion_goal_tools(
+    mcp: FastMCP[Any],
+) -> CustomConversionGoalService:
+    """Register custom conversion goal tools with the MCP server."""
+    service = CustomConversionGoalService()
+    tools = create_custom_conversion_goal_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

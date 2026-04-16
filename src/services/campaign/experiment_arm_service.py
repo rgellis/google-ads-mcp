@@ -4,9 +4,10 @@ This module provides functionality for managing experiment arms (variants) in Go
 Experiment arms allow you to test different campaign configurations and compare performance.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.resources.types.experiment_arm import ExperimentArm
 from google.ads.googleads.v23.services.services.experiment_arm_service import (
     ExperimentArmServiceClient,
@@ -14,11 +15,17 @@ from google.ads.googleads.v23.services.services.experiment_arm_service import (
 from google.ads.googleads.v23.services.types.experiment_arm_service import (
     ExperimentArmOperation,
     MutateExperimentArmsRequest,
-    MutateExperimentArmsResponse,
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, set_request_options
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
+
+logger = get_logger(__name__)
 
 
 class ExperimentArmService:
@@ -37,17 +44,19 @@ class ExperimentArmService:
         assert self._client is not None
         return self._client
 
-    def mutate_experiment_arms(
+    async def mutate_experiment_arms(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[ExperimentArmOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
-    ) -> MutateExperimentArmsResponse:
+    ) -> Dict[str, Any]:
         """Mutate experiment arms.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of experiment arm operations
             partial_failure: Whether to enable partial failure
@@ -55,20 +64,34 @@ class ExperimentArmService:
             response_content_type: Response content type enum value
 
         Returns:
-            MutateExperimentArmsResponse: The response containing results
+            Serialized response containing results
         """
-        customer_id = format_customer_id(customer_id)
-        request = MutateExperimentArmsRequest(
-            customer_id=customer_id,
-            operations=operations,
-        )
-        set_request_options(
-            request,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-        return self.client.mutate_experiment_arms(request=request)
+        try:
+            customer_id = format_customer_id(customer_id)
+            request = MutateExperimentArmsRequest(
+                customer_id=customer_id,
+                operations=operations,
+            )
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+            response = self.client.mutate_experiment_arms(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(response.results)} experiment arms",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate experiment arms: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def create_experiment_arm_operation(
         self,
@@ -150,30 +173,33 @@ class ExperimentArmService:
         return ExperimentArmOperation(remove=resource_name)
 
 
-def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
-    """Register experiment arm tools with the MCP server."""
+def create_experiment_arm_tools(
+    service: ExperimentArmService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create experiment arm tools for MCP."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_experiment_arms(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_experiment_arms(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create, update, or remove experiment arms.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of experiment arm operations
             partial_failure: Enable partial failure
             validate_only: Only validate the request
+            response_content_type: Response content type
 
         Returns:
-            Success message with operation count
+            Serialized response with operation results
         """
-        service = ExperimentArmService()
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -202,7 +228,8 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_experiment_arms(
+        return await service.mutate_experiment_arms(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
@@ -210,22 +237,21 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
             response_content_type=response_content_type,
         )
 
-        return (
-            f"Successfully processed {len(response.results)} experiment arm operations"
-        )
+    tools.append(mutate_experiment_arms)
 
-    @mcp.tool
-    async def create_experiment_arm(  # pyright: ignore[reportUnusedFunction]
+    async def create_experiment_arm(
+        ctx: Context,
         customer_id: str,
         experiment: str,
         name: str,
         control: bool,
         traffic_split: int,
         campaigns: list[str] = [],
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create a new experiment arm.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             experiment: The experiment resource name
             name: Name of the experiment arm
@@ -234,10 +260,8 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
             campaigns: List of campaign resource names
 
         Returns:
-            The created experiment arm resource name
+            Serialized response with created experiment arm details
         """
-        service = ExperimentArmService()
-
         operation = service.create_experiment_arm_operation(
             experiment=experiment,
             name=name,
@@ -246,24 +270,24 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
             campaigns=campaigns,
         )
 
-        response = service.mutate_experiment_arms(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_experiment_arms(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Created experiment arm: {result.resource_name}"
+    tools.append(create_experiment_arm)
 
-    @mcp.tool
-    async def update_experiment_arm(  # pyright: ignore[reportUnusedFunction]
+    async def update_experiment_arm(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         name: Optional[str] = None,
         traffic_split: Optional[int] = None,
         campaigns: Optional[list[str]] = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Update an existing experiment arm.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The experiment arm resource name
             name: Name of the experiment arm
@@ -271,10 +295,8 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
             campaigns: List of campaign resource names
 
         Returns:
-            The updated experiment arm resource name
+            Serialized response with updated experiment arm details
         """
-        service = ExperimentArmService()
-
         operation = service.update_experiment_arm_operation(
             resource_name=resource_name,
             name=name,
@@ -282,31 +304,42 @@ def register_experiment_arm_tools(mcp: FastMCP[Any]) -> None:
             campaigns=campaigns,
         )
 
-        response = service.mutate_experiment_arms(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_experiment_arms(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Updated experiment arm: {result.resource_name}"
+    tools.append(update_experiment_arm)
 
-    @mcp.tool
-    async def remove_experiment_arm(  # pyright: ignore[reportUnusedFunction]
+    async def remove_experiment_arm(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Remove an experiment arm.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The experiment arm resource name
 
         Returns:
-            Success message
+            Serialized response confirming removal
         """
-        service = ExperimentArmService()
-
         operation = service.remove_experiment_arm_operation(resource_name=resource_name)
 
-        service.mutate_experiment_arms(customer_id=customer_id, operations=[operation])
+        return await service.mutate_experiment_arms(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
+        )
 
-        return f"Removed experiment arm: {resource_name}"
+    tools.append(remove_experiment_arm)
+
+    return tools
+
+
+def register_experiment_arm_tools(mcp: FastMCP[Any]) -> ExperimentArmService:
+    """Register experiment arm tools with the MCP server."""
+    service = ExperimentArmService()
+    tools = create_experiment_arm_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

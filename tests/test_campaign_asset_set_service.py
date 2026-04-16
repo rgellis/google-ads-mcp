@@ -2,7 +2,7 @@
 
 import pytest
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 from google.ads.googleads.v23.services.services.campaign_asset_set_service import (
     CampaignAssetSetServiceClient,
@@ -17,7 +17,11 @@ from google.ads.googleads.v23.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
 
-from src.services.campaign.campaign_asset_set_service import CampaignAssetSetService
+from src.services.campaign.campaign_asset_set_service import (
+    CampaignAssetSetService,
+    create_campaign_asset_set_tools,
+    register_campaign_asset_set_tools,
+)
 
 
 class TestCampaignAssetSetService:
@@ -29,15 +33,24 @@ class TestCampaignAssetSetService:
         return Mock(spec=CampaignAssetSetServiceClient)
 
     @pytest.fixture
-    def service(self, mock_client: Any) -> Any:
+    def service(self, mock_client: Any) -> CampaignAssetSetService:
         """Create a CampaignAssetSetService instance with mock client."""
         service = CampaignAssetSetService()
-        service._client = mock_client  # type: ignore # Need to set private attribute for testing
+        service._client = mock_client  # type: ignore
         return service
 
-    def test_mutate_campaign_asset_sets_success(self, service: Any, mock_client: Any):
+    @pytest.fixture
+    def mock_ctx(self) -> AsyncMock:
+        """Create a mock FastMCP context."""
+        ctx = AsyncMock()
+        ctx.log = AsyncMock()
+        return ctx
+
+    @pytest.mark.asyncio
+    async def test_mutate_campaign_asset_sets_success(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test successful campaign asset sets mutation."""
-        # Arrange
         customer_id = "1234567890"
         operation = CampaignAssetSetOperation()
         operation.remove = "customers/1234567890/campaignAssetSets/123~456"
@@ -51,26 +64,26 @@ class TestCampaignAssetSetService:
         )
         mock_client.mutate_campaign_asset_sets.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.mutate_campaign_asset_sets(
+        response = await service.mutate_campaign_asset_sets(
+            ctx=mock_ctx,
             customer_id=customer_id,
             operations=operations,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         mock_client.mutate_campaign_asset_sets.assert_called_once()  # type: ignore
+        mock_ctx.log.assert_called()
 
         call_args = mock_client.mutate_campaign_asset_sets.call_args[1]  # type: ignore
         request = call_args["request"]
         assert isinstance(request, MutateCampaignAssetSetsRequest)
         assert request.customer_id == customer_id
 
-    def test_mutate_campaign_asset_sets_with_options(
-        self, service: Any, mock_client: Any
-    ):
+    @pytest.mark.asyncio
+    async def test_mutate_campaign_asset_sets_with_options(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test campaign asset sets mutation with all options."""
-        # Arrange
         customer_id = "1234567890"
         operation = CampaignAssetSetOperation()
         operation.remove = "customers/1234567890/campaignAssetSets/123~456"
@@ -78,8 +91,8 @@ class TestCampaignAssetSetService:
         expected_response = MutateCampaignAssetSetsResponse()
         mock_client.mutate_campaign_asset_sets.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.mutate_campaign_asset_sets(
+        response = await service.mutate_campaign_asset_sets(
+            ctx=mock_ctx,
             customer_id=customer_id,
             operations=operations,
             partial_failure=True,
@@ -87,8 +100,7 @@ class TestCampaignAssetSetService:
             response_content_type=ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         call_args = mock_client.mutate_campaign_asset_sets.call_args[1]  # type: ignore
         request = call_args["request"]
         assert request.partial_failure is True
@@ -98,53 +110,53 @@ class TestCampaignAssetSetService:
             == ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE
         )
 
-    def test_mutate_campaign_asset_sets_failure(self, service: Any, mock_client: Any):
+    @pytest.mark.asyncio
+    async def test_mutate_campaign_asset_sets_failure(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test campaign asset sets mutation failure."""
-        # Arrange
         customer_id = "1234567890"
-        operations = [Mock(spec=CampaignAssetSetOperation)]
+        operations = [CampaignAssetSetOperation()]
         mock_client.mutate_campaign_asset_sets.side_effect = Exception("API Error")  # type: ignore
 
-        # Act & Assert
         with pytest.raises(Exception, match="Failed to mutate campaign asset sets"):
-            service.mutate_campaign_asset_sets(
+            await service.mutate_campaign_asset_sets(
+                ctx=mock_ctx,
                 customer_id=customer_id,
                 operations=operations,
             )
 
-    def test_create_campaign_asset_set_operation(self, service: Any):
+    def test_create_campaign_asset_set_operation(
+        self, service: CampaignAssetSetService
+    ) -> None:
         """Test creating campaign asset set operation."""
-        # Arrange
         campaign = "customers/1234567890/campaigns/123"
         asset_set = "customers/1234567890/assetSets/456"
 
-        # Act
         operation = service.create_campaign_asset_set_operation(
             campaign=campaign,
             asset_set=asset_set,
         )
 
-        # Assert
         assert isinstance(operation, CampaignAssetSetOperation)
         assert operation.create.campaign == campaign
         assert operation.create.asset_set == asset_set
 
-    def test_create_remove_operation(self, service: Any):
+    def test_create_remove_operation(self, service: CampaignAssetSetService) -> None:
         """Test creating remove operation."""
-        # Arrange
         resource_name = "customers/1234567890/campaignAssetSets/123~456"
 
-        # Act
         operation = service.create_remove_operation(resource_name=resource_name)
 
-        # Assert
         assert isinstance(operation, CampaignAssetSetOperation)
         assert operation.remove == resource_name
         assert not operation.create
 
-    def test_link_asset_set_to_campaign(self, service: Any, mock_client: Any):
+    @pytest.mark.asyncio
+    async def test_link_asset_set_to_campaign(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test linking an asset set to a campaign."""
-        # Arrange
         customer_id = "1234567890"
         campaign = "customers/1234567890/campaigns/123"
         asset_set = "customers/1234567890/assetSets/456"
@@ -158,20 +170,21 @@ class TestCampaignAssetSetService:
         )
         mock_client.mutate_campaign_asset_sets.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.link_asset_set_to_campaign(
+        response = await service.link_asset_set_to_campaign(
+            ctx=mock_ctx,
             customer_id=customer_id,
             campaign=campaign,
             asset_set=asset_set,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         mock_client.mutate_campaign_asset_sets.assert_called_once()  # type: ignore
 
-    def test_unlink_asset_set_from_campaign(self, service: Any, mock_client: Any):
+    @pytest.mark.asyncio
+    async def test_unlink_asset_set_from_campaign(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test unlinking an asset set from a campaign."""
-        # Arrange
         customer_id = "1234567890"
         resource_name = "customers/1234567890/campaignAssetSets/123~456"
 
@@ -180,19 +193,20 @@ class TestCampaignAssetSetService:
         )
         mock_client.mutate_campaign_asset_sets.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.unlink_asset_set_from_campaign(
+        response = await service.unlink_asset_set_from_campaign(
+            ctx=mock_ctx,
             customer_id=customer_id,
             resource_name=resource_name,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         mock_client.mutate_campaign_asset_sets.assert_called_once()  # type: ignore
 
-    def test_link_multiple_asset_sets_to_campaign(self, service: Any, mock_client: Any):
+    @pytest.mark.asyncio
+    async def test_link_multiple_asset_sets_to_campaign(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test linking multiple asset sets to a campaign."""
-        # Arrange
         customer_id = "1234567890"
         campaign = "customers/1234567890/campaigns/123"
         asset_sets = [
@@ -212,25 +226,25 @@ class TestCampaignAssetSetService:
         )
         mock_client.mutate_campaign_asset_sets.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.link_multiple_asset_sets_to_campaign(
+        response = await service.link_multiple_asset_sets_to_campaign(
+            ctx=mock_ctx,
             customer_id=customer_id,
             campaign=campaign,
             asset_sets=asset_sets,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         mock_client.mutate_campaign_asset_sets.assert_called_once()  # type: ignore
 
-        # Verify that two operations were created
         call_args = mock_client.mutate_campaign_asset_sets.call_args[1]  # type: ignore
         request = call_args["request"]
         assert len(request.operations) == 2
 
-    def test_link_asset_set_to_multiple_campaigns(self, service: Any, mock_client: Any):
+    @pytest.mark.asyncio
+    async def test_link_asset_set_to_multiple_campaigns(
+        self, service: CampaignAssetSetService, mock_client: Any, mock_ctx: AsyncMock
+    ) -> None:
         """Test linking an asset set to multiple campaigns."""
-        # Arrange
         customer_id = "1234567890"
         campaigns = [
             "customers/1234567890/campaigns/123",
@@ -250,18 +264,23 @@ class TestCampaignAssetSetService:
         )
         mock_client.mutate_campaign_asset_sets.return_value = expected_response  # type: ignore
 
-        # Act
-        response = service.link_asset_set_to_multiple_campaigns(
+        response = await service.link_asset_set_to_multiple_campaigns(
+            ctx=mock_ctx,
             customer_id=customer_id,
             campaigns=campaigns,
             asset_set=asset_set,
         )
 
-        # Assert
-        assert response == expected_response
+        assert isinstance(response, dict)
         mock_client.mutate_campaign_asset_sets.assert_called_once()  # type: ignore
 
-        # Verify that two operations were created
         call_args = mock_client.mutate_campaign_asset_sets.call_args[1]  # type: ignore
         request = call_args["request"]
         assert len(request.operations) == 2
+
+    def test_register_tools(self) -> None:
+        """Test registering tools."""
+        mock_mcp = Mock()
+        service = register_campaign_asset_set_tools(mock_mcp)
+        assert isinstance(service, CampaignAssetSetService)
+        assert mock_mcp.tool.call_count > 0

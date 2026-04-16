@@ -4,9 +4,10 @@ This module provides functionality for managing keyword plan campaigns in Google
 Keyword plan campaigns define the targeting and settings for keyword planning.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.enums.types.keyword_plan_network import (
     KeywordPlanNetworkEnum,
 )
@@ -20,11 +21,12 @@ from google.ads.googleads.v23.services.services.keyword_plan_campaign_service im
 from google.ads.googleads.v23.services.types.keyword_plan_campaign_service import (
     KeywordPlanCampaignOperation,
     MutateKeywordPlanCampaignsRequest,
-    MutateKeywordPlanCampaignsResponse,
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class KeywordPlanCampaignService:
@@ -43,34 +45,50 @@ class KeywordPlanCampaignService:
         assert self._client is not None
         return self._client
 
-    def mutate_keyword_plan_campaigns(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_keyword_plan_campaigns(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[KeywordPlanCampaignOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
-    ) -> MutateKeywordPlanCampaignsResponse:
+    ) -> Dict[str, Any]:
         """Mutate keyword plan campaigns.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of keyword plan campaign operations
             partial_failure: Whether to enable partial failure
             validate_only: Whether to only validate the request
 
         Returns:
-            MutateKeywordPlanCampaignsResponse: The response containing results
+            Serialized response containing results
         """
-        customer_id = format_customer_id(customer_id)
-        request = MutateKeywordPlanCampaignsRequest(
-            customer_id=customer_id,
-            operations=operations,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-        )
-        return self.client.mutate_keyword_plan_campaigns(request=request)
+        try:
+            customer_id = format_customer_id(customer_id)
+            request = MutateKeywordPlanCampaignsRequest(
+                customer_id=customer_id,
+                operations=operations,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
+            response = self.client.mutate_keyword_plan_campaigns(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(response.results)} keyword plan campaigns",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate keyword plan campaigns: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
-    def create_keyword_plan_campaign_operation(  # pyright: ignore[reportUnusedFunction]
+    def create_keyword_plan_campaign_operation(
         self,
         keyword_plan: str,
         name: str,
@@ -110,7 +128,7 @@ class KeywordPlanCampaignService:
 
         return KeywordPlanCampaignOperation(create=keyword_plan_campaign)
 
-    def update_keyword_plan_campaign_operation(  # pyright: ignore[reportUnusedFunction]
+    def update_keyword_plan_campaign_operation(
         self,
         resource_name: str,
         name: Optional[str] = None,
@@ -162,7 +180,7 @@ class KeywordPlanCampaignService:
             update_mask={"paths": update_mask},
         )
 
-    def remove_keyword_plan_campaign_operation(  # pyright: ignore[reportUnusedFunction]
+    def remove_keyword_plan_campaign_operation(
         self, resource_name: str
     ) -> KeywordPlanCampaignOperation:
         """Create a keyword plan campaign operation for removal.
@@ -176,42 +194,42 @@ class KeywordPlanCampaignService:
         return KeywordPlanCampaignOperation(remove=resource_name)
 
 
-def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
-    """Register keyword plan campaign tools with the MCP server."""
+def create_keyword_plan_campaign_tools(
+    service: KeywordPlanCampaignService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create keyword plan campaign tools for MCP."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_keyword_plan_campaigns(  # pyright: ignore[reportUnusedFunction]
+    def _get_network_enum(
+        network_str: str,
+    ) -> KeywordPlanNetworkEnum.KeywordPlanNetwork:
+        """Convert string to network enum."""
+        if network_str == "GOOGLE_SEARCH":
+            return KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH
+        elif network_str == "GOOGLE_SEARCH_AND_PARTNERS":
+            return KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS
+        else:
+            raise ValueError(f"Invalid network: {network_str}")
+
+    async def mutate_keyword_plan_campaigns(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create, update, or remove keyword plan campaigns.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of keyword plan campaign operations
             partial_failure: Enable partial failure
             validate_only: Only validate the request
 
         Returns:
-            Success message with operation count
+            Serialized response with operation results
         """
-        service = KeywordPlanCampaignService()
-
-        def _get_network_enum(
-            network_str: str,
-        ) -> KeywordPlanNetworkEnum.KeywordPlanNetwork:
-            """Convert string to network enum."""
-            if network_str == "GOOGLE_SEARCH":
-                return KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH
-            elif network_str == "GOOGLE_SEARCH_AND_PARTNERS":
-                return (
-                    KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS
-                )
-            else:
-                raise ValueError(f"Invalid network: {network_str}")
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -249,17 +267,18 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_keyword_plan_campaigns(
+        return await service.mutate_keyword_plan_campaigns(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
         )
 
-        return f"Successfully processed {len(response.results)} keyword plan campaign operations"
+    tools.append(mutate_keyword_plan_campaigns)
 
-    @mcp.tool
-    async def create_keyword_plan_campaign(  # pyright: ignore[reportUnusedFunction]
+    async def create_keyword_plan_campaign(
+        ctx: Context,
         customer_id: str,
         keyword_plan: str,
         name: str,
@@ -267,10 +286,11 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
         cpc_bid_micros: int,
         language_constants: list[str] = [],
         geo_target_constants: list[str] = [],
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create a new keyword plan campaign.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             keyword_plan: The keyword plan resource name
             name: Name of the keyword plan campaign
@@ -280,23 +300,8 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
             geo_target_constants: List of geo target constant resource names
 
         Returns:
-            The created keyword plan campaign resource name
+            Serialized response with created keyword plan campaign details
         """
-        service = KeywordPlanCampaignService()
-
-        def _get_network_enum(
-            network_str: str,
-        ) -> KeywordPlanNetworkEnum.KeywordPlanNetwork:
-            """Convert string to network enum."""
-            if network_str == "GOOGLE_SEARCH":
-                return KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH
-            elif network_str == "GOOGLE_SEARCH_AND_PARTNERS":
-                return (
-                    KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS
-                )
-            else:
-                raise ValueError(f"Invalid network: {network_str}")
-
         operation = service.create_keyword_plan_campaign_operation(
             keyword_plan=keyword_plan,
             name=name,
@@ -306,15 +311,14 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
             geo_target_constants=geo_target_constants,
         )
 
-        response = service.mutate_keyword_plan_campaigns(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_keyword_plan_campaigns(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Created keyword plan campaign: {result.resource_name}"
+    tools.append(create_keyword_plan_campaign)
 
-    @mcp.tool
-    async def update_keyword_plan_campaign(  # pyright: ignore[reportUnusedFunction]
+    async def update_keyword_plan_campaign(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         name: Optional[str] = None,
@@ -322,10 +326,11 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
         cpc_bid_micros: Optional[int] = None,
         language_constants: Optional[list[str]] = None,
         geo_target_constants: Optional[list[str]] = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Update an existing keyword plan campaign.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The keyword plan campaign resource name
             name: Name of the keyword plan campaign
@@ -335,23 +340,8 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
             geo_target_constants: List of geo target constant resource names
 
         Returns:
-            The updated keyword plan campaign resource name
+            Serialized response with updated keyword plan campaign details
         """
-        service = KeywordPlanCampaignService()
-
-        def _get_network_enum(
-            network_str: str,
-        ) -> KeywordPlanNetworkEnum.KeywordPlanNetwork:
-            """Convert string to network enum."""
-            if network_str == "GOOGLE_SEARCH":
-                return KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH
-            elif network_str == "GOOGLE_SEARCH_AND_PARTNERS":
-                return (
-                    KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS
-                )
-            else:
-                raise ValueError(f"Invalid network: {network_str}")
-
         network = None
         if keyword_plan_network is not None:
             network = _get_network_enum(keyword_plan_network)
@@ -365,35 +355,46 @@ def register_keyword_plan_campaign_tools(mcp: FastMCP[Any]) -> None:
             geo_target_constants=geo_target_constants,
         )
 
-        response = service.mutate_keyword_plan_campaigns(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_keyword_plan_campaigns(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Updated keyword plan campaign: {result.resource_name}"
+    tools.append(update_keyword_plan_campaign)
 
-    @mcp.tool
-    async def remove_keyword_plan_campaign(  # pyright: ignore[reportUnusedFunction]
+    async def remove_keyword_plan_campaign(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Remove a keyword plan campaign.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The keyword plan campaign resource name
 
         Returns:
-            Success message
+            Serialized response confirming removal
         """
-        service = KeywordPlanCampaignService()
-
         operation = service.remove_keyword_plan_campaign_operation(
             resource_name=resource_name
         )
 
-        service.mutate_keyword_plan_campaigns(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_keyword_plan_campaigns(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        return f"Removed keyword plan campaign: {resource_name}"
+    tools.append(remove_keyword_plan_campaign)
+
+    return tools
+
+
+def register_keyword_plan_campaign_tools(
+    mcp: FastMCP[Any],
+) -> KeywordPlanCampaignService:
+    """Register keyword plan campaign tools with the MCP server."""
+    service = KeywordPlanCampaignService()
+    tools = create_keyword_plan_campaign_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

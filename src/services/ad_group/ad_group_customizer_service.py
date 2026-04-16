@@ -4,22 +4,19 @@ This service manages customizer values at the ad group level, allowing dynamic
 content insertion in ads based on ad group-specific data.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.services.services.ad_group_customizer_service import (
     AdGroupCustomizerServiceClient,
 )
 from google.ads.googleads.v23.services.types.ad_group_customizer_service import (
     AdGroupCustomizerOperation,
     MutateAdGroupCustomizersRequest,
-    MutateAdGroupCustomizersResponse,
 )
 from google.ads.googleads.v23.resources.types.ad_group_customizer import (
     AdGroupCustomizer,
-)
-from google.ads.googleads.v23.enums.types.response_content_type import (
-    ResponseContentTypeEnum,
 )
 from google.ads.googleads.v23.enums.types.customizer_attribute_type import (
     CustomizerAttributeTypeEnum,
@@ -27,7 +24,9 @@ from google.ads.googleads.v23.enums.types.customizer_attribute_type import (
 from google.ads.googleads.v23.common.types.customizer_value import CustomizerValue
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class AdGroupCustomizerService:
@@ -50,17 +49,19 @@ class AdGroupCustomizerService:
         assert self._client is not None
         return self._client
 
-    def mutate_ad_group_customizers(
+    async def mutate_ad_group_customizers(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[AdGroupCustomizerOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.RESOURCE_NAME_ONLY,
-    ) -> MutateAdGroupCustomizersResponse:
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
         """Create or remove ad group customizers.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             operations: List of operations to perform.
             partial_failure: If true, successful operations will be carried out and invalid
@@ -69,10 +70,7 @@ class AdGroupCustomizerService:
             response_content_type: The response content type setting.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing results.
-
-        Raises:
-            Exception: If the request fails.
+            Serialized response dictionary.
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -81,11 +79,23 @@ class AdGroupCustomizerService:
                 operations=operations,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
-            return self.client.mutate_ad_group_customizers(request=request)
+            if response_content_type is not None:
+                request.response_content_type = response_content_type
+            response = self.client.mutate_ad_group_customizers(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(operations)} ad group customizer(s) for customer {customer_id}",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
-            raise Exception(f"Failed to mutate ad group customizers: {e}") from e
+            error_msg = f"Failed to mutate ad group customizers: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def create_ad_group_customizer_operation(
         self,
@@ -130,18 +140,20 @@ class AdGroupCustomizerService:
         """
         return AdGroupCustomizerOperation(remove=resource_name)
 
-    def create_ad_group_customizer(
+    async def create_ad_group_customizer(
         self,
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         value_type: CustomizerAttributeTypeEnum.CustomizerAttributeType,
         string_value: str,
         validate_only: bool = False,
-    ) -> MutateAdGroupCustomizersResponse:
+    ) -> Dict[str, Any]:
         """Create a single ad group customizer.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             ad_group: The ad group resource name.
             customizer_attribute: The customizer attribute resource name.
@@ -150,7 +162,7 @@ class AdGroupCustomizerService:
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_ad_group_customizer_operation(
             ad_group=ad_group,
@@ -159,47 +171,53 @@ class AdGroupCustomizerService:
             string_value=string_value,
         )
 
-        return self.mutate_ad_group_customizers(
+        return await self.mutate_ad_group_customizers(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-    def remove_ad_group_customizer(
+    async def remove_ad_group_customizer(
         self,
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> MutateAdGroupCustomizersResponse:
+    ) -> Dict[str, Any]:
         """Remove an ad group customizer.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             resource_name: The resource name of the ad group customizer to remove.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_remove_operation(resource_name=resource_name)
 
-        return self.mutate_ad_group_customizers(
+        return await self.mutate_ad_group_customizers(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-    def create_text_customizer(
+    async def create_text_customizer(
         self,
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         text_value: str,
         validate_only: bool = False,
-    ) -> MutateAdGroupCustomizersResponse:
+    ) -> Dict[str, Any]:
         """Create a text ad group customizer.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             ad_group: The ad group resource name.
             customizer_attribute: The customizer attribute resource name.
@@ -207,9 +225,10 @@ class AdGroupCustomizerService:
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing the result.
+            Serialized response dictionary.
         """
-        return self.create_ad_group_customizer(
+        return await self.create_ad_group_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -218,17 +237,19 @@ class AdGroupCustomizerService:
             validate_only=validate_only,
         )
 
-    def create_number_customizer(
+    async def create_number_customizer(
         self,
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         number_value: str,
         validate_only: bool = False,
-    ) -> MutateAdGroupCustomizersResponse:
+    ) -> Dict[str, Any]:
         """Create a number ad group customizer.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             ad_group: The ad group resource name.
             customizer_attribute: The customizer attribute resource name.
@@ -236,9 +257,10 @@ class AdGroupCustomizerService:
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing the result.
+            Serialized response dictionary.
         """
-        return self.create_ad_group_customizer(
+        return await self.create_ad_group_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -247,17 +269,19 @@ class AdGroupCustomizerService:
             validate_only=validate_only,
         )
 
-    def create_price_customizer(
+    async def create_price_customizer(
         self,
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         price_value: str,
         validate_only: bool = False,
-    ) -> MutateAdGroupCustomizersResponse:
+    ) -> Dict[str, Any]:
         """Create a price ad group customizer.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             ad_group: The ad group resource name.
             customizer_attribute: The customizer attribute resource name.
@@ -265,9 +289,10 @@ class AdGroupCustomizerService:
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing the result.
+            Serialized response dictionary.
         """
-        return self.create_ad_group_customizer(
+        return await self.create_ad_group_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -276,17 +301,19 @@ class AdGroupCustomizerService:
             validate_only=validate_only,
         )
 
-    def create_percent_customizer(
+    async def create_percent_customizer(
         self,
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         percent_value: str,
         validate_only: bool = False,
-    ) -> MutateAdGroupCustomizersResponse:
+    ) -> Dict[str, Any]:
         """Create a percent ad group customizer.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             ad_group: The ad group resource name.
             customizer_attribute: The customizer attribute resource name.
@@ -294,9 +321,10 @@ class AdGroupCustomizerService:
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateAdGroupCustomizersResponse: The response containing the result.
+            Serialized response dictionary.
         """
-        return self.create_ad_group_customizer(
+        return await self.create_ad_group_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -306,17 +334,20 @@ class AdGroupCustomizerService:
         )
 
 
-def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
-    """Register ad group customizer tools with the MCP server."""
+def create_ad_group_customizer_tools(
+    service: AdGroupCustomizerService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create tool functions for the ad group customizer service."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_ad_group_customizers(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_ad_group_customizers(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: str = "RESOURCE_NAME_ONLY",
-    ) -> dict[str, Any]:
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Create or remove ad group customizers.
 
         Args:
@@ -329,19 +360,11 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Response with results and any partial failure errors
         """
-        service = AdGroupCustomizerService()
-
-        # Convert response content type string to enum
-        response_content_type_enum = getattr(
-            ResponseContentTypeEnum.ResponseContentType, response_content_type
-        )
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
 
             if op_type == "create":
-                # Convert value type string to enum
                 value_type = getattr(
                     CustomizerAttributeTypeEnum.CustomizerAttributeType,
                     op_data["value_type"],
@@ -362,55 +385,34 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_ad_group_customizers(
+        rct = None
+        if response_content_type is not None:
+            from google.ads.googleads.v23.enums.types.response_content_type import (
+                ResponseContentTypeEnum,
+            )
+
+            rct = getattr(
+                ResponseContentTypeEnum.ResponseContentType, response_content_type
+            )
+
+        return await service.mutate_ad_group_customizers(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type_enum,
+            response_content_type=rct,
         )
 
-        # Format response
-        results = []
-        for result in response.results:
-            result_data: dict[str, Any] = {
-                "resource_name": result.resource_name,
-            }
-            if result.ad_group_customizer:
-                result_data["ad_group_customizer"] = {
-                    "resource_name": result.ad_group_customizer.resource_name,
-                    "ad_group": result.ad_group_customizer.ad_group,
-                    "customizer_attribute": result.ad_group_customizer.customizer_attribute,
-                    "status": result.ad_group_customizer.status.name
-                    if result.ad_group_customizer.status
-                    else None,
-                    "value": {
-                        "type": result.ad_group_customizer.value.type_.name
-                        if result.ad_group_customizer.value.type_
-                        else None,
-                        "string_value": result.ad_group_customizer.value.string_value,
-                    }
-                    if result.ad_group_customizer.value
-                    else None,
-                }
-            results.append(result_data)
-
-        return {
-            "results": results,
-            "partial_failure_error": str(response.partial_failure_error)
-            if response.partial_failure_error
-            else None,
-        }
-
-    @mcp.tool
-    async def create_ad_group_customizer(  # pyright: ignore[reportUnusedFunction]
+    async def create_ad_group_customizer(
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         value_type: str,
         string_value: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create an ad group customizer.
 
         Args:
@@ -424,14 +426,12 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created customizer details
         """
-        service = AdGroupCustomizerService()
-
-        # Convert value type string to enum
         value_type_enum = getattr(
             CustomizerAttributeTypeEnum.CustomizerAttributeType, value_type
         )
 
-        response = service.create_ad_group_customizer(
+        return await service.create_ad_group_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -440,24 +440,14 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create_customizer",
-            "ad_group": ad_group,
-            "customizer_attribute": customizer_attribute,
-            "value_type": value_type,
-            "string_value": string_value,
-        }
-
-    @mcp.tool
-    async def create_text_customizer(  # pyright: ignore[reportUnusedFunction]
+    async def create_text_customizer(
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         text_value: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create a text ad group customizer.
 
         Args:
@@ -470,9 +460,8 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created customizer details
         """
-        service = AdGroupCustomizerService()
-
-        response = service.create_text_customizer(
+        return await service.create_text_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -480,23 +469,14 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create_text_customizer",
-            "ad_group": ad_group,
-            "customizer_attribute": customizer_attribute,
-            "text_value": text_value,
-        }
-
-    @mcp.tool
-    async def create_number_customizer(  # pyright: ignore[reportUnusedFunction]
+    async def create_number_customizer(
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         number_value: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create a number ad group customizer.
 
         Args:
@@ -509,9 +489,8 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created customizer details
         """
-        service = AdGroupCustomizerService()
-
-        response = service.create_number_customizer(
+        return await service.create_number_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -519,23 +498,14 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create_number_customizer",
-            "ad_group": ad_group,
-            "customizer_attribute": customizer_attribute,
-            "number_value": number_value,
-        }
-
-    @mcp.tool
-    async def create_price_customizer(  # pyright: ignore[reportUnusedFunction]
+    async def create_price_customizer(
+        ctx: Context,
         customer_id: str,
         ad_group: str,
         customizer_attribute: str,
         price_value: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create a price ad group customizer.
 
         Args:
@@ -548,9 +518,8 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created customizer details
         """
-        service = AdGroupCustomizerService()
-
-        response = service.create_price_customizer(
+        return await service.create_price_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             ad_group=ad_group,
             customizer_attribute=customizer_attribute,
@@ -558,21 +527,12 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create_price_customizer",
-            "ad_group": ad_group,
-            "customizer_attribute": customizer_attribute,
-            "price_value": price_value,
-        }
-
-    @mcp.tool
-    async def remove_ad_group_customizer(  # pyright: ignore[reportUnusedFunction]
+    async def remove_ad_group_customizer(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Remove an ad group customizer.
 
         Args:
@@ -583,17 +543,30 @@ def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Removal result details
         """
-        service = AdGroupCustomizerService()
-
-        response = service.remove_ad_group_customizer(
+        return await service.remove_ad_group_customizer(
+            ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "remove",
-            "removed_resource_name": resource_name,
-        }
+    tools.extend(
+        [
+            mutate_ad_group_customizers,
+            create_ad_group_customizer,
+            create_text_customizer,
+            create_number_customizer,
+            create_price_customizer,
+            remove_ad_group_customizer,
+        ]
+    )
+    return tools
+
+
+def register_ad_group_customizer_tools(mcp: FastMCP[Any]) -> AdGroupCustomizerService:
+    """Register ad group customizer tools with the MCP server."""
+    service = AdGroupCustomizerService()
+    tools = create_ad_group_customizer_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

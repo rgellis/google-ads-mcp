@@ -4,21 +4,18 @@ This service manages customer-level asset associations, allowing assets to be li
 to customers for use across campaigns.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.services.services.customer_asset_service import (
     CustomerAssetServiceClient,
 )
 from google.ads.googleads.v23.services.types.customer_asset_service import (
     CustomerAssetOperation,
     MutateCustomerAssetsRequest,
-    MutateCustomerAssetsResponse,
 )
 from google.ads.googleads.v23.resources.types.customer_asset import CustomerAsset
-from google.ads.googleads.v23.enums.types.response_content_type import (
-    ResponseContentTypeEnum,
-)
 from google.ads.googleads.v23.enums.types.asset_field_type import (
     AssetFieldTypeEnum,
 )
@@ -28,7 +25,9 @@ from google.ads.googleads.v23.enums.types.asset_link_status import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class CustomerAssetService:
@@ -51,17 +50,19 @@ class CustomerAssetService:
         assert self._client is not None
         return self._client
 
-    def mutate_customer_assets(
+    async def mutate_customer_assets(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[CustomerAssetOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.RESOURCE_NAME_ONLY,
-    ) -> MutateCustomerAssetsResponse:
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
         """Create, update, or remove customer assets.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             operations: List of operations to perform.
             partial_failure: If true, successful operations will be carried out and invalid
@@ -70,10 +71,7 @@ class CustomerAssetService:
             response_content_type: The response content type setting.
 
         Returns:
-            MutateCustomerAssetsResponse: The response containing results.
-
-        Raises:
-            GoogleAdsException: If the request fails.
+            Serialized response dictionary.
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -82,11 +80,23 @@ class CustomerAssetService:
                 operations=operations,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
-            return self.client.mutate_customer_assets(request=request)
+            if response_content_type is not None:
+                request.response_content_type = response_content_type
+            response = self.client.mutate_customer_assets(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(operations)} customer asset(s) for customer {customer_id}",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
-            raise Exception(f"Failed to mutate customer assets: {e}") from e
+            error_msg = f"Failed to mutate customer assets: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def create_customer_asset_operation(
         self,
@@ -157,17 +167,19 @@ class CustomerAssetService:
         """
         return CustomerAssetOperation(remove=resource_name)
 
-    def create_customer_asset(
+    async def create_customer_asset(
         self,
+        ctx: Context,
         customer_id: str,
         asset: str,
         field_type: AssetFieldTypeEnum.AssetFieldType,
         status: AssetLinkStatusEnum.AssetLinkStatus = AssetLinkStatusEnum.AssetLinkStatus.ENABLED,
         validate_only: bool = False,
-    ) -> MutateCustomerAssetsResponse:
+    ) -> Dict[str, Any]:
         """Create a single customer asset.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             asset: The asset resource name.
             field_type: The asset field type.
@@ -175,7 +187,7 @@ class CustomerAssetService:
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCustomerAssetsResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_customer_asset_operation(
             asset=asset,
@@ -183,77 +195,87 @@ class CustomerAssetService:
             status=status,
         )
 
-        return self.mutate_customer_assets(
+        return await self.mutate_customer_assets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-    def update_customer_asset_status(
+    async def update_customer_asset_status(
         self,
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         status: AssetLinkStatusEnum.AssetLinkStatus,
         validate_only: bool = False,
-    ) -> MutateCustomerAssetsResponse:
+    ) -> Dict[str, Any]:
         """Update the status of a customer asset.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             resource_name: The resource name of the customer asset.
             status: The new status.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCustomerAssetsResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_update_operation(
             resource_name=resource_name,
             status=status,
         )
 
-        return self.mutate_customer_assets(
+        return await self.mutate_customer_assets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-    def remove_customer_asset(
+    async def remove_customer_asset(
         self,
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> MutateCustomerAssetsResponse:
+    ) -> Dict[str, Any]:
         """Remove a customer asset.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             resource_name: The resource name of the customer asset to remove.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCustomerAssetsResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_remove_operation(resource_name=resource_name)
 
-        return self.mutate_customer_assets(
+        return await self.mutate_customer_assets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
 
-def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
-    """Register customer asset tools with the MCP server."""
+def create_customer_asset_tools(
+    service: CustomerAssetService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create tool functions for the customer asset service."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_customer_assets(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_customer_assets(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: str = "RESOURCE_NAME_ONLY",
-    ) -> dict[str, Any]:
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Create, update, or remove customer assets.
 
         Args:
@@ -266,19 +288,11 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Response with results and any partial failure errors
         """
-        service = CustomerAssetService()
-
-        # Convert response content type string to enum
-        response_content_type_enum = getattr(
-            ResponseContentTypeEnum.ResponseContentType, response_content_type
-        )
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
 
             if op_type == "create":
-                # Convert strings to enums
                 field_type = getattr(
                     AssetFieldTypeEnum.AssetFieldType, op_data["field_type"]
                 )
@@ -312,54 +326,33 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_customer_assets(
+        rct = None
+        if response_content_type is not None:
+            from google.ads.googleads.v23.enums.types.response_content_type import (
+                ResponseContentTypeEnum,
+            )
+
+            rct = getattr(
+                ResponseContentTypeEnum.ResponseContentType, response_content_type
+            )
+
+        return await service.mutate_customer_assets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type_enum,
+            response_content_type=rct,
         )
 
-        # Format response
-        results = []
-        for result in response.results:
-            result_data: dict[str, Any] = {
-                "resource_name": result.resource_name,
-            }
-            if result.customer_asset:
-                result_data["customer_asset"] = {
-                    "resource_name": result.customer_asset.resource_name,
-                    "asset": result.customer_asset.asset,
-                    "field_type": result.customer_asset.field_type.name
-                    if result.customer_asset.field_type
-                    else None,
-                    "status": result.customer_asset.status.name
-                    if result.customer_asset.status
-                    else None,
-                    "source": result.customer_asset.source.name
-                    if result.customer_asset.source
-                    else None,
-                    "primary_status": result.customer_asset.primary_status.name
-                    if result.customer_asset.primary_status
-                    else None,
-                }
-            results.append(result_data)
-
-        return {
-            "results": results,
-            "partial_failure_error": str(response.partial_failure_error)
-            if response.partial_failure_error
-            else None,
-        }
-
-    @mcp.tool
-    async def create_customer_asset(  # pyright: ignore[reportUnusedFunction]
+    async def create_customer_asset(
+        ctx: Context,
         customer_id: str,
         asset: str,
         field_type: str,
         status: str = "ENABLED",
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create a customer asset.
 
         Args:
@@ -372,13 +365,11 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created customer asset details
         """
-        service = CustomerAssetService()
-
-        # Convert strings to enums
         field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
         status_enum = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
 
-        response = service.create_customer_asset(
+        return await service.create_customer_asset(
+            ctx=ctx,
             customer_id=customer_id,
             asset=asset,
             field_type=field_type_enum,
@@ -386,22 +377,13 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create",
-            "asset": asset,
-            "field_type": field_type,
-            "status": status,
-        }
-
-    @mcp.tool
-    async def update_customer_asset_status(  # pyright: ignore[reportUnusedFunction]
+    async def update_customer_asset_status(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         status: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Update the status of a customer asset.
 
         Args:
@@ -413,31 +395,22 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Update result details
         """
-        service = CustomerAssetService()
-
-        # Convert string to enum
         status_enum = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
 
-        response = service.update_customer_asset_status(
+        return await service.update_customer_asset_status(
+            ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
             status=status_enum,
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "update_status",
-            "new_status": status,
-        }
-
-    @mcp.tool
-    async def remove_customer_asset(  # pyright: ignore[reportUnusedFunction]
+    async def remove_customer_asset(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Remove a customer asset.
 
         Args:
@@ -448,17 +421,28 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Removal result details
         """
-        service = CustomerAssetService()
-
-        response = service.remove_customer_asset(
+        return await service.remove_customer_asset(
+            ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "remove",
-            "removed_resource_name": resource_name,
-        }
+    tools.extend(
+        [
+            mutate_customer_assets,
+            create_customer_asset,
+            update_customer_asset_status,
+            remove_customer_asset,
+        ]
+    )
+    return tools
+
+
+def register_customer_asset_tools(mcp: FastMCP[Any]) -> CustomerAssetService:
+    """Register customer asset tools with the MCP server."""
+    service = CustomerAssetService()
+    tools = create_customer_asset_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

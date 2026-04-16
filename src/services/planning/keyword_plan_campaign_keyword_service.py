@@ -4,9 +4,10 @@ This module provides functionality for managing keyword plan campaign keywords i
 Note: Only negative keywords are supported for campaign-level keywords in keyword plans.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
 from google.ads.googleads.v23.resources.types.keyword_plan_campaign_keyword import (
     KeywordPlanCampaignKeyword,
@@ -17,11 +18,12 @@ from google.ads.googleads.v23.services.services.keyword_plan_campaign_keyword_se
 from google.ads.googleads.v23.services.types.keyword_plan_campaign_keyword_service import (
     KeywordPlanCampaignKeywordOperation,
     MutateKeywordPlanCampaignKeywordsRequest,
-    MutateKeywordPlanCampaignKeywordsResponse,
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class KeywordPlanCampaignKeywordService:
@@ -42,34 +44,52 @@ class KeywordPlanCampaignKeywordService:
         assert self._client is not None
         return self._client
 
-    def mutate_keyword_plan_campaign_keywords(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_keyword_plan_campaign_keywords(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[KeywordPlanCampaignKeywordOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
-    ) -> MutateKeywordPlanCampaignKeywordsResponse:
+    ) -> Dict[str, Any]:
         """Mutate keyword plan campaign keywords.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of keyword plan campaign keyword operations
             partial_failure: Whether to enable partial failure
             validate_only: Whether to only validate the request
 
         Returns:
-            MutateKeywordPlanCampaignKeywordsResponse: The response containing results
+            Serialized response containing results
         """
-        customer_id = format_customer_id(customer_id)
-        request = MutateKeywordPlanCampaignKeywordsRequest(
-            customer_id=customer_id,
-            operations=operations,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-        )
-        return self.client.mutate_keyword_plan_campaign_keywords(request=request)
+        try:
+            customer_id = format_customer_id(customer_id)
+            request = MutateKeywordPlanCampaignKeywordsRequest(
+                customer_id=customer_id,
+                operations=operations,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
+            response = self.client.mutate_keyword_plan_campaign_keywords(
+                request=request
+            )
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(response.results)} keyword plan campaign keywords",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate keyword plan campaign keywords: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
-    def create_keyword_plan_campaign_keyword_operation(  # pyright: ignore[reportUnusedFunction]
+    def create_keyword_plan_campaign_keyword_operation(
         self,
         keyword_plan_campaign: str,
         text: str,
@@ -96,7 +116,7 @@ class KeywordPlanCampaignKeywordService:
 
         return KeywordPlanCampaignKeywordOperation(create=keyword_plan_campaign_keyword)
 
-    def update_keyword_plan_campaign_keyword_operation(  # pyright: ignore[reportUnusedFunction]
+    def update_keyword_plan_campaign_keyword_operation(
         self,
         resource_name: str,
         text: Optional[str] = None,
@@ -129,7 +149,7 @@ class KeywordPlanCampaignKeywordService:
             update_mask={"paths": update_mask},
         )
 
-    def remove_keyword_plan_campaign_keyword_operation(  # pyright: ignore[reportUnusedFunction]
+    def remove_keyword_plan_campaign_keyword_operation(
         self, resource_name: str
     ) -> KeywordPlanCampaignKeywordOperation:
         """Create a keyword plan campaign keyword operation for removal.
@@ -143,42 +163,44 @@ class KeywordPlanCampaignKeywordService:
         return KeywordPlanCampaignKeywordOperation(remove=resource_name)
 
 
-def register_keyword_plan_campaign_keyword_tools(mcp: FastMCP[Any]) -> None:
-    """Register keyword plan campaign keyword tools with the MCP server."""
+def create_keyword_plan_campaign_keyword_tools(
+    service: KeywordPlanCampaignKeywordService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create keyword plan campaign keyword tools for MCP."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_keyword_plan_campaign_keywords(  # pyright: ignore[reportUnusedFunction]
+    def _get_match_type_enum(
+        match_type_str: str,
+    ) -> KeywordMatchTypeEnum.KeywordMatchType:
+        """Convert string to match type enum."""
+        if match_type_str == "EXACT":
+            return KeywordMatchTypeEnum.KeywordMatchType.EXACT
+        elif match_type_str == "PHRASE":
+            return KeywordMatchTypeEnum.KeywordMatchType.PHRASE
+        elif match_type_str == "BROAD":
+            return KeywordMatchTypeEnum.KeywordMatchType.BROAD
+        else:
+            raise ValueError(f"Invalid match type: {match_type_str}")
+
+    async def mutate_keyword_plan_campaign_keywords(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create, update, or remove keyword plan campaign keywords (negative keywords only).
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             operations: List of keyword plan campaign keyword operations
             partial_failure: Enable partial failure
             validate_only: Only validate the request
 
         Returns:
-            Success message with operation count
+            Serialized response with operation results
         """
-        service = KeywordPlanCampaignKeywordService()
-
-        def _get_match_type_enum(
-            match_type_str: str,
-        ) -> KeywordMatchTypeEnum.KeywordMatchType:
-            """Convert string to match type enum."""
-            if match_type_str == "EXACT":
-                return KeywordMatchTypeEnum.KeywordMatchType.EXACT
-            elif match_type_str == "PHRASE":
-                return KeywordMatchTypeEnum.KeywordMatchType.PHRASE
-            elif match_type_str == "BROAD":
-                return KeywordMatchTypeEnum.KeywordMatchType.BROAD
-            else:
-                raise ValueError(f"Invalid match type: {match_type_str}")
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -208,94 +230,66 @@ def register_keyword_plan_campaign_keyword_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_keyword_plan_campaign_keywords(
+        return await service.mutate_keyword_plan_campaign_keywords(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
         )
 
-        return f"Successfully processed {len(response.results)} keyword plan campaign keyword operations"
+    tools.append(mutate_keyword_plan_campaign_keywords)
 
-    @mcp.tool
-    async def create_keyword_plan_campaign_keyword(  # pyright: ignore[reportUnusedFunction]
+    async def create_keyword_plan_campaign_keyword(
+        ctx: Context,
         customer_id: str,
         keyword_plan_campaign: str,
         text: str,
         match_type: str,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Create a new keyword plan campaign keyword (negative keyword).
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             keyword_plan_campaign: The keyword plan campaign resource name
             text: The keyword text
             match_type: The keyword match type (EXACT, PHRASE, or BROAD)
 
         Returns:
-            The created keyword plan campaign keyword resource name
+            Serialized response with created keyword plan campaign keyword details
         """
-        service = KeywordPlanCampaignKeywordService()
-
-        def _get_match_type_enum(
-            match_type_str: str,
-        ) -> KeywordMatchTypeEnum.KeywordMatchType:
-            """Convert string to match type enum."""
-            if match_type_str == "EXACT":
-                return KeywordMatchTypeEnum.KeywordMatchType.EXACT
-            elif match_type_str == "PHRASE":
-                return KeywordMatchTypeEnum.KeywordMatchType.PHRASE
-            elif match_type_str == "BROAD":
-                return KeywordMatchTypeEnum.KeywordMatchType.BROAD
-            else:
-                raise ValueError(f"Invalid match type: {match_type_str}")
-
         operation = service.create_keyword_plan_campaign_keyword_operation(
             keyword_plan_campaign=keyword_plan_campaign,
             text=text,
             match_type=_get_match_type_enum(match_type),
         )
 
-        response = service.mutate_keyword_plan_campaign_keywords(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_keyword_plan_campaign_keywords(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Created keyword plan campaign keyword: {result.resource_name}"
+    tools.append(create_keyword_plan_campaign_keyword)
 
-    @mcp.tool
-    async def update_keyword_plan_campaign_keyword(  # pyright: ignore[reportUnusedFunction]
+    async def update_keyword_plan_campaign_keyword(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         text: Optional[str] = None,
         match_type: Optional[str] = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Update an existing keyword plan campaign keyword.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The keyword plan campaign keyword resource name
             text: The keyword text
             match_type: The keyword match type (EXACT, PHRASE, or BROAD)
 
         Returns:
-            The updated keyword plan campaign keyword resource name
+            Serialized response with updated keyword plan campaign keyword details
         """
-        service = KeywordPlanCampaignKeywordService()
-
-        def _get_match_type_enum(
-            match_type_str: str,
-        ) -> KeywordMatchTypeEnum.KeywordMatchType:
-            """Convert string to match type enum."""
-            if match_type_str == "EXACT":
-                return KeywordMatchTypeEnum.KeywordMatchType.EXACT
-            elif match_type_str == "PHRASE":
-                return KeywordMatchTypeEnum.KeywordMatchType.PHRASE
-            elif match_type_str == "BROAD":
-                return KeywordMatchTypeEnum.KeywordMatchType.BROAD
-            else:
-                raise ValueError(f"Invalid match type: {match_type_str}")
-
         match_type_enum = None
         if match_type is not None:
             match_type_enum = _get_match_type_enum(match_type)
@@ -306,35 +300,46 @@ def register_keyword_plan_campaign_keyword_tools(mcp: FastMCP[Any]) -> None:
             match_type=match_type_enum,
         )
 
-        response = service.mutate_keyword_plan_campaign_keywords(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_keyword_plan_campaign_keywords(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        result = response.results[0]
-        return f"Updated keyword plan campaign keyword: {result.resource_name}"
+    tools.append(update_keyword_plan_campaign_keyword)
 
-    @mcp.tool
-    async def remove_keyword_plan_campaign_keyword(  # pyright: ignore[reportUnusedFunction]
+    async def remove_keyword_plan_campaign_keyword(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """Remove a keyword plan campaign keyword.
 
         Args:
+            ctx: FastMCP context
             customer_id: The customer ID
             resource_name: The keyword plan campaign keyword resource name
 
         Returns:
-            Success message
+            Serialized response confirming removal
         """
-        service = KeywordPlanCampaignKeywordService()
-
         operation = service.remove_keyword_plan_campaign_keyword_operation(
             resource_name=resource_name
         )
 
-        service.mutate_keyword_plan_campaign_keywords(
-            customer_id=customer_id, operations=[operation]
+        return await service.mutate_keyword_plan_campaign_keywords(
+            ctx=ctx, customer_id=customer_id, operations=[operation]
         )
 
-        return f"Removed keyword plan campaign keyword: {resource_name}"
+    tools.append(remove_keyword_plan_campaign_keyword)
+
+    return tools
+
+
+def register_keyword_plan_campaign_keyword_tools(
+    mcp: FastMCP[Any],
+) -> KeywordPlanCampaignKeywordService:
+    """Register keyword plan campaign keyword tools with the MCP server."""
+    service = KeywordPlanCampaignKeywordService()
+    tools = create_keyword_plan_campaign_keyword_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

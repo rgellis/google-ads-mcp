@@ -4,24 +4,23 @@ This service manages asset set associations with campaigns, allowing asset sets
 to be linked to campaigns for use in advertising.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.services.services.campaign_asset_set_service import (
     CampaignAssetSetServiceClient,
 )
 from google.ads.googleads.v23.services.types.campaign_asset_set_service import (
     CampaignAssetSetOperation,
     MutateCampaignAssetSetsRequest,
-    MutateCampaignAssetSetsResponse,
 )
 from google.ads.googleads.v23.resources.types.campaign_asset_set import CampaignAssetSet
-from google.ads.googleads.v23.enums.types.response_content_type import (
-    ResponseContentTypeEnum,
-)
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
+
+logger = get_logger(__name__)
 
 
 class CampaignAssetSetService:
@@ -44,17 +43,19 @@ class CampaignAssetSetService:
         assert self._client is not None
         return self._client
 
-    def mutate_campaign_asset_sets(
+    async def mutate_campaign_asset_sets(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[CampaignAssetSetOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.RESOURCE_NAME_ONLY,
-    ) -> MutateCampaignAssetSetsResponse:
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
         """Create or remove campaign asset sets.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             operations: List of operations to perform.
             partial_failure: If true, successful operations will be carried out and invalid
@@ -63,10 +64,7 @@ class CampaignAssetSetService:
             response_content_type: The response content type setting.
 
         Returns:
-            MutateCampaignAssetSetsResponse: The response containing results.
-
-        Raises:
-            Exception: If the request fails.
+            Serialized response dictionary.
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -75,11 +73,23 @@ class CampaignAssetSetService:
                 operations=operations,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
-            return self.client.mutate_campaign_asset_sets(request=request)
+            if response_content_type is not None:
+                request.response_content_type = response_content_type
+            response = self.client.mutate_campaign_asset_sets(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(operations)} campaign asset set(s) for customer {customer_id}",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
-            raise Exception(f"Failed to mutate campaign asset sets: {e}") from e
+            error_msg = f"Failed to mutate campaign asset sets: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def create_campaign_asset_set_operation(
         self,
@@ -114,76 +124,84 @@ class CampaignAssetSetService:
         """
         return CampaignAssetSetOperation(remove=resource_name)
 
-    def link_asset_set_to_campaign(
+    async def link_asset_set_to_campaign(
         self,
+        ctx: Context,
         customer_id: str,
         campaign: str,
         asset_set: str,
         validate_only: bool = False,
-    ) -> MutateCampaignAssetSetsResponse:
+    ) -> Dict[str, Any]:
         """Link an asset set to a campaign.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             campaign: The campaign resource name.
             asset_set: The asset set resource name.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCampaignAssetSetsResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_campaign_asset_set_operation(
             campaign=campaign,
             asset_set=asset_set,
         )
 
-        return self.mutate_campaign_asset_sets(
+        return await self.mutate_campaign_asset_sets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-    def unlink_asset_set_from_campaign(
+    async def unlink_asset_set_from_campaign(
         self,
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> MutateCampaignAssetSetsResponse:
+    ) -> Dict[str, Any]:
         """Unlink an asset set from a campaign.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             resource_name: The resource name of the campaign asset set to remove.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCampaignAssetSetsResponse: The response containing the result.
+            Serialized response dictionary.
         """
         operation = self.create_remove_operation(resource_name=resource_name)
 
-        return self.mutate_campaign_asset_sets(
+        return await self.mutate_campaign_asset_sets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-    def link_multiple_asset_sets_to_campaign(
+    async def link_multiple_asset_sets_to_campaign(
         self,
+        ctx: Context,
         customer_id: str,
         campaign: str,
         asset_sets: List[str],
         validate_only: bool = False,
-    ) -> MutateCampaignAssetSetsResponse:
+    ) -> Dict[str, Any]:
         """Link multiple asset sets to a campaign.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             campaign: The campaign resource name.
             asset_sets: List of asset set resource names.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCampaignAssetSetsResponse: The response containing the results.
+            Serialized response dictionary.
         """
         operations = []
         for asset_set in asset_sets:
@@ -193,29 +211,32 @@ class CampaignAssetSetService:
             )
             operations.append(operation)
 
-        return self.mutate_campaign_asset_sets(
+        return await self.mutate_campaign_asset_sets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=operations,
             validate_only=validate_only,
         )
 
-    def link_asset_set_to_multiple_campaigns(
+    async def link_asset_set_to_multiple_campaigns(
         self,
+        ctx: Context,
         customer_id: str,
         campaigns: List[str],
         asset_set: str,
         validate_only: bool = False,
-    ) -> MutateCampaignAssetSetsResponse:
+    ) -> Dict[str, Any]:
         """Link an asset set to multiple campaigns.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             campaigns: List of campaign resource names.
             asset_set: The asset set resource name.
             validate_only: If true, the request is validated but not executed.
 
         Returns:
-            MutateCampaignAssetSetsResponse: The response containing the results.
+            Serialized response dictionary.
         """
         operations = []
         for campaign in campaigns:
@@ -225,24 +246,28 @@ class CampaignAssetSetService:
             )
             operations.append(operation)
 
-        return self.mutate_campaign_asset_sets(
+        return await self.mutate_campaign_asset_sets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=operations,
             validate_only=validate_only,
         )
 
 
-def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
-    """Register campaign asset set tools with the MCP server."""
+def create_campaign_asset_set_tools(
+    service: CampaignAssetSetService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create tool functions for the campaign asset set service."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_campaign_asset_sets(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_campaign_asset_sets(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: str = "RESOURCE_NAME_ONLY",
-    ) -> dict[str, Any]:
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Create or remove campaign asset set associations.
 
         Args:
@@ -255,13 +280,6 @@ def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Response with results and any partial failure errors
         """
-        service = CampaignAssetSetService()
-
-        # Convert response content type string to enum
-        response_content_type_enum = getattr(
-            ResponseContentTypeEnum.ResponseContentType, response_content_type
-        )
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -280,45 +298,32 @@ def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_campaign_asset_sets(
+        rct = None
+        if response_content_type is not None:
+            from google.ads.googleads.v23.enums.types.response_content_type import (
+                ResponseContentTypeEnum,
+            )
+
+            rct = getattr(
+                ResponseContentTypeEnum.ResponseContentType, response_content_type
+            )
+
+        return await service.mutate_campaign_asset_sets(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type_enum,
+            response_content_type=rct,
         )
 
-        # Format response
-        results = []
-        for result in response.results:
-            result_data: dict[str, Any] = {
-                "resource_name": result.resource_name,
-            }
-            if result.campaign_asset_set:
-                result_data["campaign_asset_set"] = {
-                    "resource_name": result.campaign_asset_set.resource_name,
-                    "campaign": result.campaign_asset_set.campaign,
-                    "asset_set": result.campaign_asset_set.asset_set,
-                    "status": result.campaign_asset_set.status.name
-                    if result.campaign_asset_set.status
-                    else None,
-                }
-            results.append(result_data)
-
-        return {
-            "results": results,
-            "partial_failure_error": str(response.partial_failure_error)
-            if response.partial_failure_error
-            else None,
-        }
-
-    @mcp.tool
-    async def link_asset_set_to_campaign(  # pyright: ignore[reportUnusedFunction]
+    async def link_asset_set_to_campaign(
+        ctx: Context,
         customer_id: str,
         campaign: str,
         asset_set: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Link an asset set to a campaign.
 
         Args:
@@ -330,29 +335,20 @@ def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created campaign asset set details
         """
-        service = CampaignAssetSetService()
-
-        response = service.link_asset_set_to_campaign(
+        return await service.link_asset_set_to_campaign(
+            ctx=ctx,
             customer_id=customer_id,
             campaign=campaign,
             asset_set=asset_set,
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "link_asset_set_to_campaign",
-            "campaign": campaign,
-            "asset_set": asset_set,
-        }
-
-    @mcp.tool
-    async def unlink_asset_set_from_campaign(  # pyright: ignore[reportUnusedFunction]
+    async def unlink_asset_set_from_campaign(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Unlink an asset set from a campaign.
 
         Args:
@@ -363,28 +359,20 @@ def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Removal result details
         """
-        service = CampaignAssetSetService()
-
-        response = service.unlink_asset_set_from_campaign(
+        return await service.unlink_asset_set_from_campaign(
+            ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "unlink",
-            "removed_resource_name": resource_name,
-        }
-
-    @mcp.tool
-    async def link_multiple_asset_sets_to_campaign(  # pyright: ignore[reportUnusedFunction]
+    async def link_multiple_asset_sets_to_campaign(
+        ctx: Context,
         customer_id: str,
         campaign: str,
         asset_sets: list[str],
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Link multiple asset sets to a campaign.
 
         Args:
@@ -394,31 +382,23 @@ def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
             validate_only: Only validate the request
 
         Returns:
-            Results with count of linked asset sets
+            Results with linked asset sets
         """
-        service = CampaignAssetSetService()
-
-        response = service.link_multiple_asset_sets_to_campaign(
+        return await service.link_multiple_asset_sets_to_campaign(
+            ctx=ctx,
             customer_id=customer_id,
             campaign=campaign,
             asset_sets=asset_sets,
             validate_only=validate_only,
         )
 
-        return {
-            "operation": "link_multiple_asset_sets",
-            "campaign": campaign,
-            "asset_sets_count": len(asset_sets),
-            "results_count": len(response.results),
-        }
-
-    @mcp.tool
-    async def link_asset_set_to_multiple_campaigns(  # pyright: ignore[reportUnusedFunction]
+    async def link_asset_set_to_multiple_campaigns(
+        ctx: Context,
         customer_id: str,
         campaigns: list[str],
         asset_set: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Link an asset set to multiple campaigns.
 
         Args:
@@ -428,20 +408,32 @@ def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> None:
             validate_only: Only validate the request
 
         Returns:
-            Results with count of linked campaigns
+            Results with linked campaigns
         """
-        service = CampaignAssetSetService()
-
-        response = service.link_asset_set_to_multiple_campaigns(
+        return await service.link_asset_set_to_multiple_campaigns(
+            ctx=ctx,
             customer_id=customer_id,
             campaigns=campaigns,
             asset_set=asset_set,
             validate_only=validate_only,
         )
 
-        return {
-            "operation": "link_to_multiple_campaigns",
-            "asset_set": asset_set,
-            "campaigns_count": len(campaigns),
-            "results_count": len(response.results),
-        }
+    tools.extend(
+        [
+            mutate_campaign_asset_sets,
+            link_asset_set_to_campaign,
+            unlink_asset_set_from_campaign,
+            link_multiple_asset_sets_to_campaign,
+            link_asset_set_to_multiple_campaigns,
+        ]
+    )
+    return tools
+
+
+def register_campaign_asset_set_tools(mcp: FastMCP[Any]) -> CampaignAssetSetService:
+    """Register campaign asset set tools with the MCP server."""
+    service = CampaignAssetSetService()
+    tools = create_campaign_asset_set_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service

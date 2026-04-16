@@ -12,21 +12,21 @@ All services should follow Pattern A: async methods with `ctx: Context`, error h
 
 These 15 services currently use Pattern B (sync methods, no ctx, no error handling):
 
-- [ ] `src/services/campaign/experiment_arm_service.py`
-- [ ] `src/services/ad_group/ad_group_customizer_service.py`
-- [ ] `src/services/ad_group/ad_group_criterion_label_service.py`
-- [ ] `src/services/assets/asset_group_signal_service.py`
-- [ ] `src/services/assets/customer_asset_service.py`
-- [ ] `src/services/account/customer_customizer_service.py`
-- [ ] `src/services/campaign/campaign_asset_set_service.py`
-- [ ] `src/services/product_integration/product_link_service.py`
-- [ ] `src/services/planning/brand_suggestion_service.py`
-- [ ] `src/services/planning/keyword_plan_ad_group_service.py`
-- [ ] `src/services/planning/keyword_plan_ad_group_keyword_service.py`
-- [ ] `src/services/planning/keyword_plan_campaign_service.py`
-- [ ] `src/services/planning/keyword_plan_campaign_keyword_service.py`
-- [ ] `src/services/conversions/custom_conversion_goal_service.py`
-- [ ] `src/services/conversions/conversion_goal_campaign_config_service.py`
+- [x] `src/services/campaign/experiment_arm_service.py` **DONE**
+- [x] `src/services/ad_group/ad_group_customizer_service.py` **DONE**
+- [x] `src/services/ad_group/ad_group_criterion_label_service.py` **DONE**
+- [x] `src/services/assets/asset_group_signal_service.py` **DONE**
+- [x] `src/services/assets/customer_asset_service.py` **DONE**
+- [x] `src/services/account/customer_customizer_service.py` **DONE**
+- [x] `src/services/campaign/campaign_asset_set_service.py` **DONE**
+- [x] `src/services/product_integration/product_link_service.py` **DONE**
+- [x] `src/services/planning/brand_suggestion_service.py` **DONE**
+- [x] `src/services/planning/keyword_plan_ad_group_service.py` **DONE**
+- [x] `src/services/planning/keyword_plan_ad_group_keyword_service.py` **DONE**
+- [x] `src/services/planning/keyword_plan_campaign_service.py` **DONE**
+- [x] `src/services/planning/keyword_plan_campaign_keyword_service.py` **DONE**
+- [x] `src/services/conversions/custom_conversion_goal_service.py` **DONE**
+- [x] `src/services/conversions/conversion_goal_campaign_config_service.py` **DONE**
 
 **For each service, migrate to:**
 ```python

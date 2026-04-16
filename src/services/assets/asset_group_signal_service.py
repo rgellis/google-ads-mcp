@@ -4,28 +4,25 @@ This service manages audience and search theme signals for Performance Max asset
 Signals help Performance Max campaigns identify users most likely to convert.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.services.services.asset_group_signal_service import (
     AssetGroupSignalServiceClient,
 )
 from google.ads.googleads.v23.services.types.asset_group_signal_service import (
     AssetGroupSignalOperation,
     MutateAssetGroupSignalsRequest,
-    MutateAssetGroupSignalsResponse,
 )
 from google.ads.googleads.v23.resources.types.asset_group_signal import AssetGroupSignal
-from google.ads.googleads.v23.enums.types.response_content_type import (
-    ResponseContentTypeEnum,
-)
 from google.ads.googleads.v23.common.types.criteria import AudienceInfo, SearchThemeInfo
 from google.ads.googleads.v23.common.types.policy import PolicyViolationKey
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id
+from src.utils import format_customer_id, get_logger, serialize_proto_message
 
-# Exception handling
+logger = get_logger(__name__)
 
 
 class AssetGroupSignalService:
@@ -48,17 +45,19 @@ class AssetGroupSignalService:
         assert self._client is not None
         return self._client
 
-    def mutate_asset_group_signals(
+    async def mutate_asset_group_signals(
         self,
+        ctx: Context,
         customer_id: str,
         operations: List[AssetGroupSignalOperation],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.RESOURCE_NAME_ONLY,
-    ) -> MutateAssetGroupSignalsResponse:
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
         """Create or remove asset group signals.
 
         Args:
+            ctx: FastMCP context.
             customer_id: The customer ID.
             operations: List of operations to perform.
             partial_failure: If true, successful operations will be carried out and invalid
@@ -67,10 +66,7 @@ class AssetGroupSignalService:
             response_content_type: The response content type setting.
 
         Returns:
-            MutateAssetGroupSignalsResponse: The response containing results.
-
-        Raises:
-            GoogleAdsException: If the request fails.
+            Serialized response dictionary.
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -79,11 +75,23 @@ class AssetGroupSignalService:
                 operations=operations,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
-            return self.client.mutate_asset_group_signals(request=request)
+            if response_content_type is not None:
+                request.response_content_type = response_content_type
+            response = self.client.mutate_asset_group_signals(request=request)
+            await ctx.log(
+                level="info",
+                message=f"Successfully mutated {len(operations)} asset group signal(s) for customer {customer_id}",
+            )
+            return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
-            raise Exception(f"Failed to mutate asset group signals: {e}") from e
+            error_msg = f"Failed to mutate asset group signals: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
 
     def create_asset_group_signal_operation(
         self,
@@ -194,17 +202,20 @@ class AssetGroupSignalService:
         )
 
 
-def register_asset_group_signal_tools(mcp: FastMCP[Any]) -> None:
-    """Register asset group signal tools with the MCP server."""
+def create_asset_group_signal_tools(
+    service: AssetGroupSignalService,
+) -> List[Callable[..., Awaitable[Any]]]:
+    """Create tool functions for the asset group signal service."""
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
-    @mcp.tool
-    async def mutate_asset_group_signals(  # pyright: ignore[reportUnusedFunction]
+    async def mutate_asset_group_signals(
+        ctx: Context,
         customer_id: str,
         operations: list[dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: str = "RESOURCE_NAME_ONLY",
-    ) -> dict[str, Any]:
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Create or remove asset group signals for Performance Max campaigns.
 
         Args:
@@ -217,13 +228,6 @@ def register_asset_group_signal_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Response with results and any partial failure errors
         """
-        service = AssetGroupSignalService()
-
-        # Convert response content type string to enum
-        response_content_type_enum = getattr(
-            ResponseContentTypeEnum.ResponseContentType, response_content_type
-        )
-
         ops = []
         for op_data in operations:
             op_type = op_data["operation_type"]
@@ -253,53 +257,32 @@ def register_asset_group_signal_tools(mcp: FastMCP[Any]) -> None:
 
             ops.append(operation)
 
-        response = service.mutate_asset_group_signals(
+        rct = None
+        if response_content_type is not None:
+            from google.ads.googleads.v23.enums.types.response_content_type import (
+                ResponseContentTypeEnum,
+            )
+
+            rct = getattr(
+                ResponseContentTypeEnum.ResponseContentType, response_content_type
+            )
+
+        return await service.mutate_asset_group_signals(
+            ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type_enum,
+            response_content_type=rct,
         )
 
-        # Format response
-        results = []
-        for result in response.results:
-            result_data: dict[str, Any] = {
-                "resource_name": result.resource_name,
-            }
-            if result.asset_group_signal:
-                signal = result.asset_group_signal
-                result_data["asset_group_signal"] = {
-                    "resource_name": signal.resource_name,
-                    "asset_group": signal.asset_group,
-                    "approval_status": signal.approval_status.name
-                    if signal.approval_status
-                    else None,
-                }
-                if signal.audience:
-                    result_data["asset_group_signal"]["audience"] = (
-                        signal.audience.audience
-                    )
-                elif signal.search_theme:
-                    result_data["asset_group_signal"]["search_theme"] = (
-                        signal.search_theme.text
-                    )
-            results.append(result_data)
-
-        return {
-            "results": results,
-            "partial_failure_error": str(response.partial_failure_error)
-            if response.partial_failure_error
-            else None,
-        }
-
-    @mcp.tool
-    async def create_audience_signal(  # pyright: ignore[reportUnusedFunction]
+    async def create_audience_signal(
+        ctx: Context,
         customer_id: str,
         asset_group: str,
         audience_resource_name: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create an audience signal for a Performance Max asset group.
 
         Args:
@@ -311,34 +294,25 @@ def register_asset_group_signal_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created signal details
         """
-        service = AssetGroupSignalService()
-
         operation = service.create_audience_signal(
             asset_group=asset_group,
             audience_resource_name=audience_resource_name,
         )
 
-        response = service.mutate_asset_group_signals(
+        return await service.mutate_asset_group_signals(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create_audience_signal",
-            "asset_group": asset_group,
-            "audience": audience_resource_name,
-        }
-
-    @mcp.tool
-    async def create_search_theme_signal(  # pyright: ignore[reportUnusedFunction]
+    async def create_search_theme_signal(
+        ctx: Context,
         customer_id: str,
         asset_group: str,
         search_theme: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create a search theme signal for a Performance Max asset group.
 
         Args:
@@ -350,33 +324,24 @@ def register_asset_group_signal_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Created signal details
         """
-        service = AssetGroupSignalService()
-
         operation = service.create_search_theme_signal(
             asset_group=asset_group,
             search_theme=search_theme,
         )
 
-        response = service.mutate_asset_group_signals(
+        return await service.mutate_asset_group_signals(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "create_search_theme_signal",
-            "asset_group": asset_group,
-            "search_theme": search_theme,
-        }
-
-    @mcp.tool
-    async def remove_asset_group_signal(  # pyright: ignore[reportUnusedFunction]
+    async def remove_asset_group_signal(
+        ctx: Context,
         customer_id: str,
         resource_name: str,
         validate_only: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Remove an asset group signal.
 
         Args:
@@ -387,19 +352,32 @@ def register_asset_group_signal_tools(mcp: FastMCP[Any]) -> None:
         Returns:
             Removal result details
         """
-        service = AssetGroupSignalService()
-
         operation = service.create_remove_operation(resource_name=resource_name)
 
-        response = service.mutate_asset_group_signals(
+        return await service.mutate_asset_group_signals(
+            ctx=ctx,
             customer_id=customer_id,
             operations=[operation],
             validate_only=validate_only,
         )
 
-        result = response.results[0] if response.results else None
-        return {
-            "resource_name": result.resource_name if result else None,
-            "operation": "remove",
-            "removed_resource_name": resource_name,
-        }
+    tools.extend(
+        [
+            mutate_asset_group_signals,
+            create_audience_signal,
+            create_search_theme_signal,
+            remove_asset_group_signal,
+        ]
+    )
+    return tools
+
+
+def register_asset_group_signal_tools(
+    mcp: FastMCP[Any],
+) -> AssetGroupSignalService:
+    """Register asset group signal tools with the MCP server."""
+    service = AssetGroupSignalService()
+    tools = create_asset_group_signal_tools(service)
+    for tool in tools:
+        mcp.tool(tool)
+    return service
