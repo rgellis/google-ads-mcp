@@ -179,28 +179,16 @@ class BatchJobService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Note: This is a simplified implementation
-            # In practice, you'd need to construct proper MutateOperation objects
-            # based on the specific operation types (campaign, ad group, keyword, etc.)
-
             operations = []
-            for _ in operations_data:
-                # This is a placeholder - actual implementation would require
-                # parsing the operation data and creating appropriate MutateOperation objects
+            for op_data in operations_data:
                 operation = MutateOperation()
-                # You would set the appropriate operation based on op_data['type']
-                # For example:
-                # if op_data.get('type') == 'campaign':
-                #     operation.campaign_operation = ...
-                # elif op_data.get('type') == 'ad_group':
-                #     operation.ad_group_operation = ...
-                # etc.
+                for key, value in op_data.items():
+                    if hasattr(operation, key):
+                        setattr(operation, key, value)
                 operations.append(operation)
 
-            # Create request
             request = AddBatchJobOperationsRequest()
             request.resource_name = batch_job_resource_name
-            request.sequence_token = ""  # Start with empty token
             request.mutate_operations = operations
 
             # Make the API call
