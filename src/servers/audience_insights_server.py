@@ -1,13 +1,8 @@
-"""Audience insights server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""audience insights server module."""
 
 from src.services.audiences.audience_insights_service import (
     register_audience_insights_tools,
 )
+from src.servers import create_server
 
-# Create the audience insights server
-audience_insights_server = FastMCP(name="audience-insights-service")
-
-# Register the tools
-register_audience_insights_tools(audience_insights_server)
+audience_insights_server = create_server(register_audience_insights_tools)

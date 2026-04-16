@@ -1,13 +1,8 @@
-"""Campaign asset set server module."""
-
-from fastmcp import FastMCP
+"""campaign asset set server module."""
 
 from src.services.campaign.campaign_asset_set_service import (
     register_campaign_asset_set_tools,
 )
+from src.servers import create_server
 
-# Create the campaign asset set SDK server instance
-campaign_asset_set_server = FastMCP()
-
-# Register tools with the server
-register_campaign_asset_set_tools(campaign_asset_set_server)
+campaign_asset_set_server = create_server(register_campaign_asset_set_tools)

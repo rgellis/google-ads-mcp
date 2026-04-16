@@ -1,13 +1,6 @@
-"""Reach plan server using SDK implementation."""
+"""reach plan server module."""
 
-from fastmcp import FastMCP
+from src.services.planning.reach_plan_service import register_reach_plan_tools
+from src.servers import create_server
 
-from src.services.planning.reach_plan_service import (
-    register_reach_plan_tools,
-)
-
-# Create the reach plan server
-reach_plan_server = FastMCP(name="reach-plan-service")
-
-# Register the tools
-register_reach_plan_tools(reach_plan_server)
+reach_plan_server = create_server(register_reach_plan_tools)

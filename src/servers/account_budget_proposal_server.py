@@ -1,13 +1,8 @@
-"""Account budget proposal server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""account budget proposal server module."""
 
 from src.services.account.account_budget_proposal_service import (
     register_account_budget_proposal_tools,
 )
+from src.servers import create_server
 
-# Create the account budget proposal server
-account_budget_proposal_server = FastMCP(name="account-budget-proposal-service")
-
-# Register the tools
-register_account_budget_proposal_tools(account_budget_proposal_server)
+account_budget_proposal_server = create_server(register_account_budget_proposal_tools)

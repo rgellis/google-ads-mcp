@@ -1,15 +1,8 @@
-"""Asset group signal server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""asset group signal server module."""
 
 from src.services.assets.asset_group_signal_service import (
     register_asset_group_signal_tools,
 )
+from src.servers import create_server
 
-# Initialize the server instance
-asset_group_signal_server = FastMCP[Any]()
-
-# Register tools with the server
-register_asset_group_signal_tools(asset_group_signal_server)
+asset_group_signal_server = create_server(register_asset_group_signal_tools)

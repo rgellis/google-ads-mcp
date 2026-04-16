@@ -1,11 +1,6 @@
-"""Google Ads server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""google ads server module."""
 
 from src.services.metadata.google_ads_service import register_google_ads_tools
+from src.servers import create_server
 
-# Create the Google Ads server
-google_ads_server = FastMCP(name="google-ads-service")
-
-# Register the tools
-register_google_ads_tools(google_ads_server)
+google_ads_server = create_server(register_google_ads_tools)

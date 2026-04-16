@@ -1,10 +1,8 @@
 """customer lifecycle goal server module."""
 
-from typing import Any
-from fastmcp import FastMCP
 from src.services.account.customer_lifecycle_goal_service import (
     register_customer_lifecycle_goal_tools,
 )
+from src.servers import create_server
 
-customer_lifecycle_goal_server = FastMCP[Any]()
-register_customer_lifecycle_goal_tools(customer_lifecycle_goal_server)
+customer_lifecycle_goal_server = create_server(register_customer_lifecycle_goal_tools)

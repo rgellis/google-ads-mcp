@@ -1,16 +1,8 @@
-"""Customer customizer server module."""
-
-from fastmcp import FastMCP
+"""customer customizer server module."""
 
 from src.services.account.customer_customizer_service import (
     register_customer_customizer_tools,
 )
+from src.servers import create_server
 
-# Create FastMCP instance
-customer_customizer_server = FastMCP(
-    name="customer-customizer-server",
-    instructions="Server for managing customer customizers",
-)
-
-# Register tools with the server
-register_customer_customizer_tools(customer_customizer_server)
+customer_customizer_server = create_server(register_customer_customizer_tools)

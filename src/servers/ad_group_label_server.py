@@ -1,13 +1,6 @@
-"""Ad group label server using SDK implementation."""
+"""ad group label server module."""
 
-from fastmcp import FastMCP
+from src.services.ad_group.ad_group_label_service import register_ad_group_label_tools
+from src.servers import create_server
 
-from src.services.ad_group.ad_group_label_service import (
-    register_ad_group_label_tools,
-)
-
-# Create the ad group label server
-ad_group_label_server = FastMCP(name="ad-group-label-service")
-
-# Register the tools
-register_ad_group_label_tools(ad_group_label_server)
+ad_group_label_server = create_server(register_ad_group_label_tools)

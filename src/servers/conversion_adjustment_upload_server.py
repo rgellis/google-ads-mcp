@@ -1,17 +1,10 @@
-"""Conversion adjustment upload server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""conversion adjustment upload server module."""
 
 from src.services.conversions.conversion_adjustment_upload_service import (
     register_conversion_adjustment_upload_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP server instance
-conversion_adjustment_upload_server = FastMCP[Any](
-    name="conversion_adjustment_upload_sdk_server"
+conversion_adjustment_upload_server = create_server(
+    register_conversion_adjustment_upload_tools
 )
-
-# Register the tools with the server instance
-register_conversion_adjustment_upload_tools(conversion_adjustment_upload_server)

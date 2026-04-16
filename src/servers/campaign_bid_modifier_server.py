@@ -1,15 +1,8 @@
-"""Campaign bid modifier server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""campaign bid modifier server module."""
 
 from src.services.campaign.campaign_bid_modifier_service import (
     register_campaign_bid_modifier_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP server instance
-campaign_bid_modifier_server = FastMCP[Any](name="campaign_bid_modifier_sdk_server")
-
-# Register the tools with the server instance
-register_campaign_bid_modifier_tools(campaign_bid_modifier_server)
+campaign_bid_modifier_server = create_server(register_campaign_bid_modifier_tools)

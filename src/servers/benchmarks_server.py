@@ -1,8 +1,6 @@
 """benchmarks server module."""
 
-from typing import Any
-from fastmcp import FastMCP
 from src.services.planning.benchmarks_service import register_benchmarks_tools
+from src.servers import create_server
 
-benchmarks_server = FastMCP[Any]()
-register_benchmarks_tools(benchmarks_server)
+benchmarks_server = create_server(register_benchmarks_tools)

@@ -1,11 +1,6 @@
-"""Customer server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""customer service server module."""
 
 from src.services.account.customer_service import register_customer_tools
+from src.servers import create_server
 
-# Create the customer server
-customer_service_server = FastMCP(name="customer-service")
-
-# Register the tools
-register_customer_tools(customer_service_server)
+customer_service_server = create_server(register_customer_tools)

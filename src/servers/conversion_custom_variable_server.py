@@ -1,13 +1,10 @@
-"""Conversion custom variable server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""conversion custom variable server module."""
 
 from src.services.conversions.conversion_custom_variable_service import (
     register_conversion_custom_variable_tools,
 )
+from src.servers import create_server
 
-# Create the conversion custom variable server
-conversion_custom_variable_server = FastMCP(name="conversion-custom-variable-service")
-
-# Register the tools
-register_conversion_custom_variable_tools(conversion_custom_variable_server)
+conversion_custom_variable_server = create_server(
+    register_conversion_custom_variable_tools
+)

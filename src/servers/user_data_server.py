@@ -1,13 +1,6 @@
-"""Server wrapper for user data service."""
+"""user data server module."""
 
-from fastmcp import FastMCP
+from src.services.data_import.user_data_service import register_user_data_tools
+from src.servers import create_server
 
-from src.services.data_import.user_data_service import (
-    register_user_data_tools,
-)
-
-# Create the FastMCP instance
-user_data_server = FastMCP(name="user-data-service")
-
-# Register the tools with the server instance
-register_user_data_tools(user_data_server)
+user_data_server = create_server(register_user_data_tools)

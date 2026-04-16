@@ -1,13 +1,8 @@
-"""Server wrapper for offline user data job service."""
-
-from fastmcp import FastMCP
+"""offline user data job server module."""
 
 from src.services.data_import.offline_user_data_job_service import (
     register_offline_user_data_job_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP instance
-offline_user_data_job_server = FastMCP(name="offline-user-data-job-service")
-
-# Register the tools with the server instance
-register_offline_user_data_job_tools(offline_user_data_job_server)
+offline_user_data_job_server = create_server(register_offline_user_data_job_tools)

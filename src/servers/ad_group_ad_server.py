@@ -1,11 +1,6 @@
-"""Ad group ad server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""ad group ad server module."""
 
 from src.services.ad_group.ad_group_ad_service import register_ad_group_ad_tools
+from src.servers import create_server
 
-# Create the ad group ad server
-ad_group_ad_server = FastMCP(name="ad-group-ad-service")
-
-# Register the tools
-register_ad_group_ad_tools(ad_group_ad_server)
+ad_group_ad_server = create_server(register_ad_group_ad_tools)

@@ -1,11 +1,6 @@
-"""Search server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""search server module."""
 
 from src.services.metadata.search_service import register_search_tools
+from src.servers import create_server
 
-# Create the search server
-search_server = FastMCP(name="search-service")
-
-# Register the tools
-register_search_tools(search_server)
+search_server = create_server(register_search_tools)

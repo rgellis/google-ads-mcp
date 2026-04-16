@@ -1,16 +1,8 @@
-"""Server wrapper for customer client link service."""
-
-from fastmcp import FastMCP
+"""customer client link server module."""
 
 from src.services.account.customer_client_link_service import (
     register_customer_client_link_tools,
 )
+from src.servers import create_server
 
-# Create FastMCP instance
-customer_client_link_server = FastMCP(
-    name="customer-client-link-server",
-    instructions="Server for managing customer client links",
-)
-
-# Register tools with the server
-register_customer_client_link_tools(customer_client_link_server)
+customer_client_link_server = create_server(register_customer_client_link_tools)

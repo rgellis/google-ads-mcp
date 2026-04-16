@@ -1,15 +1,8 @@
-"""Keyword plan ad group server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""keyword plan ad group server module."""
 
 from src.services.planning.keyword_plan_ad_group_service import (
     register_keyword_plan_ad_group_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP instance for keyword plan ad group
-keyword_plan_ad_group_server = FastMCP[Any](name="keyword_plan_ad_group_sdk_server")
-
-# Register the tools with the server instance
-register_keyword_plan_ad_group_tools(keyword_plan_ad_group_server)
+keyword_plan_ad_group_server = create_server(register_keyword_plan_ad_group_tools)

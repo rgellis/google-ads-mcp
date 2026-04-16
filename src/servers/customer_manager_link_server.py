@@ -1,16 +1,8 @@
-"""Customer Manager Link server wrapper for MCP registration."""
-
-from fastmcp import FastMCP
+"""customer manager link server module."""
 
 from src.services.account.customer_manager_link_service import (
     register_customer_manager_link_tools,
 )
+from src.servers import create_server
 
-# Create FastMCP instance
-customer_manager_link_server = FastMCP(
-    name="customer-manager-link-server",
-    instructions="Server for managing customer manager links",
-)
-
-# Register tools with the server
-register_customer_manager_link_tools(customer_manager_link_server)
+customer_manager_link_server = create_server(register_customer_manager_link_tools)

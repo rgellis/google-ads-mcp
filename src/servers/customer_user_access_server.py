@@ -1,16 +1,8 @@
-"""Server wrapper for customer user access service."""
-
-from fastmcp import FastMCP
+"""customer user access server module."""
 
 from src.services.account.customer_user_access_service import (
     register_customer_user_access_tools,
 )
+from src.servers import create_server
 
-# Create FastMCP instance
-customer_user_access_server = FastMCP(
-    name="customer-user-access-server",
-    instructions="Server for managing customer user access",
-)
-
-# Register tools with the server
-register_customer_user_access_tools(customer_user_access_server)
+customer_user_access_server = create_server(register_customer_user_access_tools)

@@ -1,11 +1,6 @@
-"""Campaign server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""campaign server module."""
 
 from src.services.campaign.campaign_service import register_campaign_tools
+from src.servers import create_server
 
-# Create the campaign server
-campaign_server = FastMCP(name="campaign-service")
-
-# Register the tools
-register_campaign_tools(campaign_server)
+campaign_server = create_server(register_campaign_tools)

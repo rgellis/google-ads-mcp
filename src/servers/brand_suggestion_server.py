@@ -1,16 +1,8 @@
-"""Brand suggestion server module."""
-
-from fastmcp import FastMCP
+"""brand suggestion server module."""
 
 from src.services.planning.brand_suggestion_service import (
     register_brand_suggestion_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP instance for brand suggestion
-brand_suggestion_server = FastMCP(
-    name="brand_suggestion_sdk_server",
-    instructions="Brand suggestion server for Google Ads API",
-)
-
-# Register the tools with the server
-register_brand_suggestion_tools(brand_suggestion_server)
+brand_suggestion_server = create_server(register_brand_suggestion_tools)

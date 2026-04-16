@@ -1,15 +1,8 @@
-"""Keyword plan idea server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""keyword plan idea server module."""
 
 from src.services.planning.keyword_plan_idea_service import (
     register_keyword_plan_idea_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP instance for keyword plan idea
-keyword_plan_idea_server = FastMCP[Any](name="keyword_plan_idea_sdk_server")
-
-# Register the tools with the server instance
-register_keyword_plan_idea_tools(keyword_plan_idea_server)
+keyword_plan_idea_server = create_server(register_keyword_plan_idea_tools)

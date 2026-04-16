@@ -1,13 +1,8 @@
-"""Server wrapper for customizer attribute service."""
-
-from fastmcp import FastMCP
+"""customizer sdk server module."""
 
 from src.services.shared.customizer_attribute_service import (
     register_customizer_attribute_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP instance
-customizer_sdk_server = FastMCP(name="customizer-attribute-service")
-
-# Register the tools with the server instance
-register_customizer_attribute_tools(customizer_sdk_server)
+customizer_sdk_server = create_server(register_customizer_attribute_tools)

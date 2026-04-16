@@ -1,13 +1,8 @@
-"""Payments account server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""payments account server module."""
 
 from src.services.account.payments_account_service import (
     register_payments_account_tools,
 )
+from src.servers import create_server
 
-# Create the payments account server
-payments_account_server = FastMCP(name="payments-account-service")
-
-# Register the tools
-register_payments_account_tools(payments_account_server)
+payments_account_server = create_server(register_payments_account_tools)

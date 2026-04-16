@@ -1,17 +1,10 @@
-"""Keyword plan campaign keyword server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""keyword plan campaign keyword server module."""
 
 from src.services.planning.keyword_plan_campaign_keyword_service import (
     register_keyword_plan_campaign_keyword_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP instance for keyword plan campaign keyword
-keyword_plan_campaign_keyword_server = FastMCP[Any](
-    name="keyword_plan_campaign_keyword_sdk_server"
+keyword_plan_campaign_keyword_server = create_server(
+    register_keyword_plan_campaign_keyword_tools
 )
-
-# Register the tools with the server instance
-register_keyword_plan_campaign_keyword_tools(keyword_plan_campaign_keyword_server)

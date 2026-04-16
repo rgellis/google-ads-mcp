@@ -1,16 +1,6 @@
-"""Customer Label server wrapper for MCP registration."""
+"""customer label server module."""
 
-from fastmcp import FastMCP
+from src.services.account.customer_label_service import register_customer_label_tools
+from src.servers import create_server
 
-from src.services.account.customer_label_service import (
-    register_customer_label_tools,
-)
-
-# Create FastMCP instance
-customer_label_server = FastMCP(
-    name="customer-label-server",
-    instructions="Server for managing customer labels",
-)
-
-# Register tools with the server
-register_customer_label_tools(customer_label_server)
+customer_label_server = create_server(register_customer_label_tools)

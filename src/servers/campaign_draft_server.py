@@ -1,13 +1,6 @@
-"""Campaign draft server using SDK implementation."""
+"""campaign draft server module."""
 
-from fastmcp import FastMCP
+from src.services.campaign.campaign_draft_service import register_campaign_draft_tools
+from src.servers import create_server
 
-from src.services.campaign.campaign_draft_service import (
-    register_campaign_draft_tools,
-)
-
-# Create the campaign draft server
-campaign_draft_server = FastMCP(name="campaign-draft-service")
-
-# Register the tools
-register_campaign_draft_tools(campaign_draft_server)
+campaign_draft_server = create_server(register_campaign_draft_tools)

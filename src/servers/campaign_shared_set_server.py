@@ -1,15 +1,8 @@
-"""Campaign shared set server module."""
-
-from typing import Any
-
-from fastmcp import FastMCP
+"""campaign shared set server module."""
 
 from src.services.campaign.campaign_shared_set_service import (
     register_campaign_shared_set_tools,
 )
+from src.servers import create_server
 
-# Create the FastMCP server instance
-campaign_shared_set_server = FastMCP[Any](name="campaign_shared_set_sdk_server")
-
-# Register the tools with the server instance
-register_campaign_shared_set_tools(campaign_shared_set_server)
+campaign_shared_set_server = create_server(register_campaign_shared_set_tools)

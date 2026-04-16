@@ -1,13 +1,6 @@
-"""Account link server using SDK implementation."""
+"""account link server module."""
 
-from fastmcp import FastMCP
+from src.services.account.account_link_service import register_account_link_tools
+from src.servers import create_server
 
-from src.services.account.account_link_service import (
-    register_account_link_tools,
-)
-
-# Create the account link server
-account_link_server = FastMCP(name="account-link-service")
-
-# Register the tools
-register_account_link_tools(account_link_server)
+account_link_server = create_server(register_account_link_tools)

@@ -84,9 +84,8 @@ campaign_server = create_server(register_campaign_tools)
 
 **Or** eliminate server files entirely and build the mapping in `main.py` directly.
 
-- [ ] Create `create_server()` factory in `src/servers/__init__.py`
-- [ ] Update all 113 server files to use the factory
-- [ ] OR eliminate server files and create servers inline in main.py
+- [x] Create `create_server()` factory in `src/servers/__init__.py` **DONE**
+- [x] Update all 113 server files to use the factory **DONE**
 
 ---
 
@@ -94,7 +93,7 @@ campaign_server = create_server(register_campaign_tools)
 
 All servers should use `FastMCP[Any]()` consistently (not bare `FastMCP()`).
 
-- [ ] Normalize all server files to `FastMCP[Any]()`
+- [x] Normalize all server files to `FastMCP[Any]()` — handled by `create_server()` factory **DONE**
 
 ---
 

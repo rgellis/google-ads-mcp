@@ -1,13 +1,6 @@
-"""Ad group asset server using SDK implementation."""
+"""ad group asset server module."""
 
-from fastmcp import FastMCP
+from src.services.ad_group.ad_group_asset_service import register_ad_group_asset_tools
+from src.servers import create_server
 
-from src.services.ad_group.ad_group_asset_service import (
-    register_ad_group_asset_tools,
-)
-
-# Create the ad group asset server
-ad_group_asset_server = FastMCP(name="ad-group-asset-service")
-
-# Register the tools
-register_ad_group_asset_tools(ad_group_asset_server)
+ad_group_asset_server = create_server(register_ad_group_asset_tools)

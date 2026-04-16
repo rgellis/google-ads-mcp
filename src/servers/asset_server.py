@@ -1,11 +1,6 @@
-"""Asset server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""asset server module."""
 
 from src.services.assets.asset_service import register_asset_tools
+from src.servers import create_server
 
-# Create the asset server
-asset_server = FastMCP(name="asset-service")
-
-# Register the tools
-register_asset_tools(asset_server)
+asset_server = create_server(register_asset_tools)

@@ -1,11 +1,6 @@
-"""Budget server using SDK implementation."""
-
-from fastmcp import FastMCP
+"""budget server module."""
 
 from src.services.bidding.budget_service import register_budget_tools
+from src.servers import create_server
 
-# Create the budget server
-budget_server = FastMCP(name="budget-service")
-
-# Register the tools
-register_budget_tools(budget_server)
+budget_server = create_server(register_budget_tools)
