@@ -28,7 +28,12 @@ from google.ads.googleads.v23.services.types.customer_negative_criterion_service
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -56,6 +61,9 @@ class CustomerNegativeCriterionService:
         ctx: Context,
         customer_id: str,
         keywords: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add negative keywords at the account level.
 
@@ -96,6 +104,12 @@ class CustomerNegativeCriterionService:
             request = MutateCustomerNegativeCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCustomerNegativeCriteriaResponse = (
@@ -141,6 +155,9 @@ class CustomerNegativeCriterionService:
         ctx: Context,
         customer_id: str,
         placement_urls: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add placement (website) exclusions at the account level.
 
@@ -178,6 +195,12 @@ class CustomerNegativeCriterionService:
             request = MutateCustomerNegativeCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCustomerNegativeCriteriaResponse = (
@@ -221,6 +244,9 @@ class CustomerNegativeCriterionService:
         ctx: Context,
         customer_id: str,
         content_labels: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add content label exclusions at the account level.
 
@@ -260,6 +286,12 @@ class CustomerNegativeCriterionService:
             request = MutateCustomerNegativeCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCustomerNegativeCriteriaResponse = (
@@ -380,6 +412,9 @@ class CustomerNegativeCriterionService:
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a customer negative criterion.
 
@@ -402,6 +437,12 @@ class CustomerNegativeCriterionService:
             request = MutateCustomerNegativeCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_customer_negative_criteria(request=request)
@@ -437,6 +478,9 @@ def create_customer_negative_criterion_tools(
         ctx: Context,
         customer_id: str,
         keywords: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add negative keywords at the account level.
 
@@ -453,12 +497,18 @@ def create_customer_negative_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             keywords=keywords,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_placement_exclusions(
         ctx: Context,
         customer_id: str,
         placement_urls: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add placement (website) exclusions at the account level.
 
@@ -473,12 +523,18 @@ def create_customer_negative_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             placement_urls=placement_urls,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_content_label_exclusions(
         ctx: Context,
         customer_id: str,
         content_labels: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add content label exclusions at the account level.
 
@@ -505,6 +561,9 @@ def create_customer_negative_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             content_labels=content_labels,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_negative_criteria(
@@ -531,6 +590,9 @@ def create_customer_negative_criterion_tools(
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a customer negative criterion.
 
@@ -545,6 +607,9 @@ def create_customer_negative_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             criterion_resource_name=criterion_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

@@ -26,7 +26,12 @@ from google.ads.googleads.v23.services.types.ad_group_criterion_customizer_servi
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 

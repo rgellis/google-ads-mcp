@@ -23,7 +23,12 @@ from google.ads.googleads.v23.services.types.shared_criterion_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -50,6 +55,9 @@ class SharedCriterionService:
         customer_id: str,
         shared_set_id: str,
         keywords: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add negative keywords to a shared set.
 
@@ -90,6 +98,12 @@ class SharedCriterionService:
             request = MutateSharedCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
@@ -136,6 +150,9 @@ class SharedCriterionService:
         customer_id: str,
         shared_set_id: str,
         placement_urls: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add placement exclusions to a shared set.
 
@@ -173,6 +190,12 @@ class SharedCriterionService:
             request = MutateSharedCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
@@ -294,6 +317,9 @@ class SharedCriterionService:
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a criterion from a shared set.
 
@@ -316,6 +342,12 @@ class SharedCriterionService:
             request = MutateSharedCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_shared_criteria(request=request)
@@ -352,6 +384,9 @@ def create_shared_criterion_tools(
         customer_id: str,
         shared_set_id: str,
         keywords: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add negative keywords to a shared set.
 
@@ -370,6 +405,9 @@ def create_shared_criterion_tools(
             customer_id=customer_id,
             shared_set_id=shared_set_id,
             keywords=keywords,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_placements_to_shared_set(
@@ -377,6 +415,9 @@ def create_shared_criterion_tools(
         customer_id: str,
         shared_set_id: str,
         placement_urls: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add placement exclusions to a shared set.
 
@@ -393,6 +434,9 @@ def create_shared_criterion_tools(
             customer_id=customer_id,
             shared_set_id=shared_set_id,
             placement_urls=placement_urls,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_shared_criteria(
@@ -422,6 +466,9 @@ def create_shared_criterion_tools(
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a criterion from a shared set.
 
@@ -436,6 +483,9 @@ def create_shared_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             criterion_resource_name=criterion_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

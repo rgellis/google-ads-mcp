@@ -22,7 +22,12 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -49,6 +54,9 @@ class CampaignDraftService:
         customer_id: str,
         base_campaign: str,
         draft_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a campaign draft to test changes before applying.
 
@@ -77,6 +85,12 @@ class CampaignDraftService:
             request = MutateCampaignDraftsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignDraftsResponse = self.client.mutate_campaign_drafts(
@@ -106,6 +120,9 @@ class CampaignDraftService:
         customer_id: str,
         draft_resource_name: str,
         draft_name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a campaign draft.
 
@@ -143,6 +160,12 @@ class CampaignDraftService:
             request = MutateCampaignDraftsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             self.client.mutate_campaign_drafts(request=request)
@@ -350,6 +373,9 @@ class CampaignDraftService:
         ctx: Context,
         customer_id: str,
         draft_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a campaign draft.
 
@@ -372,6 +398,12 @@ class CampaignDraftService:
             request = MutateCampaignDraftsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             self.client.mutate_campaign_drafts(request=request)
@@ -411,6 +443,9 @@ def create_campaign_draft_tools(
         customer_id: str,
         base_campaign: str,
         draft_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a campaign draft to test changes before applying them to the live campaign.
 
@@ -427,6 +462,9 @@ def create_campaign_draft_tools(
             customer_id=customer_id,
             base_campaign=base_campaign,
             draft_name=draft_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_campaign_draft(
@@ -434,6 +472,9 @@ def create_campaign_draft_tools(
         customer_id: str,
         draft_resource_name: str,
         draft_name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a campaign draft.
 
@@ -450,6 +491,9 @@ def create_campaign_draft_tools(
             customer_id=customer_id,
             draft_resource_name=draft_resource_name,
             draft_name=draft_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_campaign_drafts(
@@ -516,6 +560,9 @@ def create_campaign_draft_tools(
         ctx: Context,
         customer_id: str,
         draft_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a campaign draft.
 
@@ -530,6 +577,9 @@ def create_campaign_draft_tools(
             ctx=ctx,
             customer_id=customer_id,
             draft_resource_name=draft_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

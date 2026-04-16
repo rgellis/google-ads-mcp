@@ -21,7 +21,12 @@ from google.ads.googleads.v23.services.types.asset_set_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -49,6 +54,9 @@ class AssetSetService:
         name: str,
         asset_set_type: AssetSetTypeEnum.AssetSetType,
         status: AssetSetStatusEnum.AssetSetStatus = AssetSetStatusEnum.AssetSetStatus.ENABLED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new asset set.
 
@@ -79,6 +87,12 @@ class AssetSetService:
             request = MutateAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAssetSetsResponse = self.client.mutate_asset_sets(
@@ -103,6 +117,9 @@ class AssetSetService:
         asset_set_id: str,
         name: Optional[str] = None,
         status: Optional[AssetSetStatusEnum.AssetSetStatus] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an asset set.
 
@@ -146,6 +163,12 @@ class AssetSetService:
             request = MutateAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_asset_sets(request=request)
@@ -252,6 +275,9 @@ class AssetSetService:
         ctx: Context,
         customer_id: str,
         asset_set_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an asset set.
 
@@ -275,6 +301,12 @@ class AssetSetService:
             request = MutateAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_asset_sets(request=request)
@@ -312,6 +344,9 @@ def create_asset_set_tools(
         name: str,
         asset_set_type: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new asset set.
 
@@ -345,6 +380,9 @@ def create_asset_set_tools(
             name=name,
             asset_set_type=asset_set_type_enum,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_asset_set(
@@ -353,6 +391,9 @@ def create_asset_set_tools(
         asset_set_id: str,
         name: Optional[str] = None,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an asset set.
 
@@ -376,6 +417,9 @@ def create_asset_set_tools(
             asset_set_id=asset_set_id,
             name=name,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_asset_sets(
@@ -408,6 +452,9 @@ def create_asset_set_tools(
         ctx: Context,
         customer_id: str,
         asset_set_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an asset set.
 
@@ -422,6 +469,9 @@ def create_asset_set_tools(
             ctx=ctx,
             customer_id=customer_id,
             asset_set_id=asset_set_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

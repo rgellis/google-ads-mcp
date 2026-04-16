@@ -23,7 +23,12 @@ from google.ads.googleads.v23.services.types.campaign_shared_set_service import 
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -51,6 +56,9 @@ class CampaignSharedSetService:
         campaign_id: str,
         shared_set_id: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Attach a shared set to a campaign.
 
@@ -85,6 +93,12 @@ class CampaignSharedSetService:
             request = MutateCampaignSharedSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignSharedSetsResponse = (
@@ -112,6 +126,9 @@ class CampaignSharedSetService:
         ctx: Context,
         customer_id: str,
         attachments: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Attach multiple shared sets to campaigns.
 
@@ -155,6 +172,12 @@ class CampaignSharedSetService:
             request = MutateCampaignSharedSetsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignSharedSetsResponse = (
@@ -184,6 +207,9 @@ class CampaignSharedSetService:
         campaign_id: str,
         shared_set_id: str,
         status: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the status of a campaign shared set attachment.
 
@@ -242,6 +268,12 @@ class CampaignSharedSetService:
                 request = MutateCampaignSharedSetsRequest()
                 request.customer_id = customer_id
                 request.operations = operations
+                set_request_options(
+                    request,
+                    partial_failure=partial_failure,
+                    validate_only=validate_only,
+                    response_content_type=response_content_type,
+                )
 
                 # Make the API call
                 response = self.client.mutate_campaign_shared_sets(request=request)
@@ -346,6 +378,9 @@ class CampaignSharedSetService:
         customer_id: str,
         campaign_id: str,
         shared_set_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Detach a shared set from a campaign.
 
@@ -371,6 +406,12 @@ class CampaignSharedSetService:
             request = MutateCampaignSharedSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaign_shared_sets(request=request)
@@ -467,6 +508,9 @@ def create_campaign_shared_set_tools(
         campaign_id: str,
         shared_set_id: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Attach a shared set to a campaign.
 
@@ -485,12 +529,18 @@ def create_campaign_shared_set_tools(
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def attach_shared_sets_to_campaigns(
         ctx: Context,
         customer_id: str,
         attachments: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Attach multiple shared sets to campaigns.
 
@@ -508,6 +558,9 @@ def create_campaign_shared_set_tools(
             ctx=ctx,
             customer_id=customer_id,
             attachments=attachments,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_campaign_shared_set_status(
@@ -516,6 +569,9 @@ def create_campaign_shared_set_tools(
         campaign_id: str,
         shared_set_id: str,
         status: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the status of a campaign shared set attachment.
 
@@ -534,6 +590,9 @@ def create_campaign_shared_set_tools(
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_campaign_shared_sets(
@@ -567,6 +626,9 @@ def create_campaign_shared_set_tools(
         customer_id: str,
         campaign_id: str,
         shared_set_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Detach a shared set from a campaign.
 
@@ -583,6 +645,9 @@ def create_campaign_shared_set_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def get_campaigns_using_shared_set(

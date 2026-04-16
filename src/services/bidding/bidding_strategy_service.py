@@ -30,7 +30,12 @@ from google.ads.googleads.v23.services.types.bidding_strategy_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -58,6 +63,9 @@ class BiddingStrategyService:
         name: str,
         target_cpa_micros: int,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a Target CPA bidding strategy.
 
@@ -97,6 +105,12 @@ class BiddingStrategyService:
             request = MutateBiddingStrategiesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBiddingStrategiesResponse = (
@@ -126,6 +140,9 @@ class BiddingStrategyService:
         name: str,
         target_roas: float,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a Target ROAS (Return on Ad Spend) bidding strategy.
 
@@ -165,6 +182,12 @@ class BiddingStrategyService:
             request = MutateBiddingStrategiesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBiddingStrategiesResponse = (
@@ -194,6 +217,9 @@ class BiddingStrategyService:
         name: str,
         target_cpa_micros: Optional[int] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a Maximize Conversions bidding strategy.
 
@@ -234,6 +260,12 @@ class BiddingStrategyService:
             request = MutateBiddingStrategiesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBiddingStrategiesResponse = (
@@ -265,6 +297,9 @@ class BiddingStrategyService:
         location_fraction_micros: int,
         max_cpc_bid_ceiling_micros: Optional[int] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a Target Impression Share bidding strategy.
 
@@ -316,6 +351,12 @@ class BiddingStrategyService:
             request = MutateBiddingStrategiesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBiddingStrategiesResponse = (
@@ -355,6 +396,9 @@ def create_bidding_strategy_tools(
         name: str,
         target_cpa_micros: int,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a Target CPA bidding strategy.
 
@@ -373,6 +417,9 @@ def create_bidding_strategy_tools(
             name=name,
             target_cpa_micros=target_cpa_micros,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_target_roas_strategy(
@@ -381,6 +428,9 @@ def create_bidding_strategy_tools(
         name: str,
         target_roas: float,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a Target ROAS (Return on Ad Spend) bidding strategy.
 
@@ -399,6 +449,9 @@ def create_bidding_strategy_tools(
             name=name,
             target_roas=target_roas,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_maximize_conversions_strategy(
@@ -407,6 +460,9 @@ def create_bidding_strategy_tools(
         name: str,
         target_cpa_micros: Optional[int] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a Maximize Conversions bidding strategy.
 
@@ -425,6 +481,9 @@ def create_bidding_strategy_tools(
             name=name,
             target_cpa_micros=target_cpa_micros,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_target_impression_share_strategy(
@@ -435,6 +494,9 @@ def create_bidding_strategy_tools(
         location_fraction_micros: int,
         max_cpc_bid_ceiling_micros: Optional[int] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a Target Impression Share bidding strategy.
 
@@ -457,6 +519,9 @@ def create_bidding_strategy_tools(
             location_fraction_micros=location_fraction_micros,
             max_cpc_bid_ceiling_micros=max_cpc_bid_ceiling_micros,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

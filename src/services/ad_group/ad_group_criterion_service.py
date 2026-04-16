@@ -34,7 +34,12 @@ from google.ads.googleads.v23.services.types.ad_group_criterion_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -62,6 +67,9 @@ class AdGroupCriterionService:
         ad_group_id: str,
         keywords: List[Dict[str, Any]],
         negative: bool = False,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add keyword criteria to an ad group.
 
@@ -111,6 +119,12 @@ class AdGroupCriterionService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupCriteriaResponse = (
@@ -140,6 +154,9 @@ class AdGroupCriterionService:
         ad_group_id: str,
         user_list_ids: List[str],
         bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add audience (user list) targeting criteria to an ad group.
 
@@ -186,6 +203,12 @@ class AdGroupCriterionService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupCriteriaResponse = (
@@ -231,6 +254,9 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         demographics: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add demographic targeting criteria to an ad group.
 
@@ -299,6 +325,12 @@ class AdGroupCriterionService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupCriteriaResponse = (
@@ -328,6 +360,9 @@ class AdGroupCriterionService:
         criterion_resource_name: str,
         cpc_bid_micros: Optional[int] = None,
         bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the bid for an ad group criterion.
 
@@ -370,6 +405,12 @@ class AdGroupCriterionService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_criteria(request=request)
@@ -395,6 +436,9 @@ class AdGroupCriterionService:
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an ad group criterion.
 
@@ -417,6 +461,12 @@ class AdGroupCriterionService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_criteria(request=request)
@@ -454,6 +504,9 @@ def create_ad_group_criterion_tools(
         ad_group_id: str,
         keywords: List[Dict[str, Any]],
         negative: bool = False,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add keyword criteria to an ad group.
 
@@ -475,6 +528,9 @@ def create_ad_group_criterion_tools(
             ad_group_id=ad_group_id,
             keywords=keywords,
             negative=negative,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_audience_criteria(
@@ -483,6 +539,9 @@ def create_ad_group_criterion_tools(
         ad_group_id: str,
         user_list_ids: List[str],
         bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add audience (user list) targeting criteria to an ad group.
 
@@ -501,6 +560,9 @@ def create_ad_group_criterion_tools(
             ad_group_id=ad_group_id,
             user_list_ids=user_list_ids,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_demographic_criteria(
@@ -508,6 +570,9 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         demographics: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add demographic targeting criteria to an ad group.
 
@@ -527,6 +592,9 @@ def create_ad_group_criterion_tools(
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             demographics=demographics,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_criterion_bid(
@@ -535,6 +603,9 @@ def create_ad_group_criterion_tools(
         criterion_resource_name: str,
         cpc_bid_micros: Optional[int] = None,
         bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the bid for an ad group criterion.
 
@@ -553,12 +624,18 @@ def create_ad_group_criterion_tools(
             criterion_resource_name=criterion_resource_name,
             cpc_bid_micros=cpc_bid_micros,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_ad_group_criterion(
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an ad group criterion.
 
@@ -573,6 +650,9 @@ def create_ad_group_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             criterion_resource_name=criterion_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

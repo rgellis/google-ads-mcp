@@ -23,7 +23,12 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 from google.ads.googleads.v23.services.types.google_ads_service import MutateOperation
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -48,6 +53,9 @@ class BatchJobService:
         self,
         ctx: Context,
         customer_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new batch job.
 
@@ -72,6 +80,12 @@ class BatchJobService:
             request = MutateBatchJobRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBatchJobResponse = self.client.mutate_batch_job(
@@ -388,6 +402,9 @@ def create_batch_job_tools(
     async def create_batch_job(
         ctx: Context,
         customer_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new batch job for bulk operations.
 
@@ -400,6 +417,9 @@ def create_batch_job_tools(
         return await service.create_batch_job(
             ctx=ctx,
             customer_id=customer_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def get_batch_job(

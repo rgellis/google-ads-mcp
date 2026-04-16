@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.conversion_value_rule_set_service i
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -47,6 +52,9 @@ class ConversionValueRuleSetService:
         conversion_value_rules: List[str],
         attachment_type: str,
         campaign: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a conversion value rule set.
 
@@ -90,6 +98,12 @@ class ConversionValueRuleSetService:
             request = MutateConversionValueRuleSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateConversionValueRuleSetsResponse = (
                 self.client.mutate_conversion_value_rule_sets(request=request)
@@ -114,6 +128,9 @@ class ConversionValueRuleSetService:
         customer_id: str,
         resource_name: str,
         conversion_value_rules: Optional[List[str]] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a conversion value rule set.
 
@@ -146,6 +163,12 @@ class ConversionValueRuleSetService:
             request = MutateConversionValueRuleSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateConversionValueRuleSetsResponse = (
                 self.client.mutate_conversion_value_rule_sets(request=request)
@@ -172,6 +195,9 @@ class ConversionValueRuleSetService:
         ctx: Context,
         customer_id: str,
         resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a conversion value rule set.
 
@@ -192,6 +218,12 @@ class ConversionValueRuleSetService:
             request = MutateConversionValueRuleSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateConversionValueRuleSetsResponse = (
                 self.client.mutate_conversion_value_rule_sets(request=request)
@@ -227,6 +259,9 @@ def create_conversion_value_rule_set_tools(
         conversion_value_rules: List[str],
         attachment_type: str,
         campaign: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a conversion value rule set to group value rules.
 
@@ -247,6 +282,9 @@ def create_conversion_value_rule_set_tools(
             conversion_value_rules=conversion_value_rules,
             attachment_type=attachment_type,
             campaign=campaign,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_conversion_value_rule_set(
@@ -254,6 +292,9 @@ def create_conversion_value_rule_set_tools(
         customer_id: str,
         resource_name: str,
         conversion_value_rules: Optional[List[str]] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a conversion value rule set.
 
@@ -270,10 +311,18 @@ def create_conversion_value_rule_set_tools(
             customer_id=customer_id,
             resource_name=resource_name,
             conversion_value_rules=conversion_value_rules,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_conversion_value_rule_set(
-        ctx: Context, customer_id: str, resource_name: str
+        ctx: Context,
+        customer_id: str,
+        resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a conversion value rule set.
 
@@ -285,7 +334,12 @@ def create_conversion_value_rule_set_tools(
             Removal result
         """
         return await service.remove_conversion_value_rule_set(
-            ctx=ctx, customer_id=customer_id, resource_name=resource_name
+            ctx=ctx,
+            customer_id=customer_id,
+            resource_name=resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

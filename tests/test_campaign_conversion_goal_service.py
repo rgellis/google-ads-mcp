@@ -238,6 +238,8 @@ class TestCampaignConversionGoalTools:
                 origin=ConversionOriginEnum.ConversionOrigin.WEBSITE,
                 biddable=True,
                 validate_only=False,
+                partial_failure=False,
+                response_content_type=None,
             )
 
     async def test_update_tool_with_different_enums(self, mock_context: Any):
@@ -268,4 +270,6 @@ class TestCampaignConversionGoalTools:
                 origin=ConversionOriginEnum.ConversionOrigin.APP,
                 biddable=False,
                 validate_only=True,
+                partial_failure=False,
+                response_content_type=None,
             )

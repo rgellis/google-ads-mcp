@@ -19,7 +19,12 @@ from google.ads.googleads.v23.services.types.billing_setup_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -47,6 +52,9 @@ class BillingSetupService:
         payments_account_id: str,
         start_date: Optional[str] = None,
         start_time_type: TimeTypeEnum.TimeType = TimeTypeEnum.TimeType.NOW,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
@@ -83,6 +91,12 @@ class BillingSetupService:
             request = MutateBillingSetupRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBillingSetupResponse = self.client.mutate_billing_setup(
@@ -293,6 +307,9 @@ class BillingSetupService:
         ctx: Context,
         customer_id: str,
         billing_setup_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove (cancel) a pending billing setup.
 
@@ -313,6 +330,12 @@ class BillingSetupService:
             request = MutateBillingSetupRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateBillingSetupResponse = self.client.mutate_billing_setup(
                 request=request
@@ -351,6 +374,9 @@ def create_billing_setup_tools(
         payments_account_id: str,
         start_date: Optional[str] = None,
         start_time_type: str = "NOW",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
@@ -371,6 +397,9 @@ def create_billing_setup_tools(
             payments_account_id=payments_account_id,
             start_date=start_date,
             start_time_type=start_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_billing_setups(
@@ -434,6 +463,9 @@ def create_billing_setup_tools(
         ctx: Context,
         customer_id: str,
         billing_setup_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove (cancel) a pending billing setup.
 
@@ -450,6 +482,9 @@ def create_billing_setup_tools(
             ctx=ctx,
             customer_id=customer_id,
             billing_setup_resource_name=billing_setup_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

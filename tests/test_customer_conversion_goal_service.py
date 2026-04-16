@@ -305,4 +305,6 @@ class TestCustomerConversionGoalTools:
             customer_id="123",
             operations=[],
             validate_only=False,
+            partial_failure=False,
+            response_content_type=None,
         )

@@ -17,7 +17,12 @@ from google.ads.googleads.v23.services.types.customer_sk_ad_network_conversion_v
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -39,7 +44,13 @@ class CustomerSkAdNetworkService:
         return self._client
 
     async def mutate_schema(
-        self, ctx: Context, customer_id: str, schema: Dict[str, Any]
+        self,
+        ctx: Context,
+        customer_id: str,
+        schema: Dict[str, Any],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the SKAdNetwork conversion value schema.
 
@@ -60,6 +71,12 @@ class CustomerSkAdNetworkService:
             request = MutateCustomerSkAdNetworkConversionValueSchemaRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
             response: MutateCustomerSkAdNetworkConversionValueSchemaResponse = (
                 self.client.mutate_customer_sk_ad_network_conversion_value_schema(
                     request=request
@@ -85,7 +102,12 @@ def create_customer_sk_ad_network_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def mutate_sk_ad_network_schema(
-        ctx: Context, customer_id: str, schema: Dict[str, Any]
+        ctx: Context,
+        customer_id: str,
+        schema: Dict[str, Any],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the iOS SKAdNetwork conversion value schema.
 
@@ -94,7 +116,12 @@ def create_customer_sk_ad_network_tools(
             schema: Schema data
         """
         return await service.mutate_schema(
-            ctx=ctx, customer_id=customer_id, schema=schema
+            ctx=ctx,
+            customer_id=customer_id,
+            schema=schema,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.append(mutate_sk_ad_network_schema)

@@ -26,7 +26,12 @@ from google.ads.googleads.v23.services.types.label_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -54,6 +59,9 @@ class LabelService:
         name: str,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new label.
 
@@ -91,6 +99,12 @@ class LabelService:
             request = MutateLabelsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateLabelsResponse = self.client.mutate_labels(request=request)
@@ -119,6 +133,9 @@ class LabelService:
         name: Optional[str] = None,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing label.
 
@@ -170,6 +187,12 @@ class LabelService:
             request = MutateLabelsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_labels(request=request)
@@ -258,6 +281,9 @@ class LabelService:
         customer_id: str,
         label_id: str,
         campaign_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Apply a label to multiple campaigns.
 
@@ -306,6 +332,12 @@ class LabelService:
             request = MutateCampaignLabelsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             campaign_label_service.mutate_campaign_labels(request=request)
@@ -336,6 +368,9 @@ class LabelService:
         customer_id: str,
         label_id: str,
         ad_group_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Apply a label to multiple ad groups.
 
@@ -384,6 +419,12 @@ class LabelService:
             request = MutateAdGroupLabelsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             ad_group_label_service.mutate_ad_group_labels(request=request)
@@ -423,6 +464,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         name: str,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new label for organizing campaigns, ad groups, and ads.
 
@@ -441,6 +485,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name=name,
             description=description,
             background_color=background_color,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_label(
@@ -450,6 +497,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         name: Optional[str] = None,
         description: Optional[str] = None,
         background_color: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing label.
 
@@ -470,6 +520,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name=name,
             description=description,
             background_color=background_color,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_labels(
@@ -497,6 +550,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         customer_id: str,
         label_id: str,
         campaign_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Apply a label to multiple campaigns.
 
@@ -513,6 +569,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             customer_id=customer_id,
             label_id=label_id,
             campaign_ids=campaign_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def apply_label_to_ad_groups(
@@ -520,6 +579,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         customer_id: str,
         label_id: str,
         ad_group_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Apply a label to multiple ad groups.
 
@@ -536,6 +598,9 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             customer_id=customer_id,
             label_id=label_id,
             ad_group_ids=ad_group_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

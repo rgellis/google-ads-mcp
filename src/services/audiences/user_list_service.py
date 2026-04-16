@@ -30,7 +30,12 @@ from google.ads.googleads.v23.services.types.user_list_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -59,6 +64,9 @@ class UserListService:
         description: Optional[str] = None,
         membership_life_span: int = 30,
         membership_status: str = "OPEN",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a basic remarketing user list.
 
@@ -99,6 +107,12 @@ class UserListService:
             request = MutateUserListsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateUserListsResponse = self.client.mutate_user_lists(
@@ -131,6 +145,9 @@ class UserListService:
         membership_life_span: int = 30,
         upload_key_type: str = "CONTACT_INFO",
         data_source_type: str = "FIRST_PARTY",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a CRM-based user list for customer match.
 
@@ -182,6 +199,12 @@ class UserListService:
             request = MutateUserListsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateUserListsResponse = self.client.mutate_user_lists(
@@ -212,6 +235,9 @@ class UserListService:
         name: str,
         seed_user_list_ids: List[str],
         description: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a similar audiences user list.
 
@@ -257,6 +283,12 @@ class UserListService:
             request = MutateUserListsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateUserListsResponse = self.client.mutate_user_lists(
@@ -289,6 +321,9 @@ class UserListService:
         rule_operator: str = "ALL",
         description: Optional[str] = None,
         membership_life_span: int = 30,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a logical (combined) user list.
 
@@ -350,6 +385,12 @@ class UserListService:
             request = MutateUserListsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateUserListsResponse = self.client.mutate_user_lists(
@@ -382,6 +423,9 @@ class UserListService:
         description: Optional[str] = None,
         membership_status: Optional[str] = None,
         membership_life_span: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing user list.
 
@@ -438,6 +482,12 @@ class UserListService:
             request = MutateUserListsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_user_lists(request=request)
@@ -477,6 +527,9 @@ def create_user_list_tools(
         description: Optional[str] = None,
         membership_life_span: int = 30,
         membership_status: str = "OPEN",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a basic remarketing user list.
 
@@ -497,6 +550,9 @@ def create_user_list_tools(
             description=description,
             membership_life_span=membership_life_span,
             membership_status=membership_status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_crm_based_user_list(
@@ -507,6 +563,9 @@ def create_user_list_tools(
         membership_life_span: int = 30,
         upload_key_type: str = "CONTACT_INFO",
         data_source_type: str = "FIRST_PARTY",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a CRM-based user list for customer match.
 
@@ -529,6 +588,9 @@ def create_user_list_tools(
             membership_life_span=membership_life_span,
             upload_key_type=upload_key_type,
             data_source_type=data_source_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_similar_user_list(
@@ -537,6 +599,9 @@ def create_user_list_tools(
         name: str,
         seed_user_list_ids: List[str],
         description: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a similar audiences user list.
 
@@ -555,6 +620,9 @@ def create_user_list_tools(
             name=name,
             seed_user_list_ids=seed_user_list_ids,
             description=description,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_logical_user_list(
@@ -565,6 +633,9 @@ def create_user_list_tools(
         rule_operator: str = "ALL",
         description: Optional[str] = None,
         membership_life_span: int = 30,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a logical (combined) user list.
 
@@ -596,6 +667,9 @@ def create_user_list_tools(
             rule_operator=rule_operator,
             description=description,
             membership_life_span=membership_life_span,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_user_list(
@@ -606,6 +680,9 @@ def create_user_list_tools(
         description: Optional[str] = None,
         membership_status: Optional[str] = None,
         membership_life_span: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing user list.
 
@@ -628,6 +705,9 @@ def create_user_list_tools(
             description=description,
             membership_status=membership_status,
             membership_life_span=membership_life_span,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

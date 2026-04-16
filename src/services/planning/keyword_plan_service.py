@@ -27,7 +27,12 @@ from google.ads.googleads.v23.services.types.keyword_plan_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -54,6 +59,9 @@ class KeywordPlanService:
         customer_id: str,
         name: str,
         forecast_period_days: int = 30,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new keyword plan for keyword research.
 
@@ -90,6 +98,12 @@ class KeywordPlanService:
             request = MutateKeywordPlansRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateKeywordPlansResponse = self.client.mutate_keyword_plans(
@@ -208,6 +222,9 @@ class KeywordPlanService:
         cpc_bid_micros: int,
         location_ids: Optional[List[str]] = None,
         language_id: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a campaign within a keyword plan.
 
@@ -274,6 +291,12 @@ class KeywordPlanService:
             request = MutateKeywordPlanCampaignsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = campaign_service.mutate_keyword_plan_campaigns(request=request)
@@ -296,6 +319,9 @@ class KeywordPlanService:
         customer_id: str,
         ad_group_id: str,
         keywords: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Add keywords to a keyword plan ad group.
 
@@ -351,6 +377,12 @@ class KeywordPlanService:
             request = MutateKeywordPlanAdGroupKeywordsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = keyword_service.mutate_keyword_plan_ad_group_keywords(
@@ -396,6 +428,9 @@ def create_keyword_plan_tools(
         customer_id: str,
         name: str,
         forecast_period_days: int = 30,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new keyword plan for keyword research.
 
@@ -412,6 +447,9 @@ def create_keyword_plan_tools(
             customer_id=customer_id,
             name=name,
             forecast_period_days=forecast_period_days,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def get_keyword_ideas(
@@ -463,6 +501,9 @@ def create_keyword_plan_tools(
         cpc_bid_micros: int,
         location_ids: Optional[List[str]] = None,
         language_id: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a campaign within a keyword plan.
 
@@ -485,6 +526,9 @@ def create_keyword_plan_tools(
             cpc_bid_micros=cpc_bid_micros,
             location_ids=location_ids,
             language_id=language_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_keywords_to_plan(
@@ -492,6 +536,9 @@ def create_keyword_plan_tools(
         customer_id: str,
         ad_group_id: str,
         keywords: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Add keywords to a keyword plan ad group.
 
@@ -511,6 +558,9 @@ def create_keyword_plan_tools(
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             keywords=keywords,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

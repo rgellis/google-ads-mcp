@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.campaign_label_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -45,6 +50,9 @@ class CampaignLabelService:
         customer_id: str,
         campaign_id: str,
         label_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Apply a label to a campaign.
 
@@ -75,6 +83,12 @@ class CampaignLabelService:
             request = MutateCampaignLabelsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignLabelsResponse = self.client.mutate_campaign_labels(
@@ -103,6 +117,9 @@ class CampaignLabelService:
         ctx: Context,
         customer_id: str,
         campaign_label_pairs: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Apply labels to multiple campaigns.
 
@@ -139,6 +156,12 @@ class CampaignLabelService:
             request = MutateCampaignLabelsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignLabelsResponse = self.client.mutate_campaign_labels(
@@ -179,6 +202,9 @@ class CampaignLabelService:
         customer_id: str,
         campaign_id: str,
         label_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a label from a campaign.
 
@@ -205,6 +231,12 @@ class CampaignLabelService:
             request = MutateCampaignLabelsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaign_labels(request=request)
@@ -334,6 +366,9 @@ def create_campaign_label_tools(
         customer_id: str,
         campaign_id: str,
         label_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Apply a label to a campaign.
 
@@ -350,12 +385,18 @@ def create_campaign_label_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             label_id=label_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def apply_labels_to_campaigns(
         ctx: Context,
         customer_id: str,
         campaign_label_pairs: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Apply labels to multiple campaigns.
 
@@ -372,6 +413,9 @@ def create_campaign_label_tools(
             ctx=ctx,
             customer_id=customer_id,
             campaign_label_pairs=campaign_label_pairs,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_label_from_campaign(
@@ -379,6 +423,9 @@ def create_campaign_label_tools(
         customer_id: str,
         campaign_id: str,
         label_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a label from a campaign.
 
@@ -395,6 +442,9 @@ def create_campaign_label_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             label_id=label_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_campaign_labels(

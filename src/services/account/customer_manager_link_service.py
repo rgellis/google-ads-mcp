@@ -23,7 +23,12 @@ from google.ads.googleads.v23.services.types.customer_manager_link_service impor
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -52,6 +57,8 @@ class CustomerManagerLinkService:
         manager_link_id: int,
         status: ManagerLinkStatusEnum.ManagerLinkStatus,
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the status of a customer-manager link.
 
@@ -96,6 +103,12 @@ class CustomerManagerLinkService:
             request.customer_id = customer_id
             request.operations = [operation]
             request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Execute the mutation
             response: MutateCustomerManagerLinkResponse = (
@@ -200,6 +213,8 @@ def create_customer_manager_link_tools(
         manager_customer_id: str,
         manager_link_id: int,
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Accept a pending manager invitation.
 
@@ -219,6 +234,8 @@ def create_customer_manager_link_tools(
             manager_link_id=manager_link_id,
             status=ManagerLinkStatusEnum.ManagerLinkStatus.ACTIVE,
             validate_only=validate_only,
+            partial_failure=partial_failure,
+            response_content_type=response_content_type,
         )
 
     async def decline_manager_invitation(
@@ -227,6 +244,8 @@ def create_customer_manager_link_tools(
         manager_customer_id: str,
         manager_link_id: int,
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Decline a pending manager invitation.
 
@@ -246,6 +265,8 @@ def create_customer_manager_link_tools(
             manager_link_id=manager_link_id,
             status=ManagerLinkStatusEnum.ManagerLinkStatus.REFUSED,
             validate_only=validate_only,
+            partial_failure=partial_failure,
+            response_content_type=response_content_type,
         )
 
     async def terminate_manager_link(
@@ -254,6 +275,8 @@ def create_customer_manager_link_tools(
         manager_customer_id: str,
         manager_link_id: int,
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Terminate an existing manager-client relationship.
 
@@ -273,6 +296,8 @@ def create_customer_manager_link_tools(
             manager_link_id=manager_link_id,
             status=ManagerLinkStatusEnum.ManagerLinkStatus.INACTIVE,
             validate_only=validate_only,
+            partial_failure=partial_failure,
+            response_content_type=response_content_type,
         )
 
     async def move_client_to_new_manager(

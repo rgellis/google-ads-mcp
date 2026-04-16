@@ -31,7 +31,12 @@ from google.ads.googleads.v23.services.types.ad_group_bid_modifier_service impor
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -59,6 +64,9 @@ class AdGroupBidModifierService:
         ad_group_id: str,
         device_type: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a device bid modifier for an ad group.
 
@@ -94,6 +102,12 @@ class AdGroupBidModifierService:
             request = MutateAdGroupBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupBidModifiersResponse = (
@@ -123,6 +137,9 @@ class AdGroupBidModifierService:
         ad_group_id: str,
         day_of_week: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a hotel check-in day bid modifier for an ad group.
 
@@ -160,6 +177,12 @@ class AdGroupBidModifierService:
             request = MutateAdGroupBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupBidModifiersResponse = (
@@ -189,6 +212,9 @@ class AdGroupBidModifierService:
         ad_group_id: str,
         date_selection_type: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a hotel date selection bid modifier for an ad group.
 
@@ -226,6 +252,12 @@ class AdGroupBidModifierService:
             request = MutateAdGroupBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupBidModifiersResponse = (
@@ -254,6 +286,9 @@ class AdGroupBidModifierService:
         customer_id: str,
         bid_modifier_resource_name: str,
         new_bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing bid modifier.
 
@@ -285,6 +320,12 @@ class AdGroupBidModifierService:
             request = MutateAdGroupBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_bid_modifiers(request=request)
@@ -440,6 +481,9 @@ class AdGroupBidModifierService:
         ctx: Context,
         customer_id: str,
         bid_modifier_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an ad group bid modifier.
 
@@ -462,6 +506,12 @@ class AdGroupBidModifierService:
             request = MutateAdGroupBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_bid_modifiers(request=request)
@@ -499,6 +549,9 @@ def create_ad_group_bid_modifier_tools(
         ad_group_id: str,
         device_type: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a device bid modifier for an ad group.
 
@@ -517,6 +570,9 @@ def create_ad_group_bid_modifier_tools(
             ad_group_id=ad_group_id,
             device_type=device_type,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_ad_group_hotel_check_in_day_bid_modifier(
@@ -525,6 +581,9 @@ def create_ad_group_bid_modifier_tools(
         ad_group_id: str,
         day_of_week: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a hotel check-in day bid modifier for an ad group.
 
@@ -543,6 +602,9 @@ def create_ad_group_bid_modifier_tools(
             ad_group_id=ad_group_id,
             day_of_week=day_of_week,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_ad_group_hotel_date_selection_bid_modifier(
@@ -551,6 +613,9 @@ def create_ad_group_bid_modifier_tools(
         ad_group_id: str,
         date_selection_type: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a hotel date selection bid modifier for an ad group.
 
@@ -569,6 +634,9 @@ def create_ad_group_bid_modifier_tools(
             ad_group_id=ad_group_id,
             date_selection_type=date_selection_type,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_ad_group_bid_modifier(
@@ -576,6 +644,9 @@ def create_ad_group_bid_modifier_tools(
         customer_id: str,
         bid_modifier_resource_name: str,
         new_bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing ad group bid modifier.
 
@@ -592,6 +663,9 @@ def create_ad_group_bid_modifier_tools(
             customer_id=customer_id,
             bid_modifier_resource_name=bid_modifier_resource_name,
             new_bid_modifier=new_bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_ad_group_bid_modifiers(
@@ -621,6 +695,9 @@ def create_ad_group_bid_modifier_tools(
         ctx: Context,
         customer_id: str,
         bid_modifier_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an ad group bid modifier.
 
@@ -635,6 +712,9 @@ def create_ad_group_bid_modifier_tools(
             ctx=ctx,
             customer_id=customer_id,
             bid_modifier_resource_name=bid_modifier_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

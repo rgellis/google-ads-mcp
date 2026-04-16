@@ -218,4 +218,4 @@ For 100% API field coverage, every mutate service's tool wrapper should expose:
 - [x] Fix `conversion_goal_campaign_config` — added `format_customer_id()` **DONE**
 - [x] Fix `custom_conversion_goal` — added `format_customer_id()` **DONE**
 - [x] Fix `experiment_arm` — added `format_customer_id()` **DONE**
-- [ ] Add `partial_failure`, `validate_only`, `response_content_type` params to all mutate tool wrappers
+- [x] Add `partial_failure`, `validate_only`, `response_content_type` params to all mutate services via reusable `set_request_options()` utility **DONE** — 76 service files updated

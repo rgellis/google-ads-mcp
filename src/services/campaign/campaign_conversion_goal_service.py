@@ -24,7 +24,12 @@ from google.ads.googleads.v23.services.types.campaign_conversion_goal_service im
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -60,6 +65,8 @@ class CampaignConversionGoalService:
         origin: ConversionOriginEnum.ConversionOrigin,
         biddable: bool,
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a campaign conversion goal's biddability setting.
 
@@ -106,6 +113,12 @@ class CampaignConversionGoalService:
             request.customer_id = customer_id
             request.operations = [operation]
             request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Execute the mutation
             response: MutateCampaignConversionGoalsResponse = (
@@ -146,6 +159,8 @@ def create_campaign_conversion_goal_tools(
         origin: str,
         biddable: bool,
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update whether specific conversion types are used for bidding in a campaign.
 
@@ -196,6 +211,8 @@ def create_campaign_conversion_goal_tools(
             origin=origin_enum,
             biddable=biddable,
             validate_only=validate_only,
+            partial_failure=partial_failure,
+            response_content_type=response_content_type,
         )
 
     tools.append(update_campaign_conversion_goal)

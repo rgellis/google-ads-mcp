@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.customer_lifecycle_goal_service imp
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -36,7 +41,13 @@ class CustomerLifecycleGoalService:
         return self._client
 
     async def configure_customer_lifecycle_goals(
-        self, ctx: Context, customer_id: str, operation_type: str = "create"
+        self,
+        ctx: Context,
+        customer_id: str,
+        operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         try:
             customer_id = format_customer_id(customer_id)
@@ -51,6 +62,12 @@ class CustomerLifecycleGoalService:
             request = ConfigureCustomerLifecycleGoalsRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
             response: ConfigureCustomerLifecycleGoalsResponse = (
                 self.client.configure_customer_lifecycle_goals(request=request)
             )
@@ -75,7 +92,12 @@ def create_customer_lifecycle_goal_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def configure_customer_lifecycle_goal(
-        ctx: Context, customer_id: str, operation_type: str = "create"
+        ctx: Context,
+        customer_id: str,
+        operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Configure customer lifecycle goals (acquisition/retention).
 
@@ -84,7 +106,12 @@ def create_customer_lifecycle_goal_tools(
             operation_type: create or update
         """
         return await service.configure_customer_lifecycle_goals(
-            ctx=ctx, customer_id=customer_id, operation_type=operation_type
+            ctx=ctx,
+            customer_id=customer_id,
+            operation_type=operation_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.append(configure_customer_lifecycle_goal)

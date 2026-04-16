@@ -24,7 +24,12 @@ from google.ads.googleads.v23.services.types.asset_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -51,6 +56,9 @@ class AssetService:
         customer_id: str,
         text: str,
         name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a text asset.
 
@@ -89,6 +97,12 @@ class AssetService:
             request = MutateAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAssetsResponse = self.client.mutate_assets(request=request)
@@ -110,6 +124,9 @@ class AssetService:
         image_data: bytes,
         name: str,
         mime_type: str = "image/jpeg",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an image asset.
 
@@ -145,6 +162,12 @@ class AssetService:
             request = MutateAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAssetsResponse = self.client.mutate_assets(request=request)
@@ -166,6 +189,9 @@ class AssetService:
         customer_id: str,
         youtube_video_id: str,
         name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a YouTube video asset.
 
@@ -204,6 +230,12 @@ class AssetService:
             request = MutateAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAssetsResponse = self.client.mutate_assets(request=request)
@@ -331,6 +363,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         customer_id: str,
         text: str,
         name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a text asset.
 
@@ -347,6 +382,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             customer_id=customer_id,
             text=text,
             name=name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_image_asset(
@@ -355,6 +393,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         image_data: bytes,
         name: str,
         mime_type: str = "image/jpeg",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an image asset.
 
@@ -373,6 +414,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             image_data=image_data,
             name=name,
             mime_type=mime_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_youtube_video_asset(
@@ -380,6 +424,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         customer_id: str,
         youtube_video_id: str,
         name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a YouTube video asset.
 
@@ -396,6 +443,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             customer_id=customer_id,
             youtube_video_id=youtube_video_id,
             name=name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def search_assets(

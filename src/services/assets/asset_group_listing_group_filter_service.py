@@ -17,7 +17,12 @@ from google.ads.googleads.v23.services.types.asset_group_listing_group_filter_se
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -45,6 +50,9 @@ class AssetGroupListingGroupFilterService:
         asset_group_resource_name: str,
         filter_type: str,
         parent_listing_group_filter: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a listing group filter for a Performance Max asset group.
 
@@ -79,6 +87,12 @@ class AssetGroupListingGroupFilterService:
             request = MutateAssetGroupListingGroupFiltersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateAssetGroupListingGroupFiltersResponse = (
                 self.client.mutate_asset_group_listing_group_filters(request=request)
@@ -102,6 +116,9 @@ class AssetGroupListingGroupFilterService:
         ctx: Context,
         customer_id: str,
         resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a listing group filter.
 
@@ -122,6 +139,12 @@ class AssetGroupListingGroupFilterService:
             request = MutateAssetGroupListingGroupFiltersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateAssetGroupListingGroupFiltersResponse = (
                 self.client.mutate_asset_group_listing_group_filters(request=request)
@@ -156,6 +179,9 @@ def create_asset_group_listing_group_filter_tools(
         asset_group_resource_name: str,
         filter_type: str,
         parent_listing_group_filter: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a listing group filter for PMax product feed targeting.
 
@@ -174,10 +200,18 @@ def create_asset_group_listing_group_filter_tools(
             asset_group_resource_name=asset_group_resource_name,
             filter_type=filter_type,
             parent_listing_group_filter=parent_listing_group_filter,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_listing_group_filter(
-        ctx: Context, customer_id: str, resource_name: str
+        ctx: Context,
+        customer_id: str,
+        resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a listing group filter.
 
@@ -189,7 +223,12 @@ def create_asset_group_listing_group_filter_tools(
             Removal result
         """
         return await service.remove_listing_group_filter(
-            ctx=ctx, customer_id=customer_id, resource_name=resource_name
+            ctx=ctx,
+            customer_id=customer_id,
+            resource_name=resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([create_listing_group_filter, remove_listing_group_filter])

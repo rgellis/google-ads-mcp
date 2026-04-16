@@ -28,7 +28,12 @@ from google.ads.googleads.v23.services.types.campaign_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -59,6 +64,9 @@ class CampaignService:
         status: CampaignStatusEnum.CampaignStatus = CampaignStatusEnum.CampaignStatus.PAUSED,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new campaign.
 
@@ -115,6 +123,12 @@ class CampaignService:
             request = MutateCampaignsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignsResponse = self.client.mutate_campaigns(
@@ -140,6 +154,9 @@ class CampaignService:
         status: Optional[CampaignStatusEnum.CampaignStatus] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing campaign.
 
@@ -193,6 +210,12 @@ class CampaignService:
             request = MutateCampaignsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaigns(request=request)
@@ -218,6 +241,9 @@ class CampaignService:
         ctx: Context,
         customer_id: str,
         operations: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Enable Performance Max brand guidelines for campaigns.
 
@@ -271,6 +297,12 @@ class CampaignService:
             request = EnablePMaxBrandGuidelinesRequest()
             request.customer_id = customer_id
             request.operations = enable_ops
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: EnablePMaxBrandGuidelinesResponse = (
                 self.client.enable_p_max_brand_guidelines(request=request)
@@ -307,6 +339,9 @@ def create_campaign_tools(
         status: str = "PAUSED",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new campaign.
 
@@ -337,6 +372,9 @@ def create_campaign_tools(
             status=status_enum,
             start_date=start_date,
             end_date=end_date,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_campaign(
@@ -347,6 +385,9 @@ def create_campaign_tools(
         status: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing campaign.
 
@@ -374,12 +415,18 @@ def create_campaign_tools(
             status=status_enum,
             start_date=start_date,
             end_date=end_date,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def enable_p_max_brand_guidelines(
         ctx: Context,
         customer_id: str,
         operations: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Enable Performance Max brand guidelines for campaigns.
 
@@ -404,6 +451,9 @@ def create_campaign_tools(
             ctx=ctx,
             customer_id=customer_id,
             operations=operations,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([create_campaign, update_campaign, enable_p_max_brand_guidelines])

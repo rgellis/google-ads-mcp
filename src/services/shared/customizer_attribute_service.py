@@ -27,7 +27,12 @@ from google.ads.googleads.v23.services.types.customizer_attribute_service import
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -55,6 +60,9 @@ class CustomizerAttributeService:
         name: str,
         attribute_type: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a customizer attribute.
 
@@ -89,6 +97,12 @@ class CustomizerAttributeService:
             request = MutateCustomizerAttributesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCustomizerAttributesResponse = (
@@ -111,6 +125,9 @@ class CustomizerAttributeService:
         customer_id: str,
         attribute_resource_name: str,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a customizer attribute.
 
@@ -150,6 +167,12 @@ class CustomizerAttributeService:
             request = MutateCustomizerAttributesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_customizer_attributes(request=request)
@@ -247,6 +270,9 @@ class CustomizerAttributeService:
         ctx: Context,
         customer_id: str,
         attribute_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a customizer attribute.
 
@@ -269,6 +295,12 @@ class CustomizerAttributeService:
             request = MutateCustomizerAttributesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_customizer_attributes(request=request)
@@ -306,6 +338,9 @@ def create_customizer_attribute_tools(
         name: str,
         attribute_type: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a customizer attribute for ad customization.
 
@@ -324,6 +359,9 @@ def create_customizer_attribute_tools(
             name=name,
             attribute_type=attribute_type,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_customizer_attribute(
@@ -331,6 +369,9 @@ def create_customizer_attribute_tools(
         customer_id: str,
         attribute_resource_name: str,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a customizer attribute.
 
@@ -347,6 +388,9 @@ def create_customizer_attribute_tools(
             customer_id=customer_id,
             attribute_resource_name=attribute_resource_name,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_customizer_attributes(
@@ -373,6 +417,9 @@ def create_customizer_attribute_tools(
         ctx: Context,
         customer_id: str,
         attribute_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a customizer attribute.
 
@@ -387,6 +434,9 @@ def create_customizer_attribute_tools(
             ctx=ctx,
             customer_id=customer_id,
             attribute_resource_name=attribute_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

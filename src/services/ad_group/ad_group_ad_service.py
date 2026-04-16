@@ -24,7 +24,12 @@ from google.ads.googleads.v23.services.types.ad_group_ad_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -52,6 +57,9 @@ class AdGroupAdService:
         ad_group_id: str,
         ad_resource_name: str,
         status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.ENABLED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new ad group ad (associate an ad with an ad group).
 
@@ -87,6 +95,12 @@ class AdGroupAdService:
             request = MutateAdGroupAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
@@ -110,6 +124,9 @@ class AdGroupAdService:
         customer_id: str,
         ad_group_ad_resource_name: str,
         status: AdGroupAdStatusEnum.AdGroupAdStatus,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the status of an ad group ad.
 
@@ -139,6 +156,12 @@ class AdGroupAdService:
             request = MutateAdGroupAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_ads(request=request)
@@ -246,6 +269,9 @@ class AdGroupAdService:
         ctx: Context,
         customer_id: str,
         ad_group_ad_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an ad from an ad group.
 
@@ -268,6 +294,12 @@ class AdGroupAdService:
             request = MutateAdGroupAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_ads(request=request)
@@ -294,6 +326,9 @@ class AdGroupAdService:
         customer_id: str,
         ad_group_ad_resource_name: str,
         assets_with_field_type: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove automatically created assets from an ad group ad.
 
@@ -322,6 +357,12 @@ class AdGroupAdService:
             request = RemoveAutomaticallyCreatedAssetsRequest()
             request.ad_group_ad = ad_group_ad_resource_name
             request.assets_with_field_type = assets
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             self.client.remove_automatically_created_assets(request=request)
 
@@ -362,6 +403,9 @@ def create_ad_group_ad_tools(
         ad_group_id: str,
         ad_resource_name: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new ad group ad (associate an ad with an ad group).
 
@@ -383,6 +427,9 @@ def create_ad_group_ad_tools(
             ad_group_id=ad_group_id,
             ad_resource_name=ad_resource_name,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_ad_group_ad_status(
@@ -390,6 +437,9 @@ def create_ad_group_ad_tools(
         customer_id: str,
         ad_group_ad_resource_name: str,
         status: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the status of an ad group ad.
 
@@ -409,6 +459,9 @@ def create_ad_group_ad_tools(
             customer_id=customer_id,
             ad_group_ad_resource_name=ad_group_ad_resource_name,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_ad_group_ads(
@@ -441,6 +494,9 @@ def create_ad_group_ad_tools(
         ctx: Context,
         customer_id: str,
         ad_group_ad_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an ad from an ad group.
 
@@ -455,6 +511,9 @@ def create_ad_group_ad_tools(
             ctx=ctx,
             customer_id=customer_id,
             ad_group_ad_resource_name=ad_group_ad_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_automatically_created_assets(
@@ -462,6 +521,9 @@ def create_ad_group_ad_tools(
         customer_id: str,
         ad_group_ad_resource_name: str,
         assets_with_field_type: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove automatically created assets from an ad group ad.
 
@@ -479,6 +541,9 @@ def create_ad_group_ad_tools(
             customer_id=customer_id,
             ad_group_ad_resource_name=ad_group_ad_resource_name,
             assets_with_field_type=assets_with_field_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

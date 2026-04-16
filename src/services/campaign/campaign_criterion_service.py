@@ -25,7 +25,12 @@ from google.ads.googleads.v23.services.types.campaign_criterion_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -54,6 +59,9 @@ class CampaignCriterionService:
         location_ids: List[str],
         negative: bool = False,
         bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add location targeting criteria to a campaign.
 
@@ -97,6 +105,12 @@ class CampaignCriterionService:
             request = MutateCampaignCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignCriteriaResponse = (
@@ -125,6 +139,9 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         language_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add language targeting criteria to a campaign.
 
@@ -165,6 +182,12 @@ class CampaignCriterionService:
             request = MutateCampaignCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignCriteriaResponse = (
@@ -194,6 +217,9 @@ class CampaignCriterionService:
         campaign_id: str,
         device_types: List[DeviceEnum.Device],
         bid_modifiers: Optional[Dict[str, float]] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add device targeting criteria to a campaign.
 
@@ -240,6 +266,12 @@ class CampaignCriterionService:
             request = MutateCampaignCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignCriteriaResponse = (
@@ -268,6 +300,9 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         keywords: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add negative keyword criteria to a campaign.
 
@@ -309,6 +344,12 @@ class CampaignCriterionService:
             request = MutateCampaignCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignCriteriaResponse = (
@@ -336,6 +377,9 @@ class CampaignCriterionService:
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a campaign criterion.
 
@@ -358,6 +402,12 @@ class CampaignCriterionService:
             request = MutateCampaignCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignCriteriaResponse = (
@@ -398,6 +448,9 @@ def create_campaign_criterion_tools(
         location_ids: List[str],
         negative: bool = False,
         bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add location targeting criteria to a campaign.
 
@@ -418,6 +471,9 @@ def create_campaign_criterion_tools(
             location_ids=location_ids,
             negative=negative,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_language_criteria(
@@ -425,6 +481,9 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         language_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add language targeting criteria to a campaign.
 
@@ -441,6 +500,9 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             language_ids=language_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_device_criteria(
@@ -449,6 +511,9 @@ def create_campaign_criterion_tools(
         campaign_id: str,
         device_types: List[str],
         bid_modifiers: Optional[Dict[str, float]] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add device targeting criteria to a campaign.
 
@@ -473,6 +538,9 @@ def create_campaign_criterion_tools(
             campaign_id=campaign_id,
             device_types=device_type_enums,
             bid_modifiers=bid_modifiers,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def add_negative_keyword_criteria(
@@ -480,6 +548,9 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         keywords: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add negative keyword criteria to a campaign.
 
@@ -500,12 +571,18 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             keywords=keywords,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_campaign_criterion(
         ctx: Context,
         customer_id: str,
         criterion_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a campaign criterion.
 
@@ -520,6 +597,9 @@ def create_campaign_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             criterion_resource_name=criterion_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

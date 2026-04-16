@@ -15,7 +15,12 @@ from google.ads.googleads.v23.services.types.automatically_created_asset_removal
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -41,6 +46,9 @@ class AutomaticallyCreatedAssetRemovalService:
         ctx: Context,
         customer_id: str,
         operations: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove automatically created assets from campaigns.
 
@@ -72,6 +80,12 @@ class AutomaticallyCreatedAssetRemovalService:
             request.customer_id = customer_id
             request.operations = removal_ops
             request.partial_failure = False
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: RemoveCampaignAutomaticallyCreatedAssetResponse = (
                 self.client.remove_campaign_automatically_created_asset(request=request)
@@ -104,6 +118,9 @@ def create_automatically_created_asset_removal_tools(
         ctx: Context,
         customer_id: str,
         operations: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove automatically created assets from campaigns.
 
@@ -116,7 +133,12 @@ def create_automatically_created_asset_removal_tools(
             Removal result
         """
         return await service.remove_campaign_automatically_created_assets(
-            ctx=ctx, customer_id=customer_id, operations=operations
+            ctx=ctx,
+            customer_id=customer_id,
+            operations=operations,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.append(remove_campaign_automatically_created_assets)

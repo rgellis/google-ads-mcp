@@ -19,7 +19,12 @@ from google.ads.googleads.v23.services.types.campaign_group_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -43,6 +48,9 @@ class CampaignGroupService:
         ctx: Context,
         customer_id: str,
         name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a campaign group.
 
@@ -66,6 +74,12 @@ class CampaignGroupService:
             request = MutateCampaignGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCampaignGroupsResponse = self.client.mutate_campaign_groups(
                 request=request
@@ -90,6 +104,9 @@ class CampaignGroupService:
         customer_id: str,
         campaign_group_resource_name: str,
         name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a campaign group.
 
@@ -122,6 +139,12 @@ class CampaignGroupService:
             request = MutateCampaignGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCampaignGroupsResponse = self.client.mutate_campaign_groups(
                 request=request
@@ -148,6 +171,9 @@ class CampaignGroupService:
         ctx: Context,
         customer_id: str,
         campaign_group_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a campaign group.
 
@@ -168,6 +194,12 @@ class CampaignGroupService:
             request = MutateCampaignGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCampaignGroupsResponse = self.client.mutate_campaign_groups(
                 request=request
@@ -246,7 +278,12 @@ def create_campaign_group_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def create_campaign_group(
-        ctx: Context, customer_id: str, name: str
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a campaign group for organizing campaigns.
 
@@ -258,7 +295,12 @@ def create_campaign_group_tools(
             Created campaign group details
         """
         return await service.create_campaign_group(
-            ctx=ctx, customer_id=customer_id, name=name
+            ctx=ctx,
+            customer_id=customer_id,
+            name=name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_campaign_group(
@@ -266,6 +308,9 @@ def create_campaign_group_tools(
         customer_id: str,
         campaign_group_resource_name: str,
         name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a campaign group.
 
@@ -282,10 +327,18 @@ def create_campaign_group_tools(
             customer_id=customer_id,
             campaign_group_resource_name=campaign_group_resource_name,
             name=name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_campaign_group(
-        ctx: Context, customer_id: str, campaign_group_resource_name: str
+        ctx: Context,
+        customer_id: str,
+        campaign_group_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a campaign group.
 
@@ -300,6 +353,9 @@ def create_campaign_group_tools(
             ctx=ctx,
             customer_id=customer_id,
             campaign_group_resource_name=campaign_group_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_campaign_groups(

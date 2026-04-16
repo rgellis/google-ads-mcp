@@ -27,7 +27,7 @@ from google.ads.googleads.v23.enums.types.user_identifier_source import (
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger
+from src.utils import format_customer_id, get_logger, set_request_options
 
 logger = get_logger(__name__)
 
@@ -53,6 +53,9 @@ class UserDataService:
         ctx: Context,
         customer_id: str,
         conversion_adjustments: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Upload enhanced conversions with user data.
 
@@ -144,6 +147,12 @@ class UserDataService:
             request = UploadUserDataRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: UploadUserDataResponse = self.client.upload_user_data(
@@ -181,6 +190,9 @@ class UserDataService:
         customer_id: str,
         user_list_id: str,
         user_data_list: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Upload customer match data to a user list.
 
@@ -283,6 +295,12 @@ class UserDataService:
                 f"customers/{customer_id}/userLists/{user_list_id}"
             )
             request.customer_match_user_list_metadata = customer_match_metadata
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: UploadUserDataResponse = self.client.upload_user_data(
@@ -320,6 +338,9 @@ class UserDataService:
         customer_id: str,
         conversion_action: str,
         store_sales_data: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Upload store sales data for enhanced conversions.
 
@@ -393,6 +414,12 @@ class UserDataService:
             request = UploadUserDataRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Note: StoreSalesMetadata is may require additional type handling in current API version
             # Store sales data is handled through transaction attributes with store_code
@@ -442,6 +469,9 @@ def create_user_data_tools(
         ctx: Context,
         customer_id: str,
         conversion_adjustments: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Upload enhanced conversions with user data for better attribution.
 
@@ -459,6 +489,9 @@ def create_user_data_tools(
             ctx=ctx,
             customer_id=customer_id,
             conversion_adjustments=conversion_adjustments,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def upload_customer_match_data(
@@ -466,6 +499,9 @@ def create_user_data_tools(
         customer_id: str,
         user_list_id: str,
         user_data_list: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Upload customer match data to populate a user list.
 
@@ -484,6 +520,9 @@ def create_user_data_tools(
             customer_id=customer_id,
             user_list_id=user_list_id,
             user_data_list=user_data_list,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def upload_store_sales_data(
@@ -491,6 +530,9 @@ def create_user_data_tools(
         customer_id: str,
         conversion_action: str,
         store_sales_data: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Upload store sales data for enhanced conversions from offline sales.
 
@@ -510,6 +552,9 @@ def create_user_data_tools(
             customer_id=customer_id,
             conversion_action=conversion_action,
             store_sales_data=store_sales_data,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

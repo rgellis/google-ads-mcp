@@ -25,7 +25,12 @@ from google.ads.googleads.v23.services.types.ad_group_criterion_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -53,6 +58,9 @@ class KeywordService:
         ad_group_id: str,
         keywords: List[Dict[str, str]],
         default_cpc_bid_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add keywords to an ad group.
 
@@ -107,6 +115,12 @@ class KeywordService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupCriteriaResponse = (
@@ -136,6 +150,9 @@ class KeywordService:
         ad_group_id: str,
         criterion_id: str,
         cpc_bid_micros: int,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the bid for a keyword.
 
@@ -171,6 +188,12 @@ class KeywordService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_criteria(request=request)
@@ -197,6 +220,9 @@ class KeywordService:
         customer_id: str,
         ad_group_id: str,
         criterion_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a keyword from an ad group.
 
@@ -223,6 +249,12 @@ class KeywordService:
             request = MutateAdGroupCriteriaRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_criteria(request=request)
@@ -260,6 +292,9 @@ def create_keyword_tools(
         ad_group_id: str,
         keywords: List[Dict[str, str]],
         default_cpc_bid_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add keywords to an ad group.
 
@@ -281,6 +316,9 @@ def create_keyword_tools(
             ad_group_id=ad_group_id,
             keywords=keywords,
             default_cpc_bid_micros=default_cpc_bid_micros,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_keyword_bid(
@@ -289,6 +327,9 @@ def create_keyword_tools(
         ad_group_id: str,
         criterion_id: str,
         cpc_bid_micros: int,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the bid for a keyword.
 
@@ -307,6 +348,9 @@ def create_keyword_tools(
             ad_group_id=ad_group_id,
             criterion_id=criterion_id,
             cpc_bid_micros=cpc_bid_micros,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_keyword(
@@ -314,6 +358,9 @@ def create_keyword_tools(
         customer_id: str,
         ad_group_id: str,
         criterion_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a keyword from an ad group.
 
@@ -330,6 +377,9 @@ def create_keyword_tools(
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             criterion_id=criterion_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([add_keywords, update_keyword_bid, remove_keyword])

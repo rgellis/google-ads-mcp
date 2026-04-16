@@ -31,7 +31,12 @@ from google.ads.googleads.v23.services.types.custom_audience_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -61,6 +66,9 @@ class CustomAudienceService:
         members: List[Dict[str, Any]],
         type_: str = "AUTO",
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new custom audience (custom segment).
 
@@ -135,6 +143,12 @@ class CustomAudienceService:
             request = MutateCustomAudiencesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCustomAudiencesResponse = (
@@ -166,6 +180,9 @@ class CustomAudienceService:
         description: Optional[str] = None,
         members: Optional[List[Dict[str, Any]]] = None,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing custom audience.
 
@@ -254,6 +271,12 @@ class CustomAudienceService:
             request = MutateCustomAudiencesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_custom_audiences(request=request)
@@ -420,6 +443,9 @@ def create_custom_audience_tools(
         members: List[Dict[str, Any]],
         type_: str = "AUTO",
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new custom audience (custom segment).
 
@@ -451,6 +477,9 @@ def create_custom_audience_tools(
             members=members,
             type_=type_,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_custom_audience(
@@ -461,6 +490,9 @@ def create_custom_audience_tools(
         description: Optional[str] = None,
         members: Optional[List[Dict[str, Any]]] = None,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing custom audience.
 
@@ -483,6 +515,9 @@ def create_custom_audience_tools(
             description=description,
             members=members,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_custom_audiences(

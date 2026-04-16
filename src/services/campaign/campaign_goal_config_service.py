@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.campaign_goal_config_service import
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -44,6 +49,9 @@ class CampaignGoalConfigService:
         campaign_resource_name: str,
         goal_resource_name: Optional[str] = None,
         operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create, update, or remove a campaign goal config.
 
@@ -80,6 +88,12 @@ class CampaignGoalConfigService:
             request = MutateCampaignGoalConfigsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCampaignGoalConfigsResponse = (
                 self.client.mutate_campaign_goal_configs(request=request)
@@ -114,6 +128,9 @@ def create_campaign_goal_config_tools(
         campaign_resource_name: str,
         goal_resource_name: Optional[str] = None,
         operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create, update, or remove a campaign goal configuration.
 
@@ -132,6 +149,9 @@ def create_campaign_goal_config_tools(
             campaign_resource_name=campaign_resource_name,
             goal_resource_name=goal_resource_name,
             operation_type=operation_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.append(mutate_campaign_goal_config)

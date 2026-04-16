@@ -33,7 +33,12 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -70,6 +75,9 @@ class BiddingSeasonalityAdjustmentService:
         advertising_channel_types: Optional[List[str]] = None,
         devices: Optional[List[str]] = None,
         description: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a bidding seasonality adjustment for seasonal conversion rate changes.
 
@@ -136,6 +144,12 @@ class BiddingSeasonalityAdjustmentService:
             request = MutateBiddingSeasonalityAdjustmentsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateBiddingSeasonalityAdjustmentsResponse = (
@@ -169,6 +183,9 @@ class BiddingSeasonalityAdjustmentService:
         end_date_time: Optional[str] = None,
         conversion_rate_modifier: Optional[float] = None,
         description: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a bidding seasonality adjustment.
 
@@ -226,6 +243,12 @@ class BiddingSeasonalityAdjustmentService:
             request = MutateBiddingSeasonalityAdjustmentsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_bidding_seasonality_adjustments(
@@ -348,6 +371,9 @@ class BiddingSeasonalityAdjustmentService:
         ctx: Context,
         customer_id: str,
         adjustment_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a bidding seasonality adjustment.
 
@@ -370,6 +396,12 @@ class BiddingSeasonalityAdjustmentService:
             request = MutateBiddingSeasonalityAdjustmentsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_bidding_seasonality_adjustments(
@@ -417,6 +449,9 @@ def create_bidding_seasonality_adjustment_tools(
         advertising_channel_types: Optional[List[str]] = None,
         devices: Optional[List[str]] = None,
         description: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a bidding seasonality adjustment for seasonal conversion rate changes.
 
@@ -449,6 +484,9 @@ def create_bidding_seasonality_adjustment_tools(
             advertising_channel_types=advertising_channel_types,
             devices=devices,
             description=description,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_bidding_seasonality_adjustment(
@@ -460,6 +498,9 @@ def create_bidding_seasonality_adjustment_tools(
         end_date_time: Optional[str] = None,
         conversion_rate_modifier: Optional[float] = None,
         description: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a bidding seasonality adjustment.
 
@@ -484,6 +525,9 @@ def create_bidding_seasonality_adjustment_tools(
             end_date_time=end_date_time,
             conversion_rate_modifier=conversion_rate_modifier,
             description=description,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_bidding_seasonality_adjustments(
@@ -510,6 +554,9 @@ def create_bidding_seasonality_adjustment_tools(
         ctx: Context,
         customer_id: str,
         adjustment_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a bidding seasonality adjustment.
 
@@ -524,6 +571,9 @@ def create_bidding_seasonality_adjustment_tools(
             ctx=ctx,
             customer_id=customer_id,
             adjustment_resource_name=adjustment_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

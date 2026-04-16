@@ -26,7 +26,12 @@ from google.ads.googleads.v23.services.types.experiment_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -57,6 +62,9 @@ class ExperimentService:
         experiment_type: str = "SEARCH_CUSTOM",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new experiment for A/B testing.
 
@@ -103,6 +111,12 @@ class ExperimentService:
             request = MutateExperimentsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateExperimentsResponse = self.client.mutate_experiments(
@@ -468,6 +482,9 @@ def create_experiment_tools(
         experiment_type: str = "SEARCH_CUSTOM",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new experiment for A/B testing campaigns.
 
@@ -499,6 +516,9 @@ def create_experiment_tools(
             experiment_type=experiment_type,
             start_date=start_date,
             end_date=end_date,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def schedule_experiment(

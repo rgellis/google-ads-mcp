@@ -50,6 +50,32 @@ def format_customer_id(customer_id: str) -> str:
     return customer_id.replace("-", "")
 
 
+def set_request_options(
+    request: Any,
+    partial_failure: bool = False,
+    validate_only: bool = False,
+    response_content_type: Any = None,
+) -> None:
+    """Set common optional fields on a Google Ads API request.
+
+    Safely sets partial_failure, validate_only, and response_content_type
+    on any request object that supports them. Fields not present on the
+    request type are silently skipped.
+
+    Args:
+        request: A Google Ads API request proto object
+        partial_failure: If true, successful operations proceed even if others fail
+        validate_only: If true, validate the request without executing
+        response_content_type: Enum value controlling what's returned in the response
+    """
+    if partial_failure and hasattr(request, "partial_failure"):
+        request.partial_failure = partial_failure
+    if validate_only and hasattr(request, "validate_only"):
+        request.validate_only = validate_only
+    if response_content_type is not None and hasattr(request, "response_content_type"):
+        request.response_content_type = response_content_type
+
+
 def serialize_proto_message(
     message: Any, use_integers_for_enums: bool = False
 ) -> Dict[str, Any]:

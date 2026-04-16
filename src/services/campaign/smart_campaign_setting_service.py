@@ -20,7 +20,12 @@ from google.ads.googleads.v23.services.types.smart_campaign_setting_service impo
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -65,6 +70,9 @@ class SmartCampaignSettingService:
         customer_id: str,
         setting_resource_name: str,
         update_fields: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         try:
             customer_id = format_customer_id(customer_id)
@@ -78,6 +86,12 @@ class SmartCampaignSettingService:
             request = MutateSmartCampaignSettingsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
             response: MutateSmartCampaignSettingsResponse = (
                 self.client.mutate_smart_campaign_settings(request=request)
             )
@@ -118,6 +132,9 @@ def create_smart_campaign_setting_tools(
         customer_id: str,
         setting_resource_name: str,
         update_fields: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a Smart campaign setting.
 
@@ -131,6 +148,9 @@ def create_smart_campaign_setting_tools(
             customer_id=customer_id,
             setting_resource_name=setting_resource_name,
             update_fields=update_fields,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([get_smart_campaign_status, update_smart_campaign_setting])

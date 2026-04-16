@@ -19,7 +19,12 @@ from google.ads.googleads.v23.services.types.campaign_budget_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -48,6 +53,9 @@ class BudgetService:
         amount_micros: int,
         delivery_method: str = "STANDARD",
         explicitly_shared: bool = False,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new campaign budget.
 
@@ -84,6 +92,12 @@ class BudgetService:
             request = MutateCampaignBudgetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignBudgetsResponse = (
@@ -109,6 +123,9 @@ class BudgetService:
         name: Optional[str] = None,
         amount_micros: Optional[int] = None,
         delivery_method: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing campaign budget.
 
@@ -159,6 +176,12 @@ class BudgetService:
             request = MutateCampaignBudgetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaign_budgets(request=request)
@@ -195,6 +218,9 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
         amount_micros: int,
         delivery_method: str = "STANDARD",
         explicitly_shared: bool = False,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new campaign budget.
 
@@ -215,6 +241,9 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             amount_micros=amount_micros,
             delivery_method=delivery_method,
             explicitly_shared=explicitly_shared,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_campaign_budget(
@@ -224,6 +253,9 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
         name: Optional[str] = None,
         amount_micros: Optional[int] = None,
         delivery_method: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing campaign budget.
 
@@ -244,6 +276,9 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             name=name,
             amount_micros=amount_micros,
             delivery_method=delivery_method,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([create_campaign_budget, update_campaign_budget])

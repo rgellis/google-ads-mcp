@@ -28,7 +28,12 @@ from google.ads.googleads.v23.services.types.campaign_bid_modifier_service impor
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -60,6 +65,9 @@ class CampaignBidModifierService:
         campaign_id: str,
         interaction_type: InteractionTypeEnum.InteractionType,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an interaction type bid modifier for a campaign.
 
@@ -95,6 +103,12 @@ class CampaignBidModifierService:
             request = MutateCampaignBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignBidModifiersResponse = (
@@ -123,6 +137,9 @@ class CampaignBidModifierService:
         customer_id: str,
         bid_modifier_resource_name: str,
         new_bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing bid modifier.
 
@@ -154,6 +171,12 @@ class CampaignBidModifierService:
             request = MutateCampaignBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaign_bid_modifiers(request=request)
@@ -266,6 +289,9 @@ class CampaignBidModifierService:
         ctx: Context,
         customer_id: str,
         bid_modifier_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a campaign bid modifier.
 
@@ -288,6 +314,12 @@ class CampaignBidModifierService:
             request = MutateCampaignBidModifiersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaign_bid_modifiers(request=request)
@@ -325,6 +357,9 @@ def create_campaign_bid_modifier_tools(
         campaign_id: str,
         interaction_type: str,
         bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an interaction type bid modifier for a campaign.
 
@@ -351,6 +386,9 @@ def create_campaign_bid_modifier_tools(
             campaign_id=campaign_id,
             interaction_type=interaction_type_enum,
             bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_bid_modifier(
@@ -358,6 +396,9 @@ def create_campaign_bid_modifier_tools(
         customer_id: str,
         bid_modifier_resource_name: str,
         new_bid_modifier: float,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing bid modifier.
 
@@ -374,6 +415,9 @@ def create_campaign_bid_modifier_tools(
             customer_id=customer_id,
             bid_modifier_resource_name=bid_modifier_resource_name,
             new_bid_modifier=new_bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_campaign_bid_modifiers(
@@ -403,6 +447,9 @@ def create_campaign_bid_modifier_tools(
         ctx: Context,
         customer_id: str,
         bid_modifier_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a campaign bid modifier.
 
@@ -417,6 +464,9 @@ def create_campaign_bid_modifier_tools(
             ctx=ctx,
             customer_id=customer_id,
             bid_modifier_resource_name=bid_modifier_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

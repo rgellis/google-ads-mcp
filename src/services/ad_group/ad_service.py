@@ -33,7 +33,12 @@ from google.ads.googleads.v23.services.types.ad_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -80,6 +85,9 @@ class AdService:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a responsive search ad.
 
@@ -142,6 +150,12 @@ class AdService:
             request = MutateAdGroupAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
@@ -178,6 +192,9 @@ class AdService:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an expanded text ad.
 
@@ -239,6 +256,12 @@ class AdService:
             request = MutateAdGroupAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
@@ -268,6 +291,9 @@ class AdService:
         ad_group_id: str,
         ad_id: str,
         status: AdGroupAdStatusEnum.AdGroupAdStatus,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the status of an ad.
 
@@ -299,6 +325,12 @@ class AdService:
             request = MutateAdGroupAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_ads(request=request)
@@ -329,6 +361,9 @@ class AdService:
         final_urls: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing ad's content via AdService.MutateAds.
 
@@ -396,6 +431,12 @@ class AdService:
             request = MutateAdsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateAdsResponse = self.ad_client.mutate_ads(request=request)
 
@@ -434,6 +475,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a responsive search ad.
 
@@ -463,6 +507,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             path1=path1,
             path2=path2,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def create_expanded_text_ad(
@@ -478,6 +525,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an expanded text ad.
 
@@ -513,6 +563,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             path1=path1,
             path2=path2,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_ad_status(
@@ -521,6 +574,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         ad_group_id: str,
         ad_id: str,
         status: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the status of an ad.
 
@@ -542,6 +598,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             ad_group_id=ad_group_id,
             ad_id=ad_id,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_ad(
@@ -553,6 +612,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing ad's content (headlines, descriptions, URLs).
 
@@ -580,6 +642,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls=final_urls,
             path1=path1,
             path2=path2,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

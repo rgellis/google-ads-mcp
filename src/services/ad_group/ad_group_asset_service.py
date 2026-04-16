@@ -21,7 +21,12 @@ from google.ads.googleads.v23.services.types.ad_group_asset_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -50,6 +55,9 @@ class AdGroupAssetService:
         asset_id: str,
         field_type: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Link an asset to an ad group for a specific field type.
 
@@ -86,6 +94,12 @@ class AdGroupAssetService:
             request = MutateAdGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAssetsResponse = self.client.mutate_ad_group_assets(
@@ -114,6 +128,9 @@ class AdGroupAssetService:
         customer_id: str,
         ad_group_id: str,
         asset_links: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Link multiple assets to an ad group.
 
@@ -158,6 +175,12 @@ class AdGroupAssetService:
             request = MutateAdGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAssetsResponse = self.client.mutate_ad_group_assets(
@@ -202,6 +225,9 @@ class AdGroupAssetService:
         asset_id: str,
         field_type: str,
         status: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update the status of an ad group asset link.
 
@@ -235,6 +261,12 @@ class AdGroupAssetService:
             request = MutateAdGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_assets(request=request)
@@ -371,6 +403,9 @@ class AdGroupAssetService:
         ad_group_id: str,
         asset_id: str,
         field_type: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an asset from an ad group.
 
@@ -397,6 +432,12 @@ class AdGroupAssetService:
             request = MutateAdGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_assets(request=request)
@@ -435,6 +476,9 @@ def create_ad_group_asset_tools(
         asset_id: str,
         field_type: str,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Link an asset to an ad group for a specific field type.
 
@@ -466,6 +510,9 @@ def create_ad_group_asset_tools(
             asset_id=asset_id,
             field_type=field_type,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def link_multiple_assets_to_ad_group(
@@ -473,6 +520,9 @@ def create_ad_group_asset_tools(
         customer_id: str,
         ad_group_id: str,
         asset_links: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Link multiple assets to an ad group.
 
@@ -492,6 +542,9 @@ def create_ad_group_asset_tools(
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             asset_links=asset_links,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_ad_group_asset_status(
@@ -501,6 +554,9 @@ def create_ad_group_asset_tools(
         asset_id: str,
         field_type: str,
         status: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update the status of an ad group asset link.
 
@@ -521,6 +577,9 @@ def create_ad_group_asset_tools(
             asset_id=asset_id,
             field_type=field_type,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_ad_group_assets(
@@ -558,6 +617,9 @@ def create_ad_group_asset_tools(
         ad_group_id: str,
         asset_id: str,
         field_type: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an asset from an ad group.
 
@@ -576,6 +638,9 @@ def create_ad_group_asset_tools(
             ad_group_id=ad_group_id,
             asset_id=asset_id,
             field_type=field_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

@@ -19,7 +19,12 @@ from google.ads.googleads.v23.services.types.campaign_asset_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -47,6 +52,9 @@ class CampaignAssetService:
         campaign_id: str,
         asset_id: str,
         field_type: AssetFieldTypeEnum.AssetFieldType,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Link an asset to a campaign for a specific field type.
 
@@ -79,6 +87,12 @@ class CampaignAssetService:
             request = MutateCampaignAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignAssetsResponse = self.client.mutate_campaign_assets(
@@ -107,6 +121,9 @@ class CampaignAssetService:
         customer_id: str,
         campaign_id: str,
         asset_links: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> List[Dict[str, Any]]:
         """Link multiple assets to a campaign.
 
@@ -147,6 +164,12 @@ class CampaignAssetService:
             request = MutateCampaignAssetsRequest()
             request.customer_id = customer_id
             request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCampaignAssetsResponse = self.client.mutate_campaign_assets(
@@ -288,6 +311,9 @@ class CampaignAssetService:
         campaign_id: str,
         asset_id: str,
         field_type: AssetFieldTypeEnum.AssetFieldType,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an asset from a campaign.
 
@@ -314,6 +340,12 @@ class CampaignAssetService:
             request = MutateCampaignAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_campaign_assets(request=request)
@@ -351,6 +383,9 @@ def create_campaign_asset_tools(
         campaign_id: str,
         asset_id: str,
         field_type: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Link an asset to a campaign for a specific field type.
 
@@ -383,6 +418,9 @@ def create_campaign_asset_tools(
             campaign_id=campaign_id,
             asset_id=asset_id,
             field_type=field_type_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def link_multiple_assets_to_campaign(
@@ -390,6 +428,9 @@ def create_campaign_asset_tools(
         customer_id: str,
         campaign_id: str,
         asset_links: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Link multiple assets to a campaign.
 
@@ -408,6 +449,9 @@ def create_campaign_asset_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             asset_links=asset_links,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_campaign_assets(
@@ -449,6 +493,9 @@ def create_campaign_asset_tools(
         campaign_id: str,
         asset_id: str,
         field_type: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an asset from a campaign.
 
@@ -470,6 +517,9 @@ def create_campaign_asset_tools(
             campaign_id=campaign_id,
             asset_id=asset_id,
             field_type=field_type_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

@@ -20,7 +20,12 @@ from google.ads.googleads.v23.services.types.customer_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -149,6 +154,9 @@ class CustomerService:
         descriptive_name: Optional[str] = None,
         auto_tagging_enabled: Optional[bool] = None,
         tracking_url_template: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a customer's settings.
 
@@ -191,6 +199,12 @@ class CustomerService:
             request = MutateCustomerRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCustomerResponse = self.client.mutate_customer(
                 request=request
@@ -263,6 +277,9 @@ def create_customer_tools(
         descriptive_name: Optional[str] = None,
         auto_tagging_enabled: Optional[bool] = None,
         tracking_url_template: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a customer's settings.
 
@@ -281,6 +298,9 @@ def create_customer_tools(
             descriptive_name=descriptive_name,
             auto_tagging_enabled=auto_tagging_enabled,
             tracking_url_template=tracking_url_template,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([create_customer_client, list_accessible_customers, mutate_customer])

@@ -21,7 +21,12 @@ from google.ads.googleads.v23.services.types.youtube_video_upload_service import
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -49,6 +54,9 @@ class YouTubeVideoUploadService:
         video_file_path: str,
         video_description: Optional[str] = None,
         video_privacy: str = "PRIVATE",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a YouTube video upload.
 
@@ -83,6 +91,12 @@ class YouTubeVideoUploadService:
             request = CreateYouTubeVideoUploadRequest()
             request.customer_id = customer_id
             request.you_tube_video_upload = upload
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             with open(video_file_path, "rb") as stream:
                 response: CreateYouTubeVideoUploadResponse = (
@@ -115,6 +129,9 @@ class YouTubeVideoUploadService:
         video_title: Optional[str] = None,
         video_description: Optional[str] = None,
         video_privacy: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a YouTube video upload.
 
@@ -155,6 +172,12 @@ class YouTubeVideoUploadService:
             request = UpdateYouTubeVideoUploadRequest()
             request.customer_id = customer_id
             request.you_tube_video_upload = upload
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
             request.update_mask.CopyFrom(
                 field_mask_pb2.FieldMask(paths=update_mask_fields)
             )
@@ -184,6 +207,9 @@ class YouTubeVideoUploadService:
         ctx: Context,
         customer_id: str,
         resource_names: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove YouTube video uploads.
 
@@ -201,6 +227,12 @@ class YouTubeVideoUploadService:
             request = RemoveYouTubeVideoUploadRequest()
             request.customer_id = customer_id
             request.resource_names = resource_names
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: RemoveYouTubeVideoUploadResponse = (
                 self.client.remove_you_tube_video_upload(request=request)
@@ -237,6 +269,9 @@ def create_youtube_video_upload_tools(
         video_file_path: str,
         video_description: Optional[str] = None,
         video_privacy: str = "PRIVATE",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a YouTube video upload for use in video campaigns.
 
@@ -256,6 +291,9 @@ def create_youtube_video_upload_tools(
             video_file_path=video_file_path,
             video_description=video_description,
             video_privacy=video_privacy,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_youtube_video_upload(
@@ -265,6 +303,9 @@ def create_youtube_video_upload_tools(
         video_title: Optional[str] = None,
         video_description: Optional[str] = None,
         video_privacy: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a YouTube video upload.
 
@@ -282,12 +323,18 @@ def create_youtube_video_upload_tools(
             video_title=video_title,
             video_description=video_description,
             video_privacy=video_privacy,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_youtube_video_uploads(
         ctx: Context,
         customer_id: str,
         resource_names: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove YouTube video uploads.
 
@@ -299,6 +346,9 @@ def create_youtube_video_upload_tools(
             ctx=ctx,
             customer_id=customer_id,
             resource_names=resource_names,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

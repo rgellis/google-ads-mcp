@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.ad_group_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -49,6 +54,9 @@ class AdGroupService:
         type: AdGroupTypeEnum.AdGroupType = AdGroupTypeEnum.AdGroupType.SEARCH_STANDARD,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new ad group.
 
@@ -94,6 +102,12 @@ class AdGroupService:
             request = MutateAdGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupsResponse = self.client.mutate_ad_groups(
@@ -125,6 +139,9 @@ class AdGroupService:
         status: Optional[AdGroupStatusEnum.AdGroupStatus] = None,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing ad group.
 
@@ -178,6 +195,12 @@ class AdGroupService:
             request = MutateAdGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_groups(request=request)
@@ -218,6 +241,9 @@ def create_ad_group_tools(
         type: str = "SEARCH_STANDARD",
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new ad group.
 
@@ -246,6 +272,9 @@ def create_ad_group_tools(
             type=type_enum,
             cpc_bid_micros=cpc_bid_micros,
             cpm_bid_micros=cpm_bid_micros,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_ad_group(
@@ -256,6 +285,9 @@ def create_ad_group_tools(
         status: Optional[str] = None,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing ad group.
 
@@ -283,6 +315,9 @@ def create_ad_group_tools(
             status=status_enum,
             cpc_bid_micros=cpc_bid_micros,
             cpm_bid_micros=cpm_bid_micros,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([create_ad_group, update_ad_group])

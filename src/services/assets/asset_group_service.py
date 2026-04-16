@@ -20,7 +20,12 @@ from google.ads.googleads.v23.services.types.asset_group_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -52,6 +57,9 @@ class AssetGroupService:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: AssetGroupStatusEnum.AssetGroupStatus = AssetGroupStatusEnum.AssetGroupStatus.ENABLED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new asset group for Performance Max campaigns.
 
@@ -97,6 +105,12 @@ class AssetGroupService:
             request = MutateAssetGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAssetGroupsResponse = self.client.mutate_asset_groups(
@@ -130,6 +144,9 @@ class AssetGroupService:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: Optional[AssetGroupStatusEnum.AssetGroupStatus] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an asset group.
 
@@ -195,6 +212,12 @@ class AssetGroupService:
             request = MutateAssetGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_asset_groups(request=request)
@@ -316,6 +339,9 @@ class AssetGroupService:
         ctx: Context,
         customer_id: str,
         asset_group_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an asset group.
 
@@ -339,6 +365,12 @@ class AssetGroupService:
             request = MutateAssetGroupsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_asset_groups(request=request)
@@ -380,6 +412,9 @@ def create_asset_group_tools(
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new asset group for Performance Max campaigns.
 
@@ -409,6 +444,9 @@ def create_asset_group_tools(
             path1=path1,
             path2=path2,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_asset_group(
@@ -421,6 +459,9 @@ def create_asset_group_tools(
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an asset group.
 
@@ -452,6 +493,9 @@ def create_asset_group_tools(
             path1=path1,
             path2=path2,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_asset_groups(
@@ -484,6 +528,9 @@ def create_asset_group_tools(
         ctx: Context,
         customer_id: str,
         asset_group_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an asset group.
 
@@ -498,6 +545,9 @@ def create_asset_group_tools(
             ctx=ctx,
             customer_id=customer_id,
             asset_group_id=asset_group_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

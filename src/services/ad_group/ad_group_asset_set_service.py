@@ -21,7 +21,12 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -48,6 +53,9 @@ class AdGroupAssetSetService:
         customer_id: str,
         ad_group_resource_name: str,
         asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an ad group asset set to link an asset set to an ad group.
 
@@ -76,6 +84,12 @@ class AdGroupAssetSetService:
             request = MutateAdGroupAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAssetSetsResponse = (
@@ -197,6 +211,9 @@ class AdGroupAssetSetService:
         ctx: Context,
         customer_id: str,
         ad_group_asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an ad group asset set.
 
@@ -219,6 +236,12 @@ class AdGroupAssetSetService:
             request = MutateAdGroupAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_asset_sets(request=request)
@@ -256,6 +279,9 @@ def create_ad_group_asset_set_tools(
         customer_id: str,
         ad_group_resource_name: str,
         asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an ad group asset set to link an asset set to an ad group.
 
@@ -272,6 +298,9 @@ def create_ad_group_asset_set_tools(
             customer_id=customer_id,
             ad_group_resource_name=ad_group_resource_name,
             asset_set_resource_name=asset_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_ad_group_asset_sets(
@@ -301,6 +330,9 @@ def create_ad_group_asset_set_tools(
         ctx: Context,
         customer_id: str,
         ad_group_asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an ad group asset set.
 
@@ -315,6 +347,9 @@ def create_ad_group_asset_set_tools(
             ctx=ctx,
             customer_id=customer_id,
             ad_group_asset_set_resource_name=ad_group_asset_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

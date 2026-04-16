@@ -21,7 +21,12 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -48,6 +53,9 @@ class AdGroupAdLabelService:
         customer_id: str,
         ad_group_ad_resource_name: str,
         label_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an ad group ad label to attach a label to an ad group ad.
 
@@ -76,6 +84,12 @@ class AdGroupAdLabelService:
             request = MutateAdGroupAdLabelsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAdGroupAdLabelsResponse = (
@@ -193,6 +207,9 @@ class AdGroupAdLabelService:
         ctx: Context,
         customer_id: str,
         ad_group_ad_label_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an ad group ad label.
 
@@ -215,6 +232,12 @@ class AdGroupAdLabelService:
             request = MutateAdGroupAdLabelsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_ad_group_ad_labels(request=request)
@@ -252,6 +275,9 @@ def create_ad_group_ad_label_tools(
         customer_id: str,
         ad_group_ad_resource_name: str,
         label_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an ad group ad label to attach a label to an ad group ad.
 
@@ -268,6 +294,9 @@ def create_ad_group_ad_label_tools(
             customer_id=customer_id,
             ad_group_ad_resource_name=ad_group_ad_resource_name,
             label_resource_name=label_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_ad_group_ad_labels(
@@ -297,6 +326,9 @@ def create_ad_group_ad_label_tools(
         ctx: Context,
         customer_id: str,
         ad_group_ad_label_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an ad group ad label.
 
@@ -311,6 +343,9 @@ def create_ad_group_ad_label_tools(
             ctx=ctx,
             customer_id=customer_id,
             ad_group_ad_label_resource_name=ad_group_ad_label_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

@@ -24,7 +24,7 @@ from google.ads.googleads.errors import GoogleAdsException
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger
+from src.utils import format_customer_id, get_logger, set_request_options
 
 logger = get_logger(__name__)
 
@@ -53,6 +53,8 @@ class CustomerConversionGoalService:
         customer_id: str,
         operations: List[Dict[str, Any]],
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update customer conversion goals.
 
@@ -110,6 +112,12 @@ class CustomerConversionGoalService:
             request.customer_id = customer_id
             request.operations = mutate_operations
             request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateCustomerConversionGoalsResponse = (
@@ -158,6 +166,8 @@ def create_customer_conversion_goal_tools(
         customer_id: str,
         operations: List[Dict[str, Any]],
         validate_only: bool = False,
+        partial_failure: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update customer conversion goals to control biddability at the customer level.
 
@@ -175,6 +185,8 @@ def create_customer_conversion_goal_tools(
             customer_id=customer_id,
             operations=operations,
             validate_only=validate_only,
+            partial_failure=partial_failure,
+            response_content_type=response_content_type,
         )
 
     tools.extend([mutate_customer_conversion_goals])

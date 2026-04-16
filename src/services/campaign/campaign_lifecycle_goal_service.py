@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.campaign_lifecycle_goal_service imp
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -43,6 +48,9 @@ class CampaignLifecycleGoalService:
         customer_id: str,
         campaign_resource_name: str,
         operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         try:
             customer_id = format_customer_id(customer_id)
@@ -58,6 +66,12 @@ class CampaignLifecycleGoalService:
             request = ConfigureCampaignLifecycleGoalsRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
             response: ConfigureCampaignLifecycleGoalsResponse = (
                 self.client.configure_campaign_lifecycle_goals(request=request)
             )
@@ -86,6 +100,9 @@ def create_campaign_lifecycle_goal_tools(
         customer_id: str,
         campaign_resource_name: str,
         operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Configure campaign lifecycle goals (acquisition/retention).
 
@@ -99,6 +116,9 @@ def create_campaign_lifecycle_goal_tools(
             customer_id=customer_id,
             campaign_resource_name=campaign_resource_name,
             operation_type=operation_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.append(configure_campaign_lifecycle_goal)

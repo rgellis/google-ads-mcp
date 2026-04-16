@@ -34,7 +34,12 @@ from google.ads.googleads.v23.services.types.audience_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -64,6 +69,9 @@ class AudienceService:
         dimensions: List[Dict[str, Any]],
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a combined audience with multiple targeting dimensions.
 
@@ -108,6 +116,12 @@ class AudienceService:
             request = MutateAudiencesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response: MutateAudiencesResponse = self.client.mutate_audiences(
@@ -321,6 +335,9 @@ class AudienceService:
         name: Optional[str] = None,
         description: Optional[str] = None,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an audience.
 
@@ -369,6 +386,12 @@ class AudienceService:
             request = MutateAudiencesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_audiences(request=request)
@@ -505,6 +528,9 @@ def create_audience_tools(
         dimensions: List[Dict[str, Any]],
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
         status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a combined audience with multiple targeting dimensions.
 
@@ -539,6 +565,9 @@ def create_audience_tools(
             dimensions=dimensions,
             exclusion_dimensions=exclusion_dimensions,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def update_audience(
@@ -548,6 +577,9 @@ def create_audience_tools(
         name: Optional[str] = None,
         description: Optional[str] = None,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an audience.
 
@@ -568,6 +600,9 @@ def create_audience_tools(
             name=name,
             description=description,
             status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_audiences(

@@ -17,7 +17,12 @@ from google.ads.googleads.v23.services.types.user_list_customer_type_service imp
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -42,6 +47,9 @@ class UserListCustomerTypeService:
         customer_id: str,
         user_list_resource_name: str,
         customer_type_category: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add a customer type classification to a user list.
 
@@ -75,6 +83,12 @@ class UserListCustomerTypeService:
             request = MutateUserListCustomerTypesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateUserListCustomerTypesResponse = (
                 self.client.mutate_user_list_customer_types(request=request)
@@ -101,6 +115,9 @@ class UserListCustomerTypeService:
         ctx: Context,
         customer_id: str,
         user_list_customer_type_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a customer type classification from a user list.
 
@@ -121,6 +138,12 @@ class UserListCustomerTypeService:
             request = MutateUserListCustomerTypesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateUserListCustomerTypesResponse = (
                 self.client.mutate_user_list_customer_types(request=request)
@@ -154,6 +177,9 @@ def create_user_list_customer_type_tools(
         customer_id: str,
         user_list_resource_name: str,
         customer_type_category: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Add a customer type classification to a user list.
 
@@ -172,12 +198,18 @@ def create_user_list_customer_type_tools(
             customer_id=customer_id,
             user_list_resource_name=user_list_resource_name,
             customer_type_category=customer_type_category,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def remove_customer_type_from_user_list(
         ctx: Context,
         customer_id: str,
         user_list_customer_type_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a customer type classification from a user list.
 
@@ -192,6 +224,9 @@ def create_user_list_customer_type_tools(
             ctx=ctx,
             customer_id=customer_id,
             user_list_customer_type_resource_name=user_list_customer_type_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([add_customer_type_to_user_list, remove_customer_type_from_user_list])

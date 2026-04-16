@@ -32,7 +32,12 @@ from google.ads.googleads.v23.services.types.account_link_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -125,6 +130,9 @@ class AccountLinkService:
         customer_id: str,
         account_link_resource_name: str,
         status: Optional[AccountLinkStatusEnum.AccountLinkStatus] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an account link.
 
@@ -162,6 +170,12 @@ class AccountLinkService:
             request = MutateAccountLinkRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_account_link(request=request)
@@ -251,6 +265,9 @@ class AccountLinkService:
         ctx: Context,
         customer_id: str,
         account_link_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an account link.
 
@@ -273,6 +290,12 @@ class AccountLinkService:
             request = MutateAccountLinkRequest()
             request.customer_id = customer_id
             request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Make the API call
             response = self.client.mutate_account_link(request=request)
@@ -342,6 +365,9 @@ def create_account_link_tools(
         customer_id: str,
         account_link_resource_name: str,
         status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an account link.
 
@@ -363,6 +389,9 @@ def create_account_link_tools(
             customer_id=customer_id,
             account_link_resource_name=account_link_resource_name,
             status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def list_account_links(
@@ -389,6 +418,9 @@ def create_account_link_tools(
         ctx: Context,
         customer_id: str,
         account_link_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an account link.
 
@@ -403,6 +435,9 @@ def create_account_link_tools(
             ctx=ctx,
             customer_id=customer_id,
             account_link_resource_name=account_link_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

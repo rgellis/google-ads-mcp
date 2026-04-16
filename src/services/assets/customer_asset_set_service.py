@@ -17,7 +17,12 @@ from google.ads.googleads.v23.services.types.customer_asset_set_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -41,6 +46,9 @@ class CustomerAssetSetService:
         ctx: Context,
         customer_id: str,
         asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Link an asset set to a customer.
 
@@ -65,6 +73,12 @@ class CustomerAssetSetService:
             request = MutateCustomerAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCustomerAssetSetsResponse = (
                 self.client.mutate_customer_asset_sets(request=request)
@@ -88,6 +102,9 @@ class CustomerAssetSetService:
         ctx: Context,
         customer_id: str,
         customer_asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Unlink an asset set from a customer.
 
@@ -108,6 +125,12 @@ class CustomerAssetSetService:
             request = MutateCustomerAssetSetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateCustomerAssetSetsResponse = (
                 self.client.mutate_customer_asset_sets(request=request)
@@ -137,7 +160,12 @@ def create_customer_asset_set_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def link_asset_set_to_customer(
-        ctx: Context, customer_id: str, asset_set_resource_name: str
+        ctx: Context,
+        customer_id: str,
+        asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Link an asset set to a customer.
 
@@ -152,10 +180,18 @@ def create_customer_asset_set_tools(
             ctx=ctx,
             customer_id=customer_id,
             asset_set_resource_name=asset_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     async def unlink_asset_set_from_customer(
-        ctx: Context, customer_id: str, customer_asset_set_resource_name: str
+        ctx: Context,
+        customer_id: str,
+        customer_asset_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Unlink an asset set from a customer.
 
@@ -170,6 +206,9 @@ def create_customer_asset_set_tools(
             ctx=ctx,
             customer_id=customer_id,
             customer_asset_set_resource_name=customer_asset_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend([link_asset_set_to_customer, unlink_asset_set_from_customer])

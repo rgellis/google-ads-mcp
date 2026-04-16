@@ -16,7 +16,12 @@ from google.ads.googleads.v23.services.types.goal_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -41,6 +46,9 @@ class GoalService:
         customer_id: str,
         goal_resource_name: Optional[str] = None,
         operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create or update account-level goals.
 
@@ -70,6 +78,12 @@ class GoalService:
             request = MutateGoalsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             response: MutateGoalsResponse = self.client.mutate_goals(request=request)
 
@@ -101,6 +115,9 @@ def create_goal_tools(
         customer_id: str,
         goal_resource_name: Optional[str] = None,
         operation_type: str = "create",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create or update account-level goals.
 
@@ -117,6 +134,9 @@ def create_goal_tools(
             customer_id=customer_id,
             goal_resource_name=goal_resource_name,
             operation_type=operation_type,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.append(mutate_goal)
