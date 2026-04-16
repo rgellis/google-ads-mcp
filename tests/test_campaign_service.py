@@ -591,12 +591,47 @@ def test_register_campaign_tools() -> None:
     assert isinstance(service, CampaignService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 2  # 2 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
     tool_names = [tool.__name__ for tool in registered_tools]
 
-    expected_tools = ["create_campaign", "update_campaign"]
+    expected_tools = ["create_campaign", "update_campaign", "enable_p_max_brand_guidelines"]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_enable_p_max_brand_guidelines(
+    campaign_service: CampaignService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test enabling PMax brand guidelines."""
+    customer_id = "1234567890"
+    operations = [
+        {
+            "campaign": f"customers/{customer_id}/campaigns/111",
+            "auto_populate_brand_assets": True,
+        }
+    ]
+
+    mock_campaign_client = campaign_service.client  # type: ignore
+    mock_response = Mock()
+    mock_campaign_client.enable_p_max_brand_guidelines.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"campaign": f"customers/{customer_id}/campaigns/111"}]}
+
+    with patch(
+        "src.services.campaign.campaign_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await campaign_service.enable_p_max_brand_guidelines(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            operations=operations,
+        )
+
+    assert result == expected_result
+    mock_campaign_client.enable_p_max_brand_guidelines.assert_called_once()  # type: ignore

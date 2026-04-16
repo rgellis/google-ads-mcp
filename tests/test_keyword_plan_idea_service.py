@@ -384,7 +384,7 @@ def test_register_keyword_plan_idea_tools() -> None:
     assert isinstance(service, KeywordPlanIdeaService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 7  # 7 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -395,6 +395,96 @@ def test_register_keyword_plan_idea_tools() -> None:
         "generate_keyword_ideas_from_url",
         "generate_keyword_ideas_from_site",
         "generate_keyword_ideas_from_keywords_and_url",
+        "generate_keyword_historical_metrics",
+        "generate_ad_group_themes",
+        "generate_keyword_forecast_metrics",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_generate_keyword_historical_metrics(
+    keyword_plan_idea_service: KeywordPlanIdeaService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating keyword historical metrics."""
+    customer_id = "1234567890"
+    mock_kpi_client = keyword_plan_idea_service.client  # type: ignore
+    mock_response = Mock()
+    mock_kpi_client.generate_keyword_historical_metrics.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": []}
+
+    with patch(
+        "src.services.planning.keyword_plan_idea_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await keyword_plan_idea_service.generate_keyword_historical_metrics(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            keywords=["running shoes", "sneakers"],
+        )
+
+    assert result == expected_result
+    mock_kpi_client.generate_keyword_historical_metrics.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_ad_group_themes(
+    keyword_plan_idea_service: KeywordPlanIdeaService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating ad group themes."""
+    customer_id = "1234567890"
+    mock_kpi_client = keyword_plan_idea_service.client  # type: ignore
+    mock_response = Mock()
+    mock_kpi_client.generate_ad_group_themes.return_value = mock_response  # type: ignore
+
+    expected_result = {"ad_group_keyword_suggestions": []}
+
+    with patch(
+        "src.services.planning.keyword_plan_idea_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await keyword_plan_idea_service.generate_ad_group_themes(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            keywords=["shoes", "sneakers"],
+            ad_groups=[f"customers/{customer_id}/adGroups/123"],
+        )
+
+    assert result == expected_result
+    mock_kpi_client.generate_ad_group_themes.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_keyword_forecast_metrics(
+    keyword_plan_idea_service: KeywordPlanIdeaService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating keyword forecast metrics."""
+    customer_id = "1234567890"
+    mock_kpi_client = keyword_plan_idea_service.client  # type: ignore
+    mock_response = Mock()
+    mock_kpi_client.generate_keyword_forecast_metrics.return_value = mock_response  # type: ignore
+
+    expected_result = {"campaign_forecast_metrics": {}}
+
+    with patch(
+        "src.services.planning.keyword_plan_idea_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await keyword_plan_idea_service.generate_keyword_forecast_metrics(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            keyword_plan_network="GOOGLE_SEARCH",
+            biddable_keywords=[{"text": "shoes", "match_type": "BROAD"}],
+            bidding_strategy={"type": "manual_cpc", "max_cpc_bid_micros": 1000000},
+        )
+
+    assert result == expected_result
+    mock_kpi_client.generate_keyword_forecast_metrics.assert_called_once()  # type: ignore

@@ -386,7 +386,7 @@ def test_register_recommendation_tools() -> None:
     assert isinstance(service, RecommendationService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -396,6 +396,37 @@ def test_register_recommendation_tools() -> None:
         "get_recommendations",
         "apply_recommendation",
         "dismiss_recommendation",
+        "generate_recommendations",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_generate_recommendations(
+    recommendation_service: RecommendationService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating recommendations."""
+    customer_id = "1234567890"
+
+    mock_rec_client = recommendation_service.client  # type: ignore
+    mock_response = Mock()
+    mock_rec_client.generate_recommendations.return_value = mock_response  # type: ignore
+
+    expected_result = {"recommendations": []}
+
+    with patch(
+        "src.services.planning.recommendation_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await recommendation_service.generate_recommendations(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            recommendation_types=["CAMPAIGN_BUDGET", "KEYWORD"],
+            advertising_channel_type="SEARCH",
+        )
+
+    assert result == expected_result
+    mock_rec_client.generate_recommendations.assert_called_once()  # type: ignore

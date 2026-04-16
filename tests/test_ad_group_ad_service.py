@@ -430,7 +430,7 @@ def test_register_ad_group_ad_tools() -> None:
     assert isinstance(service, AdGroupAdService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -441,6 +441,42 @@ def test_register_ad_group_ad_tools() -> None:
         "update_ad_group_ad_status",
         "list_ad_group_ads",
         "remove_ad_group_ad",
+        "remove_automatically_created_assets",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_remove_automatically_created_assets(
+    ad_group_ad_service: AdGroupAdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing automatically created assets from an ad group ad."""
+    # Arrange
+    customer_id = "1234567890"
+    ad_group_ad_resource_name = f"customers/{customer_id}/adGroupAds/123~456"
+    assets_with_field_type = [
+        {"asset": f"customers/{customer_id}/assets/789", "asset_field_type": "HEADLINE"},
+        {"asset": f"customers/{customer_id}/assets/790", "asset_field_type": "DESCRIPTION"},
+    ]
+
+    # Get the mocked client
+    mock_ad_group_ad_client = ad_group_ad_service.client  # type: ignore
+    mock_ad_group_ad_client.remove_automatically_created_assets.return_value = None  # type: ignore
+
+    # Act
+    result = await ad_group_ad_service.remove_automatically_created_assets(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        ad_group_ad_resource_name=ad_group_ad_resource_name,
+        assets_with_field_type=assets_with_field_type,
+    )
+
+    # Assert
+    assert result["status"] == "success"
+    assert result["assets_removed"] == 2
+
+    # Verify the API call
+    mock_ad_group_ad_client.remove_automatically_created_assets.assert_called_once()  # type: ignore

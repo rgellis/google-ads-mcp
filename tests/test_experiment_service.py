@@ -620,7 +620,7 @@ def test_register_experiment_tools() -> None:
     assert isinstance(service, ExperimentService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 7  # 7 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -632,6 +632,63 @@ def test_register_experiment_tools() -> None:
         "end_experiment",
         "promote_experiment",
         "list_experiments",
+        "graduate_experiment",
+        "list_experiment_async_errors",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_graduate_experiment(
+    experiment_service: ExperimentService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test graduating an experiment."""
+    customer_id = "1234567890"
+    experiment_id = "555"
+    experiment_campaign = f"customers/{customer_id}/campaigns/666"
+    campaign_budget = f"customers/{customer_id}/campaignBudgets/777"
+
+    mock_experiment_client = experiment_service.client  # type: ignore
+    mock_experiment_client.graduate_experiment.return_value = None  # type: ignore
+
+    result = await experiment_service.graduate_experiment(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        experiment_id=experiment_id,
+        experiment_campaign=experiment_campaign,
+        campaign_budget=campaign_budget,
+    )
+
+    assert result["status"] == "success"
+    assert result["graduated_campaign"] == experiment_campaign
+    mock_experiment_client.graduate_experiment.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_list_experiment_async_errors(
+    experiment_service: ExperimentService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test listing experiment async errors."""
+    customer_id = "1234567890"
+    experiment_id = "555"
+
+    mock_experiment_client = experiment_service.client  # type: ignore
+    mock_experiment_client.list_experiment_async_errors.return_value = iter([])  # type: ignore
+
+    with patch(
+        "src.services.campaign.experiment_service.serialize_proto_message",
+        return_value={},
+    ):
+        result = await experiment_service.list_experiment_async_errors(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+        )
+
+    assert result == []
+    mock_experiment_client.list_experiment_async_errors.assert_called_once()  # type: ignore

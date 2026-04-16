@@ -99,9 +99,9 @@ async def test_generate_insights_finder_report(
     assert request.customer_id == customer_id
 
     # Verify baseline audience
-    assert len(request.baseline_audience.country_location) == 1
+    assert len(request.baseline_audience.country_locations) == 1
     assert (
-        request.baseline_audience.country_location[0].geo_target_constant
+        request.baseline_audience.country_locations[0].geo_target_constant
         == "geoTargetConstants/2840"
     )
     assert len(request.baseline_audience.age_ranges) == 2
@@ -109,15 +109,15 @@ async def test_generate_insights_finder_report(
         request.baseline_audience.age_ranges[0].type_
         == AgeRangeTypeEnum.AgeRangeType.AGE_RANGE_25_34
     )
-    # BasicInsightsAudience only has a single gender field
+    # InsightsAudience gender field
     assert request.baseline_audience.gender.type_ == GenderTypeEnum.GenderType.MALE
 
     # Verify specific audience
     specific_audience = getattr(request, "specific_audience", None)
     assert specific_audience is not None
-    assert len(specific_audience.country_location) == 2
+    assert len(specific_audience.country_locations) == 2
     assert len(specific_audience.age_ranges) == 2
-    # BasicInsightsAudience only has a single gender field
+    # InsightsAudience gender field
     assert specific_audience.gender.type_ == GenderTypeEnum.GenderType.FEMALE
     assert len(specific_audience.user_interests) == 2
     assert (
@@ -125,7 +125,7 @@ async def test_generate_insights_finder_report(
         == "customers/1234567890/userInterests/12345"
     )
 
-    # Note: In v20, GenerateInsightsFinderReportRequest doesn't have dimensions field
+    
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -180,20 +180,20 @@ async def test_generate_insights_finder_report_minimal(
     request = call_args[1]["request"]
 
     # Verify minimal setup - only countries
-    assert len(request.baseline_audience.country_location) == 1
+    assert len(request.baseline_audience.country_locations) == 1
     assert len(request.baseline_audience.age_ranges) == 0
-    # BasicInsightsAudience gender field should be unset
+    # InsightsAudience gender field should be unset
     # For proto-plus, checking if the field is set is complex, so we skip this check
 
     specific_audience = getattr(request, "specific_audience", None)
     assert specific_audience is not None
-    assert len(specific_audience.country_location) == 1
+    assert len(specific_audience.country_locations) == 1
     assert len(specific_audience.age_ranges) == 0
-    # BasicInsightsAudience gender field should be unset
+    # InsightsAudience gender field should be unset
     # For proto-plus, checking if the field is set is complex, so we skip this check
     assert len(specific_audience.user_interests) == 0
 
-    # Note: In v20, GenerateInsightsFinderReportRequest doesn't have dimensions field
+    
 
 
 @pytest.mark.asyncio
@@ -537,7 +537,7 @@ def test_register_audience_insights_tools() -> None:
     assert isinstance(service, AudienceInsightsService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 8  # 8 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -547,6 +547,153 @@ def test_register_audience_insights_tools() -> None:
         "generate_insights_finder_report",
         "generate_audience_composition_insights",
         "generate_suggested_targeting_insights",
+        "generate_audience_definition",
+        "generate_audience_overlap_insights",
+        "generate_targeting_suggestion_metrics",
+        "list_audience_insights_attributes",
+        "list_insights_eligible_dates",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_generate_audience_definition(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating audience definition from text."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.generate_audience_definition.return_value = mock_response  # type: ignore
+
+    expected_result = {"high_relevance_attributes": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.generate_audience_definition(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            audience_description="people interested in running shoes",
+            country_locations=["geoTargetConstants/2840"],
+        )
+
+    assert result == expected_result
+    mock_ai_client.generate_audience_definition.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_audience_overlap_insights(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating audience overlap insights."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.generate_audience_overlap_insights.return_value = mock_response  # type: ignore
+
+    expected_result = {"dimension_results": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.generate_audience_overlap_insights(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            country_location="geoTargetConstants/2840",
+            primary_attribute_type="age_range",
+            primary_attribute_value="AGE_RANGE_25_34",
+            dimensions=["AFFINITY_USER_INTEREST"],
+        )
+
+    assert result == expected_result
+    mock_ai_client.generate_audience_overlap_insights.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_targeting_suggestion_metrics(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating targeting suggestion metrics."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.generate_targeting_suggestion_metrics.return_value = mock_response  # type: ignore
+
+    expected_result = {"suggestions": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.generate_targeting_suggestion_metrics(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            audiences=[{"country_locations": ["geoTargetConstants/2840"]}],
+        )
+
+    assert result == expected_result
+    mock_ai_client.generate_targeting_suggestion_metrics.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_list_audience_insights_attributes(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test listing audience insights attributes."""
+    customer_id = "1234567890"
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.list_audience_insights_attributes.return_value = mock_response  # type: ignore
+
+    expected_result = {"attributes": []}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.list_audience_insights_attributes(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            dimensions=["AFFINITY_USER_INTEREST"],
+            query_text="fitness",
+        )
+
+    assert result == expected_result
+    mock_ai_client.list_audience_insights_attributes.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_list_insights_eligible_dates(
+    audience_insights_service: AudienceInsightsService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test listing insights eligible dates."""
+    mock_ai_client = audience_insights_service.client  # type: ignore
+    mock_response = Mock()
+    mock_ai_client.list_insights_eligible_dates.return_value = mock_response  # type: ignore
+
+    expected_result = {"data_months": ["2026-01", "2026-02"]}
+
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await audience_insights_service.list_insights_eligible_dates(
+            ctx=mock_ctx,
+        )
+
+    assert result == expected_result
+    mock_ai_client.list_insights_eligible_dates.assert_called_once()  # type: ignore

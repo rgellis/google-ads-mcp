@@ -91,13 +91,13 @@ Tracks remaining work to bring the project to full v23 coverage with 100% test c
 
 ### Tests needing updates for newly added methods (7 files)
 
-- [ ] `tests/test_ad_group_ad_service.py` — add: `remove_automatically_created_assets`
-- [ ] `tests/test_campaign_service.py` — add: `enable_p_max_brand_guidelines`
-- [ ] `tests/test_experiment_service.py` — add: `graduate_experiment`, `list_experiment_async_errors`
-- [ ] `tests/test_recommendation_service.py` — add: `generate_recommendations`
-- [ ] `tests/test_reach_plan_service.py` — add: `generate_reach_forecast` (replaces stub test), `generate_conversion_rates`, `list_plannable_user_interests`, `list_plannable_user_lists`
-- [ ] `tests/test_keyword_plan_idea_service.py` — add: `generate_keyword_historical_metrics`, `generate_ad_group_themes`, `generate_keyword_forecast_metrics`
-- [ ] `tests/test_audience_insights_service.py` — add: `generate_audience_definition`, `generate_audience_overlap_insights`, `generate_targeting_suggestion_metrics`, `list_audience_insights_attributes`, `list_insights_eligible_dates`; also fix `BasicInsightsAudience` references
+- [x] `tests/test_ad_group_ad_service.py` — **DONE** — added `remove_automatically_created_assets`, fixed tool count 4→5
+- [x] `tests/test_campaign_service.py` — **DONE** — added `enable_p_max_brand_guidelines`, fixed tool count 2→3
+- [x] `tests/test_experiment_service.py` — **DONE** — added `graduate_experiment`, `list_experiment_async_errors`, fixed tool count 5→7
+- [x] `tests/test_recommendation_service.py` — **DONE** — added `generate_recommendations`, fixed tool count 3→4
+- [x] `tests/test_reach_plan_service.py` — **DONE** — added 4 new method tests, removed old stub test, fixed tool count 3→6
+- [x] `tests/test_keyword_plan_idea_service.py` — **DONE** — added 3 new method tests, fixed tool count 4→7
+- [x] `tests/test_audience_insights_service.py` — **DONE** — added 5 new method tests, fixed `country_location`→`country_locations`, removed `BasicInsightsAudience` refs, fixed tool count 3→8
 
 ### Services completely missing tests (15 files)
 

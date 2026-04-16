@@ -187,33 +187,6 @@ async def test_list_plannable_products(
 
 
 @pytest.mark.asyncio
-async def test_generate_basic_reach_forecast_not_implemented(
-    reach_plan_service: ReachPlanService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test that generate_basic_reach_forecast raises NotImplementedError."""
-    # Arrange
-    customer_id = "1234567890"
-    plannable_location_id = "2840"
-    currency_code = "USD"
-    budget_micros = 10000000  # $10
-
-    # Act & Assert
-    with pytest.raises(Exception) as exc_info:
-        await reach_plan_service.generate_basic_reach_forecast(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            plannable_location_id=plannable_location_id,
-            currency_code=currency_code,
-            budget_micros=budget_micros,
-        )
-
-    # The service catches NotImplementedError and wraps it in an Exception
-    assert "Failed to generate reach forecast" in str(exc_info.value)
-
-
-@pytest.mark.asyncio
 async def test_error_handling_list_locations(
     reach_plan_service: ReachPlanService,
     mock_sdk_client: Any,
@@ -284,7 +257,7 @@ def test_register_reach_plan_tools() -> None:
     assert isinstance(service, ReachPlanService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 6  # 6 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -293,7 +266,119 @@ def test_register_reach_plan_tools() -> None:
     expected_tools = [
         "list_plannable_locations",
         "list_plannable_products",
-        "generate_basic_reach_forecast",
+        "generate_reach_forecast",
+        "generate_conversion_rates",
+        "list_plannable_user_interests",
+        "list_plannable_user_lists",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_generate_reach_forecast(
+    reach_plan_service: ReachPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating a reach forecast."""
+    customer_id = "1234567890"
+    mock_reach_client = reach_plan_service.client  # type: ignore
+    mock_response = Mock()
+    mock_reach_client.generate_reach_forecast.return_value = mock_response  # type: ignore
+
+    expected_result = {"on_target_reach": 1000}
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await reach_plan_service.generate_reach_forecast(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            plannable_location_id="2840",
+            currency_code="USD",
+            campaign_duration_days=30,
+            planned_products=[{"plannable_product_code": "YOUTUBE", "budget_micros": 1000000}],
+        )
+
+    assert result == expected_result
+    mock_reach_client.generate_reach_forecast.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_generate_conversion_rates(
+    reach_plan_service: ReachPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generating conversion rates."""
+    customer_id = "1234567890"
+    mock_reach_client = reach_plan_service.client  # type: ignore
+    mock_response = Mock()
+    mock_reach_client.generate_conversion_rates.return_value = mock_response  # type: ignore
+
+    expected_result = {"conversion_rate_suggestions": []}
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await reach_plan_service.generate_conversion_rates(
+            ctx=mock_ctx, customer_id=customer_id
+        )
+
+    assert result == expected_result
+    mock_reach_client.generate_conversion_rates.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_list_plannable_user_interests(
+    reach_plan_service: ReachPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test listing plannable user interests."""
+    customer_id = "1234567890"
+    mock_reach_client = reach_plan_service.client  # type: ignore
+    mock_response = Mock()
+    mock_reach_client.list_plannable_user_interests.return_value = mock_response  # type: ignore
+
+    expected_result = {"plannable_user_interests": []}
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await reach_plan_service.list_plannable_user_interests(
+            ctx=mock_ctx, customer_id=customer_id
+        )
+
+    assert result == expected_result
+    mock_reach_client.list_plannable_user_interests.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_list_plannable_user_lists(
+    reach_plan_service: ReachPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test listing plannable user lists."""
+    customer_id = "1234567890"
+    mock_reach_client = reach_plan_service.client  # type: ignore
+    mock_response = Mock()
+    mock_reach_client.list_plannable_user_lists.return_value = mock_response  # type: ignore
+
+    expected_result = {"plannable_user_lists": []}
+
+    with patch(
+        "src.services.planning.reach_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await reach_plan_service.list_plannable_user_lists(
+            ctx=mock_ctx, customer_id=customer_id
+        )
+
+    assert result == expected_result
+    mock_reach_client.list_plannable_user_lists.assert_called_once()  # type: ignore
