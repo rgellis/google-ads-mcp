@@ -2,7 +2,8 @@
 
 from typing import Any
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from fastmcp import Context
 
 from src.services.account.customer_service import (
     CustomerService,
@@ -86,6 +87,38 @@ async def test_create_customer_client(
         level="info",
         message="Created customer client 1234567890 under manager 1234567890",
     )
+
+
+@pytest.mark.asyncio
+async def test_create_customer_client_with_email_and_role(
+    customer_service: CustomerService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a customer client with email and access role."""
+    mock_customer_client = customer_service.client  # type: ignore
+    mock_response = Mock()
+    mock_response.resource_name = "customers/1234567890/customerClients/999"
+    mock_customer_client.create_customer_client.return_value = mock_response  # type: ignore
+
+    expected_result = {"resource_name": "customers/1234567890/customerClients/999"}
+
+    with patch(
+        "src.services.account.customer_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await customer_service.create_customer_client(
+            ctx=mock_ctx,
+            manager_customer_id="1234567890",
+            descriptive_name="New Client",
+            email_address="client@example.com",
+            access_role="ADMIN",
+        )
+
+    assert result == expected_result
+    call_args = mock_customer_client.create_customer_client.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.email_address == "client@example.com"
 
 
 @pytest.mark.asyncio

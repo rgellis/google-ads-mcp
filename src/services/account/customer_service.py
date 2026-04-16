@@ -53,6 +53,8 @@ class CustomerService:
         descriptive_name: str,
         currency_code: str = "USD",
         time_zone: str = "America/New_York",
+        email_address: Optional[str] = None,
+        access_role: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new client customer under a manager account.
 
@@ -62,6 +64,8 @@ class CustomerService:
             descriptive_name: Name of the new client
             currency_code: Currency code (e.g. USD, EUR)
             time_zone: Time zone ID
+            email_address: Email address for the new customer account
+            access_role: Access role for the manager-client link (ADMIN, STANDARD, READ_ONLY, EMAIL_ONLY)
 
         Returns:
             Created customer details
@@ -69,16 +73,22 @@ class CustomerService:
         try:
             manager_customer_id = format_customer_id(manager_customer_id)
 
-            # Create a new customer object
             customer = Customer()
             customer.descriptive_name = descriptive_name
             customer.currency_code = currency_code
             customer.time_zone = time_zone
 
-            # Create the request
             request = CreateCustomerClientRequest()
             request.customer_id = manager_customer_id
             request.customer_client = customer
+            if email_address:
+                request.email_address = email_address
+            if access_role:
+                from google.ads.googleads.v23.enums.types.access_role import (
+                    AccessRoleEnum,
+                )
+
+                request.access_role = getattr(AccessRoleEnum.AccessRole, access_role)
 
             # Make the API call
             response: CreateCustomerClientResponse = self.client.create_customer_client(
@@ -243,6 +253,8 @@ def create_customer_tools(
         descriptive_name: str,
         currency_code: str = "USD",
         time_zone: str = "America/New_York",
+        email_address: Optional[str] = None,
+        access_role: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new client customer under a manager account.
 
@@ -250,7 +262,9 @@ def create_customer_tools(
             manager_customer_id: The manager customer ID
             descriptive_name: Name of the new client
             currency_code: Currency code (e.g. USD, EUR)
-            time_zone: Time zone ID
+            time_zone: Time zone ID (e.g. America/New_York)
+            email_address: Email address for the new customer account
+            access_role: Access role - ADMIN, STANDARD, READ_ONLY, or EMAIL_ONLY
 
         Returns:
             Created customer details
@@ -261,6 +275,8 @@ def create_customer_tools(
             descriptive_name=descriptive_name,
             currency_code=currency_code,
             time_zone=time_zone,
+            email_address=email_address,
+            access_role=access_role,
         )
 
     async def list_accessible_customers(ctx: Context) -> Dict[str, Any]:

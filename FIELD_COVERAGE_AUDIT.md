@@ -209,8 +209,8 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 8. `customer` — `src/services/account/customer_service.py` | test: `tests/test_customer_service.py`
 
 **CreateCustomerClientRequest:**
-- [ ] `email_address` (string) — email for new customer account
-- [ ] `access_role` (AccessRole) — access role for the link
+- [x] `email_address` (string) — email for new customer account **DONE**
+- [x] `access_role` (AccessRole) — access role for the link (ADMIN, STANDARD, READ_ONLY, EMAIL_ONLY) **DONE**
 
 ### 9. `customer_sk_ad_network` — `src/services/account/customer_sk_ad_network_service.py` | test: `tests/test_customer_sk_ad_network_service.py`
 
