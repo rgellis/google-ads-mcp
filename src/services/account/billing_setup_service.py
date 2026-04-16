@@ -300,6 +300,52 @@ class BillingSetupService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_billing_setup(
+        self,
+        ctx: Context,
+        customer_id: str,
+        billing_setup_resource_name: str,
+    ) -> Dict[str, Any]:
+        """Remove (cancel) a pending billing setup.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            billing_setup_resource_name: Resource name of the billing setup to cancel
+
+        Returns:
+            Removal result
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operation = BillingSetupOperation()
+            operation.remove = billing_setup_resource_name
+
+            request = MutateBillingSetupRequest()
+            request.customer_id = customer_id
+            request.operation = operation
+
+            response: MutateBillingSetupResponse = self.client.mutate_billing_setup(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Removed billing setup: {billing_setup_resource_name}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove billing setup: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_billing_setup_tools(
     service: BillingSetupService,
@@ -404,12 +450,35 @@ def create_billing_setup_tools(
             customer_id=customer_id,
         )
 
+    async def remove_billing_setup(
+        ctx: Context,
+        customer_id: str,
+        billing_setup_resource_name: str,
+    ) -> Dict[str, Any]:
+        """Remove (cancel) a pending billing setup.
+
+        Only pending billing setups can be removed.
+
+        Args:
+            customer_id: The customer ID
+            billing_setup_resource_name: Resource name of the billing setup to cancel
+
+        Returns:
+            Removal result
+        """
+        return await service.remove_billing_setup(
+            ctx=ctx,
+            customer_id=customer_id,
+            billing_setup_resource_name=billing_setup_resource_name,
+        )
+
     tools.extend(
         [
             create_billing_setup,
             list_billing_setups,
             get_billing_setup,
             list_payments_accounts,
+            remove_billing_setup,
         ]
     )
     return tools
