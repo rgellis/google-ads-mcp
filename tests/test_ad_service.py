@@ -9,8 +9,14 @@ from google.ads.googleads.v23.enums.types.ad_group_ad_status import AdGroupAdSta
 from google.ads.googleads.v23.services.services.ad_group_ad_service import (
     AdGroupAdServiceClient,
 )
+from google.ads.googleads.v23.services.services.ad_service import (
+    AdServiceClient,
+)
 from google.ads.googleads.v23.services.types.ad_group_ad_service import (
     MutateAdGroupAdsResponse,
+)
+from google.ads.googleads.v23.services.types.ad_service import (
+    MutateAdsResponse,
 )
 
 from src.services.ad_group.ad_service import (
@@ -22,17 +28,24 @@ from src.services.ad_group.ad_service import (
 @pytest.fixture
 def ad_service(mock_sdk_client: Any) -> AdService:
     """Create an AdService instance with mocked dependencies."""
-    # Mock AdGroupAdService client
     mock_ad_group_ad_client = Mock(spec=AdGroupAdServiceClient)
-    mock_sdk_client.client.get_service.return_value = mock_ad_group_ad_client  # type: ignore
+    mock_ad_client = Mock(spec=AdServiceClient)
+
+    def get_service_side_effect(service_name: str) -> Any:
+        if service_name == "AdService":
+            return mock_ad_client
+        return mock_ad_group_ad_client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect  # type: ignore
 
     with patch(
         "src.services.ad_group.ad_service.get_sdk_client",
         return_value=mock_sdk_client,
     ):
         service = AdService()
-        # Force client initialization
+        # Force both client initializations
         _ = service.client
+        _ = service.ad_client
         return service
 
 
@@ -552,7 +565,7 @@ def test_register_ad_tools() -> None:
     assert isinstance(service, AdService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -562,6 +575,103 @@ def test_register_ad_tools() -> None:
         "create_responsive_search_ad",
         "create_expanded_text_ad",
         "update_ad_status",
+        "update_ad",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_update_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating ad content via AdServiceClient.mutate_ads."""
+    # Arrange
+    customer_id = "1234567890"
+    ad_resource_name = f"customers/{customer_id}/ads/456"
+
+    mock_response = Mock(spec=MutateAdsResponse)
+    mock_response.results = []
+    result_mock = Mock()
+    result_mock.resource_name = ad_resource_name
+    mock_response.results.append(result_mock)  # type: ignore
+
+    # Get the mocked ad service client
+    mock_ad_client = ad_service.ad_client  # type: ignore
+    mock_ad_client.mutate_ads.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": ad_resource_name}]}
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_service.update_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_resource_name=ad_resource_name,
+            headlines=["New Headline 1", "New Headline 2", "New Headline 3"],
+            descriptions=["New Description 1", "New Description 2"],
+            final_urls=["https://example.com/new"],
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the AdService.mutate_ads call
+    mock_ad_client.mutate_ads.assert_called_once()  # type: ignore
+    call_args = mock_ad_client.mutate_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.update.resource_name == ad_resource_name
+    assert "final_urls" in operation.update_mask.paths
+    assert "responsive_search_ad.headlines" in operation.update_mask.paths
+    assert "responsive_search_ad.descriptions" in operation.update_mask.paths
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Updated ad content: {ad_resource_name}",
+    )
+
+
+@pytest.mark.asyncio
+async def test_update_ad_partial(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating only specific ad fields."""
+    customer_id = "1234567890"
+    ad_resource_name = f"customers/{customer_id}/ads/456"
+
+    mock_ad_client = ad_service.ad_client  # type: ignore
+    mock_response = Mock(spec=MutateAdsResponse)
+    mock_response.results = []
+    mock_ad_client.mutate_ads.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": []}
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_service.update_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_resource_name=ad_resource_name,
+            final_urls=["https://example.com/updated"],
+        )
+
+    assert result == expected_result
+
+    call_args = mock_ad_client.mutate_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    operation = request.operations[0]
+    assert "final_urls" in operation.update_mask.paths
+    assert "responsive_search_ad.headlines" not in operation.update_mask.paths
