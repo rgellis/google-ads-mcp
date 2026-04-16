@@ -176,8 +176,8 @@ Some API fields are intentionally not exposed through the MCP server because the
 ### 5. `campaign_draft` — `src/services/campaign/campaign_draft_service.py` | test: `tests/test_campaign_draft_service.py`
 
 **ListCampaignDraftAsyncErrorsRequest:**
-- [ ] `page_token` (string) — pagination token
-- [ ] `page_size` (int32) — results per page
+- [x] `page_token` (string) — pagination token **DONE**
+- [x] `page_size` (int32) — results per page **DONE**
 
 ### 6. `content_creator_insights` — `src/services/audiences/content_creator_insights_service.py` | test: `tests/test_content_creator_insights_service.py`
 

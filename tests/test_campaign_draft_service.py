@@ -525,6 +525,35 @@ async def test_error_handling_promote_draft(
     )
 
 
+@pytest.mark.asyncio
+async def test_list_campaign_draft_async_errors_with_pagination(
+    campaign_draft_service: CampaignDraftService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test listing async errors with pagination parameters."""
+    customer_id = "1234567890"
+    draft_resource_name = f"customers/{customer_id}/campaignDrafts/111"
+
+    mock_draft_client = campaign_draft_service.client  # type: ignore
+    mock_draft_client.list_campaign_draft_async_errors.return_value = iter([])  # type: ignore
+
+    result = await campaign_draft_service.list_campaign_draft_async_errors(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        draft_resource_name=draft_resource_name,
+        page_token="abc123",
+        page_size=50,
+    )
+
+    assert result == []
+    mock_draft_client.list_campaign_draft_async_errors.assert_called_once()  # type: ignore
+    call_args = mock_draft_client.list_campaign_draft_async_errors.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.page_token == "abc123"
+    assert request.page_size == 50
+
+
 def test_register_campaign_draft_tools() -> None:
     """Test tool registration."""
     # Arrange

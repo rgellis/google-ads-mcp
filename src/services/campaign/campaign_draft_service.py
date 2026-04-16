@@ -319,6 +319,8 @@ class CampaignDraftService:
         ctx: Context,
         customer_id: str,
         draft_resource_name: str,
+        page_token: Optional[str] = None,
+        page_size: int = 1000,
     ) -> List[Dict[str, Any]]:
         """List async errors for a campaign draft.
 
@@ -326,6 +328,8 @@ class CampaignDraftService:
             ctx: FastMCP context
             customer_id: The customer ID
             draft_resource_name: Resource name of the campaign draft
+            page_token: Pagination token from previous response
+            page_size: Maximum number of results per page
 
         Returns:
             List of async errors
@@ -333,9 +337,11 @@ class CampaignDraftService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Create request
             request = ListCampaignDraftAsyncErrorsRequest()
             request.resource_name = draft_resource_name
+            request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
 
             # Make the API call
             response = self.client.list_campaign_draft_async_errors(request=request)
@@ -540,12 +546,16 @@ def create_campaign_draft_tools(
         ctx: Context,
         customer_id: str,
         draft_resource_name: str,
+        page_token: Optional[str] = None,
+        page_size: int = 1000,
     ) -> List[Dict[str, Any]]:
         """List async errors that occurred during campaign draft operations.
 
         Args:
             customer_id: The customer ID
             draft_resource_name: Resource name of the campaign draft
+            page_token: Pagination token from previous response
+            page_size: Maximum number of results per page
 
         Returns:
             List of async errors with error codes, messages, and details
@@ -554,6 +564,8 @@ def create_campaign_draft_tools(
             ctx=ctx,
             customer_id=customer_id,
             draft_resource_name=draft_resource_name,
+            page_token=page_token,
+            page_size=page_size,
         )
 
     async def remove_campaign_draft(
