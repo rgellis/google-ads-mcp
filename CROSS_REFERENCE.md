@@ -250,7 +250,7 @@ headlines, descriptions, URLs). This is the correct architecture per Google's AP
 
 ### Verified: No Missing Services
 
-All 111 official Google Ads API v23 services from the [googleads_v23.yaml](https://github.com/googleapis/googleapis/blob/master/google/ads/googleads/v23/googleads_v23.yaml) have corresponding implementation files. Every RPC method defined in the proto service definitions is covered (except the AdService gap noted above).
+All 111 official Google Ads API v23 services from the [googleads_v23.yaml](https://github.com/googleapis/googleapis/blob/master/google/ads/googleads/v23/googleads_v23.yaml) have corresponding implementation files. Every RPC method defined in the proto service definitions is covered.
 
 ### Sources Verified
 
