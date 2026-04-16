@@ -1,4 +1,4 @@
-"""Customer Asset Service for Google Ads API v20.
+"""Customer Asset Service for Google Ads API v23.
 
 This service manages customer-level asset associations, allowing assets to be linked
 to customers for use across campaigns.

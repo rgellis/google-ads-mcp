@@ -1,4 +1,4 @@
-"""Campaign Asset Set Service for Google Ads API v20.
+"""Campaign Asset Set Service for Google Ads API v23.
 
 This service manages asset set associations with campaigns, allowing asset sets
 to be linked to campaigns for use in advertising.

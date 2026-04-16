@@ -1,4 +1,4 @@
-"""Ad Group Criterion Label Service for Google Ads API v20.
+"""Ad Group Criterion Label Service for Google Ads API v23.
 
 This service manages label assignments to ad group criteria, allowing for better
 organization and management of targeting criteria.

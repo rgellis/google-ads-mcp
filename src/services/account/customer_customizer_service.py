@@ -1,4 +1,4 @@
-"""Customer Customizer Service for Google Ads API v20.
+"""Customer Customizer Service for Google Ads API v23.
 
 This service manages customizer values at the customer level, allowing dynamic
 content insertion in ads based on customer-specific data.

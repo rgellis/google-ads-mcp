@@ -1,6 +1,6 @@
 """Campaign bid modifier service implementation using Google Ads SDK.
 
-Note: In Google Ads API v20, bid modifiers for most criteria (device, location,
+Note: In Google Ads API v23, bid modifiers for most criteria (device, location,
 demographics, etc.) are managed through CampaignCriterion with the bid_modifier field.
 CampaignBidModifier is specifically for interaction type bid modifiers.
 """

@@ -1,4 +1,4 @@
-"""Ad Group Customizer Service for Google Ads API v20.
+"""Ad Group Customizer Service for Google Ads API v23.
 
 This service manages customizer values at the ad group level, allowing dynamic
 content insertion in ads based on ad group-specific data.

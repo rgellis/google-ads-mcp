@@ -1,4 +1,4 @@
-"""Customer Manager Link service implementation with full v20 type safety."""
+"""Customer Manager Link service implementation with full v23 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 

@@ -1,4 +1,4 @@
-"""Asset Group Signal Service for Google Ads API v20.
+"""Asset Group Signal Service for Google Ads API v23.
 
 This service manages audience and search theme signals for Performance Max asset groups.
 Signals help Performance Max campaigns identify users most likely to convert.

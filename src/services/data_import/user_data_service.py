@@ -394,7 +394,7 @@ class UserDataService:
             request.customer_id = customer_id
             request.operations = operations
 
-            # Note: StoreSalesMetadata is not supported as a separate field in v20 API
+            # Note: StoreSalesMetadata is may require additional type handling in current API version
             # Store sales data is handled through transaction attributes with store_code
 
             # Make the API call

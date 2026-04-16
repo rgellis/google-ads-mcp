@@ -191,7 +191,7 @@ class OfflineUserDataJobService:
                         trans_attr.get("transaction_date_time")
                     )
 
-                # Note: OfflineUserData not available in v20 - simplified implementation
+                # Note: OfflineUserData handling - simplified implementation
                 # operation.create = user_data  # Simplified approach
                 operation.create = user_data
                 operations.append(operation)

@@ -1,4 +1,4 @@
-"""Campaign Customizer service implementation with full v20 type safety."""
+"""Campaign Customizer service implementation with full v23 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
