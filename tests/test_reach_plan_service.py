@@ -299,7 +299,9 @@ async def test_generate_reach_forecast(
             plannable_location_id="2840",
             currency_code="USD",
             campaign_duration_days=30,
-            planned_products=[{"plannable_product_code": "YOUTUBE", "budget_micros": 1000000}],
+            planned_products=[
+                {"plannable_product_code": "YOUTUBE", "budget_micros": 1000000}
+            ],
         )
 
     assert result == expected_result

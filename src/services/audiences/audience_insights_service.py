@@ -147,14 +147,22 @@ class AudienceInsightsService:
                 )
                 specific_audience.gender = gender_info
 
-            # Add user interests if provided
+            # Add user interests if provided (via topic_audience_combinations)
             if specific_audience_user_interests:
+                attr_group = InsightsAudienceAttributeGroup()
                 for interest_id in specific_audience_user_interests:
+                    from google.ads.googleads.v23.common.types.audience_insights_attribute import (
+                        AudienceInsightsAttribute as AudienceInsightsAttr,
+                    )
+
+                    attr = AudienceInsightsAttr()
                     interest_info = UserInterestInfo()
                     interest_info.user_interest_category = (
                         f"customers/{customer_id}/userInterests/{interest_id}"
                     )
-                    specific_audience.user_interests.append(interest_info)
+                    attr.user_interest = interest_info
+                    attr_group.attributes.append(attr)
+                specific_audience.topic_audience_combinations.append(attr_group)
 
             # Create request
             request = GenerateInsightsFinderReportRequest()

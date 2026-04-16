@@ -358,12 +358,12 @@ async def test_list_ad_group_bid_modifiers(
     row2.ad_group_bid_modifier.hotel_check_in_day.day_of_week = (
         DayOfWeekEnum.DayOfWeek.MONDAY
     )
-    # Initialize other criterion types to None
+    # Initialize other criterion types to falsy values
     row2.ad_group_bid_modifier.device = Mock(type=None)
     row2.ad_group_bid_modifier.hotel_date_selection_type = Mock(type=None)
-    row2.ad_group_bid_modifier.hotel_advance_booking_window = Mock(min_days=None)
-    row2.ad_group_bid_modifier.hotel_length_of_stay = Mock(min_nights=None)
-    row2.ad_group_bid_modifier.hotel_check_in_date_range = Mock(start_date=None)
+    row2.ad_group_bid_modifier.hotel_advance_booking_window = None
+    row2.ad_group_bid_modifier.hotel_length_of_stay = None
+    row2.ad_group_bid_modifier.hotel_check_in_date_range = None
     row2.ad_group = Mock(id="111", name="Test Ad Group")
     row2.campaign = Mock(id="222", name="Test Campaign")
     mock_results.append(row2)

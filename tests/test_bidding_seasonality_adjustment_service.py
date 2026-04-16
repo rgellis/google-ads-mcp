@@ -59,7 +59,7 @@ async def test_remove_seasonality_adjustment(
         result = await service.remove_bidding_seasonality_adjustment(
             ctx=mock_ctx,
             customer_id="1234567890",
-            seasonality_adjustment_resource_name="customers/1234567890/biddingSeasonalityAdjustments/1",
+            adjustment_resource_name="customers/1234567890/biddingSeasonalityAdjustments/1",
         )
     assert result == {"results": []}
 

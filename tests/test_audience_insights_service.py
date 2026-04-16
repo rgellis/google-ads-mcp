@@ -119,13 +119,8 @@ async def test_generate_insights_finder_report(
     assert len(specific_audience.age_ranges) == 2
     # InsightsAudience gender field
     assert specific_audience.gender.type_ == GenderTypeEnum.GenderType.FEMALE
-    assert len(specific_audience.user_interests) == 2
-    assert (
-        specific_audience.user_interests[0].user_interest_category
-        == "customers/1234567890/userInterests/12345"
-    )
-
-    
+    assert len(specific_audience.topic_audience_combinations) == 1
+    assert len(specific_audience.topic_audience_combinations[0].attributes) == 2
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -191,9 +186,7 @@ async def test_generate_insights_finder_report_minimal(
     assert len(specific_audience.age_ranges) == 0
     # InsightsAudience gender field should be unset
     # For proto-plus, checking if the field is set is complex, so we skip this check
-    assert len(specific_audience.user_interests) == 0
-
-    
+    assert len(specific_audience.topic_audience_combinations) == 0
 
 
 @pytest.mark.asyncio

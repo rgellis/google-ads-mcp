@@ -472,8 +472,8 @@ async def test_add_demographic_criteria_unknown_type(
         demographics=demographics,
     )
 
-    # Assert - only 1 result since unknown type was skipped
-    assert len(result) == 1
+    # Assert - result is a serialized response dict
+    assert isinstance(result, dict)
 
     # Verify the API call - only 1 operation since unknown type was skipped
     call_args = mock_ad_group_criterion_client.mutate_ad_group_criteria.call_args  # type: ignore

@@ -36,7 +36,7 @@ async def test_create_ad_group_asset_set(
         result = await service.create_ad_group_asset_set(
             ctx=mock_ctx,
             customer_id="1234567890",
-            ad_group_id="111",
+            ad_group_resource_name="customers/1234567890/adGroups/111",
             asset_set_resource_name="customers/1234567890/assetSets/222",
         )
     assert result == {"results": []}

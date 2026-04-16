@@ -17,23 +17,21 @@ class TestBrandSuggestionService:
     """Test cases for BrandSuggestionService"""
 
     @pytest.fixture
-    def mock_client(self) -> Any:
-        """Create a mock Google Ads client"""
-        client = Mock()
-        service = Mock()
-        client.get_service.return_value = service  # type: ignore
-        return client
+    def mock_service_client(self) -> Any:
+        """Create a mock BrandSuggestionServiceClient"""
+        return Mock()
 
     @pytest.fixture
-    def brand_suggestion_service(self, mock_client: Any) -> Any:
+    def brand_suggestion_service(self, mock_service_client: Any) -> Any:
         """Create BrandSuggestionService instance with mock client"""
         service = BrandSuggestionService()
-        service._client = mock_client  # type: ignore # Need to set private attribute for testing
+        service._client = mock_service_client  # type: ignore
         return service
 
-    def test_suggest_brands(self, brand_suggestion_service: Any, mock_client: Any):
+    def test_suggest_brands(
+        self, brand_suggestion_service: Any, mock_service_client: Any
+    ):
         """Test suggesting brands"""
-        # Setup
         customer_id = "1234567890"
         brand_prefix = "nike"
         selected_brands = ["brand123"]
@@ -54,31 +52,27 @@ class TestBrandSuggestionService:
                 ),
             ]
         )
-        mock_client.get_service.return_value.suggest_brands.return_value = mock_response  # type: ignore
+        mock_service_client.suggest_brands.return_value = mock_response  # type: ignore
 
-        # Execute
         response = brand_suggestion_service.suggest_brands(
             customer_id=customer_id,
             brand_prefix=brand_prefix,
             selected_brands=selected_brands,
         )
 
-        # Verify
         assert response == mock_response
-        mock_client.get_service.assert_called_with("BrandSuggestionService")  # type: ignore
+        mock_service_client.suggest_brands.assert_called_once()  # type: ignore
 
-        # Verify request
-        call_args = mock_client.get_service.return_value.suggest_brands.call_args  # type: ignore
+        call_args = mock_service_client.suggest_brands.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
         assert request.brand_prefix == brand_prefix
         assert request.selected_brands == selected_brands
 
     def test_suggest_brands_without_selected_brands(
-        self, brand_suggestion_service: Any, mock_client: Any
+        self, brand_suggestion_service: Any, mock_service_client: Any
     ):
         """Test suggesting brands without selected brands"""
-        # Setup
         customer_id = "1234567890"
         brand_prefix = "adidas"
 
@@ -92,18 +86,15 @@ class TestBrandSuggestionService:
                 )
             ]
         )
-        mock_client.get_service.return_value.suggest_brands.return_value = mock_response  # type: ignore
+        mock_service_client.suggest_brands.return_value = mock_response  # type: ignore
 
-        # Execute
         response = brand_suggestion_service.suggest_brands(
             customer_id=customer_id, brand_prefix=brand_prefix
         )
 
-        # Verify
         assert response == mock_response
 
-        # Verify request
-        call_args = mock_client.get_service.return_value.suggest_brands.call_args  # type: ignore
+        call_args = mock_service_client.suggest_brands.call_args  # type: ignore
         request = call_args.kwargs["request"]
         assert request.customer_id == customer_id
         assert request.brand_prefix == brand_prefix

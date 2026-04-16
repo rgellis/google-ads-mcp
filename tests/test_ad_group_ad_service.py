@@ -458,8 +458,14 @@ async def test_remove_automatically_created_assets(
     customer_id = "1234567890"
     ad_group_ad_resource_name = f"customers/{customer_id}/adGroupAds/123~456"
     assets_with_field_type = [
-        {"asset": f"customers/{customer_id}/assets/789", "asset_field_type": "HEADLINE"},
-        {"asset": f"customers/{customer_id}/assets/790", "asset_field_type": "DESCRIPTION"},
+        {
+            "asset": f"customers/{customer_id}/assets/789",
+            "asset_field_type": "HEADLINE",
+        },
+        {
+            "asset": f"customers/{customer_id}/assets/790",
+            "asset_field_type": "DESCRIPTION",
+        },
     ]
 
     # Get the mocked client

@@ -597,7 +597,11 @@ def test_register_campaign_tools() -> None:
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
     tool_names = [tool.__name__ for tool in registered_tools]
 
-    expected_tools = ["create_campaign", "update_campaign", "enable_p_max_brand_guidelines"]
+    expected_tools = [
+        "create_campaign",
+        "update_campaign",
+        "enable_p_max_brand_guidelines",
+    ]
 
     assert set(tool_names) == set(expected_tools)
 
@@ -621,7 +625,9 @@ async def test_enable_p_max_brand_guidelines(
     mock_response = Mock()
     mock_campaign_client.enable_p_max_brand_guidelines.return_value = mock_response  # type: ignore
 
-    expected_result = {"results": [{"campaign": f"customers/{customer_id}/campaigns/111"}]}
+    expected_result = {
+        "results": [{"campaign": f"customers/{customer_id}/campaigns/111"}]
+    }
 
     with patch(
         "src.services.campaign.campaign_service.serialize_proto_message",
