@@ -349,6 +349,65 @@ class SharedSetService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a shared set. This action is permanent and cannot be undone.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID to remove
+
+        Returns:
+            Removed shared set details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            # Create operation
+            operation = SharedSetOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateSharedSetsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateSharedSetsResponse = self.client.mutate_shared_sets(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Removed shared set {shared_set_id} for customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_shared_set_tools(
     service: SharedSetService,
@@ -473,12 +532,42 @@ def create_shared_set_tools(
             response_content_type=response_content_type,
         )
 
+    async def remove_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Permanently remove a shared set. This action cannot be undone.
+
+        The shared set and all its members (negative keywords or placements)
+        will be permanently removed. It will also be detached from any campaigns.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID to remove
+
+        Returns:
+            Removed shared set details
+        """
+        return await service.remove_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_shared_set,
             update_shared_set,
             list_shared_sets,
             attach_shared_set_to_campaigns,
+            remove_shared_set,
         ]
     )
     return tools

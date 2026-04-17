@@ -325,7 +325,7 @@ def test_register_label_tools() -> None:
     assert isinstance(service, LabelService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 6  # 5 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -337,6 +337,7 @@ def test_register_label_tools() -> None:
         "list_labels",
         "apply_label_to_campaigns",
         "apply_label_to_ad_groups",
+        "remove_label",
     ]
 
     assert set(tool_names) == set(expected_tools)

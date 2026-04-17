@@ -397,6 +397,65 @@ class BatchJobService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_batch_job(
+        self,
+        ctx: Context,
+        customer_id: str,
+        batch_job_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a batch job. This action is permanent and cannot be undone.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            batch_job_id: The batch job ID to remove
+
+        Returns:
+            Removed batch job details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/batchJobs/{batch_job_id}"
+
+            # Create operation
+            operation = BatchJobOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateBatchJobRequest()
+            request.customer_id = customer_id
+            request.operation = operation
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateBatchJobResponse = self.client.mutate_batch_job(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Removed batch job {batch_job_id} for customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove batch job: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_batch_job_tools(
     service: BatchJobService,
@@ -543,6 +602,34 @@ def create_batch_job_tools(
             status_filter=status_filter,
         )
 
+    async def remove_batch_job(
+        ctx: Context,
+        customer_id: str,
+        batch_job_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Permanently remove a batch job. This action cannot be undone.
+
+        The batch job and all its associated operations will be permanently removed.
+
+        Args:
+            customer_id: The customer ID
+            batch_job_id: The batch job ID to remove
+
+        Returns:
+            Removed batch job details
+        """
+        return await service.remove_batch_job(
+            ctx=ctx,
+            customer_id=customer_id,
+            batch_job_id=batch_job_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_batch_job,
@@ -551,6 +638,7 @@ def create_batch_job_tools(
             run_batch_job,
             list_batch_job_results,
             list_batch_jobs,
+            remove_batch_job,
         ]
     )
     return tools

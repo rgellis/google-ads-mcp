@@ -23,6 +23,8 @@ from google.ads.googleads.v23.services.types.asset_service import (
     MutateAssetsResponse,
 )
 
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -348,6 +350,78 @@ class AssetService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def update_asset(
+        self,
+        ctx: Context,
+        customer_id: str,
+        asset_id: str,
+        name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update an existing asset.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            asset_id: The asset ID to update
+            name: New name for the asset
+
+        Returns:
+            Updated asset details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/assets/{asset_id}"
+
+            # Create asset with fields to update
+            asset = Asset()
+            asset.resource_name = resource_name
+
+            update_mask_fields: List[str] = []
+
+            if name is not None:
+                asset.name = name
+                update_mask_fields.append("name")
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            # Create operation
+            operation = AssetOperation()
+            operation.update = asset
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            # Create request
+            request = MutateAssetsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateAssetsResponse = self.client.mutate_assets(request=request)
+
+            await ctx.log(level="info", message=f"Updated asset {asset_id}")
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update asset: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     def get_mime_type_enum(self, mime_type: str):
         """Convert MIME type string to enum value."""
         from google.ads.googleads.v23.enums.types.mime_type import MimeTypeEnum
@@ -485,12 +559,48 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             limit=limit,
         )
 
+    async def update_asset(
+        ctx: Context,
+        customer_id: str,
+        asset_id: str,
+        name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update an existing asset using partial update with field mask.
+
+        Updatable fields:
+            - name (str): The name of the asset
+
+        Args:
+            customer_id: The customer ID
+            asset_id: The asset ID to update
+            name: New name for the asset
+            partial_failure: Whether to enable partial failure
+            validate_only: Whether to only validate without executing
+            response_content_type: Response content type
+
+        Returns:
+            Updated asset details including resource_name
+        """
+        return await service.update_asset(
+            ctx=ctx,
+            customer_id=customer_id,
+            asset_id=asset_id,
+            name=name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_text_asset,
             create_image_asset,
             create_youtube_video_asset,
             search_assets,
+            update_asset,
         ]
     )
     return tools

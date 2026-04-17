@@ -25,6 +25,8 @@ from google.ads.googleads.v23.services.types.experiment_service import (
     ScheduleExperimentRequest,
 )
 
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -136,6 +138,96 @@ class ExperimentService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to create experiment: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def update_experiment(
+        self,
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update an existing experiment.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            experiment_id: The experiment ID to update
+            name: New experiment name
+            description: New experiment description
+            status: New experiment status (SETUP, INITIATED, ENABLED, HALTED, PROMOTED, REMOVED)
+
+        Returns:
+            Updated experiment details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/experiments/{experiment_id}"
+
+            experiment = Experiment()
+            experiment.resource_name = resource_name
+
+            update_mask_fields: List[str] = []
+
+            if name is not None:
+                experiment.name = name
+                update_mask_fields.append("name")
+
+            if description is not None:
+                experiment.description = description
+                update_mask_fields.append("description")
+
+            if status is not None:
+                experiment.status = getattr(
+                    ExperimentStatusEnum.ExperimentStatus, status
+                )
+                update_mask_fields.append("status")
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            # Create operation
+            operation = ExperimentOperation()
+            operation.update = experiment
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            # Create request
+            request = MutateExperimentsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateExperimentsResponse = self.client.mutate_experiments(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated experiment {experiment_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update experiment: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -470,6 +562,65 @@ class ExperimentService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_experiment(
+        self,
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove an experiment. This action is permanent and cannot be undone.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            experiment_id: The experiment ID to remove
+
+        Returns:
+            Removed experiment details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/experiments/{experiment_id}"
+
+            # Create operation
+            operation = ExperimentOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateExperimentsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateExperimentsResponse = self.client.mutate_experiments(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Removed experiment {experiment_id} for customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove experiment: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_experiment_tools(
     service: ExperimentService,
@@ -688,15 +839,86 @@ def create_experiment_tools(
             page_token=page_token,
         )
 
+    async def update_experiment(
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update an existing experiment using partial update with field mask.
+
+        Updatable fields:
+            - name (str): The experiment name
+            - description (str): The experiment description
+            - status (str): The experiment status - SETUP, INITIATED, ENABLED, HALTED, PROMOTED, REMOVED
+
+        Args:
+            customer_id: The customer ID
+            experiment_id: The experiment ID to update
+            name: New experiment name
+            description: New experiment description
+            status: New experiment status
+
+        Returns:
+            Updated experiment details including resource_name
+        """
+        return await service.update_experiment(
+            ctx=ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+            name=name,
+            description=description,
+            status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def remove_experiment(
+        ctx: Context,
+        customer_id: str,
+        experiment_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Permanently remove an experiment. This action cannot be undone.
+
+        The experiment and all its associated experiment arms and data
+        will be permanently removed.
+
+        Args:
+            customer_id: The customer ID
+            experiment_id: The experiment ID to remove
+
+        Returns:
+            Removed experiment details
+        """
+        return await service.remove_experiment(
+            ctx=ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_experiment,
+            update_experiment,
             schedule_experiment,
             end_experiment,
             promote_experiment,
             list_experiments,
             graduate_experiment,
             list_experiment_async_errors,
+            remove_experiment,
         ]
     )
     return tools

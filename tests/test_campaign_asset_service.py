@@ -678,7 +678,7 @@ def test_register_campaign_asset_tools() -> None:
     assert isinstance(service, CampaignAssetService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 5  # 4 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -689,6 +689,7 @@ def test_register_campaign_asset_tools() -> None:
         "link_multiple_assets_to_campaign",
         "list_campaign_assets",
         "remove_asset_from_campaign",
+        "update_campaign_asset",
     ]
 
     assert set(tool_names) == set(expected_tools)

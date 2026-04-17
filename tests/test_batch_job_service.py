@@ -516,7 +516,7 @@ def test_register_batch_job_tools() -> None:
     assert isinstance(service, BatchJobService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 6  # 6 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 7  # 6 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -529,6 +529,7 @@ def test_register_batch_job_tools() -> None:
         "run_batch_job",
         "list_batch_job_results",
         "list_batch_jobs",
+        "remove_batch_job",
     ]
 
     assert set(tool_names) == set(expected_tools)

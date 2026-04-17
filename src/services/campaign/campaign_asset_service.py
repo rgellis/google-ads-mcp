@@ -18,6 +18,9 @@ from google.ads.googleads.v23.services.types.campaign_asset_service import (
     MutateCampaignAssetsResponse,
 )
 
+from google.ads.googleads.v23.enums.types.asset_link_status import AssetLinkStatusEnum
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -308,6 +311,88 @@ class CampaignAssetService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def update_campaign_asset(
+        self,
+        ctx: Context,
+        customer_id: str,
+        campaign_id: str,
+        asset_id: str,
+        field_type: str,
+        status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update a campaign asset link.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            campaign_id: The campaign ID
+            asset_id: The asset ID
+            field_type: The field type of the asset link
+            status: New status (ENABLED, REMOVED, PAUSED)
+
+        Returns:
+            Updated campaign asset details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type}"
+
+            campaign_asset = CampaignAsset()
+            campaign_asset.resource_name = resource_name
+
+            update_mask_fields: List[str] = []
+
+            if status is not None:
+                campaign_asset.status = getattr(
+                    AssetLinkStatusEnum.AssetLinkStatus, status
+                )
+                update_mask_fields.append("status")
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            # Create operation
+            operation = CampaignAssetOperation()
+            operation.update = campaign_asset
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            # Create request
+            request = MutateCampaignAssetsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateCampaignAssetsResponse = self.client.mutate_campaign_assets(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated campaign asset {asset_id} on campaign {campaign_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update campaign asset: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def remove_asset_from_campaign(
         self,
         ctx: Context,
@@ -526,11 +611,50 @@ def create_campaign_asset_tools(
             response_content_type=response_content_type,
         )
 
+    async def update_campaign_asset(
+        ctx: Context,
+        customer_id: str,
+        campaign_id: str,
+        asset_id: str,
+        field_type: str,
+        status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update a campaign asset link using partial update with field mask.
+
+        Updatable fields:
+            - status (str): The status of the campaign asset link - ENABLED, REMOVED, PAUSED
+
+        Args:
+            customer_id: The customer ID
+            campaign_id: The campaign ID
+            asset_id: The asset ID
+            field_type: The field type of the asset link (e.g., HEADLINE, SITELINK, CALLOUT)
+            status: New status for the asset link - ENABLED, REMOVED, PAUSED
+
+        Returns:
+            Updated campaign asset details including resource_name
+        """
+        return await service.update_campaign_asset(
+            ctx=ctx,
+            customer_id=customer_id,
+            campaign_id=campaign_id,
+            asset_id=asset_id,
+            field_type=field_type,
+            status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             link_asset_to_campaign,
             link_multiple_assets_to_campaign,
             list_campaign_assets,
+            update_campaign_asset,
             remove_asset_from_campaign,
         ]
     )

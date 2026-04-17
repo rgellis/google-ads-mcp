@@ -445,7 +445,7 @@ def test_register_bidding_strategy_tools() -> None:
     assert isinstance(service, BiddingStrategyService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 6  # 5 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -457,6 +457,7 @@ def test_register_bidding_strategy_tools() -> None:
         "create_maximize_conversions_strategy",
         "create_target_impression_share_strategy",
         "remove_bidding_strategy",
+        "update_bidding_strategy",
     ]
 
     assert set(tool_names) == set(expected_tools)

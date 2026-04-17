@@ -282,7 +282,7 @@ def test_register_ad_group_tools() -> None:
     assert isinstance(service, AdGroupService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 2  # 2 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 3  # 2 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -291,6 +291,7 @@ def test_register_ad_group_tools() -> None:
     expected_tools = [
         "create_ad_group",
         "update_ad_group",
+        "remove_ad_group",
     ]
 
     assert set(tool_names) == set(expected_tools)

@@ -26,6 +26,8 @@ from google.ads.googleads.v23.services.types.keyword_plan_service import (
     MutateKeywordPlansResponse,
 )
 
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -424,6 +426,91 @@ class KeywordPlanService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def update_keyword_plan(
+        self,
+        ctx: Context,
+        customer_id: str,
+        keyword_plan_id: str,
+        name: Optional[str] = None,
+        forecast_period: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update an existing keyword plan.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            keyword_plan_id: The keyword plan ID to update
+            name: New name for the keyword plan
+            forecast_period: New forecast period - NEXT_WEEK, NEXT_MONTH, NEXT_QUARTER
+
+        Returns:
+            Updated keyword plan details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"
+
+            keyword_plan = KeywordPlan()
+            keyword_plan.resource_name = resource_name
+
+            update_mask_fields: List[str] = []
+
+            if name is not None:
+                keyword_plan.name = name
+                update_mask_fields.append("name")
+
+            if forecast_period is not None:
+                keyword_plan.forecast_period.date_interval = getattr(
+                    KeywordPlanForecastIntervalEnum.KeywordPlanForecastInterval,
+                    forecast_period,
+                )
+                update_mask_fields.append("forecast_period")
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            # Create operation
+            operation = KeywordPlanOperation()
+            operation.update = keyword_plan
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            # Create request
+            request = MutateKeywordPlansRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateKeywordPlansResponse = self.client.mutate_keyword_plans(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated keyword plan {keyword_plan_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update keyword plan: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def remove_keyword_plan(
         self,
         ctx: Context,
@@ -658,12 +745,50 @@ def create_keyword_plan_tools(
             response_content_type=response_content_type,
         )
 
+    async def update_keyword_plan(
+        ctx: Context,
+        customer_id: str,
+        keyword_plan_id: str,
+        name: Optional[str] = None,
+        forecast_period: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update an existing keyword plan using partial update with field mask.
+
+        Updatable fields:
+            - name (str): The keyword plan name
+            - forecast_period (str): The forecast period interval -
+                NEXT_WEEK, NEXT_MONTH, NEXT_QUARTER
+
+        Args:
+            customer_id: The customer ID
+            keyword_plan_id: The keyword plan ID to update
+            name: New name for the keyword plan
+            forecast_period: New forecast period - NEXT_WEEK, NEXT_MONTH, NEXT_QUARTER
+
+        Returns:
+            Updated keyword plan details including resource_name
+        """
+        return await service.update_keyword_plan(
+            ctx=ctx,
+            customer_id=customer_id,
+            keyword_plan_id=keyword_plan_id,
+            name=name,
+            forecast_period=forecast_period,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_keyword_plan,
             get_keyword_ideas,
             create_keyword_plan_campaign,
             add_keywords_to_plan,
+            update_keyword_plan,
             remove_keyword_plan,
         ]
     )

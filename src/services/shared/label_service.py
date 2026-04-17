@@ -453,6 +453,63 @@ class LabelService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_label(
+        self,
+        ctx: Context,
+        customer_id: str,
+        label_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a label. This action is permanent and cannot be undone.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            label_id: The label ID to remove
+
+        Returns:
+            Removed label details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/labels/{label_id}"
+
+            # Create operation
+            operation = LabelOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateLabelsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateLabelsResponse = self.client.mutate_labels(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Removed label {label_id} for customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove label: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[Any]]]:
     """Create tool functions for the label service.
@@ -607,6 +664,35 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             response_content_type=response_content_type,
         )
 
+    async def remove_label(
+        ctx: Context,
+        customer_id: str,
+        label_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Permanently remove a label. This action cannot be undone.
+
+        The label will be removed from all campaigns, ad groups, and ads
+        it is currently applied to.
+
+        Args:
+            customer_id: The customer ID
+            label_id: The label ID to remove
+
+        Returns:
+            Removed label details
+        """
+        return await service.remove_label(
+            ctx=ctx,
+            customer_id=customer_id,
+            label_id=label_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_label,
@@ -614,6 +700,7 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             list_labels,
             apply_label_to_campaigns,
             apply_label_to_ad_groups,
+            remove_label,
         ]
     )
     return tools

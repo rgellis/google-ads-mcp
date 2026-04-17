@@ -24,6 +24,8 @@ from google.ads.googleads.v23.services.types.campaign_criterion_service import (
     MutateCampaignCriteriaResponse,
 )
 
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -372,6 +374,86 @@ class CampaignCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def update_campaign_criterion(
+        self,
+        ctx: Context,
+        customer_id: str,
+        campaign_id: str,
+        criterion_id: str,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update a campaign criterion.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            campaign_id: The campaign ID
+            criterion_id: The criterion ID to update
+            bid_modifier: New bid modifier (e.g., 1.2 for +20%, 0.8 for -20%)
+
+        Returns:
+            Updated campaign criterion details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = (
+                f"customers/{customer_id}/campaignCriteria/{campaign_id}~{criterion_id}"
+            )
+
+            campaign_criterion = CampaignCriterion()
+            campaign_criterion.resource_name = resource_name
+
+            update_mask_fields: List[str] = []
+
+            if bid_modifier is not None:
+                campaign_criterion.bid_modifier = bid_modifier
+                update_mask_fields.append("bid_modifier")
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            # Create operation
+            operation = CampaignCriterionOperation()
+            operation.update = campaign_criterion
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            # Create request
+            request = MutateCampaignCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateCampaignCriteriaResponse = (
+                self.client.mutate_campaign_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated campaign criterion {criterion_id} on campaign {campaign_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update campaign criterion: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def remove_campaign_criterion(
         self,
         ctx: Context,
@@ -602,12 +684,50 @@ def create_campaign_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def update_campaign_criterion(
+        ctx: Context,
+        customer_id: str,
+        campaign_id: str,
+        criterion_id: str,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update a campaign criterion using partial update with field mask.
+
+        Updatable fields:
+            - bid_modifier (float): Bid modifier for the criterion. Use values like
+                1.2 for +20%, 0.8 for -20%, 0.0 to remove the modifier.
+                Not applicable to negative criteria.
+
+        Args:
+            customer_id: The customer ID
+            campaign_id: The campaign ID
+            criterion_id: The criterion ID to update
+            bid_modifier: New bid modifier value
+
+        Returns:
+            Updated campaign criterion details including resource_name
+        """
+        return await service.update_campaign_criterion(
+            ctx=ctx,
+            customer_id=customer_id,
+            campaign_id=campaign_id,
+            criterion_id=criterion_id,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             add_location_criteria,
             add_language_criteria,
             add_device_criteria,
             add_negative_keyword_criteria,
+            update_campaign_criterion,
             remove_campaign_criterion,
         ]
     )

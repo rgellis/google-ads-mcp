@@ -221,6 +221,65 @@ class AdGroupService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_ad_group(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove an ad group. This action is permanent and cannot be undone.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID to remove
+
+        Returns:
+            Removed ad group details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            # Create the operation
+            operation = AdGroupOperation()
+            operation.remove = resource_name
+
+            # Create the request
+            request = MutateAdGroupsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateAdGroupsResponse = self.client.mutate_ad_groups(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Removed ad group {ad_group_id} for customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove ad group: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_ad_group_tools(
     service: AdGroupService,
@@ -320,7 +379,36 @@ def create_ad_group_tools(
             response_content_type=response_content_type,
         )
 
-    tools.extend([create_ad_group, update_ad_group])
+    async def remove_ad_group(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Permanently remove an ad group. This action cannot be undone.
+
+        The ad group and all its associated ads, keywords, and criteria
+        will be permanently removed.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID to remove
+
+        Returns:
+            Removed ad group details
+        """
+        return await service.remove_ad_group(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    tools.extend([create_ad_group, update_ad_group, remove_ad_group])
     return tools
 
 

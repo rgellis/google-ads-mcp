@@ -16,6 +16,8 @@ from google.ads.googleads.v23.services.types.asset_group_listing_group_filter_se
     MutateAssetGroupListingGroupFiltersResponse,
 )
 
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -108,6 +110,90 @@ class AssetGroupListingGroupFilterService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to create listing group filter: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def update_listing_group_filter(
+        self,
+        ctx: Context,
+        customer_id: str,
+        listing_group_filter_resource_name: str,
+        filter_type: Optional[str] = None,
+        parent_listing_group_filter: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update a listing group filter for a Performance Max asset group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            listing_group_filter_resource_name: Resource name of the listing group filter
+            filter_type: Filter type (UNIT_INCLUDED, UNIT_EXCLUDED, SUBDIVISION)
+            parent_listing_group_filter: Resource name of parent filter
+
+        Returns:
+            Updated listing group filter details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            lgf = AssetGroupListingGroupFilter()
+            lgf.resource_name = listing_group_filter_resource_name
+
+            update_mask_fields: list[str] = []
+
+            if filter_type is not None:
+                from google.ads.googleads.v23.enums.types.listing_group_filter_type_enum import (
+                    ListingGroupFilterTypeEnum,
+                )
+
+                lgf.type_ = getattr(
+                    ListingGroupFilterTypeEnum.ListingGroupFilterType, filter_type
+                )
+                update_mask_fields.append("type")
+
+            if parent_listing_group_filter is not None:
+                lgf.parent_listing_group_filter = parent_listing_group_filter
+                update_mask_fields.append("parent_listing_group_filter")
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            operation = AssetGroupListingGroupFilterOperation()
+            operation.update = lgf
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            request = MutateAssetGroupListingGroupFiltersRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAssetGroupListingGroupFiltersResponse = (
+                self.client.mutate_asset_group_listing_group_filters(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated listing group filter: {listing_group_filter_resource_name}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update listing group filter: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -231,7 +317,49 @@ def create_asset_group_listing_group_filter_tools(
             response_content_type=response_content_type,
         )
 
-    tools.extend([create_listing_group_filter, remove_listing_group_filter])
+    async def update_listing_group_filter(
+        ctx: Context,
+        customer_id: str,
+        listing_group_filter_resource_name: str,
+        filter_type: Optional[str] = None,
+        parent_listing_group_filter: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update a listing group filter for PMax product feed targeting using partial update with field mask.
+
+        Updatable fields:
+            - filter_type (str): Filter type - UNIT_INCLUDED, UNIT_EXCLUDED, or SUBDIVISION
+            - parent_listing_group_filter (str): Resource name of the parent filter
+
+        Args:
+            customer_id: The customer ID
+            listing_group_filter_resource_name: Full resource name of the listing group filter
+            filter_type: UNIT_INCLUDED, UNIT_EXCLUDED, or SUBDIVISION
+            parent_listing_group_filter: Parent filter resource name (for subdivisions)
+
+        Returns:
+            Updated filter details
+        """
+        return await service.update_listing_group_filter(
+            ctx=ctx,
+            customer_id=customer_id,
+            listing_group_filter_resource_name=listing_group_filter_resource_name,
+            filter_type=filter_type,
+            parent_listing_group_filter=parent_listing_group_filter,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    tools.extend(
+        [
+            create_listing_group_filter,
+            remove_listing_group_filter,
+            update_listing_group_filter,
+        ]
+    )
     return tools
 
 

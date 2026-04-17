@@ -449,6 +449,127 @@ class OfflineUserDataJobService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_user_data_operations(
+        self,
+        ctx: Context,
+        customer_id: str,
+        job_resource_name: str,
+        user_data_list: List[Dict[str, Any]],
+        enable_partial_failure: bool = True,
+        validate_only: bool = False,
+        enable_warnings: bool = False,
+    ) -> Dict[str, Any]:
+        """Remove user data from an offline user data job. This action is permanent.
+
+        Uses the OfflineUserDataJobOperation.remove field to remove specific
+        user data entries from the job.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            job_resource_name: The offline user data job resource name
+            user_data_list: List of user data to remove (same format as add)
+            enable_partial_failure: Whether to enable partial failure
+
+        Returns:
+            Result of removing operations
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            # Create operations
+            operations = []
+            for user_data_dict in user_data_list:
+                operation = OfflineUserDataJobOperation()
+
+                # Create user data
+                user_data = UserData()
+
+                # Process user identifiers
+                if "user_identifiers" in user_data_dict:
+                    for identifier_dict in user_data_dict["user_identifiers"]:
+                        identifier = UserIdentifier()
+
+                        # Set identifier based on type
+                        if "hashed_email" in identifier_dict:
+                            identifier.hashed_email = identifier_dict["hashed_email"]
+                        elif "hashed_phone_number" in identifier_dict:
+                            identifier.hashed_phone_number = identifier_dict[
+                                "hashed_phone_number"
+                            ]
+                        elif "mobile_id" in identifier_dict:
+                            identifier.mobile_id = identifier_dict["mobile_id"]
+                        elif "third_party_user_id" in identifier_dict:
+                            identifier.third_party_user_id = identifier_dict[
+                                "third_party_user_id"
+                            ]
+                        elif "address_info" in identifier_dict:
+                            address_info = OfflineUserAddressInfo()
+                            addr = identifier_dict["address_info"]
+
+                            if "hashed_first_name" in addr:
+                                address_info.hashed_first_name = addr[
+                                    "hashed_first_name"
+                                ]
+                            if "hashed_last_name" in addr:
+                                address_info.hashed_last_name = addr["hashed_last_name"]
+                            if "country_code" in addr:
+                                address_info.country_code = addr["country_code"]
+                            if "postal_code" in addr:
+                                address_info.postal_code = addr["postal_code"]
+                            if "hashed_street_address" in addr:
+                                address_info.hashed_street_address = addr[
+                                    "hashed_street_address"
+                                ]
+
+                            identifier.address_info = address_info
+
+                        user_data.user_identifiers.append(identifier)
+
+                # Set the remove field (not create)
+                operation.remove = user_data
+                operations.append(operation)
+
+            # Create request
+            request = AddOfflineUserDataJobOperationsRequest()
+            request.resource_name = job_resource_name
+            request.enable_partial_failure = enable_partial_failure
+            request.operations = operations
+            if validate_only:
+                request.validate_only = validate_only
+            if enable_warnings:
+                request.enable_warnings = enable_warnings
+
+            # Make the API call
+            response: AddOfflineUserDataJobOperationsResponse = (
+                self.client.add_offline_user_data_job_operations(request=request)
+            )
+
+            # Process results
+            result = {
+                "job_resource_name": job_resource_name,
+                "operations_removed": len(operations),
+                "partial_failure_error": str(response.partial_failure_error)
+                if response.partial_failure_error
+                else None,
+            }
+
+            await ctx.log(
+                level="info",
+                message=f"Removed {len(operations)} user data operations from job",
+            )
+
+            return result
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove user data operations: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_offline_user_data_job_tools(
     service: OfflineUserDataJobService,
@@ -592,6 +713,47 @@ def create_offline_user_data_job_tools(
             job_type_filter=job_type_filter,
         )
 
+    async def remove_user_data_operations(
+        ctx: Context,
+        customer_id: str,
+        job_resource_name: str,
+        user_data_list: List[Dict[str, Any]],
+        enable_partial_failure: bool = True,
+        validate_only: bool = False,
+        enable_warnings: bool = False,
+    ) -> Dict[str, Any]:
+        """Permanently remove user data from an offline user data job. This action cannot be undone.
+
+        Removes specific user data entries from the job using the
+        OfflineUserDataJobOperation.remove field.
+
+        Args:
+            customer_id: The customer ID
+            job_resource_name: The offline user data job resource name
+            user_data_list: List of user data to remove. Each item should contain:
+                - user_identifiers: List of identifiers, each with one of:
+                    - hashed_email: SHA256 hashed email address
+                    - hashed_phone_number: SHA256 hashed phone number (E.164 format)
+                    - mobile_id: Mobile advertising ID
+                    - third_party_user_id: Third-party user ID
+                    - address_info: Address information with hashed fields
+            enable_partial_failure: Whether to enable partial failure
+            validate_only: Whether to only validate the request
+            enable_warnings: Whether to enable warnings
+
+        Returns:
+            Result of removing operations with success/failure details
+        """
+        return await service.remove_user_data_operations(
+            ctx=ctx,
+            customer_id=customer_id,
+            job_resource_name=job_resource_name,
+            user_data_list=user_data_list,
+            enable_partial_failure=enable_partial_failure,
+            validate_only=validate_only,
+            enable_warnings=enable_warnings,
+        )
+
     tools.extend(
         [
             create_customer_match_job,
@@ -599,6 +761,7 @@ def create_offline_user_data_job_tools(
             run_offline_user_data_job,
             get_offline_user_data_job,
             list_offline_user_data_jobs,
+            remove_user_data_operations,
         ]
     )
     return tools

@@ -29,6 +29,8 @@ from google.ads.googleads.v23.services.types.bidding_strategy_service import (
     MutateBiddingStrategiesResponse,
 )
 
+from google.protobuf import field_mask_pb2
+
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
@@ -379,6 +381,154 @@ class BiddingStrategyService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def update_bidding_strategy(
+        self,
+        ctx: Context,
+        customer_id: str,
+        bidding_strategy_id: str,
+        name: Optional[str] = None,
+        status: Optional[str] = None,
+        target_cpa_micros: Optional[int] = None,
+        target_roas: Optional[float] = None,
+        maximize_conversions_target_cpa_micros: Optional[int] = None,
+        target_impression_share_location: Optional[str] = None,
+        target_impression_share_location_fraction_micros: Optional[int] = None,
+        target_impression_share_cpc_bid_ceiling_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Update an existing bidding strategy.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            bidding_strategy_id: The bidding strategy ID to update
+            name: New strategy name
+            status: New status (ENABLED, PAUSED, REMOVED)
+            target_cpa_micros: New target CPA in micros (for TARGET_CPA strategies)
+            target_roas: New target ROAS (for TARGET_ROAS strategies)
+            maximize_conversions_target_cpa_micros: New target CPA constraint for MAXIMIZE_CONVERSIONS
+            target_impression_share_location: New location for TARGET_IMPRESSION_SHARE
+            target_impression_share_location_fraction_micros: New location fraction for TARGET_IMPRESSION_SHARE
+            target_impression_share_cpc_bid_ceiling_micros: New CPC bid ceiling for TARGET_IMPRESSION_SHARE
+
+        Returns:
+            Updated bidding strategy details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = (
+                f"customers/{customer_id}/biddingStrategies/{bidding_strategy_id}"
+            )
+
+            bidding_strategy = BiddingStrategy()
+            bidding_strategy.resource_name = resource_name
+
+            update_mask_fields: List[str] = []
+
+            if name is not None:
+                bidding_strategy.name = name
+                update_mask_fields.append("name")
+
+            if status is not None:
+                bidding_strategy.status = getattr(
+                    BiddingStrategyStatusEnum.BiddingStrategyStatus, status
+                )
+                update_mask_fields.append("status")
+
+            if target_cpa_micros is not None:
+                target_cpa = TargetCpa()
+                target_cpa.target_cpa_micros = target_cpa_micros
+                bidding_strategy.target_cpa = target_cpa
+                update_mask_fields.append("target_cpa.target_cpa_micros")
+
+            if target_roas is not None:
+                target_roas_strategy = TargetRoas()
+                target_roas_strategy.target_roas = target_roas
+                bidding_strategy.target_roas = target_roas_strategy
+                update_mask_fields.append("target_roas.target_roas")
+
+            if maximize_conversions_target_cpa_micros is not None:
+                maximize_conversions = MaximizeConversions()
+                maximize_conversions.target_cpa_micros = (
+                    maximize_conversions_target_cpa_micros
+                )
+                bidding_strategy.maximize_conversions = maximize_conversions
+                update_mask_fields.append("maximize_conversions.target_cpa_micros")
+
+            if target_impression_share_location is not None:
+                tis = TargetImpressionShare()
+                tis.location = getattr(
+                    TargetImpressionShareLocationEnum.TargetImpressionShareLocation,
+                    target_impression_share_location,
+                )
+                bidding_strategy.target_impression_share = tis
+                update_mask_fields.append("target_impression_share.location")
+
+            if target_impression_share_location_fraction_micros is not None:
+                if not bidding_strategy.target_impression_share.location_fraction_micros:
+                    bidding_strategy.target_impression_share = (
+                        bidding_strategy.target_impression_share
+                        or TargetImpressionShare()
+                    )
+                bidding_strategy.target_impression_share.location_fraction_micros = (
+                    target_impression_share_location_fraction_micros
+                )
+                update_mask_fields.append(
+                    "target_impression_share.location_fraction_micros"
+                )
+
+            if target_impression_share_cpc_bid_ceiling_micros is not None:
+                bidding_strategy.target_impression_share.cpc_bid_ceiling_micros = (
+                    target_impression_share_cpc_bid_ceiling_micros
+                )
+                update_mask_fields.append(
+                    "target_impression_share.cpc_bid_ceiling_micros"
+                )
+
+            if not update_mask_fields:
+                raise ValueError("At least one field must be provided for update")
+
+            # Create operation
+            operation = BiddingStrategyOperation()
+            operation.update = bidding_strategy
+            operation.update_mask.CopyFrom(
+                field_mask_pb2.FieldMask(paths=update_mask_fields)
+            )
+
+            # Create request
+            request = MutateBiddingStrategiesRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateBiddingStrategiesResponse = (
+                self.client.mutate_bidding_strategies(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Updated bidding strategy {bidding_strategy_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to update bidding strategy: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def remove_bidding_strategy(
         self,
         ctx: Context,
@@ -609,12 +759,67 @@ def create_bidding_strategy_tools(
             response_content_type=response_content_type,
         )
 
+    async def update_bidding_strategy(
+        ctx: Context,
+        customer_id: str,
+        bidding_strategy_id: str,
+        name: Optional[str] = None,
+        status: Optional[str] = None,
+        target_cpa_micros: Optional[int] = None,
+        target_roas: Optional[float] = None,
+        maximize_conversions_target_cpa_micros: Optional[int] = None,
+        target_impression_share_location: Optional[str] = None,
+        target_impression_share_location_fraction_micros: Optional[int] = None,
+        target_impression_share_cpc_bid_ceiling_micros: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Update an existing bidding strategy using partial update with field mask.
+
+        Updatable fields:
+            - name (str): Strategy name
+            - status (str): Strategy status - ENABLED, PAUSED, REMOVED
+            - target_cpa_micros (int): Target CPA in micros for TARGET_CPA strategies (1000000 = $1)
+            - target_roas (float): Target ROAS for TARGET_ROAS strategies (e.g., 4.0 for 400%)
+            - maximize_conversions_target_cpa_micros (int): Target CPA constraint for MAXIMIZE_CONVERSIONS
+            - target_impression_share_location (str): Location for TARGET_IMPRESSION_SHARE -
+                ABSOLUTE_TOP_OF_PAGE, TOP_OF_PAGE, ANYWHERE_ON_PAGE
+            - target_impression_share_location_fraction_micros (int): Target impression share in micros
+                (e.g., 650000 for 65%)
+            - target_impression_share_cpc_bid_ceiling_micros (int): Max CPC bid ceiling in micros
+
+        Args:
+            customer_id: The customer ID
+            bidding_strategy_id: The bidding strategy ID to update
+
+        Returns:
+            Updated bidding strategy details
+        """
+        return await service.update_bidding_strategy(
+            ctx=ctx,
+            customer_id=customer_id,
+            bidding_strategy_id=bidding_strategy_id,
+            name=name,
+            status=status,
+            target_cpa_micros=target_cpa_micros,
+            target_roas=target_roas,
+            maximize_conversions_target_cpa_micros=maximize_conversions_target_cpa_micros,
+            target_impression_share_location=target_impression_share_location,
+            target_impression_share_location_fraction_micros=target_impression_share_location_fraction_micros,
+            target_impression_share_cpc_bid_ceiling_micros=target_impression_share_cpc_bid_ceiling_micros,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_target_cpa_strategy,
             create_target_roas_strategy,
             create_maximize_conversions_strategy,
             create_target_impression_share_strategy,
+            update_bidding_strategy,
             remove_bidding_strategy,
         ]
     )

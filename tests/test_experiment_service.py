@@ -620,7 +620,7 @@ def test_register_experiment_tools() -> None:
     assert isinstance(service, ExperimentService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 7  # 7 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 9  # 7 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -634,6 +634,8 @@ def test_register_experiment_tools() -> None:
         "list_experiments",
         "graduate_experiment",
         "list_experiment_async_errors",
+        "update_experiment",
+        "remove_experiment",
     ]
 
     assert set(tool_names) == set(expected_tools)

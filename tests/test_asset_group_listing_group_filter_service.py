@@ -177,10 +177,11 @@ def test_register_tools() -> None:
     mock_mcp = Mock()
     svc = register_asset_group_listing_group_filter_tools(mock_mcp)
     assert isinstance(svc, AssetGroupListingGroupFilterService)
-    assert mock_mcp.tool.call_count == 2  # type: ignore
+    assert mock_mcp.tool.call_count == 3  # type: ignore
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
     tool_names = [t.__name__ for t in registered_tools]
     assert set(tool_names) == {
         "create_listing_group_filter",
         "remove_listing_group_filter",
+        "update_listing_group_filter",
     }
