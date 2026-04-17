@@ -11,214 +11,143 @@ from typing import Any, AsyncGenerator, Optional, Set
 from fastmcp import Context, FastMCP
 
 from src.sdk_client import GoogleAdsSdkClient, get_sdk_client, set_sdk_client
-from src.servers.account_budget_proposal_server import (
+from src.servers.account import (
     account_budget_proposal_server,
-)
-from src.servers.account_link_server import account_link_server
-from src.servers.ad_group_ad_label_server import ad_group_ad_label_server
-from src.servers.ad_group_ad_server import ad_group_ad_server
-from src.servers.ad_group_asset_server import ad_group_asset_server
-from src.servers.ad_group_asset_set_server import ad_group_asset_set_server
-from src.servers.ad_group_bid_modifier_server import (
-    ad_group_bid_modifier_server,
-)
-from src.servers.ad_group_criterion_customizer_server import (
-    ad_group_criterion_customizer_server,
-)
-from src.servers.ad_group_criterion_label_server import (
-    ad_group_criterion_label_server,
-)
-from src.servers.ad_group_criterion_server import ad_group_criterion_server
-from src.servers.ad_group_customizer_server import (
-    ad_group_customizer_server,
-)
-from src.servers.ad_group_label_server import ad_group_label_server
-from src.servers.ad_group_server import ad_group_server
-from src.servers.ad_parameter_server import (
-    ad_parameter_server,
-)
-from src.servers.ad_server import ad_server
-from src.servers.asset_group_asset_server import asset_group_asset_server
-from src.servers.asset_group_server import asset_group_server
-from src.servers.asset_group_signal_server import asset_group_signal_server
-from src.servers.asset_server import asset_server
-from src.servers.asset_set_server import asset_set_server
-from src.servers.audience_insights_server import audience_insights_server
-from src.servers.audience_server import audience_server
-from src.servers.batch_job_server import batch_job_server
-from src.servers.bidding_data_exclusion_server import (
-    bidding_data_exclusion_server,
-)
-from src.servers.bidding_seasonality_adjustment_server import (
-    bidding_seasonality_adjustment_server,
-)
-from src.servers.bidding_strategy_server import bidding_strategy_server
-from src.servers.billing_setup_server import billing_setup_server
-from src.servers.brand_suggestion_server import brand_suggestion_server
-from src.servers.budget_server import budget_server
-from src.servers.campaign_asset_server import campaign_asset_server
-from src.servers.campaign_asset_set_server import campaign_asset_set_server
-from src.servers.campaign_bid_modifier_server import (
-    campaign_bid_modifier_server,
-)
-from src.servers.campaign_conversion_goal_server import (
-    campaign_conversion_goal_server,
-)
-from src.servers.campaign_criterion_server import campaign_criterion_server
-from src.servers.campaign_customizer_server import (
-    campaign_customizer_server,
-)
-from src.servers.campaign_draft_server import campaign_draft_server
-from src.servers.campaign_label_server import campaign_label_server
-from src.servers.campaign_server import campaign_server
-from src.servers.campaign_shared_set_server import (
-    campaign_shared_set_server,
-)
-from src.servers.conversion_adjustment_upload_server import (
-    conversion_adjustment_upload_server,
-)
-from src.servers.conversion_custom_variable_server import (
-    conversion_custom_variable_server,
-)
-from src.servers.conversion_goal_campaign_config_server import (
-    conversion_goal_campaign_config_server,
-)
-from src.servers.conversion_server import conversion_server
-from src.servers.conversion_upload_server import conversion_upload_server
-from src.servers.conversion_value_rule_server import (
-    conversion_value_rule_server,
-)
-from src.servers.custom_audience_server import custom_audience_server
-from src.servers.custom_conversion_goal_server import (
-    custom_conversion_goal_server,
-)
-from src.servers.custom_interest_server import custom_interest_server
-from src.servers.customer_asset_server import customer_asset_server
-from src.servers.customer_client_link_server import (
+    account_link_server,
+    billing_setup_server,
     customer_client_link_server,
-)
-from src.servers.customer_conversion_goal_server import (
-    customer_conversion_goal_server,
-)
-from src.servers.customer_customizer_server import (
-    customer_customizer_server,
-)
-from src.servers.customer_label_server import customer_label_server
-from src.servers.customer_manager_link_server import (
-    customer_manager_link_server,
-)
-from src.servers.customer_negative_criterion_server import (
-    customer_negative_criterion_server,
-)
-from src.servers.customer_server import customer_service_server
-from src.servers.customer_user_access_invitation_server import (
-    customer_user_access_invitation_server,
-)
-from src.servers.customer_user_access_server import (
-    customer_user_access_server,
-)
-from src.servers.customizer_attribute_server import (
-    customizer_sdk_server,
-)
-from src.servers.data_link_server import data_link_server
-from src.servers.experiment_arm_server import experiment_arm_server
-from src.servers.experiment_server import experiment_server
-from src.servers.geo_target_constant_server import geo_target_constant_server
-from src.servers.google_ads_field_server import google_ads_field_server
-from src.servers.google_ads_server import google_ads_server
-from src.servers.identity_verification_server import (
-    identity_verification_server,
-)
-from src.servers.invoice_server import invoice_server
-from src.servers.keyword_plan_ad_group_keyword_server import (
-    keyword_plan_ad_group_keyword_server,
-)
-from src.servers.keyword_plan_ad_group_server import (
-    keyword_plan_ad_group_server,
-)
-from src.servers.keyword_plan_campaign_keyword_server import (
-    keyword_plan_campaign_keyword_server,
-)
-from src.servers.keyword_plan_campaign_server import (
-    keyword_plan_campaign_server,
-)
-from src.servers.keyword_plan_idea_server import keyword_plan_idea_server
-from src.servers.keyword_plan_server import keyword_plan_server
-from src.servers.keyword_server import keyword_server
-from src.servers.label_server import label_server
-from src.servers.offline_user_data_job_server import (
-    offline_user_data_job_server,
-)
-from src.servers.payments_account_server import (
-    payments_account_server,
-)
-from src.servers.product_link_server import product_link_server
-from src.servers.reach_plan_server import reach_plan_server
-from src.servers.recommendation_server import recommendation_server
-from src.servers.remarketing_action_server import remarketing_action_server
-from src.servers.search_server import search_server
-from src.servers.shared_criterion_server import shared_criterion_server
-from src.servers.shared_set_server import shared_set_server
-from src.servers.smart_campaign_server import smart_campaign_server
-
-from src.servers.user_data_server import user_data_server
-from src.servers.user_list_server import user_list_server
-
-# New v23 services
-from src.servers.asset_generation_server import asset_generation_server
-from src.servers.asset_group_listing_group_filter_server import (
-    asset_group_listing_group_filter_server,
-)
-from src.servers.asset_set_asset_server import asset_set_asset_server
-from src.servers.automatically_created_asset_removal_server import (
-    automatically_created_asset_removal_server,
-)
-from src.servers.benchmarks_server import benchmarks_server
-from src.servers.campaign_goal_config_server import campaign_goal_config_server
-from src.servers.campaign_group_server import campaign_group_server
-from src.servers.campaign_lifecycle_goal_server import (
-    campaign_lifecycle_goal_server,
-)
-from src.servers.content_creator_insights_server import (
-    content_creator_insights_server,
-)
-from src.servers.conversion_value_rule_set_server import (
-    conversion_value_rule_set_server,
-)
-from src.servers.customer_asset_set_server import customer_asset_set_server
-from src.servers.customer_lifecycle_goal_server import (
     customer_lifecycle_goal_server,
-)
-from src.servers.customer_sk_ad_network_server import (
+    customer_manager_link_server,
     customer_sk_ad_network_server,
-)
-from src.servers.goal_server import goal_server
-from src.servers.incentive_server import incentive_server
-from src.servers.keyword_theme_constant_server import (
-    keyword_theme_constant_server,
-)
-from src.servers.local_services_lead_server import local_services_lead_server
-from src.servers.product_link_invitation_server import (
+    customer_user_access_invitation_server,
+    customer_user_access_server,
+    data_link_server,
+    goal_server,
+    identity_verification_server,
+    incentive_server,
+    payments_account_server,
     product_link_invitation_server,
-)
-from src.servers.recommendation_subscription_server import (
-    recommendation_subscription_server,
-)
-from src.servers.reservation_server import reservation_server
-from src.servers.shareable_preview_server import shareable_preview_server
-from src.servers.smart_campaign_setting_server import (
-    smart_campaign_setting_server,
-)
-from src.servers.third_party_app_analytics_link_server import (
+    product_link_server,
     third_party_app_analytics_link_server,
 )
-from src.servers.travel_asset_suggestion_server import (
+from src.servers.assets import (
+    ad_group_asset_server,
+    ad_group_asset_set_server,
+    asset_generation_server,
+    asset_group_asset_server,
+    asset_group_listing_group_filter_server,
+    asset_group_server,
+    asset_group_signal_server,
+    asset_server,
+    asset_set_asset_server,
+    asset_set_server,
+    automatically_created_asset_removal_server,
+    campaign_asset_server,
+    campaign_asset_set_server,
+    customer_asset_server,
+    customer_asset_set_server,
+    youtube_video_upload_server,
+)
+from src.servers.bidding import (
+    ad_group_bid_modifier_server,
+    bidding_data_exclusion_server,
+    bidding_seasonality_adjustment_server,
+    bidding_strategy_server,
+    campaign_bid_modifier_server,
+)
+from src.servers.conversion import (
+    campaign_conversion_goal_server,
+    conversion_adjustment_upload_server,
+    conversion_custom_variable_server,
+    conversion_goal_campaign_config_server,
+    conversion_upload_server,
+    conversion_value_rule_server,
+    conversion_value_rule_set_server,
+    custom_conversion_goal_server,
+    customer_conversion_goal_server,
+    offline_user_data_job_server,
+    remarketing_action_server,
+)
+from src.servers.core import (
+    ad_group_ad_server,
+    ad_group_server,
+    ad_server,
+    budget_server,
+    campaign_server,
+    conversion_server,
+    customer_service_server,
+    google_ads_server,
+    keyword_server,
+)
+from src.servers.customizers import (
+    ad_group_criterion_customizer_server,
+    ad_group_customizer_server,
+    ad_parameter_server,
+    campaign_customizer_server,
+    customer_customizer_server,
+    customizer_sdk_server,
+)
+from src.servers.experiments import (
+    campaign_draft_server,
+    experiment_arm_server,
+    experiment_server,
+)
+from src.servers.organization import (
+    ad_group_ad_label_server,
+    ad_group_criterion_label_server,
+    ad_group_label_server,
+    campaign_label_server,
+    campaign_shared_set_server,
+    customer_label_server,
+    label_server,
+    shared_criterion_server,
+    shared_set_server,
+)
+from src.servers.other import (
+    batch_job_server,
+    campaign_goal_config_server,
+    campaign_group_server,
+    campaign_lifecycle_goal_server,
+    local_services_lead_server,
+    reservation_server,
+    smart_campaign_server,
+    smart_campaign_setting_server,
+    user_data_server,
+)
+from src.servers.planning import (
+    benchmarks_server,
+    brand_suggestion_server,
+    keyword_plan_ad_group_keyword_server,
+    keyword_plan_ad_group_server,
+    keyword_plan_campaign_keyword_server,
+    keyword_plan_campaign_server,
+    keyword_plan_idea_server,
+    keyword_plan_server,
+    keyword_theme_constant_server,
+    reach_plan_server,
+    recommendation_subscription_server,
     travel_asset_suggestion_server,
 )
-from src.servers.user_list_customer_type_server import (
-    user_list_customer_type_server,
+from src.servers.reporting import (
+    audience_insights_server,
+    content_creator_insights_server,
+    google_ads_field_server,
+    invoice_server,
+    recommendation_server,
+    search_server,
+    shareable_preview_server,
 )
-from src.servers.youtube_video_upload_server import youtube_video_upload_server
+from src.servers.targeting import (
+    ad_group_criterion_server,
+    audience_server,
+    campaign_criterion_server,
+    custom_audience_server,
+    custom_interest_server,
+    customer_negative_criterion_server,
+    geo_target_constant_server,
+    user_list_customer_type_server,
+    user_list_server,
+)
 from src.utils import get_logger, load_dotenv
 
 logger = get_logger(__name__)

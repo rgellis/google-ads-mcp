@@ -86,6 +86,9 @@ campaign_server = create_server(register_campaign_tools)
 
 - [x] Create `create_server()` factory in `src/servers/__init__.py` **DONE**
 - [x] Update all 113 server files to use the factory **DONE**
+- [x] Consolidate 113 individual `*_server.py` files into 12 domain modules **DONE**
+- [x] Update `main.py` imports to use domain modules **DONE**
+- [x] Delete 113 individual server files **DONE**
 
 ---
 
