@@ -351,6 +351,10 @@ uv run ruff format .
 
 MIT - see [LICENSE](LICENSE)
 
+## Acknowledgments
+
+This project was originally forked from [promobase/google-ads-mcp](https://github.com/promobase/google-ads-mcp). It has since been rewritten to support Google Ads API v23 with 100% service coverage, full type safety, and standardized architecture.
+
 ## Disclaimer
 
 This is an unofficial implementation and is not affiliated with, endorsed by, or supported by Google.
