@@ -326,15 +326,15 @@ The following API fields are not exposed because they serve no purpose for MCP c
 
 ## Deprecated Types (not implemented)
 
-These types exist in the Google Ads API v23 proto definitions but are deprecated by Google. The MCP server intentionally does not expose them to prevent the LLM from attempting to use unsupported formats.
+The following types exist in the [Google Ads API v23 proto definitions](https://github.com/googleapis/googleapis/tree/master/google/ads/googleads/v23) but are deprecated by Google. The MCP server intentionally does not expose them to prevent the LLM from attempting to use formats that Google will reject or no longer supports.
 
-| Type | Category | Deprecated | Replacement (implemented) |
-|------|----------|------------|--------------------------|
-| `text_ad` | Ad | June 2022 — Google blocks new creation | `responsive_search_ad` |
-| `legacy_responsive_display_ad` | Ad | Legacy format | `responsive_display_ad` |
-| `legacy_app_install_ad` | Ad | Legacy format | `app_ad` |
-| `shopping_smart_ad` | Ad | Replaced by Performance Max | Performance Max campaigns |
-| `custom_intent` | Criterion | Deprecated by Google | `custom_audience` |
+| Type | Service | Proto Reference | Why Deprecated | Replacement (implemented) |
+|------|---------|-----------------|----------------|--------------------------|
+| `TextAd` | [AdService](https://developers.google.com/google-ads/api/reference/rpc/v23/TextAdInfo) | `TextAdInfo` | Google stopped accepting new text ads in June 2022 | `ResponsiveSearchAdInfo` via `create_responsive_search_ad` |
+| `LegacyResponsiveDisplayAd` | [AdService](https://developers.google.com/google-ads/api/reference/rpc/v23/LegacyResponsiveDisplayAdInfo) | `LegacyResponsiveDisplayAdInfo` | Superseded by newer format | `ResponsiveDisplayAdInfo` via `create_responsive_display_ad` |
+| `LegacyAppInstallAd` | [AdService](https://developers.google.com/google-ads/api/reference/rpc/v23/LegacyAppInstallAdInfo) | `LegacyAppInstallAdInfo` | Superseded by newer format | `AppAdInfo` via `create_app_ad` |
+| `ShoppingSmartAd` | [AdService](https://developers.google.com/google-ads/api/reference/rpc/v23/ShoppingSmartAdInfo) | `ShoppingSmartAdInfo` | Replaced by Performance Max campaigns | No direct replacement — use Performance Max |
+| `CustomIntent` | [AdGroupCriterionService](https://developers.google.com/google-ads/api/reference/rpc/v23/CustomIntentInfo) | `CustomIntentInfo` | Deprecated in favor of custom audiences | `CustomAudienceInfo` via `add_custom_audience_criteria` |
 
 ## Development
 
