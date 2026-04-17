@@ -61,6 +61,61 @@ async def test_remove_ad_group_ad_label(
     assert result == {"results": []}
 
 
+@pytest.mark.asyncio
+async def test_list_ad_group_ad_labels(
+    service: AdGroupAdLabelService, mock_sdk_client: Any, mock_ctx: Context
+) -> None:
+    """Test listing ad group ad labels."""
+    from google.ads.googleads.v23.services.services.google_ads_service import (
+        GoogleAdsServiceClient,
+    )
+
+    mock_google_ads_service = Mock(spec=GoogleAdsServiceClient)
+
+    # Create mock search result
+    row = Mock()
+    row.ad_group_ad_label = Mock()
+    row.ad_group_ad_label.resource_name = (
+        "customers/1234567890/adGroupAdLabels/123~456~789"
+    )
+    row.ad_group_ad_label.ad_group_ad = "customers/1234567890/adGroupAds/123~456"
+    row.ad_group_ad_label.label = "customers/1234567890/labels/789"
+    row.ad_group_ad = Mock()
+    row.ad_group_ad.ad = Mock()
+    row.ad_group_ad.ad.id = 456
+    row.ad_group_ad.ad_group = "customers/1234567890/adGroups/123"
+    row.label = Mock()
+    row.label.id = 789
+    row.label.name = "Test Label"
+    row.label.description = "A test label"
+
+    mock_google_ads_service.search.return_value = [row]
+
+    def get_service_side_effect(service_name: str):  # type: ignore
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with patch(
+        "src.services.ad_group.ad_group_ad_label_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        result = await service.list_ad_group_ad_labels(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+        )
+
+    assert len(result) == 1
+    assert (
+        result[0]["resource_name"] == "customers/1234567890/adGroupAdLabels/123~456~789"
+    )
+    assert result[0]["label_name"] == "Test Label"
+    assert result[0]["ad_id"] == "456"
+    mock_google_ads_service.search.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_ad_group_ad_label_tools(mock_mcp)

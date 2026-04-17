@@ -371,6 +371,82 @@ async def test_remove_label(
     )
 
 
+@pytest.mark.asyncio
+async def test_apply_label_to_campaigns(
+    label_service: LabelService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test applying a label to campaigns."""
+    customer_id = "1234567890"
+    label_id = "123"
+    campaign_ids = ["456", "789"]
+
+    mock_campaign_label_service = Mock()
+    mock_campaign_label_service.mutate_campaign_labels.return_value = Mock()
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "CampaignLabelService":
+            return mock_campaign_label_service
+        return label_service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with patch(
+        "src.services.shared.label_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        result = await label_service.apply_label_to_campaigns(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            label_id=label_id,
+            campaign_ids=campaign_ids,
+        )
+
+    assert result["label_id"] == label_id
+    assert result["campaign_ids"] == campaign_ids
+    assert result["status"] == "APPLIED"
+    mock_campaign_label_service.mutate_campaign_labels.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_apply_label_to_ad_groups(
+    label_service: LabelService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test applying a label to ad groups."""
+    customer_id = "1234567890"
+    label_id = "123"
+    ad_group_ids = ["456", "789"]
+
+    mock_ad_group_label_service = Mock()
+    mock_ad_group_label_service.mutate_ad_group_labels.return_value = Mock()
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "AdGroupLabelService":
+            return mock_ad_group_label_service
+        return label_service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with patch(
+        "src.services.shared.label_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        result = await label_service.apply_label_to_ad_groups(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            label_id=label_id,
+            ad_group_ids=ad_group_ids,
+        )
+
+    assert result["label_id"] == label_id
+    assert result["ad_group_ids"] == ad_group_ids
+    assert result["status"] == "APPLIED"
+    mock_ad_group_label_service.mutate_ad_group_labels.assert_called_once()
+
+
 def test_register_label_tools() -> None:
     """Test tool registration."""
     # Arrange

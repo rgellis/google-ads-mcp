@@ -129,6 +129,115 @@ async def test_remove_user_data_operations(
     mock_client.add_offline_user_data_job_operations.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_add_user_data_operations(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_response = Mock()
+    mock_response.partial_failure_error = None
+    mock_client.add_offline_user_data_job_operations.return_value = mock_response
+
+    user_data_list = [
+        {
+            "user_identifiers": [
+                {"hashed_email": "abc123hash"},
+            ]
+        }
+    ]
+
+    result = await service.add_user_data_operations(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        job_resource_name="customers/1234567890/offlineUserDataJobs/1",
+        user_data_list=user_data_list,
+    )
+
+    assert result["job_resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
+    assert result["operations_added"] == 1
+    assert result["partial_failure_error"] is None
+    mock_client.add_offline_user_data_job_operations.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_get_offline_user_data_job(
+    service: OfflineUserDataJobService, mock_sdk_client: Any, mock_ctx: Context
+) -> None:
+    mock_google_ads_service = Mock()
+    mock_row = Mock()
+    mock_row.offline_user_data_job = Mock()
+    mock_row.offline_user_data_job.resource_name = (
+        "customers/1234567890/offlineUserDataJobs/1"
+    )
+    mock_google_ads_service.search.return_value = [mock_row]
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with (
+        patch(
+            "src.services.data_import.offline_user_data_job_service.get_sdk_client",
+            return_value=mock_sdk_client,
+        ),
+        patch(
+            "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
+            return_value={
+                "resource_name": "customers/1234567890/offlineUserDataJobs/1"
+            },
+        ),
+    ):
+        result = await service.get_offline_user_data_job(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            job_resource_name="customers/1234567890/offlineUserDataJobs/1",
+        )
+    assert result == {"resource_name": "customers/1234567890/offlineUserDataJobs/1"}
+    mock_google_ads_service.search.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_list_offline_user_data_jobs(
+    service: OfflineUserDataJobService, mock_sdk_client: Any, mock_ctx: Context
+) -> None:
+    mock_google_ads_service = Mock()
+    mock_job = Mock()
+    mock_job.resource_name = "customers/1234567890/offlineUserDataJobs/1"
+    mock_job.id = 1
+    mock_job.type_ = Mock()
+    mock_job.type_.name = "CUSTOMER_MATCH_USER_LIST"
+    mock_job.status = Mock()
+    mock_job.status.name = "SUCCESS"
+    mock_job.failure_reason = None
+    mock_job.operation_metadata = None
+    mock_row = Mock()
+    mock_row.offline_user_data_job = mock_job
+    mock_google_ads_service.search.return_value = [mock_row]
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with patch(
+        "src.services.data_import.offline_user_data_job_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        result = await service.list_offline_user_data_jobs(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+        )
+    assert len(result) == 1
+    assert result[0]["resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
+    assert result[0]["status"] == "SUCCESS"
+    mock_google_ads_service.search.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_offline_user_data_job_tools(mock_mcp)

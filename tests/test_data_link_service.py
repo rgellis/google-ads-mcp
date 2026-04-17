@@ -73,6 +73,40 @@ async def test_update_data_link(service: DataLinkService, mock_ctx: Context) -> 
     assert result == {"resource_name": "test"}
 
 
+@pytest.mark.asyncio
+async def test_list_data_links(
+    service: DataLinkService, mock_sdk_client: Any, mock_ctx: Context
+) -> None:
+    mock_google_ads_service = Mock()
+    mock_row = Mock()
+    mock_row.data_link = Mock()
+    mock_google_ads_service.search.return_value = [mock_row]
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with (
+        patch(
+            "src.services.data_import.data_link_service.get_sdk_client",
+            return_value=mock_sdk_client,
+        ),
+        patch(
+            "src.services.data_import.data_link_service.serialize_proto_message",
+            return_value={"resource_name": "test", "status": "ENABLED"},
+        ),
+    ):
+        result = await service.list_data_links(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+        )
+    assert len(result) == 1
+    mock_google_ads_service.search.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_data_link_tools(mock_mcp)

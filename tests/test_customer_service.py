@@ -161,6 +161,50 @@ async def test_list_accessible_customers(
     )
 
 
+@pytest.mark.asyncio
+async def test_mutate_customer(
+    customer_service: CustomerService,
+    mock_sdk_client: Any,
+    mock_ctx: AsyncMock,
+) -> None:
+    """Test mutating (updating) a customer."""
+    # Mock the customer service client
+    mock_customer_client = customer_service.client  # type: ignore
+    mock_response = Mock()
+    mock_response.resource_name = "customers/1234567890"
+    mock_customer_client.mutate_customer.return_value = mock_response  # type: ignore
+
+    expected_result = {
+        "resource_name": "customers/1234567890",
+    }
+
+    with patch(
+        "src.services.account.customer_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await customer_service.mutate_customer(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            descriptive_name="Updated Name",
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API was called correctly
+    mock_customer_client.mutate_customer.assert_called_once()  # type: ignore
+    call_args = mock_customer_client.mutate_customer.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == "1234567890"
+    assert request.operation.update.descriptive_name == "Updated Name"
+
+    # Verify logging
+    mock_ctx.log.assert_called_with(  # type: ignore
+        level="info",
+        message="Updated customer 1234567890",
+    )
+
+
 def test_create_customer_tools() -> None:
     """Test that tools are created correctly."""
     service = MagicMock()

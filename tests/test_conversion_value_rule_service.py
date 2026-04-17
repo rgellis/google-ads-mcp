@@ -80,6 +80,40 @@ async def test_remove_conversion_value_rule(
     assert result == {"results": []}
 
 
+@pytest.mark.asyncio
+async def test_list_conversion_value_rules(
+    service: ConversionValueRuleService, mock_sdk_client: Any, mock_ctx: Context
+) -> None:
+    mock_google_ads_service = Mock()
+    mock_row = Mock()
+    mock_row.conversion_value_rule = Mock()
+    mock_google_ads_service.search.return_value = [mock_row]
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with (
+        patch(
+            "src.services.conversions.conversion_value_rule_service.get_sdk_client",
+            return_value=mock_sdk_client,
+        ),
+        patch(
+            "src.services.conversions.conversion_value_rule_service.serialize_proto_message",
+            return_value={"id": "1", "status": "ENABLED"},
+        ),
+    ):
+        result = await service.list_conversion_value_rules(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+        )
+    assert len(result) == 1
+    mock_google_ads_service.search.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_conversion_value_rule_tools(mock_mcp)

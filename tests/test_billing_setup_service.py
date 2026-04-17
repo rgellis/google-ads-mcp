@@ -634,6 +634,57 @@ async def test_error_handling_list_payments_accounts(
     )
 
 
+@pytest.mark.asyncio
+async def test_remove_billing_setup(
+    billing_setup_service: BillingSetupService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a billing setup."""
+    # Arrange
+    customer_id = "1234567890"
+    billing_setup_resource_name = "customers/1234567890/billingSetups/111222333"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateBillingSetupResponse)
+    mock_response.result = Mock()
+    mock_response.result.resource_name = billing_setup_resource_name  # type: ignore
+
+    # Get the mocked billing setup service client
+    mock_billing_setup_client = billing_setup_service.client  # type: ignore
+    mock_billing_setup_client.mutate_billing_setup.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {"result": {"resource_name": billing_setup_resource_name}}
+
+    with patch(
+        "src.services.account.billing_setup_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await billing_setup_service.remove_billing_setup(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            billing_setup_resource_name=billing_setup_resource_name,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_billing_setup_client.mutate_billing_setup.assert_called_once()  # type: ignore
+    call_args = mock_billing_setup_client.mutate_billing_setup.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert request.operation.remove == billing_setup_resource_name
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Removed billing setup: {billing_setup_resource_name}",
+    )
+
+
 def test_register_billing_setup_tools() -> None:
     """Test tool registration."""
     # Arrange
