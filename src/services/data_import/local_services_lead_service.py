@@ -106,7 +106,10 @@ class LocalServicesLeadService:
             if satisfied_reason is not None or satisfied_comment is not None:
                 survey_satisfied = SurveySatisfied()
                 if satisfied_reason is not None:
-                    survey_satisfied.survey_satisfied_reason = satisfied_reason
+                    reason_enum = type(survey_satisfied.survey_satisfied_reason)
+                    survey_satisfied.survey_satisfied_reason = reason_enum[
+                        satisfied_reason
+                    ]
                 if satisfied_comment is not None:
                     survey_satisfied.other_reason_comment = satisfied_comment
                 request.survey_satisfied = survey_satisfied
@@ -114,7 +117,10 @@ class LocalServicesLeadService:
             if dissatisfied_reason is not None or dissatisfied_comment is not None:
                 survey_dissatisfied = SurveyDissatisfied()
                 if dissatisfied_reason is not None:
-                    survey_dissatisfied.survey_dissatisfied_reason = dissatisfied_reason
+                    reason_enum = type(survey_dissatisfied.survey_dissatisfied_reason)
+                    survey_dissatisfied.survey_dissatisfied_reason = reason_enum[
+                        dissatisfied_reason
+                    ]
                 if dissatisfied_comment is not None:
                     survey_dissatisfied.other_reason_comment = dissatisfied_comment
                 request.survey_dissatisfied = survey_dissatisfied
@@ -173,9 +179,13 @@ def create_local_services_lead_tools(
         Args:
             resource_name: Lead resource name (e.g. customers/123/localServicesLeads/456)
             survey_answer: Feedback answer - SATISFIED or DISSATISFIED
-            satisfied_reason: Reason for satisfaction (when answer is SATISFIED)
+            satisfied_reason: Reason for satisfaction (when SATISFIED) -
+                BOOKED_CUSTOMER, LIKELY_BOOKED_CUSTOMER, SERVICE_RELATED,
+                HIGH_VALUE_SERVICE, OTHER_SATISFIED_REASON
             satisfied_comment: Additional comment for satisfaction feedback
-            dissatisfied_reason: Reason for dissatisfaction (when answer is DISSATISFIED)
+            dissatisfied_reason: Reason for dissatisfaction (when DISSATISFIED) -
+                GEO_MISMATCH, JOB_TYPE_MISMATCH, NOT_READY_TO_BOOK, SPAM,
+                DUPLICATE, SOLICITATION, OTHER_DISSATISFIED_REASON
             dissatisfied_comment: Additional comment for dissatisfaction feedback
 
         Returns:

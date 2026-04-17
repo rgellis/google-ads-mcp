@@ -18,7 +18,7 @@ The server is designed for chat and voice interaction — all tool parameters us
 | Request field coverage | 100% — every field on every request type is exposed as a parameter |
 | Response field coverage | 100% — all responses returned via `serialize_proto_message` (no fields dropped) |
 | Sub-type coverage | 100% of non-deprecated — all criterion types, ad types, asset types, bidding strategies |
-| Test coverage | 100% — 113 test files, 988 tests, every public method tested |
+| Test coverage | 100% — 113 test files, 991 tests, every public method tested |
 | Type errors (pyright) | 0 |
 
 ### What "100% coverage" means

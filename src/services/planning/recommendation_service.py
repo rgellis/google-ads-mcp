@@ -446,8 +446,12 @@ class RecommendationService:
             if is_new_customer is not None:
                 request.is_new_customer = is_new_customer
             if ad_group_info is not None:
+                from google.ads.googleads.v23.common.types.criteria import KeywordInfo
                 from google.ads.googleads.v23.enums.types.ad_group_type import (
                     AdGroupTypeEnum,
+                )
+                from google.ads.googleads.v23.enums.types.keyword_match_type import (
+                    KeywordMatchTypeEnum,
                 )
 
                 for ag in ad_group_info:
@@ -457,7 +461,22 @@ class RecommendationService:
                             AdGroupTypeEnum.AdGroupType, ag["ad_group_type"]
                         )
                     if "keywords" in ag:
-                        agi.keywords.extend(ag["keywords"])
+                        for kw in ag["keywords"]:
+                            if isinstance(kw, str):
+                                ki = KeywordInfo()
+                                ki.text = kw
+                                ki.match_type = (
+                                    KeywordMatchTypeEnum.KeywordMatchType.BROAD
+                                )
+                                agi.keywords.append(ki)
+                            elif isinstance(kw, dict):
+                                ki = KeywordInfo()
+                                ki.text = kw["text"]
+                                ki.match_type = getattr(
+                                    KeywordMatchTypeEnum.KeywordMatchType,
+                                    kw.get("match_type", "BROAD"),
+                                )
+                                agi.keywords.append(ki)
                     request.ad_group_info.append(agi)
 
             if asset_group_info is not None:

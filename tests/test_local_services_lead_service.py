@@ -139,6 +139,60 @@ async def test_provide_lead_feedback_error(
     assert "Test Google Ads Exception" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_provide_lead_feedback_with_details(
+    service: LocalServicesLeadService,
+    mock_ctx: Context,
+) -> None:
+    """Test providing detailed feedback with satisfaction/dissatisfaction reasons."""
+    mock_client = service.client
+    mock_client.provide_lead_feedback.return_value = Mock()  # type: ignore
+
+    expected_result = {"resource_name": "customers/1234567890/localServicesLeads/111"}
+
+    with patch(
+        "src.services.data_import.local_services_lead_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await service.provide_lead_feedback(
+            ctx=mock_ctx,
+            resource_name="customers/1234567890/localServicesLeads/111",
+            survey_answer="SATISFIED",
+            satisfied_reason="BOOKED_CUSTOMER",
+            satisfied_comment="Great lead, converted to a sale",
+        )
+
+    assert result == expected_result
+    mock_client.provide_lead_feedback.assert_called_once()  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_provide_lead_feedback_dissatisfied_with_details(
+    service: LocalServicesLeadService,
+    mock_ctx: Context,
+) -> None:
+    """Test providing dissatisfied feedback with reason and comment."""
+    mock_client = service.client
+    mock_client.provide_lead_feedback.return_value = Mock()  # type: ignore
+
+    expected_result = {"resource_name": "customers/1234567890/localServicesLeads/222"}
+
+    with patch(
+        "src.services.data_import.local_services_lead_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await service.provide_lead_feedback(
+            ctx=mock_ctx,
+            resource_name="customers/1234567890/localServicesLeads/222",
+            survey_answer="DISSATISFIED",
+            dissatisfied_reason="SPAM",
+            dissatisfied_comment="Not a real customer",
+        )
+
+    assert result == expected_result
+    mock_client.provide_lead_feedback.assert_called_once()  # type: ignore
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()

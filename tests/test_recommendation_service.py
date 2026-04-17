@@ -534,3 +534,36 @@ async def test_generate_recommendations_new_fields(
     assert list(request.country_codes) == ["US", "CA"]
     assert request.target_content_network is True
     assert request.merchant_center_account_id == 12345
+
+
+@pytest.mark.asyncio
+async def test_generate_recommendations_with_ad_group_info(
+    recommendation_service: RecommendationService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test generate_recommendations with ad_group_info for Search campaigns."""
+    mock_rec_client = recommendation_service.client  # type: ignore
+    mock_response = Mock()
+    mock_rec_client.generate_recommendations.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.planning.recommendation_service.serialize_proto_message",
+        return_value={"recommendations": []},
+    ):
+        await recommendation_service.generate_recommendations(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            recommendation_types=["KEYWORD"],
+            advertising_channel_type="SEARCH",
+            ad_group_info=[
+                {
+                    "ad_group_type": "SEARCH_STANDARD",
+                    "keywords": ["running shoes", "athletic footwear"],
+                },
+            ],
+        )
+
+    call_args = mock_rec_client.generate_recommendations.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.ad_group_info) == 1
