@@ -64,11 +64,36 @@ class LocalServicesLeadService:
             raise Exception(error_msg) from e
 
     async def provide_lead_feedback(
-        self, ctx: Context, resource_name: str, survey_answer: str
+        self,
+        ctx: Context,
+        resource_name: str,
+        survey_answer: str,
+        satisfied_reason: Optional[str] = None,
+        satisfied_comment: Optional[str] = None,
+        dissatisfied_reason: Optional[str] = None,
+        dissatisfied_comment: Optional[str] = None,
     ) -> Dict[str, Any]:
+        """Provide feedback for a Local Services lead.
+
+        Args:
+            ctx: FastMCP context
+            resource_name: Lead resource name
+            survey_answer: Feedback answer - SATISFIED or DISSATISFIED
+            satisfied_reason: Reason for satisfaction (when SATISFIED)
+            satisfied_comment: Additional comment (when SATISFIED)
+            dissatisfied_reason: Reason for dissatisfaction (when DISSATISFIED)
+            dissatisfied_comment: Additional comment (when DISSATISFIED)
+
+        Returns:
+            Feedback submission result
+        """
         try:
             from google.ads.googleads.v23.enums.types.local_services_lead_survey_answer import (
                 LocalServicesLeadSurveyAnswerEnum,
+            )
+            from google.ads.googleads.v23.services.types.local_services_lead_service import (
+                SurveyDissatisfied,
+                SurveySatisfied,
             )
 
             request = ProvideLeadFeedbackRequest()
@@ -77,6 +102,23 @@ class LocalServicesLeadService:
                 LocalServicesLeadSurveyAnswerEnum.SurveyAnswer,
                 survey_answer,
             )
+
+            if satisfied_reason is not None or satisfied_comment is not None:
+                survey_satisfied = SurveySatisfied()
+                if satisfied_reason is not None:
+                    survey_satisfied.survey_satisfied_reason = satisfied_reason
+                if satisfied_comment is not None:
+                    survey_satisfied.other_reason_comment = satisfied_comment
+                request.survey_satisfied = survey_satisfied
+
+            if dissatisfied_reason is not None or dissatisfied_comment is not None:
+                survey_dissatisfied = SurveyDissatisfied()
+                if dissatisfied_reason is not None:
+                    survey_dissatisfied.survey_dissatisfied_reason = dissatisfied_reason
+                if dissatisfied_comment is not None:
+                    survey_dissatisfied.other_reason_comment = dissatisfied_comment
+                request.survey_dissatisfied = survey_dissatisfied
+
             response: ProvideLeadFeedbackResponse = self.client.provide_lead_feedback(
                 request=request
             )
@@ -118,19 +160,35 @@ def create_local_services_lead_tools(
         )
 
     async def provide_lead_feedback(
-        ctx: Context, resource_name: str, survey_answer: str
+        ctx: Context,
+        resource_name: str,
+        survey_answer: str,
+        satisfied_reason: Optional[str] = None,
+        satisfied_comment: Optional[str] = None,
+        dissatisfied_reason: Optional[str] = None,
+        dissatisfied_comment: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Provide feedback for a Local Services lead to improve lead quality.
 
         Args:
             resource_name: Lead resource name (e.g. customers/123/localServicesLeads/456)
             survey_answer: Feedback answer - SATISFIED or DISSATISFIED
+            satisfied_reason: Reason for satisfaction (when answer is SATISFIED)
+            satisfied_comment: Additional comment for satisfaction feedback
+            dissatisfied_reason: Reason for dissatisfaction (when answer is DISSATISFIED)
+            dissatisfied_comment: Additional comment for dissatisfaction feedback
 
         Returns:
             Feedback submission result
         """
         return await service.provide_lead_feedback(
-            ctx=ctx, resource_name=resource_name, survey_answer=survey_answer
+            ctx=ctx,
+            resource_name=resource_name,
+            survey_answer=survey_answer,
+            satisfied_reason=satisfied_reason,
+            satisfied_comment=satisfied_comment,
+            dissatisfied_reason=dissatisfied_reason,
+            dissatisfied_comment=dissatisfied_comment,
         )
 
     tools.extend([append_lead_conversation, provide_lead_feedback])

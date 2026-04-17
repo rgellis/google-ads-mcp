@@ -445,6 +445,21 @@ class RecommendationService:
                 request.merchant_center_account_id = merchant_center_account_id
             if is_new_customer is not None:
                 request.is_new_customer = is_new_customer
+            if ad_group_info is not None:
+                from google.ads.googleads.v23.enums.types.ad_group_type import (
+                    AdGroupTypeEnum,
+                )
+
+                for ag in ad_group_info:
+                    agi = GenerateRecommendationsRequest.AdGroupInfo()
+                    if "ad_group_type" in ag:
+                        agi.ad_group_type = getattr(
+                            AdGroupTypeEnum.AdGroupType, ag["ad_group_type"]
+                        )
+                    if "keywords" in ag:
+                        agi.keywords.extend(ag["keywords"])
+                    request.ad_group_info.append(agi)
+
             if asset_group_info is not None:
                 for ag in asset_group_info:
                     agi = GenerateRecommendationsRequest.AssetGroupInfo()

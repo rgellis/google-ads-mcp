@@ -14,11 +14,22 @@ The server is designed for chat and voice interaction — all tool parameters us
 |--------|-------|
 | Google Ads API v23 services | 111 |
 | Service implementations | 113 (111 official + 2 convenience wrappers) |
-| RPC method coverage | 100% — every proto RPC implemented |
-| Input field coverage | 100% — 665 fields across 169 request types |
-| Output field coverage | 100% — 333 fields across 160 response types |
-| Test coverage | 100% — 113 test files covering all 113 services (951 tests) |
+| RPC method coverage | 100% — all 170 RPCs across 111 services |
+| Request field coverage | 100% — every field on every request type is exposed as a parameter |
+| Response field coverage | 100% — all responses returned via `serialize_proto_message` (no fields dropped) |
+| Sub-type coverage | 100% of non-deprecated — all criterion types, ad types, asset types, bidding strategies |
+| Test coverage | 100% — 113 test files, 988 tests, every public method tested |
 | Type errors (pyright) | 0 |
+
+### What "100% coverage" means
+
+This MCP server was verified against the [Google Ads API v23 proto definitions](https://github.com/googleapis/googleapis/tree/master/google/ads/googleads/v23/services) and the installed Python SDK (`google-ads==30.0.0`). Specifically:
+
+- **Every RPC method** defined in every proto service file has a corresponding MCP tool
+- **Every request field** on every request type is exposed as a tool parameter (except `AdditionalApplicationInfo` — see [Intentionally Skipped Fields](#intentionally-skipped-fields))
+- **Every response field** is returned to the caller via protobuf serialization
+- **Every sub-type** within oneof fields is exposed as an individual tool (e.g. all 36 campaign criterion types, all 31 asset types, all 21 non-deprecated ad types, all 7 bidding strategies)
+- **Every create/update/remove operation** supported by each proto Operation type is implemented
 
 ## Architecture
 
