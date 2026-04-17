@@ -110,13 +110,16 @@ def create_incentive_tools(
         email: str,
         incentive_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Fetch available incentive offers.
+        """Fetch available Google Ads promotional incentive offers (e.g. ad credit coupons).
 
         Args:
             language_code: Language code (e.g. "en")
             country_code: Country code (e.g. "US")
-            email: Email address
-            incentive_type: Optional incentive type (e.g. "ACQUISITION")
+            email: Email address associated with the account
+            incentive_type: Optional filter by type - ACQUISITION or WINBACK
+
+        Returns:
+            Available incentive offers with IDs, amounts, and eligibility details
         """
         return await service.fetch_incentive(
             ctx=ctx,
@@ -129,12 +132,15 @@ def create_incentive_tools(
     async def apply_incentive(
         ctx: Context, customer_id: str, selected_incentive_id: int, country_code: str
     ) -> Dict[str, Any]:
-        """Apply a selected incentive to a customer account.
+        """Apply a selected incentive (ad credit) to a customer account.
 
         Args:
             customer_id: The customer ID
-            selected_incentive_id: ID of the incentive to apply
-            country_code: Country code
+            selected_incentive_id: ID of the incentive to apply (from fetch_incentive results)
+            country_code: Country code (e.g. "US")
+
+        Returns:
+            Application result confirming the incentive was applied
         """
         return await service.apply_incentive(
             ctx=ctx,

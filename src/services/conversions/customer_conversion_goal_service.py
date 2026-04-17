@@ -169,16 +169,21 @@ def create_customer_conversion_goal_tools(
         partial_failure: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update customer conversion goals to control biddability at the customer level.
+        """Update customer conversion goals to control which conversions are used for bidding.
+
+        Customer conversion goals determine the default biddability of conversion actions
+        across the account.
 
         Args:
             customer_id: The customer ID
-            operations: List of update operations. Each operation should have:
-                - update: Dict with resource_name and biddable (true/false)
+            operations: List of update operations. Each dict should have:
+                - update: Dict with:
+                    - resource_name: Customer conversion goal resource name
+                    - biddable: true to include in bidding, false to exclude
             validate_only: Whether to only validate the request
 
         Returns:
-            Mutation results with resource names
+            Mutation results with updated resource names
         """
         return await service.mutate_customer_conversion_goals(
             ctx=ctx,

@@ -119,15 +119,18 @@ def create_goal_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create or update account-level goals.
+        """Create or update account-level conversion goals that define which conversions to optimize for.
+
+        Account goals determine the default conversion actions used for bidding and reporting
+        across all campaigns in the account unless overridden at the campaign level.
 
         Args:
             customer_id: The customer ID
-            goal_resource_name: Goal resource name (for update)
+            goal_resource_name: Goal resource name (required for update)
             operation_type: create or update
 
         Returns:
-            Mutation result
+            Mutation result with resource name
         """
         return await service.mutate_goals(
             ctx=ctx,

@@ -118,10 +118,13 @@ def create_smart_campaign_setting_tools(
     async def get_smart_campaign_status(
         ctx: Context, resource_name: str
     ) -> Dict[str, Any]:
-        """Get the status of a Smart campaign.
+        """Get the status of a Smart campaign including eligibility and optimization score.
 
         Args:
-            resource_name: Smart campaign setting resource name
+            resource_name: Smart campaign setting resource name (e.g. customers/123/smartCampaignSettings/456)
+
+        Returns:
+            Smart campaign status details including optimization score and eligibility
         """
         return await service.get_smart_campaign_status(
             ctx=ctx, resource_name=resource_name
@@ -136,12 +139,15 @@ def create_smart_campaign_setting_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update a Smart campaign setting.
+        """Update a Smart campaign setting (phone number, landing page, business info).
 
         Args:
             customer_id: The customer ID
-            setting_resource_name: Setting resource name
-            update_fields: List of field paths to update
+            setting_resource_name: Setting resource name (e.g. customers/123/smartCampaignSettings/456)
+            update_fields: List of field paths to update (e.g. ["phone_number", "final_url", "business_profile_location"])
+
+        Returns:
+            Updated smart campaign setting details
         """
         return await service.update_smart_campaign_setting(
             ctx=ctx,

@@ -73,12 +73,17 @@ def create_travel_asset_suggestion_tools(
         place_ids: List[str],
         language_option: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Suggest assets for travel campaigns based on place IDs.
+        """Suggest text and image assets for travel campaigns based on Google Places.
+
+        Generates headlines, descriptions, and images using business information from Google Maps.
 
         Args:
             customer_id: The customer ID
-            place_ids: List of Google Place IDs
-            language_option: Optional language code
+            place_ids: List of Google Place IDs (from Google Maps/Places API)
+            language_option: Optional language code (e.g. "en") for generated content
+
+        Returns:
+            Suggested assets including headlines, descriptions, and image URLs for each place
         """
         return await service.suggest_travel_assets(
             ctx=ctx,

@@ -132,16 +132,16 @@ def create_campaign_goal_config_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create, update, or remove a campaign goal configuration.
+        """Create, update, or remove a campaign goal configuration that links a campaign to specific goals.
 
         Args:
             customer_id: The customer ID
-            campaign_resource_name: Campaign resource name
-            goal_resource_name: Goal resource name (for create/update)
+            campaign_resource_name: Campaign resource name (e.g. customers/123/campaigns/456)
+            goal_resource_name: Goal resource name (required for create/update)
             operation_type: create, update, or remove
 
         Returns:
-            Mutation result
+            Mutation result with resource name
         """
         return await service.mutate_campaign_goal_configs(
             ctx=ctx,

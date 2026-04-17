@@ -267,16 +267,22 @@ def create_ad_group_criterion_label_tools(
         partial_failure: bool = False,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
-        """Create or remove ad group criterion labels.
+        """Create or remove ad group criterion labels to organize criteria with labels.
 
         Args:
             customer_id: The customer ID
-            operations: List of ad group criterion label operations
+            operations: List of operations. Each dict must have:
+                - operation_type: "create" or "remove"
+                For create:
+                    - ad_group_criterion: Ad group criterion resource name
+                    - label: Label resource name
+                For remove:
+                    - resource_name: The ad group criterion label resource name
             partial_failure: Enable partial failure
             validate_only: Only validate the request
 
         Returns:
-            Response with results
+            Mutation results with resource names
         """
         ops = []
         for op_data in operations:

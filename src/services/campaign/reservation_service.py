@@ -127,11 +127,16 @@ def create_reservation_tools(
         customer_id: str,
         operation: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """Get a quote for reservation (guaranteed) campaigns.
+        """Get a price quote for reservation (guaranteed reach) campaigns before booking.
 
         Args:
             customer_id: The customer ID
-            operation: Dict with campaigns (list) and quote_signature (optional)
+            operation: Dict with:
+                - campaigns: List of campaign resource names or dicts with campaign details
+                - quote_signature: Optional signature from a previous quote (for re-quoting)
+
+        Returns:
+            Quote details including estimated costs and reach
         """
         return await service.quote_campaigns(
             ctx=ctx, customer_id=customer_id, operation=operation
@@ -142,11 +147,16 @@ def create_reservation_tools(
         customer_id: str,
         operation: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """Book reservation (guaranteed) campaigns.
+        """Book reservation (guaranteed reach) campaigns to lock in inventory and pricing.
 
         Args:
             customer_id: The customer ID
-            operation: Dict with campaigns (list) and quote_signature (optional)
+            operation: Dict with:
+                - campaigns: List of campaign resource names or dicts with campaign details
+                - quote_signature: Signature from a previous quote (recommended to lock quoted price)
+
+        Returns:
+            Booking confirmation with reserved campaign details
         """
         return await service.book_campaigns(
             ctx=ctx, customer_id=customer_id, operation=operation

@@ -104,12 +104,18 @@ def create_campaign_lifecycle_goal_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Configure campaign lifecycle goals (acquisition/retention).
+        """Configure campaign lifecycle goals to optimize for new customer acquisition or retention.
+
+        Lifecycle goals tell Google Ads to bid differently for new vs returning customers,
+        helping maximize the value of acquiring new customers.
 
         Args:
             customer_id: The customer ID
-            campaign_resource_name: Campaign resource name
+            campaign_resource_name: Campaign resource name (e.g. customers/123/campaigns/456)
             operation_type: create or update
+
+        Returns:
+            Configuration result with resource name
         """
         return await service.configure_campaign_lifecycle_goals(
             ctx=ctx,

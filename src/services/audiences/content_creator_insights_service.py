@@ -225,18 +225,23 @@ def create_content_creator_insights_tools(
         search_audience_interests: Optional[List[str]] = None,
         customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Generate YouTube creator insights.
+        """Generate YouTube creator insights to find relevant content creators for advertising.
 
-        Find creators by channel, brand, or audience interest.
+        Search by channel, brand, or audience interest. These three search modes are
+        mutually exclusive — provide only ONE of: search_channel_ids, search_brand_names,
+        or search_audience_interests.
 
         Args:
             customer_id: The customer ID
             country_locations: Country geo target constants (e.g. geoTargetConstants/2840 for US)
-            sub_country_locations: Sub-country geo targets for finer targeting
-            search_channel_ids: YouTube channel resource names to search specific creators
-            search_brand_names: Brand names (knowledge graph entities) to find related creators
-            search_audience_interests: Audience interest topics to find creators whose audience matches
-            customer_insights_group: Grouping label for this request
+            sub_country_locations: Sub-country geo targets for finer geographic targeting
+            search_channel_ids: YouTube channel resource names to analyze specific creators (mode 1)
+            search_brand_names: Brand names (knowledge graph entities) to find related creators (mode 2)
+            search_audience_interests: Audience interest topics to find creators whose audience matches (mode 3)
+            customer_insights_group: Grouping label for organizing requests
+
+        Returns:
+            Creator insights including audience demographics, channel metrics, and content topics
         """
         return await service.generate_creator_insights(
             ctx=ctx,
@@ -257,16 +262,20 @@ def create_content_creator_insights_tools(
         search_audience_interests: Optional[List[str]] = None,
         customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Generate YouTube trending content insights.
+        """Generate YouTube trending content insights to discover what's popular.
 
-        Find what's trending by topic or audience interest.
+        Search by topic or audience interest. These two search modes are mutually exclusive —
+        provide only ONE of: search_topic_names or search_audience_interests.
 
         Args:
             customer_id: The customer ID
-            country_location: Country geo target constant (e.g. geoTargetConstants/2840)
-            search_topic_names: Topic names (knowledge graph entities) to filter trends
-            search_audience_interests: Audience interests to filter which trends matter
-            customer_insights_group: Grouping label for this request
+            country_location: Country geo target constant (e.g. geoTargetConstants/2840 for US)
+            search_topic_names: Topic names (knowledge graph entities) to filter trends (mode 1)
+            search_audience_interests: Audience interests to filter which trends matter (mode 2)
+            customer_insights_group: Grouping label for organizing requests
+
+        Returns:
+            Trending content insights including topics, creators, and engagement metrics
         """
         return await service.generate_trending_insights(
             ctx=ctx,

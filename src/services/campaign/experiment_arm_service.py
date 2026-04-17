@@ -187,18 +187,26 @@ def create_experiment_arm_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create, update, or remove experiment arms.
+        """Create, update, or remove experiment arms (variants in an A/B test).
 
         Args:
-            ctx: FastMCP context
             customer_id: The customer ID
-            operations: List of experiment arm operations
-            partial_failure: Enable partial failure
-            validate_only: Only validate the request
-            response_content_type: Response content type
+            operations: List of experiment arm operations. Each dict must have:
+                - operation_type: "create", "update", or "remove"
+                For create:
+                    - experiment: Experiment resource name (e.g. customers/123/experiments/456)
+                    - name: Name of the arm (e.g. "Control" or "Treatment")
+                    - control: true for the control arm, false for treatment
+                    - traffic_split: Percentage of traffic for this arm (1-100)
+                    - campaigns: List of campaign resource names (optional)
+                For update:
+                    - resource_name: The experiment arm resource name
+                    - name, traffic_split, campaigns: Fields to update (all optional)
+                For remove:
+                    - resource_name: The experiment arm resource name
 
         Returns:
-            Serialized response with operation results
+            Mutation results with created/updated/removed resource names
         """
         ops = []
         for op_data in operations:
@@ -248,19 +256,18 @@ def create_experiment_arm_tools(
         traffic_split: int,
         campaigns: list[str] = [],
     ) -> Dict[str, Any]:
-        """Create a new experiment arm.
+        """Create a new experiment arm (variant in an A/B test).
 
         Args:
-            ctx: FastMCP context
             customer_id: The customer ID
-            experiment: The experiment resource name
-            name: Name of the experiment arm
-            control: Whether this is a control arm
-            traffic_split: Traffic split percentage (1-100)
-            campaigns: List of campaign resource names
+            experiment: The experiment resource name (e.g. customers/123/experiments/456)
+            name: Name of the arm (e.g. "Control" or "Treatment")
+            control: true if this is the control arm (baseline), false for treatment (test variant)
+            traffic_split: Percentage of traffic routed to this arm (1-100, all arms must sum to 100)
+            campaigns: List of campaign resource names to include in this arm
 
         Returns:
-            Serialized response with created experiment arm details
+            Created experiment arm details with resource name
         """
         operation = service.create_experiment_arm_operation(
             experiment=experiment,

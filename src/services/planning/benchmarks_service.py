@@ -194,11 +194,19 @@ def create_benchmarks_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def list_benchmarks_locations(ctx: Context) -> Dict[str, Any]:
-        """List available benchmark locations."""
+        """List available geographic locations for competitive benchmarking.
+
+        Returns:
+            List of locations (countries/regions) with geo target constant resource names
+        """
         return await service.list_benchmarks_locations(ctx=ctx)
 
     async def list_benchmarks_products(ctx: Context) -> Dict[str, Any]:
-        """List available benchmark products."""
+        """List available Google Ads products for competitive benchmarking (e.g. Search, Shopping, Display).
+
+        Returns:
+            List of products with codes that can be passed to generate_benchmarks_metrics
+        """
         return await service.list_benchmarks_products(ctx=ctx)
 
     async def list_benchmarks_sources(
@@ -229,18 +237,21 @@ def create_benchmarks_tools(
         date_breakdown: Optional[str] = None,
         customer_benchmarks_group: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Generate competitive benchmark metrics.
+        """Generate competitive benchmark metrics to compare your performance against your industry.
 
         Args:
             customer_id: The customer ID
-            industry_vertical_id: Industry vertical ID from list_benchmarks_sources
-            location_resource_name: Geo target constant resource name
+            industry_vertical_id: Industry vertical ID (get from list_benchmarks_sources)
+            location_resource_name: Geo target constant resource name (get from list_benchmarks_locations)
             start_date: Start date (YYYY-MM-DD)
             end_date: End date (YYYY-MM-DD)
-            currency_code: Optional currency code (e.g. USD)
-            product_codes: Optional product codes to filter benchmarks
-            date_breakdown: Optional time granularity (WEEK, MONTH, QUARTER)
+            currency_code: Optional currency code (e.g. "USD")
+            product_codes: Optional product codes to filter (get from list_benchmarks_products)
+            date_breakdown: Optional time granularity - WEEK, MONTH, or QUARTER
             customer_benchmarks_group: Optional user-defined grouping label
+
+        Returns:
+            Benchmark metrics including CPCs, CTRs, and conversion rates for your industry
         """
         return await service.generate_benchmarks_metrics(
             ctx=ctx,

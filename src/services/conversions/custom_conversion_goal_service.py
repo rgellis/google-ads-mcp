@@ -194,16 +194,25 @@ def create_custom_conversion_goal_tools(
         operations: list[dict[str, Any]],
         validate_only: bool = False,
     ) -> Dict[str, Any]:
-        """Create, update, or remove custom conversion goals.
+        """Create, update, or remove custom conversion goals (groups of conversion actions for bidding).
 
         Args:
-            ctx: FastMCP context
             customer_id: The customer ID
-            operations: List of custom conversion goal operations
+            operations: List of operations. Each dict must have:
+                - operation_type: "create", "update", or "remove"
+                For create:
+                    - name: Goal name
+                    - conversion_actions: List of conversion action resource names
+                    - status: ENABLED or REMOVED (default: ENABLED)
+                For update:
+                    - resource_name: The custom conversion goal resource name
+                    - name, conversion_actions, status: Fields to update (all optional)
+                For remove:
+                    - resource_name: The custom conversion goal resource name
             validate_only: Only validate the request
 
         Returns:
-            Serialized response with operation results
+            Mutation results with resource names
         """
         ops = []
         for op_data in operations:

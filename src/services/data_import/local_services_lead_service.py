@@ -102,11 +102,16 @@ def create_local_services_lead_tools(
     async def append_lead_conversation(
         ctx: Context, customer_id: str, conversations: List[Dict[str, str]]
     ) -> Dict[str, Any]:
-        """Append conversations to Local Services leads.
+        """Append conversation messages to Local Services leads (for service providers using Local Services Ads).
 
         Args:
             customer_id: The customer ID
-            conversations: List of dicts with local_services_lead (resource name) and text
+            conversations: List of dicts, each with:
+                - local_services_lead: Lead resource name (e.g. customers/123/localServicesLeads/456)
+                - text: The message text to append
+
+        Returns:
+            Append results with status for each conversation
         """
         return await service.append_lead_conversation(
             ctx=ctx, customer_id=customer_id, conversations=conversations
@@ -115,11 +120,14 @@ def create_local_services_lead_tools(
     async def provide_lead_feedback(
         ctx: Context, resource_name: str, survey_answer: str
     ) -> Dict[str, Any]:
-        """Provide feedback for a Local Services lead.
+        """Provide feedback for a Local Services lead to improve lead quality.
 
         Args:
-            resource_name: Lead resource name
-            survey_answer: Survey answer (SATISFIED, DISSATISFIED)
+            resource_name: Lead resource name (e.g. customers/123/localServicesLeads/456)
+            survey_answer: Feedback answer - SATISFIED or DISSATISFIED
+
+        Returns:
+            Feedback submission result
         """
         return await service.provide_lead_feedback(
             ctx=ctx, resource_name=resource_name, survey_answer=survey_answer

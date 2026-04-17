@@ -530,7 +530,7 @@ def create_custom_audience_tools(
 
         Args:
             customer_id: The customer ID
-            type_filter: Optional filter by type
+            type_filter: Optional filter by type - AUTO, INTEREST, PURCHASE_INTENT, or SEARCH
             status_filter: Optional filter - ENABLED or REMOVED
 
         Returns:

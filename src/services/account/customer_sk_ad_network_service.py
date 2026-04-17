@@ -113,12 +113,20 @@ def create_customer_sk_ad_network_tools(
         response_content_type: Optional[str] = None,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
-        """Update the iOS SKAdNetwork conversion value schema.
+        """Update the iOS SKAdNetwork conversion value schema for iOS app campaign measurement.
+
+        SKAdNetwork is Apple's privacy-preserving attribution framework. This tool configures
+        how conversion values map to your app events for iOS campaign reporting.
 
         Args:
             customer_id: The customer ID
-            schema: Schema data
-            enable_warnings: Whether to enable warnings
+            schema: Schema configuration dict with:
+                - app_id: The iOS app ID
+                - measurement_window_hours: Hours after install to measure conversions
+            enable_warnings: Whether to return warnings about schema issues
+
+        Returns:
+            Updated schema details
         """
         return await service.mutate_schema(
             ctx=ctx,

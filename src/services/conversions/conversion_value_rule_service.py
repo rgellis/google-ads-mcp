@@ -461,11 +461,14 @@ def create_conversion_value_rule_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Remove a conversion value rule.
+        """Remove a conversion value rule so it no longer adjusts conversion values.
 
         Args:
             customer_id: The customer ID
             rule_resource_name: Resource name of the rule to remove
+
+        Returns:
+            Removal confirmation with resource name
 
         Returns:
             Removal result

@@ -156,16 +156,21 @@ def create_conversion_goal_campaign_config_tools(
         operations: list[dict[str, Any]],
         validate_only: bool = False,
     ) -> Dict[str, Any]:
-        """Create or update conversion goal campaign configurations.
+        """Update conversion goal configurations at the campaign level.
+
+        Controls which conversion goals a campaign optimizes for, overriding account-level defaults.
 
         Args:
-            ctx: FastMCP context
             customer_id: The customer ID
-            operations: List of conversion goal campaign config operations
+            operations: List of update operations. Each dict must have:
+                - operation_type: "update"
+                - resource_name: The conversion goal campaign config resource name
+                - goal_config_level: CUSTOMER (use account goals) or CAMPAIGN (use campaign-specific goals)
+                - custom_conversion_goal: Custom conversion goal resource name (optional)
             validate_only: Only validate the request
 
         Returns:
-            Serialized response with operation results
+            Mutation results with updated resource names
         """
         ops = []
         for op_data in operations:
