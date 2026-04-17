@@ -446,6 +446,792 @@ async def test_update_asset(
     assert "name" in operation.update_mask.paths
 
 
+@pytest.mark.asyncio
+async def test_create_sitelink_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a sitelink asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_sitelink_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            link_text="Visit Us",
+            final_url="https://example.com",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_callout_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a callout asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_callout_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            callout_text="Free Shipping",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_structured_snippet_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a structured snippet asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_structured_snippet_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            header="Brands",
+            values=["Brand A", "Brand B"],
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_call_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a call asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_call_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            country_code="US",
+            phone_number="555-0100",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_price_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a price asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_price_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            type_="SERVICES",
+            language_code="en",
+            price_qualifier="FROM",
+            price_offerings=[
+                {
+                    "header": "Basic",
+                    "description": "Basic plan",
+                    "final_url": "https://example.com/basic",
+                    "price": {"currency_code": "USD", "amount_micros": 9990000},
+                    "unit": "PER_MONTH",
+                }
+            ],
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_promotion_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a promotion asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_promotion_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            promotion_target="Summer Sale",
+            language_code="en",
+            percent_off=20,
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_lead_form_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a lead form asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_lead_form_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            business_name="Test Business",
+            headline="Get a Quote",
+            description="Fill out the form",
+            privacy_policy_url="https://example.com/privacy",
+            call_to_action_type="SIGN_UP",
+            fields=[{"input_type": "FULL_NAME"}, {"input_type": "EMAIL"}],
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_page_feed_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a page feed asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_page_feed_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            page_url="https://example.com/page",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_mobile_app_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a mobile app asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_mobile_app_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            app_id="com.example.app",
+            app_store="GOOGLE_APP_STORE",
+            link_text="Download Now",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_hotel_callout_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a hotel callout asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_hotel_callout_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            text="Free WiFi",
+            language_code="en",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_call_to_action_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a call-to-action asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_call_to_action_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            call_to_action="LEARN_MORE",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_location_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a location asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_location_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            place_id="ChIJN1t_tDeuEmsRUsoyG83frY4",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_hotel_property_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a hotel property asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_hotel_property_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            place_id="ChIJN1t_tDeuEmsRUsoyG83frY4",
+            hotel_name="Grand Hotel",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_app_deep_link_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating an app deep link asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_app_deep_link_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            app_deep_link_uri="myapp://products/123",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_book_on_google_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a Book on Google asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_book_on_google_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_media_bundle_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a media bundle asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_media_bundle_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            data=b"fake_zip_data",
+            name="Test Bundle",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_demand_gen_carousel_card_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a Demand Gen carousel card asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_demand_gen_carousel_card_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            marketing_image_asset="customers/1234567890/assets/111",
+            headline="Shop Now",
+            call_to_action_text="Buy",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_business_message_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a business message asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_business_message_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            message_provider="WHATSAPP",
+            starter_message="Hello!",
+            call_to_action_selection="CONTACT_US",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_education_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic education asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_education_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            program_id="CS101",
+            program_name="Computer Science",
+            school_name="MIT",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_real_estate_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic real estate asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_real_estate_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            listing_id="RE001",
+            listing_name="Beautiful Condo",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_custom_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic custom asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_custom_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            id="ITEM001",
+            item_title="Custom Widget",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_hotels_and_rentals_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic hotels and rentals asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_hotels_and_rentals_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            property_id="HOTEL001",
+            property_name="Beach Resort",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_flights_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic flights asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_flights_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            destination_id="LAX",
+            destination_name="Los Angeles",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_travel_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic travel asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_travel_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            destination_id="PARIS01",
+            title="Paris Getaway",
+            destination_name="Paris",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_local_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic local asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_local_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            deal_id="DEAL001",
+            deal_name="50% Off Pizza",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_dynamic_jobs_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a dynamic jobs asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await asset_service.create_dynamic_jobs_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            job_id="JOB001",
+            job_title="Software Engineer",
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_youtube_video_list_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a YouTube video list asset."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
+    mock_asset_service_client = asset_service.client
+    mock_asset_service_client.mutate_assets.return_value = mock_response
+    expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
+
+    mock_video_list = Mock()
+    mock_video_list.youtube_videos = []
+
+    with (
+        patch(
+            "src.services.assets.asset_service.serialize_proto_message",
+            return_value=expected,
+        ),
+        patch(
+            "src.services.assets.asset_service.YouTubeVideoListAsset",
+            return_value=mock_video_list,
+        ),
+        patch("src.services.assets.asset_service.Asset", return_value=Mock()),
+        patch("src.services.assets.asset_service.AssetOperation", return_value=Mock()),
+        patch(
+            "src.services.assets.asset_service.MutateAssetsRequest", return_value=Mock()
+        ),
+    ):
+        result = await asset_service.create_youtube_video_list_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            youtube_videos=[
+                "customers/1234567890/assets/v1",
+                "customers/1234567890/assets/v2",
+            ],
+        )
+    assert result == expected
+    mock_asset_service_client.mutate_assets.assert_called_once()
+
+
 def test_register_asset_tools() -> None:
     """Test tool registration."""
     # Arrange

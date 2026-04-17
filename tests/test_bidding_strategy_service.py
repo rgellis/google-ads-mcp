@@ -580,3 +580,167 @@ async def test_remove_bidding_strategy(
         operation.remove
         == f"customers/{customer_id}/biddingStrategies/{bidding_strategy_id}"
     )
+
+
+@pytest.mark.asyncio
+async def test_create_enhanced_cpc_strategy(
+    bidding_strategy_service: BiddingStrategyService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating an Enhanced CPC bidding strategy."""
+    customer_id = "1234567890"
+    name = "Test Enhanced CPC Strategy"
+
+    mock_response = Mock(spec=MutateBiddingStrategiesResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/biddingStrategies/601"
+
+    mock_bidding_strategy_client = bidding_strategy_service.client  # type: ignore
+    mock_bidding_strategy_client.mutate_bidding_strategies.return_value = mock_response  # type: ignore
+
+    expected_result = {
+        "results": [{"resource_name": f"customers/{customer_id}/biddingStrategies/601"}]
+    }
+
+    with patch(
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await bidding_strategy_service.create_enhanced_cpc_strategy(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            name=name,
+        )
+
+    assert result == expected_result
+
+    mock_bidding_strategy_client.mutate_bidding_strategies.assert_called_once()  # type: ignore
+    call_args = mock_bidding_strategy_client.mutate_bidding_strategies.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+
+    operation = request.operations[0]
+    assert operation.create.name == name
+    assert (
+        operation.create.type_
+        == BiddingStrategyTypeEnum.BiddingStrategyType.ENHANCED_CPC
+    )
+    assert operation.create.enhanced_cpc is not None
+
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Created Enhanced CPC strategy '{name}'",
+    )
+
+
+@pytest.mark.asyncio
+async def test_create_maximize_conversion_value_strategy(
+    bidding_strategy_service: BiddingStrategyService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a Maximize Conversion Value bidding strategy."""
+    customer_id = "1234567890"
+    name = "Test Max Conv Value Strategy"
+
+    mock_response = Mock(spec=MutateBiddingStrategiesResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/biddingStrategies/602"
+
+    mock_bidding_strategy_client = bidding_strategy_service.client  # type: ignore
+    mock_bidding_strategy_client.mutate_bidding_strategies.return_value = mock_response  # type: ignore
+
+    expected_result = {
+        "results": [{"resource_name": f"customers/{customer_id}/biddingStrategies/602"}]
+    }
+
+    with patch(
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = (
+            await bidding_strategy_service.create_maximize_conversion_value_strategy(
+                ctx=mock_ctx,
+                customer_id=customer_id,
+                name=name,
+            )
+        )
+
+    assert result == expected_result
+
+    mock_bidding_strategy_client.mutate_bidding_strategies.assert_called_once()  # type: ignore
+    call_args = mock_bidding_strategy_client.mutate_bidding_strategies.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+
+    operation = request.operations[0]
+    assert operation.create.name == name
+    assert (
+        operation.create.type_
+        == BiddingStrategyTypeEnum.BiddingStrategyType.MAXIMIZE_CONVERSION_VALUE
+    )
+    assert operation.create.maximize_conversion_value is not None
+
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Created Maximize Conversion Value strategy '{name}'",
+    )
+
+
+@pytest.mark.asyncio
+async def test_create_target_spend_strategy(
+    bidding_strategy_service: BiddingStrategyService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a Target Spend bidding strategy."""
+    customer_id = "1234567890"
+    name = "Test Target Spend Strategy"
+
+    mock_response = Mock(spec=MutateBiddingStrategiesResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/biddingStrategies/603"
+
+    mock_bidding_strategy_client = bidding_strategy_service.client  # type: ignore
+    mock_bidding_strategy_client.mutate_bidding_strategies.return_value = mock_response  # type: ignore
+
+    expected_result = {
+        "results": [{"resource_name": f"customers/{customer_id}/biddingStrategies/603"}]
+    }
+
+    with patch(
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await bidding_strategy_service.create_target_spend_strategy(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            name=name,
+        )
+
+    assert result == expected_result
+
+    mock_bidding_strategy_client.mutate_bidding_strategies.assert_called_once()  # type: ignore
+    call_args = mock_bidding_strategy_client.mutate_bidding_strategies.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+
+    operation = request.operations[0]
+    assert operation.create.name == name
+    assert (
+        operation.create.type_
+        == BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_SPEND
+    )
+    assert operation.create.target_spend is not None
+
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Created Target Spend strategy '{name}'",
+    )

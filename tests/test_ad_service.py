@@ -1240,3 +1240,318 @@ async def test_create_display_upload_ad(
     ad = request.operations[0].create.ad
     upload = ad.display_upload_ad
     assert upload.media_bundle.asset == "customers/123/assets/8001"
+
+
+@pytest.mark.asyncio
+async def test_create_expanded_dynamic_search_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating an expanded dynamic search ad."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    description = "Dynamic search description"
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+    result_mock = Mock()
+    result_mock.resource_name = f"customers/{customer_id}/adGroupAds/{ad_group_id}~300"
+    mock_response.results.append(result_mock)
+
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": result_mock.resource_name}]}
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_service.create_expanded_dynamic_search_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            description=description,
+        )
+
+    assert result == expected_result
+    mock_client.mutate_ad_group_ads.assert_called_once()  # type: ignore
+    call_args = mock_client.mutate_ad_group_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    ad = request.operations[0].create.ad
+    assert ad.expanded_dynamic_search_ad.description == description
+
+
+@pytest.mark.asyncio
+async def test_create_shopping_comparison_listing_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a shopping comparison listing ad."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    headline = "Compare our products"
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+    result_mock = Mock()
+    result_mock.resource_name = f"customers/{customer_id}/adGroupAds/{ad_group_id}~301"
+    mock_response.results.append(result_mock)
+
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": result_mock.resource_name}]}
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_service.create_shopping_comparison_listing_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headline=headline,
+        )
+
+    assert result == expected_result
+    mock_client.mutate_ad_group_ads.assert_called_once()  # type: ignore
+    call_args = mock_client.mutate_ad_group_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    ad = request.operations[0].create.ad
+    assert ad.shopping_comparison_listing_ad.headline == headline
+
+
+@pytest.mark.asyncio
+async def test_create_app_engagement_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating an app engagement ad."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    headlines = ["Engage H1", "Engage H2"]
+    descriptions = ["Engage D1"]
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        result = await ad_service.create_app_engagement_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headlines=headlines,
+            descriptions=descriptions,
+        )
+
+    assert result == {"results": []}
+    call_args = mock_client.mutate_ad_group_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    ad = request.operations[0].create.ad
+    assert len(ad.app_engagement_ad.headlines) == 2
+    assert ad.app_engagement_ad.headlines[0].text == "Engage H1"
+    assert len(ad.app_engagement_ad.descriptions) == 1
+
+
+@pytest.mark.asyncio
+async def test_create_app_pre_registration_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating an app pre-registration ad."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    headlines = ["PreReg H1", "PreReg H2"]
+    descriptions = ["PreReg D1"]
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        result = await ad_service.create_app_pre_registration_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headlines=headlines,
+            descriptions=descriptions,
+        )
+
+    assert result == {"results": []}
+    call_args = mock_client.mutate_ad_group_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    ad = request.operations[0].create.ad
+    assert len(ad.app_pre_registration_ad.headlines) == 2
+    assert ad.app_pre_registration_ad.headlines[0].text == "PreReg H1"
+    assert len(ad.app_pre_registration_ad.descriptions) == 1
+
+
+@pytest.mark.asyncio
+async def test_create_demand_gen_product_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a demand gen product ad."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    headline = "Product Headline"
+    description = "Product Description"
+    business_name = "Product Biz"
+    final_urls = ["https://example.com/product"]
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+    result_mock = Mock()
+    result_mock.resource_name = f"customers/{customer_id}/adGroupAds/{ad_group_id}~305"
+    mock_response.results.append(result_mock)
+
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": result_mock.resource_name}]}
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_service.create_demand_gen_product_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headline=headline,
+            description=description,
+            business_name=business_name,
+            final_urls=final_urls,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    ad = request.operations[0].create.ad
+    dg = ad.demand_gen_product_ad
+    assert dg.headline.text == headline
+    assert dg.description.text == description
+    assert dg.business_name.text == business_name
+    assert ad.final_urls[0] == final_urls[0]
+
+
+@pytest.mark.asyncio
+async def test_create_demand_gen_video_responsive_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating a demand gen video responsive ad.
+
+    This method uses ad_group_ad_client and sets business_name as a plain
+    string on a proto that expects AdTextAsset, so we mock the proto types
+    to avoid proto serialisation errors.
+    """
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    headlines = ["DGV H1"]
+    long_headlines = ["DGV Long Headline"]
+    descriptions = ["DGV D1"]
+    videos = ["customers/123/assets/9001"]
+    business_name = "DGV Business"
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+    ad_service.ad_group_ad_client = mock_client  # type: ignore
+
+    with (
+        patch(
+            "src.services.ad_group.ad_service.DemandGenVideoResponsiveAdInfo"
+        ) as MockAdInfo,
+        patch("src.services.ad_group.ad_service.AdGroupAd") as MockAdGroupAd,
+        patch("src.services.ad_group.ad_service.AdGroupAdOperation") as MockOp,
+        patch("src.services.ad_group.ad_service.MutateAdGroupAdsRequest") as MockReq,
+        patch(
+            "src.services.ad_group.ad_service.serialize_proto_message",
+            return_value={"results": []},
+        ),
+    ):
+        mock_ad_info = Mock()
+        mock_ad_info.headlines = []
+        mock_ad_info.long_headlines = []
+        mock_ad_info.descriptions = []
+        mock_ad_info.videos = []
+        mock_ad_info.logo_images = []
+        mock_ad_info.call_to_actions = []
+        MockAdInfo.return_value = mock_ad_info
+
+        result = await ad_service.create_demand_gen_video_responsive_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headlines=headlines,
+            long_headlines=long_headlines,
+            descriptions=descriptions,
+            videos=videos,
+            business_name=business_name,
+        )
+
+    assert result == {"results": []}
+    assert mock_ad_info.business_name == business_name
+    assert len(mock_ad_info.headlines) == 1
+    assert len(mock_ad_info.videos) == 1
+
+
+@pytest.mark.asyncio
+async def test_create_image_ad(
+    ad_service: AdService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test creating an image ad."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    name = "Test Image Ad"
+    image_asset = "customers/123/assets/10001"
+
+    mock_response = Mock(spec=MutateAdGroupAdsResponse)
+    mock_response.results = []
+    result_mock = Mock()
+    result_mock.resource_name = f"customers/{customer_id}/adGroupAds/{ad_group_id}~307"
+    mock_response.results.append(result_mock)
+
+    mock_client = ad_service.client
+    mock_client.mutate_ad_group_ads.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": result_mock.resource_name}]}
+
+    with patch(
+        "src.services.ad_group.ad_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_service.create_image_ad(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            name=name,
+            image_asset=image_asset,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_ads.call_args  # type: ignore
+    request = call_args[1]["request"]
+    ad = request.operations[0].create.ad
+    assert ad.image_ad.name == name

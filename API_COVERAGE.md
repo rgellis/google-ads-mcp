@@ -44,14 +44,11 @@ Deprecated — not implementing (1):
 
 ## Shared Criterion Service — `src/services/shared/shared_criterion_service.py`
 
-**Status: FULLY COVERED (9/10 sub-types, 11 tools)**
+**Status: FULLY COVERED (10/10 sub-types, 11 tools)**
 
 - [x] keyword, placement
 - [x] youtube_video, youtube_channel, mobile_app_category, mobile_application, brand, webpage
 - [x] vertical_ads_item_group_rule
-
-Not available (1):
-- `vertical_ads_item_group_rule` on AdGroupCriterion is `VerticalAdsItemGroupRuleListInfo` (references a shared set). The SharedCriterion version is `VerticalAdsItemGroupRuleInfo` (has actual fields). Both are implemented in their respective services.
 
 ---
 
@@ -124,7 +121,7 @@ No skipped types — all 31 asset types in the v23 SDK are implemented.
 | Campaign Criterion | 36 | 36 | 0 | 100% |
 | Ad Group Criterion | 28 | 27 | 1 | 96% (100% of non-deprecated) |
 | Customer Negative Criterion | 9 | 9 | 0 | 100% |
-| Shared Criterion | 10 | 9 | 0 | 100%* |
+| Shared Criterion | 10 | 10 | 0 | 100% |
 | Ad (ad types) | 25 | 21 | 4 | 84% (100% of non-deprecated) |
 | Asset (asset types) | 31 | 31 | 0 | 100% |
 | Bidding Strategy | 7 | 7 | 0 | 100% |
