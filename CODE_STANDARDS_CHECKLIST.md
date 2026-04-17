@@ -122,8 +122,8 @@ Option B — Auto-generate tool wrappers from service method signatures (more co
 
 Either use them consistently for re-exports or keep them empty. Currently they vary from 7 to 81 lines with no clear pattern.
 
-- [ ] Decide: re-export from `__init__.py` or keep empty
-- [ ] Standardize all `__init__.py` files to match
+- [x] Decision: keep empty (application, not library — no external consumers need curated imports) **DONE**
+- [x] Cleared re-exports from 9 `__init__.py` files (account, ad_group, campaign, bidding, conversions, data_import, planning, metadata, product_integration) **DONE**
 
 ---
 
