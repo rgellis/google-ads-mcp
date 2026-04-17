@@ -17,7 +17,7 @@ The server is designed for chat and voice interaction — all tool parameters us
 | RPC method coverage | 100% — every proto RPC implemented |
 | Input field coverage | 100% — 665 fields across 169 request types |
 | Output field coverage | 100% — 333 fields across 160 response types |
-| Tests | 816 passing |
+| Test coverage | 100% — 113 test files covering all 113 services (816 tests) |
 | Type errors (pyright) | 0 |
 
 ## Architecture
