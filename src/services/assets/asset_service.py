@@ -36,6 +36,7 @@ from google.ads.googleads.v23.common.types.asset_types import (
     SitelinkAsset,
     StructuredSnippetAsset,
     TextAsset,
+    YouTubeVideoListAsset,
     YoutubeVideoAsset,
 )
 from google.ads.googleads.v23.common.types.feed_common import Money
@@ -2684,6 +2685,73 @@ class AssetService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def create_youtube_video_list_asset(
+        self,
+        ctx: Context,
+        customer_id: str,
+        youtube_videos: List[str],
+        name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a YouTube video list asset (a curated list of YouTube videos).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            youtube_videos: List of YouTube video asset resource names
+            name: Optional name for the asset
+
+        Returns:
+            Created asset details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            asset = Asset()
+            asset.type_ = AssetTypeEnum.AssetType.YOUTUBE_VIDEO
+            if name:
+                asset.name = name
+            else:
+                asset.name = f"Video List ({len(youtube_videos)} videos)"
+
+            video_list = YouTubeVideoListAsset()
+            for video in youtube_videos:
+                video_list.youtube_videos.append(video)
+            asset.youtube_video_list_asset = video_list
+
+            operation = AssetOperation()
+            operation.create = asset
+
+            request = MutateAssetsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAssetsResponse = self.client.mutate_assets(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Created YouTube video list asset with {len(youtube_videos)} videos",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create YouTube video list asset: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     def get_mime_type_enum(self, mime_type: str):
         """Convert MIME type string to enum value."""
         from google.ads.googleads.v23.enums.types.mime_type import MimeTypeEnum
@@ -4148,6 +4216,35 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             response_content_type=response_content_type,
         )
 
+    async def create_youtube_video_list_asset(
+        ctx: Context,
+        customer_id: str,
+        youtube_videos: List[str],
+        name: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a YouTube video list asset — a curated list of YouTube videos for targeting.
+
+        Args:
+            customer_id: The customer ID
+            youtube_videos: List of YouTube video asset resource names
+            name: Optional name for the asset
+
+        Returns:
+            Created asset details
+        """
+        return await service.create_youtube_video_list_asset(
+            ctx=ctx,
+            customer_id=customer_id,
+            youtube_videos=youtube_videos,
+            name=name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_text_asset,
@@ -4181,6 +4278,7 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             create_dynamic_travel_asset,
             create_dynamic_local_asset,
             create_dynamic_jobs_asset,
+            create_youtube_video_list_asset,
         ]
     )
     return tools

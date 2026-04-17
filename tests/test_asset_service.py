@@ -458,7 +458,7 @@ def test_register_asset_tools() -> None:
     assert isinstance(service, AssetService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 31  # type: ignore
+    assert mock_mcp.tool.call_count == 32  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -496,6 +496,7 @@ def test_register_asset_tools() -> None:
         "create_dynamic_travel_asset",
         "create_dynamic_local_asset",
         "create_dynamic_jobs_asset",
+        "create_youtube_video_list_asset",
     ]
 
     assert set(tool_names) == set(expected_tools)
