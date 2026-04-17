@@ -386,6 +386,61 @@ async def test_add_keywords_to_plan(
 
 
 @pytest.mark.asyncio
+async def test_update_keyword_plan(
+    keyword_plan_service: KeywordPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating a keyword plan."""
+    # Arrange
+    customer_id = "1234567890"
+    keyword_plan_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateKeywordPlansResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"
+
+    # Get the mocked keyword plan service client
+    mock_keyword_plan_client = keyword_plan_service.client  # type: ignore
+    mock_keyword_plan_client.mutate_keyword_plans.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.planning.keyword_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await keyword_plan_service.update_keyword_plan(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            keyword_plan_id=keyword_plan_id,
+            name="New Name",
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_keyword_plan_client.mutate_keyword_plans.assert_called_once()  # type: ignore
+    call_args = mock_keyword_plan_client.mutate_keyword_plans.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert "name" in operation.update_mask.paths
+
+
+@pytest.mark.asyncio
 async def test_error_handling(
     keyword_plan_service: KeywordPlanService,
     mock_sdk_client: Any,

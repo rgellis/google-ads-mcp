@@ -515,6 +515,64 @@ async def test_remove_asset_from_campaign(
 
 
 @pytest.mark.asyncio
+async def test_update_campaign_asset(
+    campaign_asset_service: CampaignAssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating a campaign asset."""
+    # Arrange
+    customer_id = "1234567890"
+    campaign_id = "9876543210"
+    asset_id = "555666777"
+    field_type = "SITELINK"
+    campaign_asset_resource = (
+        f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type}"
+    )
+
+    # Create mock response
+    mock_response = Mock(spec=MutateCampaignAssetsResponse)
+    mock_response.results = []
+    result = Mock()
+    result.resource_name = campaign_asset_resource
+    mock_response.results.append(result)  # type: ignore
+
+    # Get the mocked campaign asset service client
+    mock_campaign_asset_client = campaign_asset_service.client  # type: ignore
+    mock_campaign_asset_client.mutate_campaign_assets.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {"results": [{"resource_name": campaign_asset_resource}]}
+
+    with patch(
+        "src.services.campaign.campaign_asset_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await campaign_asset_service.update_campaign_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            campaign_id=campaign_id,
+            asset_id=asset_id,
+            field_type=field_type,
+            status="PAUSED",
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_campaign_asset_client.mutate_campaign_assets.assert_called_once()  # type: ignore
+    call_args = mock_campaign_asset_client.mutate_campaign_assets.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert "status" in operation.update_mask.paths
+
+
+@pytest.mark.asyncio
 async def test_error_handling_link_asset(
     campaign_asset_service: CampaignAssetService,
     mock_sdk_client: Any,

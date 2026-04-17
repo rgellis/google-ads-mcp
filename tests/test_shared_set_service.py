@@ -615,6 +615,66 @@ async def test_error_handling_list_shared_sets(
     )
 
 
+@pytest.mark.asyncio
+async def test_remove_shared_set(
+    shared_set_service: SharedSetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a shared set."""
+    # Arrange
+    customer_id = "1234567890"
+    shared_set_id = "123456"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateSharedSetsResponse)
+    mock_response.results = []
+    result_mock = Mock()
+    result_mock.resource_name = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+    mock_response.results.append(result_mock)  # type: ignore
+
+    # Get the mocked shared set service client
+    mock_shared_set_client = shared_set_service.client  # type: ignore
+    mock_shared_set_client.mutate_shared_sets.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/sharedSets/{shared_set_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.shared.shared_set_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await shared_set_service.remove_shared_set(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_shared_set_client.mutate_shared_sets.assert_called_once()  # type: ignore
+    call_args = mock_shared_set_client.mutate_shared_sets.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.remove == f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Removed shared set {shared_set_id} for customer {customer_id}",
+    )
+
+
 def test_register_shared_set_tools() -> None:
     """Test tool registration."""
     # Arrange

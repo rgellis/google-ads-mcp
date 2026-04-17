@@ -270,6 +270,66 @@ async def test_error_handling(
     )
 
 
+@pytest.mark.asyncio
+async def test_remove_ad_group(
+    ad_group_service: AdGroupService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing an ad group."""
+    # Arrange
+    customer_id = "1234567890"
+    ad_group_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateAdGroupsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+    # Get the mocked ad group service client
+    mock_ad_group_service_client = ad_group_service.client  # type: ignore
+    mock_ad_group_service_client.mutate_ad_groups.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/adGroups/{ad_group_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.ad_group.ad_group_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await ad_group_service.remove_ad_group(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_ad_group_service_client.mutate_ad_groups.assert_called_once()  # type: ignore
+    call_args = mock_ad_group_service_client.mutate_ad_groups.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.remove == f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Removed ad group {ad_group_id} for customer {customer_id}",
+    )
+
+
 def test_register_ad_group_tools() -> None:
     """Test tool registration."""
     # Arrange

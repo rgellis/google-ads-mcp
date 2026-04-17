@@ -724,3 +724,132 @@ async def test_list_experiment_async_errors_with_page_token(
     call_args = mock_experiment_client.list_experiment_async_errors.call_args  # type: ignore
     request = call_args[1]["request"]
     assert request.page_token == page_token
+
+
+@pytest.mark.asyncio
+async def test_remove_experiment(
+    experiment_service: ExperimentService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing an experiment."""
+    # Arrange
+    customer_id = "1234567890"
+    experiment_id = "444555666"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateExperimentsResponse)
+    mock_result = Mock()
+    mock_result.resource_name = f"customers/{customer_id}/experiments/{experiment_id}"
+    mock_response.results = [mock_result]
+
+    # Get the mocked experiment service client
+    mock_experiment_client = experiment_service.client  # type: ignore
+    mock_experiment_client.mutate_experiments.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/experiments/{experiment_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.campaign.experiment_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await experiment_service.remove_experiment(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_experiment_client.mutate_experiments.assert_called_once()  # type: ignore
+    call_args = mock_experiment_client.mutate_experiments.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.remove == f"customers/{customer_id}/experiments/{experiment_id}"
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Removed experiment {experiment_id} for customer {customer_id}",
+    )
+
+
+@pytest.mark.asyncio
+async def test_update_experiment(
+    experiment_service: ExperimentService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating an experiment."""
+    # Arrange
+    customer_id = "1234567890"
+    experiment_id = "444555666"
+    new_name = "New Name"
+    new_description = "New Description"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateExperimentsResponse)
+    mock_result = Mock()
+    mock_result.resource_name = f"customers/{customer_id}/experiments/{experiment_id}"
+    mock_response.results = [mock_result]
+
+    # Get the mocked experiment service client
+    mock_experiment_client = experiment_service.client  # type: ignore
+    mock_experiment_client.mutate_experiments.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/experiments/{experiment_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.campaign.experiment_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await experiment_service.update_experiment(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            experiment_id=experiment_id,
+            name=new_name,
+            description=new_description,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_experiment_client.mutate_experiments.assert_called_once()  # type: ignore
+    call_args = mock_experiment_client.mutate_experiments.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert (
+        operation.update.resource_name
+        == f"customers/{customer_id}/experiments/{experiment_id}"
+    )
+    assert operation.update.name == new_name
+    assert operation.update.description == new_description
+    assert "name" in operation.update_mask.paths
+    assert "description" in operation.update_mask.paths
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Updated experiment {experiment_id}",
+    )

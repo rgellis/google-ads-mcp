@@ -98,6 +98,37 @@ async def test_run_offline_user_data_job_validate_only(
     assert request.validate_only is True
 
 
+@pytest.mark.asyncio
+async def test_remove_user_data_operations(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    """Test removing user data operations from a job."""
+    mock_client = service.client
+    mock_response = Mock()
+    mock_response.partial_failure_error = None
+    mock_client.add_offline_user_data_job_operations.return_value = mock_response
+
+    user_data_list = [
+        {
+            "user_identifiers": [
+                {"hashed_email": "abc123hash"},
+            ]
+        }
+    ]
+
+    result = await service.remove_user_data_operations(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        job_resource_name="customers/1234567890/offlineUserDataJobs/1",
+        user_data_list=user_data_list,
+    )
+
+    assert result["job_resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
+    assert result["operations_removed"] == 1
+    assert result["partial_failure_error"] is None
+    mock_client.add_offline_user_data_job_operations.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_offline_user_data_job_tools(mock_mcp)

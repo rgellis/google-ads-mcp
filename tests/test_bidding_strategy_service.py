@@ -464,6 +464,63 @@ def test_register_bidding_strategy_tools() -> None:
 
 
 @pytest.mark.asyncio
+async def test_update_bidding_strategy(
+    bidding_strategy_service: BiddingStrategyService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating a bidding strategy."""
+    # Arrange
+    customer_id = "1234567890"
+    bidding_strategy_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateBiddingStrategiesResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/biddingStrategies/{bidding_strategy_id}"
+
+    # Get the mocked bidding strategy service client
+    mock_bidding_strategy_client = bidding_strategy_service.client  # type: ignore
+    mock_bidding_strategy_client.mutate_bidding_strategies.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {
+                "resource_name": f"customers/{customer_id}/biddingStrategies/{bidding_strategy_id}"
+            }
+        ]
+    }
+
+    with patch(
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await bidding_strategy_service.update_bidding_strategy(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            bidding_strategy_id=bidding_strategy_id,
+            name="New Name",
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_bidding_strategy_client.mutate_bidding_strategies.assert_called_once()  # type: ignore
+    call_args = mock_bidding_strategy_client.mutate_bidding_strategies.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert "name" in operation.update_mask.paths
+
+
+@pytest.mark.asyncio
 async def test_remove_bidding_strategy(
     bidding_strategy_service: BiddingStrategyService,
     mock_sdk_client: Any,

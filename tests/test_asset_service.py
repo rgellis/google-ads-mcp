@@ -393,6 +393,59 @@ def test_mime_type_conversion() -> None:
     assert service.get_mime_type_enum("image/webp") == MimeTypeEnum.MimeType.IMAGE_JPEG
 
 
+@pytest.mark.asyncio
+async def test_update_asset(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating an asset."""
+    # Arrange
+    customer_id = "1234567890"
+    asset_id = "456"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateAssetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/assets/{asset_id}"
+
+    # Get the mocked asset service client
+    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [{"resource_name": f"customers/{customer_id}/assets/{asset_id}"}]
+    }
+
+    with patch(
+        "src.services.assets.asset_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await asset_service.update_asset(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            asset_id=asset_id,
+            name="New Name",
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_asset_service_client.mutate_assets.assert_called_once()  # type: ignore
+    call_args = mock_asset_service_client.mutate_assets.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert "name" in operation.update_mask.paths
+
+
 def test_register_asset_tools() -> None:
     """Test tool registration."""
     # Arrange

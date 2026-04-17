@@ -530,6 +530,62 @@ async def test_remove_campaign_criterion(
 
 
 @pytest.mark.asyncio
+async def test_update_campaign_criterion(
+    campaign_criterion_service: CampaignCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test updating a campaign criterion."""
+    # Arrange
+    customer_id = "1234567890"
+    campaign_id = "9876543210"
+    criterion_id = "500"
+    criterion_resource_name = (
+        f"customers/{customer_id}/campaignCriteria/{campaign_id}~{criterion_id}"
+    )
+
+    # Create mock response
+    mock_response = Mock(spec=MutateCampaignCriteriaResponse)
+    mock_response.results = []
+    result = Mock()
+    result.resource_name = criterion_resource_name
+    mock_response.results.append(result)  # type: ignore
+
+    # Get the mocked campaign criterion service client
+    mock_campaign_criterion_client = campaign_criterion_service.client  # type: ignore
+    mock_campaign_criterion_client.mutate_campaign_criteria.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {"results": [{"resource_name": criterion_resource_name}]}
+
+    with patch(
+        "src.services.campaign.campaign_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await campaign_criterion_service.update_campaign_criterion(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            campaign_id=campaign_id,
+            criterion_id=criterion_id,
+            bid_modifier=1.5,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_campaign_criterion_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    call_args = mock_campaign_criterion_client.mutate_campaign_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert "bid_modifier" in operation.update_mask.paths
+
+
+@pytest.mark.asyncio
 async def test_error_handling(
     campaign_criterion_service: CampaignCriterionService,
     mock_sdk_client: Any,

@@ -313,6 +313,64 @@ async def test_error_handling(
     )
 
 
+@pytest.mark.asyncio
+async def test_remove_label(
+    label_service: LabelService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a label."""
+    # Arrange
+    customer_id = "1234567890"
+    label_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateLabelsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/labels/{label_id}"
+
+    # Get the mocked label service client
+    mock_label_service_client = label_service.client  # type: ignore
+    mock_label_service_client.mutate_labels.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [{"resource_name": f"customers/{customer_id}/labels/{label_id}"}]
+    }
+
+    with patch(
+        "src.services.shared.label_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await label_service.remove_label(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            label_id=label_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_label_service_client.mutate_labels.assert_called_once()  # type: ignore
+    call_args = mock_label_service_client.mutate_labels.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.remove == f"customers/{customer_id}/labels/{label_id}"
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Removed label {label_id} for customer {customer_id}",
+    )
+
+
 def test_register_label_tools() -> None:
     """Test tool registration."""
     # Arrange

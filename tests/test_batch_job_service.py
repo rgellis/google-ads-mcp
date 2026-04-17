@@ -504,6 +504,63 @@ async def test_add_operations_with_sequence_token(
     assert request.sequence_token == sequence_token
 
 
+@pytest.mark.asyncio
+async def test_remove_batch_job(
+    batch_job_service: BatchJobService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a batch job."""
+    # Arrange
+    customer_id = "1234567890"
+    batch_job_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateBatchJobResponse)
+    mock_response.result = Mock()
+    mock_response.result.resource_name = (
+        f"customers/{customer_id}/batchJobs/{batch_job_id}"  # type: ignore
+    )
+
+    # Get the mocked batch job service client
+    mock_batch_job_client = batch_job_service.client  # type: ignore
+    mock_batch_job_client.mutate_batch_job.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "result": {"resource_name": f"customers/{customer_id}/batchJobs/{batch_job_id}"}
+    }
+
+    with patch(
+        "src.services.data_import.batch_job_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await batch_job_service.remove_batch_job(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            batch_job_id=batch_job_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_batch_job_client.mutate_batch_job.assert_called_once()  # type: ignore
+    call_args = mock_batch_job_client.mutate_batch_job.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert (
+        request.operation.remove == f"customers/{customer_id}/batchJobs/{batch_job_id}"
+    )
+
+    # Verify logging
+    mock_ctx.log.assert_called_once_with(  # type: ignore
+        level="info",
+        message=f"Removed batch job {batch_job_id} for customer {customer_id}",
+    )
+
+
 def test_register_batch_job_tools() -> None:
     """Test tool registration."""
     # Arrange

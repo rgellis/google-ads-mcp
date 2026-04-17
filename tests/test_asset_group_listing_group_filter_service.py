@@ -172,6 +172,43 @@ async def test_remove_listing_group_filter_error(
     assert "Failed to remove listing group filter" in str(exc_info.value)
 
 
+@pytest.mark.asyncio
+async def test_update_listing_group_filter(
+    service: AssetGroupListingGroupFilterService, mock_ctx: Context
+) -> None:
+    """Test updating a listing group filter."""
+    mock_client = service.client
+    mock_client.mutate_asset_group_listing_group_filters.return_value = Mock()  # type: ignore
+
+    expected_result = {
+        "results": [
+            {"resource_name": "customers/1234567890/assetGroupListingGroupFilters/1~2"}
+        ]
+    }
+    resource_name = "customers/1234567890/assetGroupListingGroupFilters/1~2"
+
+    with patch(
+        "src.services.assets.asset_group_listing_group_filter_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await service.update_listing_group_filter(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            listing_group_filter_resource_name=resource_name,
+            filter_type="UNIT_EXCLUDED",
+        )
+
+    assert result == expected_result
+    mock_client.mutate_asset_group_listing_group_filters.assert_called_once()  # type: ignore
+    call_args = mock_client.mutate_asset_group_listing_group_filters.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == "1234567890"
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert "type" in operation.update_mask.paths
+
+
 def test_register_tools() -> None:
     """Test tool registration."""
     mock_mcp = Mock()
