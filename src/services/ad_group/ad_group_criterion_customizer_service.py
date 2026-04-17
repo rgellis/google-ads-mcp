@@ -137,6 +137,11 @@ class AdGroupCriterionCustomizerService:
                 self.client.mutate_ad_group_criterion_customizers(request=request)
             )
 
+            await ctx.log(
+                level="info",
+                message="Mutated ad group criterion customizers",
+            )
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:

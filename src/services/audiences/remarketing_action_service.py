@@ -173,6 +173,10 @@ class RemarketingActionService:
 
             raise Exception(f"Remarketing action {remarketing_action_id} not found")
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get remarketing action: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -293,6 +297,10 @@ class RemarketingActionService:
 
             return remarketing_actions
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list remarketing actions: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -320,6 +328,10 @@ class RemarketingActionService:
                 ctx, customer_id, remarketing_action_id
             )
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get remarketing action tags: {str(e)}"
             await ctx.log(level="error", message=error_msg)

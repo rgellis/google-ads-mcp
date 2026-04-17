@@ -104,6 +104,8 @@ class BudgetService:
                 self.client.mutate_campaign_budgets(request=request)
             )
 
+            await ctx.log(level="info", message=f"Created campaign budget '{name}'")
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:

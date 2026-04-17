@@ -208,6 +208,10 @@ class KeywordPlanService:
 
             return ideas
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get keyword ideas: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -308,6 +312,10 @@ class KeywordPlanService:
 
             return serialize_proto_message(response)
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to create keyword plan campaign: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -407,6 +415,10 @@ class KeywordPlanService:
 
             return results
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to add keywords to plan: {str(e)}"
             await ctx.log(level="error", message=error_msg)

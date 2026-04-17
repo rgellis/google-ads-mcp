@@ -327,6 +327,10 @@ class CustomInterestService:
 
             return custom_interests
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list custom interests: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -387,6 +391,10 @@ class CustomInterestService:
 
             raise Exception(f"Custom interest with ID {custom_interest_id} not found")
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get custom interest details: {str(e)}"
             await ctx.log(level="error", message=error_msg)

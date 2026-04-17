@@ -102,6 +102,11 @@ class CustomerClientLinkService:
                 self.client.mutate_customer_client_link(request=request)
             )
 
+            await ctx.log(
+                level="info",
+                message=f"Created customer client link for {customer_id}",
+            )
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
@@ -259,6 +264,10 @@ class CustomerClientLinkService:
 
             return links
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list customer client links: {str(e)}"
             await ctx.log(level="error", message=error_msg)

@@ -128,6 +128,8 @@ class AudienceService:
                 request=request
             )
 
+            await ctx.log(level="info", message=f"Created combined audience '{name}'")
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
@@ -480,6 +482,10 @@ class AudienceService:
 
             return audiences
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list audiences: {str(e)}"
             await ctx.log(level="error", message=error_msg)

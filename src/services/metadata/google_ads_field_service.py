@@ -201,6 +201,10 @@ class GoogleAdsFieldService:
 
             return result
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get resource fields: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -264,6 +268,10 @@ class GoogleAdsFieldService:
 
             return validation_result
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to validate query fields: {str(e)}"
             await ctx.log(level="error", message=error_msg)

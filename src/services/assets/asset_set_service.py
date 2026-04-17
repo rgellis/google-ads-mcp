@@ -99,6 +99,8 @@ class AssetSetService:
                 request=request
             )
 
+            await ctx.log(level="info", message=f"Created asset set '{name}'")
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
@@ -265,6 +267,10 @@ class AssetSetService:
 
             return asset_sets
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list asset sets: {str(e)}"
             await ctx.log(level="error", message=error_msg)

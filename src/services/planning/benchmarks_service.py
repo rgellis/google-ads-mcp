@@ -48,6 +48,10 @@ class BenchmarksService:
                 self.client.list_benchmarks_locations(request=request)
             )
             return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list benchmarks locations: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -60,6 +64,10 @@ class BenchmarksService:
                 self.client.list_benchmarks_products(request=request)
             )
             return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list benchmarks products: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -89,6 +97,10 @@ class BenchmarksService:
                 self.client.list_benchmarks_sources(request=request)
             )
             return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list benchmarks sources: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -101,6 +113,10 @@ class BenchmarksService:
                 self.client.list_benchmarks_available_dates(request=request)
             )
             return serialize_proto_message(response)
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list benchmarks available dates: {str(e)}"
             await ctx.log(level="error", message=error_msg)

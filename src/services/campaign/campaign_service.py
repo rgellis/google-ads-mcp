@@ -134,6 +134,9 @@ class CampaignService:
             response: MutateCampaignsResponse = self.client.mutate_campaigns(
                 request=request
             )
+
+            await ctx.log(level="info", message=f"Created campaign '{name}'")
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:

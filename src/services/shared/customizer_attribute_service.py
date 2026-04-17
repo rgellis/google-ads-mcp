@@ -108,6 +108,11 @@ class CustomizerAttributeService:
             response: MutateCustomizerAttributesResponse = (
                 self.client.mutate_customizer_attributes(request=request)
             )
+
+            await ctx.log(
+                level="info", message=f"Created customizer attribute '{name}'"
+            )
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
@@ -260,6 +265,10 @@ class CustomizerAttributeService:
 
             return attributes
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list customizer attributes: {str(e)}"
             await ctx.log(level="error", message=error_msg)

@@ -347,6 +347,10 @@ class BiddingDataExclusionService:
 
             return exclusions
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list bidding data exclusions: {str(e)}"
             await ctx.log(level="error", message=error_msg)

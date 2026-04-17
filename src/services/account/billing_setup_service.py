@@ -179,6 +179,10 @@ class BillingSetupService:
 
             return billing_setups
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list billing setups: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -241,6 +245,10 @@ class BillingSetupService:
             # If no billing setup found
             raise Exception(f"Billing setup {billing_setup_id} not found")
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get billing setup: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -297,6 +305,10 @@ class BillingSetupService:
 
             return payments_accounts
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list payments accounts: {str(e)}"
             await ctx.log(level="error", message=error_msg)

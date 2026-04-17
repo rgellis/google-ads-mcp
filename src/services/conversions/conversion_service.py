@@ -170,6 +170,8 @@ class ConversionService:
                 self.client.mutate_conversion_actions(request=request)
             )
 
+            await ctx.log(level="info", message=f"Created conversion action '{name}'")
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:

@@ -362,6 +362,10 @@ class CustomAudienceService:
 
             return custom_audiences
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to list custom audiences: {str(e)}"
             await ctx.log(level="error", message=error_msg)
@@ -419,6 +423,10 @@ class CustomAudienceService:
 
             raise Exception(f"Custom audience {custom_audience_id} not found")
 
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to get custom audience details: {str(e)}"
             await ctx.log(level="error", message=error_msg)

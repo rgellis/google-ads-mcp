@@ -141,8 +141,9 @@ except Exception as e:
     raise Exception(error_msg) from e
 ```
 
-- [ ] Verify all 98 Pattern A services follow this exactly
-- [ ] Migrate all 15 Pattern B services to include this
+- [x] Added GoogleAdsException catch to 55 methods that only had generic Exception (list/query methods) **DONE**
+- [x] Verified 29 delegation methods correctly rely on parent method's error handling **DONE**
+- [x] All 15 Pattern B services already migrated in item 1 **DONE**
 
 ---
 
@@ -153,8 +154,8 @@ All mutate/create/update/remove operations should log on success:
 await ctx.log(level="info", message=f"Created campaign '{name}'")
 ```
 
-- [ ] Audit all services for consistent success logging
-- [ ] Add missing log calls where operations succeed silently
+- [x] Added success logging to 13 methods missing it (campaign, budget, assets, conversion, audience, customizer, ad group ad, ad parameters) **DONE**
+- [x] Verified all other methods already log on success **DONE**
 
 ---
 

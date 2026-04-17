@@ -135,6 +135,11 @@ class AdParameterService:
                 request=request
             )
 
+            await ctx.log(
+                level="info",
+                message="Mutated ad parameters",
+            )
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
