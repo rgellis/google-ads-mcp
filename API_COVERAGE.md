@@ -16,43 +16,42 @@ All 36 criterion types have individual tools.
 
 ## Ad Group Criterion Service — `src/services/ad_group/ad_group_criterion_service.py`
 
-**Status: 24/28 sub-types covered (22 tools)**
+**Status: 27/28 sub-types covered (25 tools)**
 
 - [x] keyword, audience/user_list, age_range, gender, income_range, parental_status
 - [x] placement, mobile_app_category, mobile_application, youtube_video, youtube_channel
 - [x] topic, user_interest, webpage, custom_affinity, custom_audience, combined_audience
 - [x] location, language, life_event, video_lineup, extended_demographic, brand_list
+- [x] listing_group, app_payment_model, vertical_ads_item_group_rule_list
 
-Intentionally skipped:
-- listing_group — handled by `asset_group_listing_group_filter_service` (dedicated service)
-- custom_intent — deprecated by Google in favor of custom_audience
-- app_payment_model — very niche, app-campaign-specific
-- vertical_ads_item_group_rule_list — vertical-specific internal type
+Deprecated — not implementing (1):
+
+| Criterion Type | Status | Replacement |
+|---------------|--------|-------------|
+| custom_intent | Deprecated by Google | custom_audience |
 
 ---
 
 ## Customer Negative Criterion Service — `src/services/targeting/customer_negative_criterion_service.py`
 
-**Status: 8/9 sub-types covered (11 tools)**
+**Status: FULLY COVERED (9/9 sub-types, 12 tools)**
 
 - [x] keyword, placement, content_label
 - [x] mobile_application, mobile_app_category, youtube_video, youtube_channel, ip_block
-- [x] negative_keyword_list
-
-Intentionally skipped:
-- placement_list — uses SharedSetInfo, same functionality as negative_keyword_list (shared set reference)
+- [x] negative_keyword_list, placement_list
 
 ---
 
 ## Shared Criterion Service — `src/services/shared/shared_criterion_service.py`
 
-**Status: 8/10 sub-types covered (10 tools)**
+**Status: FULLY COVERED (9/10 sub-types, 11 tools)**
 
 - [x] keyword, placement
 - [x] youtube_video, youtube_channel, mobile_app_category, mobile_application, brand, webpage
+- [x] vertical_ads_item_group_rule
 
-Intentionally skipped:
-- vertical_ads_item_group_rule — vertical-specific internal type
+Not available (1):
+- `vertical_ads_item_group_rule` on AdGroupCriterion is `VerticalAdsItemGroupRuleListInfo` (references a shared set). The SharedCriterion version is `VerticalAdsItemGroupRuleInfo` (has actual fields). Both are implemented in their respective services.
 
 ---
 
@@ -123,9 +122,9 @@ No skipped types — all 31 asset types in the v23 SDK are implemented.
 | Service | Sub-types | Covered | Skipped | Coverage |
 |---------|-----------|---------|---------|----------|
 | Campaign Criterion | 36 | 36 | 0 | 100% |
-| Ad Group Criterion | 28 | 24 | 4 | 86% (100% of non-deprecated) |
-| Customer Negative Criterion | 9 | 8 | 1 | 89% (100% of non-redundant) |
-| Shared Criterion | 10 | 8 | 2 | 80% (100% of non-niche) |
+| Ad Group Criterion | 28 | 27 | 1 | 96% (100% of non-deprecated) |
+| Customer Negative Criterion | 9 | 9 | 0 | 100% |
+| Shared Criterion | 10 | 9 | 0 | 100%* |
 | Ad (ad types) | 25 | 21 | 4 | 84% (100% of non-deprecated) |
 | Asset (asset types) | 31 | 31 | 0 | 100% |
 | Bidding Strategy | 7 | 7 | 0 | 100% |

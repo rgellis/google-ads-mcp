@@ -17,7 +17,7 @@ The server is designed for chat and voice interaction — all tool parameters us
 | RPC method coverage | 100% — every proto RPC implemented |
 | Input field coverage | 100% — 665 fields across 169 request types |
 | Output field coverage | 100% — 333 fields across 160 response types |
-| Test coverage | 100% — 113 test files covering all 113 services (946 tests) |
+| Test coverage | 100% — 113 test files covering all 113 services (951 tests) |
 | Type errors (pyright) | 0 |
 
 ## Architecture
@@ -324,16 +324,17 @@ The following API fields are not exposed because they serve no purpose for MCP c
 |-------|-------------------|--------|
 | `AdditionalApplicationInfo` (`insights_application_info`, `application_info`, `reach_application_info`) | audience_insights (8 RPCs), benchmarks (5 RPCs), content_creator_insights (2 RPCs), reach_plan (6 RPCs) | Internal Google application tracking metadata used to identify the calling application. Not relevant for third-party MCP callers. |
 
-## Deprecated Ad Types (not implemented)
+## Deprecated Types (not implemented)
 
-These ad types exist in the Google Ads API v23 proto definitions but are deprecated by Google. New creation is either blocked or not recommended. The MCP server intentionally does not expose them to prevent the LLM from attempting to use unsupported formats.
+These types exist in the Google Ads API v23 proto definitions but are deprecated by Google. The MCP server intentionally does not expose them to prevent the LLM from attempting to use unsupported formats.
 
-| Ad Type | Deprecated | Replacement (implemented) |
-|---------|------------|--------------------------|
-| `text_ad` | June 2022 — Google blocks new creation | `responsive_search_ad` |
-| `legacy_responsive_display_ad` | Legacy format | `responsive_display_ad` |
-| `legacy_app_install_ad` | Legacy format | `app_ad` |
-| `shopping_smart_ad` | Replaced by Performance Max | Performance Max campaigns |
+| Type | Category | Deprecated | Replacement (implemented) |
+|------|----------|------------|--------------------------|
+| `text_ad` | Ad | June 2022 — Google blocks new creation | `responsive_search_ad` |
+| `legacy_responsive_display_ad` | Ad | Legacy format | `responsive_display_ad` |
+| `legacy_app_install_ad` | Ad | Legacy format | `app_ad` |
+| `shopping_smart_ad` | Ad | Replaced by Performance Max | Performance Max campaigns |
+| `custom_intent` | Criterion | Deprecated by Google | `custom_audience` |
 
 ## Development
 

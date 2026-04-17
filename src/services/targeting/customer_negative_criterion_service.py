@@ -12,6 +12,7 @@ from google.ads.googleads.v23.common.types.criteria import (
     MobileApplicationInfo,
     NegativeKeywordListInfo,
     PlacementInfo,
+    PlacementListInfo,
     YouTubeChannelInfo,
     YouTubeVideoInfo,
 )
@@ -815,6 +816,80 @@ class CustomerNegativeCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def add_placement_list_exclusion(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Exclude placements from a shared placement list at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_resource_name: Resource name of the shared set (placement list)
+
+        Returns:
+            Created customer negative criterion
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            customer_negative_criterion = CustomerNegativeCriterion()
+            placement_list_info = PlacementListInfo()
+            placement_list_info.shared_set = shared_set_resource_name
+            customer_negative_criterion.placement_list = placement_list_info
+            customer_negative_criterion.type_ = (
+                CriterionTypeEnum.CriterionType.PLACEMENT_LIST
+            )
+
+            operation = CustomerNegativeCriterionOperation()
+            operation.create = customer_negative_criterion
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            result = response.results[0]
+            criterion_resource = result.resource_name
+            criterion_id = (
+                criterion_resource.split("/")[-1] if criterion_resource else ""
+            )
+
+            await ctx.log(
+                level="info",
+                message="Added placement list exclusion at account level",
+            )
+
+            return {
+                "resource_name": criterion_resource,
+                "criterion_id": criterion_id,
+                "type": "PLACEMENT_LIST",
+                "shared_set": shared_set_resource_name,
+            }
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add placement list exclusion: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def list_negative_criteria(
         self,
         ctx: Context,
@@ -1265,6 +1340,33 @@ def create_customer_negative_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_placement_list_exclusion(
+        ctx: Context,
+        customer_id: str,
+        shared_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Exclude placements from a shared placement list at the account level.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_resource_name: Resource name of the shared set (placement list)
+                (e.g., "customers/1234567890/sharedSets/111222")
+
+        Returns:
+            Created customer negative criterion with resource name and ID
+        """
+        return await service.add_placement_list_exclusion(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_resource_name=shared_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             add_negative_keywords,
@@ -1276,6 +1378,7 @@ def create_customer_negative_criterion_tools(
             add_youtube_channel_exclusions,
             add_ip_block_exclusions,
             add_negative_keyword_list_exclusion,
+            add_placement_list_exclusion,
             list_negative_criteria,
             remove_negative_criterion,
         ]

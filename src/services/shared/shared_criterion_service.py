@@ -10,6 +10,7 @@ from google.ads.googleads.v23.common.types.criteria import (
     MobileAppCategoryInfo,
     MobileApplicationInfo,
     PlacementInfo,
+    VerticalAdsItemGroupRuleInfo,
     WebpageInfo,
     YouTubeChannelInfo,
     YouTubeVideoInfo,
@@ -740,6 +741,112 @@ class SharedCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def add_vertical_ads_item_group_rules_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        rules: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add vertical ads item group rules to a shared set for product/hotel targeting.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            rules: List of rule dicts with:
+                - item_code: The item code string
+                - country_criterion_id: Optional country criterion ID (string)
+                - region_criterion_id: Optional region criterion ID (string)
+                - city_criterion_id: Optional city criterion ID (string)
+                - hotel_class: Optional hotel class (int)
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for rule in rules:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+
+                rule_info = VerticalAdsItemGroupRuleInfo()
+                rule_info.item_code = rule["item_code"]
+                if (
+                    "country_criterion_id" in rule
+                    and rule["country_criterion_id"] is not None
+                ):
+                    rule_info.country_criterion_id = str(rule["country_criterion_id"])
+                if (
+                    "region_criterion_id" in rule
+                    and rule["region_criterion_id"] is not None
+                ):
+                    rule_info.region_criterion_id = str(rule["region_criterion_id"])
+                if (
+                    "city_criterion_id" in rule
+                    and rule["city_criterion_id"] is not None
+                ):
+                    rule_info.city_criterion_id = str(rule["city_criterion_id"])
+                if "hotel_class" in rule and rule["hotel_class"] is not None:
+                    rule_info.hotel_class = rule["hotel_class"]
+                shared_criterion.vertical_ads_item_group_rule = rule_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                result_dict: Dict[str, Any] = {
+                    "resource_name": criterion_resource,
+                    "shared_criterion_id": criterion_id,
+                    "type": "VERTICAL_ADS_ITEM_GROUP_RULE",
+                }
+                result_dict.update(rules[i])
+                results.append(result_dict)
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} vertical ads item group rules to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = (
+                f"Failed to add vertical ads item group rules to shared set: {str(e)}"
+            )
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def list_shared_criteria(
         self,
         ctx: Context,
@@ -1177,6 +1284,40 @@ def create_shared_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_vertical_ads_item_group_rules_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        rules: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add vertical ads item group rules to a shared set for product/hotel targeting.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            rules: List of rule dicts with:
+                - item_code: The item code string
+                - country_criterion_id: Optional country criterion ID
+                - region_criterion_id: Optional region criterion ID
+                - city_criterion_id: Optional city criterion ID
+                - hotel_class: Optional hotel class
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_vertical_ads_item_group_rules_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            rules=rules,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             add_keywords_to_shared_set,
@@ -1187,6 +1328,7 @@ def create_shared_criterion_tools(
             add_mobile_applications_to_shared_set,
             add_brands_to_shared_set,
             add_webpages_to_shared_set,
+            add_vertical_ads_item_group_rules_to_shared_set,
             list_shared_criteria,
             remove_shared_criterion,
         ]

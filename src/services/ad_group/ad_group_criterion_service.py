@@ -6,6 +6,7 @@ from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
     AgeRangeInfo,
+    AppPaymentModelInfo,
     BrandListInfo,
     CombinedAudienceInfo,
     CustomAffinityInfo,
@@ -16,6 +17,7 @@ from google.ads.googleads.v23.common.types.criteria import (
     KeywordInfo,
     LanguageInfo,
     LifeEventInfo,
+    ListingGroupInfo,
     LocationInfo,
     MobileAppCategoryInfo,
     MobileApplicationInfo,
@@ -24,6 +26,7 @@ from google.ads.googleads.v23.common.types.criteria import (
     TopicInfo,
     UserInterestInfo,
     UserListInfo,
+    VerticalAdsItemGroupRuleListInfo,
     VideoLineupInfo,
     WebpageConditionInfo,
     WebpageInfo,
@@ -34,9 +37,15 @@ from google.ads.googleads.v23.enums.types.ad_group_criterion_status import (
     AdGroupCriterionStatusEnum,
 )
 from google.ads.googleads.v23.enums.types.age_range_type import AgeRangeTypeEnum
+from google.ads.googleads.v23.enums.types.app_payment_model_type import (
+    AppPaymentModelTypeEnum,
+)
 from google.ads.googleads.v23.enums.types.gender_type import GenderTypeEnum
 from google.ads.googleads.v23.enums.types.income_range_type import IncomeRangeTypeEnum
 from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
+from google.ads.googleads.v23.enums.types.listing_group_type import (
+    ListingGroupTypeEnum,
+)
 from google.ads.googleads.v23.enums.types.parental_status_type import (
     ParentalStatusTypeEnum,
 )
@@ -1673,6 +1682,224 @@ class AdGroupCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def add_listing_group_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        listing_group_type: str,
+        case_value: Optional[Dict[str, Any]] = None,
+        parent_ad_group_criterion: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add listing group criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            listing_group_type: Type of listing group: SUBDIVISION or UNIT
+            case_value: Optional case value dict for the listing group
+            parent_ad_group_criterion: Optional parent ad group criterion resource name
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad_group_criterion = AdGroupCriterion()
+            ad_group_criterion.ad_group = ad_group_resource
+            ad_group_criterion.negative = False
+
+            listing_group_info = ListingGroupInfo()
+            listing_group_info.type_ = getattr(
+                ListingGroupTypeEnum.ListingGroupType, listing_group_type
+            )
+            if parent_ad_group_criterion is not None:
+                listing_group_info.parent_ad_group_criterion = parent_ad_group_criterion
+            ad_group_criterion.listing_group = listing_group_info
+
+            operation = AdGroupCriterionOperation()
+            operation.create = ad_group_criterion
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added listing group criterion to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add listing group criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_app_payment_model_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        app_payment_model_type: str = "PAID",
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add app payment model criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            app_payment_model_type: The app payment model type (PAID)
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad_group_criterion = AdGroupCriterion()
+            ad_group_criterion.ad_group = ad_group_resource
+
+            if bid_modifier is not None:
+                ad_group_criterion.bid_modifier = bid_modifier
+
+            app_payment_info = AppPaymentModelInfo()
+            app_payment_info.type_ = getattr(
+                AppPaymentModelTypeEnum.AppPaymentModelType,
+                app_payment_model_type,
+            )
+            ad_group_criterion.app_payment_model = app_payment_info
+
+            operation = AdGroupCriterionOperation()
+            operation.create = ad_group_criterion
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added app payment model criterion to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add app payment model criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_vertical_ads_item_group_rule_list_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        shared_set_resource_name: str,
+        negative: bool = False,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add vertical ads item group rules from a shared set for product-level targeting.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            shared_set_resource_name: Resource name of the shared set containing
+                the vertical ads item group rules
+            negative: Whether this is a negative criterion
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad_group_criterion = AdGroupCriterion()
+            ad_group_criterion.ad_group = ad_group_resource
+            ad_group_criterion.negative = negative
+
+            rule_list_info = VerticalAdsItemGroupRuleListInfo()
+            rule_list_info.shared_set = shared_set_resource_name
+            ad_group_criterion.vertical_ads_item_group_rule_list = rule_list_info
+
+            operation = AdGroupCriterionOperation()
+            operation.create = ad_group_criterion
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added vertical ads item group rule list criterion to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = (
+                f"Failed to add vertical ads item group rule list criteria: {str(e)}"
+            )
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def update_criterion_bid(
         self,
         ctx: Context,
@@ -2514,6 +2741,106 @@ def create_ad_group_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_listing_group_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        listing_group_type: str,
+        case_value: Optional[Dict[str, Any]] = None,
+        parent_ad_group_criterion: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add listing group criteria to an ad group for Shopping campaigns.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            listing_group_type: Type of listing group: SUBDIVISION or UNIT
+            case_value: Optional case value dict for the listing group
+            parent_ad_group_criterion: Optional parent ad group criterion resource name
+
+        Returns:
+            Response with created ad group listing group criteria
+        """
+        return await service.add_listing_group_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            listing_group_type=listing_group_type,
+            case_value=case_value,
+            parent_ad_group_criterion=parent_ad_group_criterion,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_app_payment_model_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        app_payment_model_type: str = "PAID",
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add app payment model criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            app_payment_model_type: The app payment model type (PAID)
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group app payment model criteria
+        """
+        return await service.add_app_payment_model_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            app_payment_model_type=app_payment_model_type,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_vertical_ads_item_group_rule_list_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        shared_set_resource_name: str,
+        negative: bool = False,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add vertical ads item group rules from a shared set for product-level targeting.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            shared_set_resource_name: Resource name of the shared set containing
+                the vertical ads item group rules
+            negative: Whether this is a negative criterion
+
+        Returns:
+            Response with created ad group vertical ads item group rule list criteria
+        """
+        return await service.add_vertical_ads_item_group_rule_list_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            shared_set_resource_name=shared_set_resource_name,
+            negative=negative,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     async def update_criterion_bid(
         ctx: Context,
         customer_id: str,
@@ -2594,6 +2921,9 @@ def create_ad_group_criterion_tools(
             add_video_lineup_criteria,
             add_extended_demographic_criteria,
             add_brand_list_criteria,
+            add_listing_group_criteria,
+            add_app_payment_model_criteria,
+            add_vertical_ads_item_group_rule_list_criteria,
             update_criterion_bid,
             remove_ad_group_criterion,
         ]

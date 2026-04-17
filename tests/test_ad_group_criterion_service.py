@@ -1592,7 +1592,7 @@ def test_register_ad_group_criterion_tools() -> None:
     assert isinstance(service, AdGroupCriterionService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 22  # 22 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 25  # 25 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -1619,8 +1619,118 @@ def test_register_ad_group_criterion_tools() -> None:
         "add_video_lineup_criteria",
         "add_extended_demographic_criteria",
         "add_brand_list_criteria",
+        "add_listing_group_criteria",
+        "add_app_payment_model_criteria",
+        "add_vertical_ads_item_group_rule_list_criteria",
         "update_criterion_bid",
         "remove_ad_group_criterion",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_add_listing_group_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding listing group criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2400)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_listing_group_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            listing_group_type="UNIT",
+            parent_ad_group_criterion="customers/1234567890/adGroupCriteria/9876543210~99",
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.negative is False
+    assert (
+        criterion.listing_group.parent_ad_group_criterion
+        == "customers/1234567890/adGroupCriteria/9876543210~99"
+    )
+
+
+@pytest.mark.asyncio
+async def test_add_app_payment_model_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding app payment model criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2500)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_app_payment_model_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            app_payment_model_type="PAID",
+            bid_modifier=1.2,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert abs(criterion.bid_modifier - 1.2) < 0.001
+
+
+@pytest.mark.asyncio
+async def test_add_vertical_ads_item_group_rule_list_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding vertical ads item group rule list criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    shared_set = "customers/1234567890/sharedSets/789"
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2600)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_vertical_ads_item_group_rule_list_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            shared_set_resource_name=shared_set,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.vertical_ads_item_group_rule_list.shared_set == shared_set
+    assert criterion.negative is False

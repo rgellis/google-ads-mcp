@@ -292,8 +292,29 @@ async def test_add_negative_keyword_list_exclusion(
     mock_client.mutate_customer_negative_criteria.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_add_placement_list_exclusion(
+    service: CustomerNegativeCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/8"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_customer_negative_criteria.return_value = mock_response
+    result = await service.add_placement_list_exclusion(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_resource_name="customers/1234567890/sharedSets/222",
+    )
+    assert isinstance(result, dict)
+    assert result["type"] == "PLACEMENT_LIST"
+    assert result["shared_set"] == "customers/1234567890/sharedSets/222"
+    mock_client.mutate_customer_negative_criteria.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_customer_negative_criterion_tools(mock_mcp)
     assert isinstance(service, CustomerNegativeCriterionService)
-    assert mock_mcp.tool.call_count == 11
+    assert mock_mcp.tool.call_count == 12

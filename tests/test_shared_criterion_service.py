@@ -266,8 +266,32 @@ async def test_add_webpages_to_shared_set(
     mock_client.mutate_shared_criteria.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_add_vertical_ads_item_group_rules_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~8"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_vertical_ads_item_group_rules_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        rules=[{"item_code": "ITEM123", "country_criterion_id": 2840}],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "VERTICAL_ADS_ITEM_GROUP_RULE"
+    assert result[0]["item_code"] == "ITEM123"
+    assert result[0]["country_criterion_id"] == 2840
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_shared_criterion_tools(mock_mcp)
     assert isinstance(service, SharedCriterionService)
-    assert mock_mcp.tool.call_count == 10
+    assert mock_mcp.tool.call_count == 11
