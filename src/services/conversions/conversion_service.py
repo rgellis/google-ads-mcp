@@ -128,12 +128,7 @@ class ConversionService:
                         "always_use_default_value"
                     ]
                 conversion_action.value_settings = value_settings_obj
-            else:
-                # Default value settings
-                value_settings_obj = ConversionAction.ValueSettings()
-                value_settings_obj.default_value = 0
-                value_settings_obj.always_use_default_value = False
-                conversion_action.value_settings = value_settings_obj
+            # If no value_settings provided, let the API use its defaults
 
             # Set attribution model
             attribution_settings = ConversionAction.AttributionModelSettings()

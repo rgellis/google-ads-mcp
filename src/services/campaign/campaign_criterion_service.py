@@ -462,8 +462,6 @@ class CampaignCriterionService:
             for schedule in schedules:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = False
-
                 if bid_modifier is not None:
                     campaign_criterion.bid_modifier = bid_modifier
 
@@ -847,8 +845,6 @@ class CampaignCriterionService:
 
             campaign_criterion = CampaignCriterion()
             campaign_criterion.campaign = campaign_resource
-            campaign_criterion.negative = False
-
             if bid_modifier is not None:
                 campaign_criterion.bid_modifier = bid_modifier
 
@@ -932,8 +928,6 @@ class CampaignCriterionService:
             for parental_status in parental_statuses:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = False
-
                 if bid_modifier is not None:
                     campaign_criterion.bid_modifier = bid_modifier
 
@@ -1745,8 +1739,6 @@ class CampaignCriterionService:
             for constant in keyword_theme_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = False
-
                 keyword_theme_info = KeywordThemeInfo()
                 keyword_theme_info.keyword_theme_constant = constant
                 campaign_criterion.keyword_theme = keyword_theme_info

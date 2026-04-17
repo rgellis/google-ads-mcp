@@ -1713,8 +1713,6 @@ class AdGroupCriterionService:
 
             ad_group_criterion = AdGroupCriterion()
             ad_group_criterion.ad_group = ad_group_resource
-            ad_group_criterion.negative = False
-
             listing_group_info = ListingGroupInfo()
             listing_group_info.type_ = getattr(
                 ListingGroupTypeEnum.ListingGroupType, listing_group_type
