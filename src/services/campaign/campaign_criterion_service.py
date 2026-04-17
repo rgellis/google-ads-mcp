@@ -622,7 +622,6 @@ class CampaignCriterionService:
             for age_range in age_ranges:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = False
 
                 if bid_modifier is not None:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -696,7 +695,6 @@ class CampaignCriterionService:
             for gender in genders:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = False
 
                 if bid_modifier is not None:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -770,7 +768,6 @@ class CampaignCriterionService:
             for income_range in income_ranges:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = False
 
                 if bid_modifier is not None:
                     campaign_criterion.bid_modifier = bid_modifier
