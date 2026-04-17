@@ -15,6 +15,7 @@ from google.ads.googleads.v23.common.types.ad_type_infos import (
     AppAdInfo,
     DemandGenCarouselAdInfo,
     DemandGenMultiAssetAdInfo,
+    DemandGenVideoResponsiveAdInfo,
     DisplayUploadAdInfo,
     ExpandedTextAdInfo,
     HotelAdInfo,
@@ -1714,6 +1715,110 @@ class AdService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def create_demand_gen_video_responsive_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headlines: List[str],
+        long_headlines: List[str],
+        descriptions: List[str],
+        videos: List[str],
+        business_name: str,
+        logo_images: Optional[List[str]] = None,
+        call_to_actions: Optional[List[str]] = None,
+        breadcrumb1: Optional[str] = None,
+        breadcrumb2: Optional[str] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a Demand Gen video responsive ad.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headlines: List of headline texts (1-5)
+            long_headlines: List of long headline texts (1-5)
+            descriptions: List of description texts (1-5)
+            videos: List of video asset resource names (1-5)
+            business_name: Business name
+            logo_images: Optional list of logo image asset resource names
+            call_to_actions: Optional list of call to action texts
+            breadcrumb1: Optional first breadcrumb
+            breadcrumb2: Optional second breadcrumb
+            status: Ad status - ENABLED or PAUSED
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource
+            ad_group_ad.status = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+
+            ad_info = DemandGenVideoResponsiveAdInfo()
+            for h in headlines:
+                ad_info.headlines.append(AdTextAsset(text=h))
+            for lh in long_headlines:
+                ad_info.long_headlines.append(AdTextAsset(text=lh))
+            for d in descriptions:
+                ad_info.descriptions.append(AdTextAsset(text=d))
+            for v in videos:
+                ad_info.videos.append(AdVideoAsset(asset=v))
+            ad_info.business_name = business_name
+
+            if logo_images:
+                for img in logo_images:
+                    ad_info.logo_images.append(AdImageAsset(asset=img))
+            if call_to_actions:
+                for cta in call_to_actions:
+                    ad_info.call_to_actions.append(AdTextAsset(text=cta))
+            if breadcrumb1:
+                ad_info.breadcrumb1 = breadcrumb1
+            if breadcrumb2:
+                ad_info.breadcrumb2 = breadcrumb2
+
+            ad_group_ad.ad.demand_gen_video_responsive_ad = ad_info
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = (
+                self.ad_group_ad_client.mutate_ad_group_ads(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created demand gen video responsive ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create demand gen video responsive ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
     """Create tool functions for the ad service.
@@ -2464,6 +2569,62 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             response_content_type=response_content_type,
         )
 
+    async def create_demand_gen_video_responsive_ad_tool(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headlines: List[str],
+        long_headlines: List[str],
+        descriptions: List[str],
+        videos: List[str],
+        business_name: str,
+        logo_images: Optional[List[str]] = None,
+        call_to_actions: Optional[List[str]] = None,
+        breadcrumb1: Optional[str] = None,
+        breadcrumb2: Optional[str] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a Demand Gen video responsive ad for video-first Demand Gen campaigns.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headlines: List of headline texts (1-5)
+            long_headlines: List of long headline texts (1-5)
+            descriptions: List of description texts (1-5)
+            videos: List of video asset resource names (1-5)
+            business_name: Business name displayed in the ad
+            logo_images: Optional logo image asset resource names
+            call_to_actions: Optional call to action texts
+            breadcrumb1: Optional first URL breadcrumb
+            breadcrumb2: Optional second URL breadcrumb
+            status: Ad status - ENABLED or PAUSED
+
+        Returns:
+            Created ad details
+        """
+        return await service.create_demand_gen_video_responsive_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headlines=headlines,
+            long_headlines=long_headlines,
+            descriptions=descriptions,
+            videos=videos,
+            business_name=business_name,
+            logo_images=logo_images,
+            call_to_actions=call_to_actions,
+            breadcrumb1=breadcrumb1,
+            breadcrumb2=breadcrumb2,
+            status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_responsive_search_ad,
@@ -2482,6 +2643,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             create_travel_ad,
             create_demand_gen_carousel_ad,
             create_display_upload_ad,
+            create_demand_gen_video_responsive_ad_tool,
         ]
     )
     return tools
