@@ -324,6 +324,17 @@ The following API fields are not exposed because they serve no purpose for MCP c
 |-------|-------------------|--------|
 | `AdditionalApplicationInfo` (`insights_application_info`, `application_info`, `reach_application_info`) | audience_insights (8 RPCs), benchmarks (5 RPCs), content_creator_insights (2 RPCs), reach_plan (6 RPCs) | Internal Google application tracking metadata used to identify the calling application. Not relevant for third-party MCP callers. |
 
+## Deprecated Ad Types (not implemented)
+
+These ad types exist in the Google Ads API v23 proto definitions but are deprecated by Google. New creation is either blocked or not recommended. The MCP server intentionally does not expose them to prevent the LLM from attempting to use unsupported formats.
+
+| Ad Type | Deprecated | Replacement (implemented) |
+|---------|------------|--------------------------|
+| `text_ad` | June 2022 — Google blocks new creation | `responsive_search_ad` |
+| `legacy_responsive_display_ad` | Legacy format | `responsive_display_ad` |
+| `legacy_app_install_ad` | Legacy format | `app_ad` |
+| `shopping_smart_ad` | Replaced by Performance Max | Performance Max campaigns |
+
 ## Development
 
 ```bash

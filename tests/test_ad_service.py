@@ -565,7 +565,7 @@ def test_register_ad_tools() -> None:
     assert isinstance(service, AdService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 17  # 17 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 23  # 23 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -589,6 +589,12 @@ def test_register_ad_tools() -> None:
         "create_demand_gen_carousel_ad",
         "create_display_upload_ad",
         "create_demand_gen_video_responsive_ad_tool",
+        "create_expanded_dynamic_search_ad",
+        "create_shopping_comparison_listing_ad",
+        "create_app_engagement_ad",
+        "create_app_pre_registration_ad",
+        "create_demand_gen_product_ad",
+        "create_image_ad",
     ]
 
     assert set(tool_names) == set(expected_tools)

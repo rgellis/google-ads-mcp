@@ -5,6 +5,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.ad_asset import (
+    AdCallToActionAsset,
     AdDemandGenCarouselCardAsset,
     AdImageAsset,
     AdMediaBundleAsset,
@@ -13,16 +14,22 @@ from google.ads.googleads.v23.common.types.ad_asset import (
 )
 from google.ads.googleads.v23.common.types.ad_type_infos import (
     AppAdInfo,
+    AppEngagementAdInfo,
+    AppPreRegistrationAdInfo,
     DemandGenCarouselAdInfo,
     DemandGenMultiAssetAdInfo,
+    DemandGenProductAdInfo,
     DemandGenVideoResponsiveAdInfo,
     DisplayUploadAdInfo,
+    ExpandedDynamicSearchAdInfo,
     ExpandedTextAdInfo,
     HotelAdInfo,
+    ImageAdInfo,
     InFeedVideoAdInfo,
     LocalAdInfo,
     ResponsiveDisplayAdInfo,
     ResponsiveSearchAdInfo,
+    ShoppingComparisonListingAdInfo,
     ShoppingProductAdInfo,
     SmartCampaignAdInfo,
     TravelAdInfo,
@@ -1819,6 +1826,566 @@ class AdService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def create_expanded_dynamic_search_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        description: str,
+        description2: Optional[str] = None,
+        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create an expanded dynamic search ad.
+
+        Used in Dynamic Search Ad campaigns where Google generates headlines
+        from your website content.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            description: First description text
+            description2: Optional second description text
+            status: Ad status enum value
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad = Ad()
+
+            edsa = ExpandedDynamicSearchAdInfo()
+            edsa.description = description
+            if description2:
+                edsa.description2 = description2
+
+            ad.expanded_dynamic_search_ad = edsa
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource_name
+            ad_group_ad.ad = ad
+            ad_group_ad.status = status
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created expanded dynamic search ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create expanded dynamic search ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_shopping_comparison_listing_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headline: str,
+        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a shopping comparison listing ad.
+
+        For Comparison Shopping Services (CSS) partners.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headline: The headline text
+            status: Ad status enum value
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad = Ad()
+
+            scl_ad = ShoppingComparisonListingAdInfo()
+            scl_ad.headline = headline
+
+            ad.shopping_comparison_listing_ad = scl_ad
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource_name
+            ad_group_ad.ad = ad
+            ad_group_ad.status = status
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created shopping comparison listing ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create shopping comparison listing ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_app_engagement_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headlines: List[str],
+        descriptions: List[str],
+        images: Optional[List[str]] = None,
+        videos: Optional[List[str]] = None,
+        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create an app engagement ad.
+
+        For app re-engagement campaigns targeting users who already have
+        the app installed.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headlines: List of headline texts
+            descriptions: List of description texts
+            images: Optional list of image asset resource names
+            videos: Optional list of video asset resource names
+            status: Ad status enum value
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad = Ad()
+
+            ae_ad = AppEngagementAdInfo()
+
+            for text in headlines:
+                hl = AdTextAsset()
+                hl.text = text
+                ae_ad.headlines.append(hl)
+
+            for text in descriptions:
+                desc = AdTextAsset()
+                desc.text = text
+                ae_ad.descriptions.append(desc)
+
+            if images:
+                for asset_rn in images:
+                    img = AdImageAsset()
+                    img.asset = asset_rn
+                    ae_ad.images.append(img)
+
+            if videos:
+                for asset_rn in videos:
+                    vid = AdVideoAsset()
+                    vid.asset = asset_rn
+                    ae_ad.videos.append(vid)
+
+            ad.app_engagement_ad = ae_ad
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource_name
+            ad_group_ad.ad = ad
+            ad_group_ad.status = status
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created app engagement ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create app engagement ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_app_pre_registration_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headlines: List[str],
+        descriptions: List[str],
+        images: Optional[List[str]] = None,
+        youtube_videos: Optional[List[str]] = None,
+        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create an app pre-registration ad.
+
+        For pre-launch app campaigns to drive pre-registrations.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headlines: List of headline texts
+            descriptions: List of description texts
+            images: Optional list of image asset resource names
+            youtube_videos: Optional list of YouTube video asset resource names
+            status: Ad status enum value
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad = Ad()
+
+            apr_ad = AppPreRegistrationAdInfo()
+
+            for text in headlines:
+                hl = AdTextAsset()
+                hl.text = text
+                apr_ad.headlines.append(hl)
+
+            for text in descriptions:
+                desc = AdTextAsset()
+                desc.text = text
+                apr_ad.descriptions.append(desc)
+
+            if images:
+                for asset_rn in images:
+                    img = AdImageAsset()
+                    img.asset = asset_rn
+                    apr_ad.images.append(img)
+
+            if youtube_videos:
+                for asset_rn in youtube_videos:
+                    vid = AdVideoAsset()
+                    vid.asset = asset_rn
+                    apr_ad.youtube_videos.append(vid)
+
+            ad.app_pre_registration_ad = apr_ad
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource_name
+            ad_group_ad.ad = ad
+            ad_group_ad.status = status
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created app pre-registration ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create app pre-registration ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_demand_gen_product_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headline: str,
+        description: str,
+        business_name: str,
+        final_urls: List[str],
+        logo_image: Optional[str] = None,
+        breadcrumb1: Optional[str] = None,
+        breadcrumb2: Optional[str] = None,
+        call_to_action: Optional[str] = None,
+        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a Demand Gen product ad.
+
+        Product-focused Demand Gen ads that use a Merchant Center feed.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headline: Headline text
+            description: Description text
+            business_name: Business name
+            final_urls: List of landing page URLs
+            logo_image: Optional logo image asset resource name
+            breadcrumb1: Optional first breadcrumb for display URL
+            breadcrumb2: Optional second breadcrumb for display URL
+            call_to_action: Optional call to action asset resource name
+            status: Ad status enum value
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad = Ad()
+            ad.final_urls.extend(final_urls)
+
+            dg_product = DemandGenProductAdInfo()
+
+            hl = AdTextAsset()
+            hl.text = headline
+            dg_product.headline = hl
+
+            desc = AdTextAsset()
+            desc.text = description
+            dg_product.description = desc
+
+            bn = AdTextAsset()
+            bn.text = business_name
+            dg_product.business_name = bn
+
+            if logo_image:
+                logo = AdImageAsset()
+                logo.asset = logo_image
+                dg_product.logo_image = logo
+
+            if breadcrumb1:
+                dg_product.breadcrumb1 = breadcrumb1
+            if breadcrumb2:
+                dg_product.breadcrumb2 = breadcrumb2
+
+            if call_to_action:
+                cta = AdCallToActionAsset()
+                cta.asset = call_to_action
+                dg_product.call_to_action = cta
+
+            ad.demand_gen_product_ad = dg_product
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource_name
+            ad_group_ad.ad = ad
+            ad_group_ad.status = status
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created demand gen product ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create demand gen product ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_image_ad(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        name: str,
+        image_asset: Optional[str] = None,
+        data: Optional[bytes] = None,
+        final_urls: Optional[List[str]] = None,
+        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create an image ad.
+
+        Supply either image_asset (asset resource name) or data (raw bytes).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            name: Name of the image ad
+            image_asset: Image asset resource name (mutually exclusive with data)
+            data: Raw image bytes (mutually exclusive with image_asset)
+            final_urls: Optional list of landing page URLs
+            status: Ad status enum value
+
+        Returns:
+            Created ad details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad = Ad()
+            if final_urls:
+                ad.final_urls.extend(final_urls)
+
+            image_ad = ImageAdInfo()
+            image_ad.name = name
+
+            if image_asset:
+                img_asset = AdImageAsset()
+                img_asset.asset = image_asset
+                image_ad.image_asset = img_asset
+            elif data:
+                image_ad.data = data
+
+            ad.image_ad = image_ad
+
+            ad_group_ad = AdGroupAd()
+            ad_group_ad.ad_group = ad_group_resource_name
+            ad_group_ad.ad = ad
+            ad_group_ad.status = status
+
+            operation = AdGroupAdOperation()
+            operation.create = ad_group_ad
+
+            request = MutateAdGroupAdsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created image ad in ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create image ad: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
     """Create tool functions for the ad service.
@@ -2625,6 +3192,262 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             response_content_type=response_content_type,
         )
 
+    async def create_expanded_dynamic_search_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        description: str,
+        description2: Optional[str] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create an expanded dynamic search ad.
+
+        Used in Dynamic Search Ad campaigns where Google auto-generates
+        headlines from your website content.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            description: First description text
+            description2: Optional second description text
+            status: Ad status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created ad details
+        """
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        return await service.create_expanded_dynamic_search_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            description=description,
+            description2=description2,
+            status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_shopping_comparison_listing_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headline: str,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a shopping comparison listing ad.
+
+        For Comparison Shopping Services (CSS) partners.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headline: The headline text
+            status: Ad status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created ad details
+        """
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        return await service.create_shopping_comparison_listing_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headline=headline,
+            status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_app_engagement_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headlines: List[str],
+        descriptions: List[str],
+        images: Optional[List[str]] = None,
+        videos: Optional[List[str]] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create an app engagement ad for app re-engagement campaigns.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headlines: List of headline texts
+            descriptions: List of description texts
+            images: Optional list of image asset resource names
+            videos: Optional list of video asset resource names
+            status: Ad status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created ad details
+        """
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        return await service.create_app_engagement_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headlines=headlines,
+            descriptions=descriptions,
+            images=images,
+            videos=videos,
+            status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_app_pre_registration_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headlines: List[str],
+        descriptions: List[str],
+        images: Optional[List[str]] = None,
+        youtube_videos: Optional[List[str]] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create an app pre-registration ad for pre-launch app campaigns.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headlines: List of headline texts
+            descriptions: List of description texts
+            images: Optional list of image asset resource names
+            youtube_videos: Optional list of YouTube video asset resource names
+            status: Ad status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created ad details
+        """
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        return await service.create_app_pre_registration_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headlines=headlines,
+            descriptions=descriptions,
+            images=images,
+            youtube_videos=youtube_videos,
+            status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_demand_gen_product_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        headline: str,
+        description: str,
+        business_name: str,
+        final_urls: List[str],
+        logo_image: Optional[str] = None,
+        breadcrumb1: Optional[str] = None,
+        breadcrumb2: Optional[str] = None,
+        call_to_action: Optional[str] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a Demand Gen product ad with Merchant Center feed.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            headline: Headline text
+            description: Description text
+            business_name: Business name
+            final_urls: List of landing page URLs
+            logo_image: Optional logo image asset resource name
+            breadcrumb1: Optional first breadcrumb for display URL
+            breadcrumb2: Optional second breadcrumb for display URL
+            call_to_action: Optional call to action asset resource name
+            status: Ad status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created ad details
+        """
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        return await service.create_demand_gen_product_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            headline=headline,
+            description=description,
+            business_name=business_name,
+            final_urls=final_urls,
+            logo_image=logo_image,
+            breadcrumb1=breadcrumb1,
+            breadcrumb2=breadcrumb2,
+            call_to_action=call_to_action,
+            status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_image_ad(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        name: str,
+        image_asset: Optional[str] = None,
+        data: Optional[bytes] = None,
+        final_urls: Optional[List[str]] = None,
+        status: str = "PAUSED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create an image ad.
+
+        Supply either image_asset (asset resource name) or data (raw bytes).
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            name: Name of the image ad
+            image_asset: Image asset resource name
+            data: Raw image bytes (alternative to image_asset)
+            final_urls: Optional list of landing page URLs
+            status: Ad status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created ad details
+        """
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        return await service.create_image_ad(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            name=name,
+            image_asset=image_asset,
+            data=data,
+            final_urls=final_urls,
+            status=status_enum,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_responsive_search_ad,
@@ -2644,6 +3467,12 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             create_demand_gen_carousel_ad,
             create_display_upload_ad,
             create_demand_gen_video_responsive_ad_tool,
+            create_expanded_dynamic_search_ad,
+            create_shopping_comparison_listing_ad,
+            create_app_engagement_ad,
+            create_app_pre_registration_ad,
+            create_demand_gen_product_ad,
+            create_image_ad,
         ]
     )
     return tools
