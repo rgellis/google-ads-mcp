@@ -125,8 +125,149 @@ async def test_list_shared_criteria(
     mock_google_ads_service.search.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_add_youtube_videos_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~2"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_youtube_videos_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        video_ids=["dQw4w9WgXcQ"],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "YOUTUBE_VIDEO"
+    assert result[0]["video_id"] == "dQw4w9WgXcQ"
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_add_youtube_channels_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~3"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_youtube_channels_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        channel_ids=["UCxxxxxx"],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "YOUTUBE_CHANNEL"
+    assert result[0]["channel_id"] == "UCxxxxxx"
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_add_mobile_app_categories_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~4"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_mobile_app_categories_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        category_constants=["mobileAppCategoryConstants/60001"],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "MOBILE_APP_CATEGORY"
+    assert (
+        result[0]["mobile_app_category_constant"] == "mobileAppCategoryConstants/60001"
+    )
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_add_mobile_applications_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~5"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_mobile_applications_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        app_ids=["com.example.app"],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "MOBILE_APPLICATION"
+    assert result[0]["app_id"] == "com.example.app"
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_add_brands_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~6"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_brands_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        brands=[{"entity_id": "brand123", "display_name": "Test Brand"}],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "BRAND"
+    assert result[0]["entity_id"] == "brand123"
+    assert result[0]["display_name"] == "Test Brand"
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_add_webpages_to_shared_set(
+    service: SharedCriterionService, mock_ctx: Context
+) -> None:
+    mock_client = service.client
+    mock_result = Mock()
+    mock_result.resource_name = "customers/1234567890/sharedCriteria/111~7"
+    mock_response = Mock()
+    mock_response.results = [mock_result]
+    mock_client.mutate_shared_criteria.return_value = mock_response
+    result = await service.add_webpages_to_shared_set(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        shared_set_id="111",
+        webpages=[{"criterion_name": "Excluded Pages"}],
+    )
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "WEBPAGE"
+    assert result[0]["criterion_name"] == "Excluded Pages"
+    mock_client.mutate_shared_criteria.assert_called_once()
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_shared_criterion_tools(mock_mcp)
     assert isinstance(service, SharedCriterionService)
-    assert mock_mcp.tool.call_count > 0
+    assert mock_mcp.tool.call_count == 10

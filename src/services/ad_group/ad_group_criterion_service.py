@@ -6,11 +6,29 @@ from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
     AgeRangeInfo,
+    BrandListInfo,
+    CombinedAudienceInfo,
+    CustomAffinityInfo,
+    CustomAudienceInfo,
+    ExtendedDemographicInfo,
     GenderInfo,
     IncomeRangeInfo,
     KeywordInfo,
+    LanguageInfo,
+    LifeEventInfo,
+    LocationInfo,
+    MobileAppCategoryInfo,
+    MobileApplicationInfo,
     ParentalStatusInfo,
+    PlacementInfo,
+    TopicInfo,
+    UserInterestInfo,
     UserListInfo,
+    VideoLineupInfo,
+    WebpageConditionInfo,
+    WebpageInfo,
+    YouTubeChannelInfo,
+    YouTubeVideoInfo,
 )
 from google.ads.googleads.v23.enums.types.ad_group_criterion_status import (
     AdGroupCriterionStatusEnum,
@@ -21,6 +39,12 @@ from google.ads.googleads.v23.enums.types.income_range_type import IncomeRangeTy
 from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
 from google.ads.googleads.v23.enums.types.parental_status_type import (
     ParentalStatusTypeEnum,
+)
+from google.ads.googleads.v23.enums.types.webpage_condition_operand import (
+    WebpageConditionOperandEnum,
+)
+from google.ads.googleads.v23.enums.types.webpage_condition_operator import (
+    WebpageConditionOperatorEnum,
 )
 from google.ads.googleads.v23.resources.types.ad_group_criterion import AdGroupCriterion
 from google.ads.googleads.v23.services.services.ad_group_criterion_service import (
@@ -353,6 +377,1302 @@ class AdGroupCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def add_placement_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        urls: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add placement (website/app) targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            urls: List of placement URLs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for url in urls:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                placement_info = PlacementInfo()
+                placement_info.url = url
+                ad_group_criterion.placement = placement_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} placement criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add placement criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_mobile_app_category_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        mobile_app_category_constants: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add mobile app category targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            mobile_app_category_constants: List of mobile app category constant
+                resource names (e.g., "mobileAppCategoryConstants/123")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in mobile_app_category_constants:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                mobile_app_category_info = MobileAppCategoryInfo()
+                mobile_app_category_info.mobile_app_category_constant = resource_name
+                ad_group_criterion.mobile_app_category = mobile_app_category_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} mobile app category criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add mobile app category criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_mobile_application_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        app_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add specific mobile application targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            app_ids: List of mobile application IDs (e.g., "1-123456789" for
+                Android or "1-com.example.app" format)
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for app_id in app_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                mobile_application_info = MobileApplicationInfo()
+                mobile_application_info.app_id = app_id
+                ad_group_criterion.mobile_application = mobile_application_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} mobile application criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add mobile application criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_youtube_video_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        video_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add YouTube video targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            video_ids: List of YouTube video IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for video_id in video_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                youtube_video_info = YouTubeVideoInfo()
+                youtube_video_info.video_id = video_id
+                ad_group_criterion.youtube_video = youtube_video_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} YouTube video criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add YouTube video criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_youtube_channel_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        channel_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add YouTube channel targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            channel_ids: List of YouTube channel IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for channel_id in channel_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                youtube_channel_info = YouTubeChannelInfo()
+                youtube_channel_info.channel_id = channel_id
+                ad_group_criterion.youtube_channel = youtube_channel_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} YouTube channel criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add YouTube channel criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_topic_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        topic_constant_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add topic targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            topic_constant_resource_names: List of topic constant resource names
+                (e.g., ["topicConstants/123"])
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in topic_constant_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                topic_info = TopicInfo()
+                topic_info.topic_constant = resource_name
+                ad_group_criterion.topic = topic_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} topic criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add topic criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_user_interest_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        user_interest_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add user interest (in-market/affinity) targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            user_interest_resource_names: List of user interest resource names
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in user_interest_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                user_interest_info = UserInterestInfo()
+                user_interest_info.user_interest_category = resource_name
+                ad_group_criterion.user_interest = user_interest_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} user interest criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add user interest criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_webpage_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        criterion_name: str,
+        conditions: List[Dict[str, str]],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add webpage targeting criteria to an ad group (for DSA campaigns).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            criterion_name: A name for this webpage criterion
+            conditions: List of condition dicts, each with keys:
+                - operand: The operand type. Valid values: URL, CATEGORY,
+                    PAGE_TITLE, PAGE_CONTENT, CUSTOM_LABEL
+                - argument: The argument string to match
+                - operator: Optional operator. Valid values: EQUALS, CONTAINS
+                    (defaults to CONTAINS if not specified)
+            negative: Whether this is a negative criterion
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad_group_criterion = AdGroupCriterion()
+            ad_group_criterion.ad_group = ad_group_resource
+            ad_group_criterion.negative = negative
+
+            if bid_modifier is not None and not negative:
+                ad_group_criterion.bid_modifier = bid_modifier
+
+            webpage_info = WebpageInfo()
+            webpage_info.criterion_name = criterion_name
+
+            for cond_dict in conditions:
+                condition = WebpageConditionInfo()
+                condition.operand = getattr(
+                    WebpageConditionOperandEnum.WebpageConditionOperand,
+                    cond_dict["operand"],
+                )
+                condition.argument = cond_dict["argument"]
+                if "operator" in cond_dict:
+                    condition.operator = getattr(
+                        WebpageConditionOperatorEnum.WebpageConditionOperator,
+                        cond_dict["operator"],
+                    )
+                webpage_info.conditions.append(condition)
+
+            ad_group_criterion.webpage = webpage_info
+
+            operation = AdGroupCriterionOperation()
+            operation.create = ad_group_criterion
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added webpage criterion to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add webpage criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_custom_affinity_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        custom_affinity_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add custom affinity audience targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            custom_affinity_resource_names: List of custom affinity resource names
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in custom_affinity_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                custom_affinity_info = CustomAffinityInfo()
+                custom_affinity_info.custom_affinity = resource_name
+                ad_group_criterion.custom_affinity = custom_affinity_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} custom affinity criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add custom affinity criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_custom_audience_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        custom_audience_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add custom audience targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            custom_audience_resource_names: List of custom audience resource names
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in custom_audience_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                custom_audience_info = CustomAudienceInfo()
+                custom_audience_info.custom_audience = resource_name
+                ad_group_criterion.custom_audience = custom_audience_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} custom audience criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add custom audience criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_combined_audience_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        combined_audience_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add combined audience targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            combined_audience_resource_names: List of combined audience resource names
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in combined_audience_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                combined_audience_info = CombinedAudienceInfo()
+                combined_audience_info.combined_audience = resource_name
+                ad_group_criterion.combined_audience = combined_audience_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} combined audience criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add combined audience criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_location_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        location_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add location targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            location_ids: List of geo target constant IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for location_id in location_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                location_info = LocationInfo()
+                location_info.geo_target_constant = f"geoTargetConstants/{location_id}"
+                ad_group_criterion.location = location_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} location criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add location criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_language_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        language_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add language targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            language_ids: List of language constant IDs (e.g., "1000" for English)
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for language_id in language_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+
+                language_info = LanguageInfo()
+                language_info.language_constant = f"languageConstants/{language_id}"
+                ad_group_criterion.language = language_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} language criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add language criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_life_event_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        life_event_ids: List[int],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add life event targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            life_event_ids: List of life event taxonomy IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for life_event_id in life_event_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                life_event_info = LifeEventInfo()
+                life_event_info.life_event_id = life_event_id
+                ad_group_criterion.life_event = life_event_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} life event criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add life event criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_video_lineup_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        video_lineup_ids: List[int],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add YouTube video lineup targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            video_lineup_ids: List of video lineup IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for lineup_id in video_lineup_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                video_lineup_info = VideoLineupInfo()
+                video_lineup_info.video_lineup_id = lineup_id
+                ad_group_criterion.video_lineup = video_lineup_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} video lineup criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add video lineup criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_extended_demographic_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        extended_demographic_ids: List[int],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add extended demographic targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            extended_demographic_ids: List of extended demographic IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for demographic_id in extended_demographic_ids:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                ad_group_criterion.negative = negative
+
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                extended_demographic_info = ExtendedDemographicInfo()
+                extended_demographic_info.extended_demographic_id = demographic_id
+                ad_group_criterion.extended_demographic = extended_demographic_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(operations)} extended demographic criteria to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add extended demographic criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_brand_list_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        shared_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add brand list targeting criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            shared_set_resource_name: Resource name of the shared set containing
+                the brand list (e.g., "customers/123/sharedSets/456")
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            ad_group_criterion = AdGroupCriterion()
+            ad_group_criterion.ad_group = ad_group_resource
+
+            brand_list_info = BrandListInfo()
+            brand_list_info.shared_set = shared_set_resource_name
+            ad_group_criterion.brand_list = brand_list_info
+
+            operation = AdGroupCriterionOperation()
+            operation.create = ad_group_criterion
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Added brand list criterion to ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add brand list criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def update_criterion_bid(
         self,
         ctx: Context,
@@ -496,7 +1816,7 @@ def create_ad_group_criterion_tools(
     This returns a list of tool functions that can be registered with FastMCP.
     This approach makes the tools testable by allowing service injection.
     """
-    tools = []
+    tools: List[Callable[..., Awaitable[Any]]] = []
 
     async def add_keywords(
         ctx: Context,
@@ -597,6 +1917,603 @@ def create_ad_group_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_placement_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        urls: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add placement (website/app URL) targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            urls: List of placement URLs (e.g., "example.com", "youtube.com")
+            negative: Whether these are negative placements (exclusions)
+            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+
+        Returns:
+            Response with created ad group placement criteria
+        """
+        return await service.add_placement_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            urls=urls,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_mobile_app_category_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        mobile_app_category_constants: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add mobile app category targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            mobile_app_category_constants: List of mobile app category constant
+                resource names (e.g., "mobileAppCategoryConstants/123")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group mobile app category criteria
+        """
+        return await service.add_mobile_app_category_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            mobile_app_category_constants=mobile_app_category_constants,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_mobile_application_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        app_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add specific mobile application targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            app_ids: List of mobile application IDs (e.g., "1-123456789" for
+                Android or "1-com.example.app" format)
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group mobile application criteria
+        """
+        return await service.add_mobile_application_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            app_ids=app_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_youtube_video_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        video_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add YouTube video targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            video_ids: List of YouTube video IDs
+            negative: Whether these are negative criteria (exclusions)
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group YouTube video criteria
+        """
+        return await service.add_youtube_video_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            video_ids=video_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_youtube_channel_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        channel_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add YouTube channel targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            channel_ids: List of YouTube channel IDs
+            negative: Whether these are negative criteria (exclusions)
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group YouTube channel criteria
+        """
+        return await service.add_youtube_channel_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            channel_ids=channel_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_topic_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        topic_constant_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add topic targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            topic_constant_resource_names: List of topic constant resource names
+                (e.g., "topicConstants/123")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group topic criteria
+        """
+        return await service.add_topic_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            topic_constant_resource_names=topic_constant_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_user_interest_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        user_interest_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add user interest (in-market/affinity audience) targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            user_interest_resource_names: List of user interest resource names
+                (e.g., "customers/123/userInterests/456")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group user interest criteria
+        """
+        return await service.add_user_interest_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            user_interest_resource_names=user_interest_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_webpage_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        criterion_name: str,
+        conditions: List[Dict[str, str]],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add webpage targeting criteria to an ad group (for DSA campaigns).
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            criterion_name: A name for this webpage criterion
+            conditions: List of condition dicts, each with keys:
+                - operand: URL, CATEGORY, PAGE_TITLE, PAGE_CONTENT, CUSTOM_LABEL
+                - argument: The argument string to match
+                - operator: Optional. EQUALS or CONTAINS (defaults to CONTAINS)
+            negative: Whether this is a negative criterion
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group webpage criteria
+        """
+        return await service.add_webpage_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            criterion_name=criterion_name,
+            conditions=conditions,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_custom_affinity_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        custom_affinity_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add custom affinity audience targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            custom_affinity_resource_names: List of custom affinity resource names
+                (e.g., "customers/123/customAffinities/456")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group custom affinity criteria
+        """
+        return await service.add_custom_affinity_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            custom_affinity_resource_names=custom_affinity_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_custom_audience_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        custom_audience_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add custom audience targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            custom_audience_resource_names: List of custom audience resource names
+                (e.g., "customers/123/customAudiences/456")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group custom audience criteria
+        """
+        return await service.add_custom_audience_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            custom_audience_resource_names=custom_audience_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_combined_audience_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        combined_audience_resource_names: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add combined audience targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            combined_audience_resource_names: List of combined audience resource names
+                (e.g., "customers/123/combinedAudiences/456")
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group combined audience criteria
+        """
+        return await service.add_combined_audience_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            combined_audience_resource_names=combined_audience_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_location_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        location_ids: List[str],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add location targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            location_ids: List of geo target constant IDs (e.g., "2840" for US)
+            negative: Whether these are negative criteria (exclusions)
+            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+
+        Returns:
+            Response with created ad group location criteria
+        """
+        return await service.add_location_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            location_ids=location_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_language_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        language_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add language targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            language_ids: List of language constant IDs (e.g., "1000" for English)
+
+        Returns:
+            Response with created ad group language criteria
+        """
+        return await service.add_language_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            language_ids=language_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_life_event_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        life_event_ids: List[int],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add life event targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            life_event_ids: List of life event taxonomy IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group life event criteria
+        """
+        return await service.add_life_event_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            life_event_ids=life_event_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_video_lineup_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        video_lineup_ids: List[int],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add YouTube video lineup targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            video_lineup_ids: List of video lineup IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier
+
+        Returns:
+            Response with created ad group video lineup criteria
+        """
+        return await service.add_video_lineup_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            video_lineup_ids=video_lineup_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_extended_demographic_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        extended_demographic_ids: List[int],
+        negative: bool = False,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add extended demographic targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            extended_demographic_ids: List of extended demographic IDs
+            negative: Whether these are negative criteria
+            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+
+        Returns:
+            Response with created ad group extended demographic criteria
+        """
+        return await service.add_extended_demographic_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            extended_demographic_ids=extended_demographic_ids,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_brand_list_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        shared_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add brand list targeting criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            shared_set_resource_name: Resource name of the shared set containing
+                the brand list (e.g., "customers/123/sharedSets/456")
+
+        Returns:
+            Response with created ad group brand list criteria
+        """
+        return await service.add_brand_list_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            shared_set_resource_name=shared_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     async def update_criterion_bid(
         ctx: Context,
         customer_id: str,
@@ -660,6 +2577,23 @@ def create_ad_group_criterion_tools(
             add_keywords,
             add_audience_criteria,
             add_demographic_criteria,
+            add_placement_criteria,
+            add_mobile_app_category_criteria,
+            add_mobile_application_criteria,
+            add_youtube_video_criteria,
+            add_youtube_channel_criteria,
+            add_topic_criteria,
+            add_user_interest_criteria,
+            add_webpage_criteria,
+            add_custom_affinity_criteria,
+            add_custom_audience_criteria,
+            add_combined_audience_criteria,
+            add_location_criteria,
+            add_language_criteria,
+            add_life_event_criteria,
+            add_video_lineup_criteria,
+            add_extended_demographic_criteria,
+            add_brand_list_criteria,
             update_criterion_bid,
             remove_ad_group_criterion,
         ]

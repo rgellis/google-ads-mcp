@@ -458,7 +458,7 @@ def test_register_asset_tools() -> None:
     assert isinstance(service, AssetService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 5  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 31  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -470,6 +470,32 @@ def test_register_asset_tools() -> None:
         "create_youtube_video_asset",
         "search_assets",
         "update_asset",
+        "create_sitelink_asset",
+        "create_callout_asset",
+        "create_structured_snippet_asset",
+        "create_call_asset",
+        "create_price_asset",
+        "create_promotion_asset",
+        "create_lead_form_asset",
+        "create_page_feed_asset",
+        "create_mobile_app_asset",
+        "create_hotel_callout_asset",
+        "create_call_to_action_asset",
+        "create_location_asset",
+        "create_hotel_property_asset",
+        "create_app_deep_link_asset",
+        "create_book_on_google_asset",
+        "create_media_bundle_asset",
+        "create_demand_gen_carousel_card_asset",
+        "create_business_message_asset",
+        "create_dynamic_education_asset",
+        "create_dynamic_real_estate_asset",
+        "create_dynamic_custom_asset",
+        "create_dynamic_hotels_and_rentals_asset",
+        "create_dynamic_flights_asset",
+        "create_dynamic_travel_asset",
+        "create_dynamic_local_asset",
+        "create_dynamic_jobs_asset",
     ]
 
     assert set(tool_names) == set(expected_tools)

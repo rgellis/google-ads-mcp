@@ -6,8 +6,14 @@ from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
     ContentLabelInfo,
+    IpBlockInfo,
     KeywordInfo,
+    MobileAppCategoryInfo,
+    MobileApplicationInfo,
+    NegativeKeywordListInfo,
     PlacementInfo,
+    YouTubeChannelInfo,
+    YouTubeVideoInfo,
 )
 from google.ads.googleads.v23.enums.types.content_label_type import ContentLabelTypeEnum
 from google.ads.googleads.v23.enums.types.criterion_type import CriterionTypeEnum
@@ -330,6 +336,485 @@ class CustomerNegativeCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def add_mobile_application_exclusions(
+        self,
+        ctx: Context,
+        customer_id: str,
+        app_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile application exclusions at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            app_ids: List of mobile app IDs to exclude
+
+        Returns:
+            List of created customer negative criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operations = []
+            for app_id in app_ids:
+                customer_negative_criterion = CustomerNegativeCriterion()
+                mobile_app_info = MobileApplicationInfo()
+                mobile_app_info.app_id = app_id
+                customer_negative_criterion.mobile_application = mobile_app_info
+                customer_negative_criterion.type_ = (
+                    CriterionTypeEnum.CriterionType.MOBILE_APPLICATION
+                )
+
+                operation = CustomerNegativeCriterionOperation()
+                operation.create = customer_negative_criterion
+                operations.append(operation)
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "criterion_id": criterion_id,
+                        "type": "MOBILE_APPLICATION",
+                        "app_id": app_ids[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} mobile application exclusions at account level",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add mobile application exclusions: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_mobile_app_category_exclusions(
+        self,
+        ctx: Context,
+        customer_id: str,
+        category_constants: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile app category exclusions at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            category_constants: List of mobile app category constant resource names
+
+        Returns:
+            List of created customer negative criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operations = []
+            for constant in category_constants:
+                customer_negative_criterion = CustomerNegativeCriterion()
+                category_info = MobileAppCategoryInfo()
+                category_info.mobile_app_category_constant = constant
+                customer_negative_criterion.mobile_app_category = category_info
+                customer_negative_criterion.type_ = (
+                    CriterionTypeEnum.CriterionType.MOBILE_APP_CATEGORY
+                )
+
+                operation = CustomerNegativeCriterionOperation()
+                operation.create = customer_negative_criterion
+                operations.append(operation)
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "criterion_id": criterion_id,
+                        "type": "MOBILE_APP_CATEGORY",
+                        "mobile_app_category_constant": category_constants[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} mobile app category exclusions at account level",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add mobile app category exclusions: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_youtube_video_exclusions(
+        self,
+        ctx: Context,
+        customer_id: str,
+        video_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube video exclusions at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            video_ids: List of YouTube video IDs to exclude
+
+        Returns:
+            List of created customer negative criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operations = []
+            for video_id in video_ids:
+                customer_negative_criterion = CustomerNegativeCriterion()
+                video_info = YouTubeVideoInfo()
+                video_info.video_id = video_id
+                customer_negative_criterion.youtube_video = video_info
+                customer_negative_criterion.type_ = (
+                    CriterionTypeEnum.CriterionType.YOUTUBE_VIDEO
+                )
+
+                operation = CustomerNegativeCriterionOperation()
+                operation.create = customer_negative_criterion
+                operations.append(operation)
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "criterion_id": criterion_id,
+                        "type": "YOUTUBE_VIDEO",
+                        "video_id": video_ids[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} YouTube video exclusions at account level",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add YouTube video exclusions: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_youtube_channel_exclusions(
+        self,
+        ctx: Context,
+        customer_id: str,
+        channel_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube channel exclusions at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            channel_ids: List of YouTube channel IDs to exclude
+
+        Returns:
+            List of created customer negative criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operations = []
+            for channel_id in channel_ids:
+                customer_negative_criterion = CustomerNegativeCriterion()
+                channel_info = YouTubeChannelInfo()
+                channel_info.channel_id = channel_id
+                customer_negative_criterion.youtube_channel = channel_info
+                customer_negative_criterion.type_ = (
+                    CriterionTypeEnum.CriterionType.YOUTUBE_CHANNEL
+                )
+
+                operation = CustomerNegativeCriterionOperation()
+                operation.create = customer_negative_criterion
+                operations.append(operation)
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "criterion_id": criterion_id,
+                        "type": "YOUTUBE_CHANNEL",
+                        "channel_id": channel_ids[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} YouTube channel exclusions at account level",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add YouTube channel exclusions: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_ip_block_exclusions(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ip_addresses: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add IP block exclusions at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ip_addresses: List of IP addresses or CIDR ranges to exclude
+
+        Returns:
+            List of created customer negative criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operations = []
+            for ip_address in ip_addresses:
+                customer_negative_criterion = CustomerNegativeCriterion()
+                ip_block_info = IpBlockInfo()
+                ip_block_info.ip_address = ip_address
+                customer_negative_criterion.ip_block = ip_block_info
+                customer_negative_criterion.type_ = (
+                    CriterionTypeEnum.CriterionType.IP_BLOCK
+                )
+
+                operation = CustomerNegativeCriterionOperation()
+                operation.create = customer_negative_criterion
+                operations.append(operation)
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "criterion_id": criterion_id,
+                        "type": "IP_BLOCK",
+                        "ip_address": ip_addresses[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} IP block exclusions at account level",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add IP block exclusions: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_negative_keyword_list_exclusion(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add a negative keyword list exclusion at the account level.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_resource_name: Resource name of the shared set (negative keyword list)
+
+        Returns:
+            Created customer negative criterion
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            customer_negative_criterion = CustomerNegativeCriterion()
+            nkl_info = NegativeKeywordListInfo()
+            nkl_info.shared_set = shared_set_resource_name
+            customer_negative_criterion.negative_keyword_list = nkl_info
+            customer_negative_criterion.type_ = (
+                CriterionTypeEnum.CriterionType.NEGATIVE_KEYWORD_LIST
+            )
+
+            operation = CustomerNegativeCriterionOperation()
+            operation.create = customer_negative_criterion
+
+            request = MutateCustomerNegativeCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCustomerNegativeCriteriaResponse = (
+                self.client.mutate_customer_negative_criteria(request=request)
+            )
+
+            result = response.results[0]
+            criterion_resource = result.resource_name
+            criterion_id = (
+                criterion_resource.split("/")[-1] if criterion_resource else ""
+            )
+
+            await ctx.log(
+                level="info",
+                message="Added negative keyword list exclusion at account level",
+            )
+
+            return {
+                "resource_name": criterion_resource,
+                "criterion_id": criterion_id,
+                "type": "NEGATIVE_KEYWORD_LIST",
+                "shared_set": shared_set_resource_name,
+            }
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add negative keyword list exclusion: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def list_negative_criteria(
         self,
         ctx: Context,
@@ -341,7 +826,9 @@ class CustomerNegativeCriterionService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            criterion_type: Optional filter by type (KEYWORD, PLACEMENT, CONTENT_LABEL)
+            criterion_type: Optional filter by type (KEYWORD, PLACEMENT, CONTENT_LABEL,
+                MOBILE_APPLICATION, MOBILE_APP_CATEGORY, YOUTUBE_VIDEO, YOUTUBE_CHANNEL,
+                IP_BLOCK, NEGATIVE_KEYWORD_LIST)
 
         Returns:
             List of customer negative criteria
@@ -616,11 +1103,179 @@ def create_customer_negative_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_mobile_application_exclusions(
+        ctx: Context,
+        customer_id: str,
+        app_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile application exclusions at the account level.
+
+        Args:
+            customer_id: The customer ID
+            app_ids: List of mobile app IDs to exclude (e.g., ["com.example.app"])
+
+        Returns:
+            List of created customer negative criteria with resource names and IDs
+        """
+        return await service.add_mobile_application_exclusions(
+            ctx=ctx,
+            customer_id=customer_id,
+            app_ids=app_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_mobile_app_category_exclusions(
+        ctx: Context,
+        customer_id: str,
+        category_constants: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile app category exclusions at the account level.
+
+        Args:
+            customer_id: The customer ID
+            category_constants: List of mobile app category constant resource names
+                (e.g., ["mobileAppCategoryConstants/60001"])
+
+        Returns:
+            List of created customer negative criteria with resource names and IDs
+        """
+        return await service.add_mobile_app_category_exclusions(
+            ctx=ctx,
+            customer_id=customer_id,
+            category_constants=category_constants,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_youtube_video_exclusions(
+        ctx: Context,
+        customer_id: str,
+        video_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube video exclusions at the account level.
+
+        Args:
+            customer_id: The customer ID
+            video_ids: List of YouTube video IDs to exclude (e.g., ["dQw4w9WgXcQ"])
+
+        Returns:
+            List of created customer negative criteria with resource names and IDs
+        """
+        return await service.add_youtube_video_exclusions(
+            ctx=ctx,
+            customer_id=customer_id,
+            video_ids=video_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_youtube_channel_exclusions(
+        ctx: Context,
+        customer_id: str,
+        channel_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube channel exclusions at the account level.
+
+        Args:
+            customer_id: The customer ID
+            channel_ids: List of YouTube channel IDs to exclude (e.g., ["UCxxxxxx"])
+
+        Returns:
+            List of created customer negative criteria with resource names and IDs
+        """
+        return await service.add_youtube_channel_exclusions(
+            ctx=ctx,
+            customer_id=customer_id,
+            channel_ids=channel_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_ip_block_exclusions(
+        ctx: Context,
+        customer_id: str,
+        ip_addresses: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add IP block exclusions at the account level.
+
+        Args:
+            customer_id: The customer ID
+            ip_addresses: List of IP addresses or CIDR ranges to exclude
+                (e.g., ["192.168.1.0/24", "10.0.0.1"])
+
+        Returns:
+            List of created customer negative criteria with resource names and IDs
+        """
+        return await service.add_ip_block_exclusions(
+            ctx=ctx,
+            customer_id=customer_id,
+            ip_addresses=ip_addresses,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_negative_keyword_list_exclusion(
+        ctx: Context,
+        customer_id: str,
+        shared_set_resource_name: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add a negative keyword list exclusion at the account level.
+
+        Links a shared negative keyword list to the account so all keywords
+        in the list are excluded account-wide.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_resource_name: Resource name of the shared set
+                (e.g., "customers/1234567890/sharedSets/111222")
+
+        Returns:
+            Created customer negative criterion with resource name and ID
+        """
+        return await service.add_negative_keyword_list_exclusion(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_resource_name=shared_set_resource_name,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             add_negative_keywords,
             add_placement_exclusions,
             add_content_label_exclusions,
+            add_mobile_application_exclusions,
+            add_mobile_app_category_exclusions,
+            add_youtube_video_exclusions,
+            add_youtube_channel_exclusions,
+            add_ip_block_exclusions,
+            add_negative_keyword_list_exclusion,
             list_negative_criteria,
             remove_negative_criterion,
         ]

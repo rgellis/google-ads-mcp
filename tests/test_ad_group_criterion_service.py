@@ -15,6 +15,9 @@ from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatch
 from google.ads.googleads.v23.enums.types.parental_status_type import (
     ParentalStatusTypeEnum,
 )
+from google.ads.googleads.v23.enums.types.webpage_condition_operand import (
+    WebpageConditionOperandEnum,
+)
 from google.ads.googleads.v23.services.services.ad_group_criterion_service import (
     AdGroupCriterionServiceClient,
 )
@@ -45,6 +48,21 @@ def ad_group_criterion_service(mock_sdk_client: Any) -> AdGroupCriterionService:
         return service
 
 
+def _make_mock_response(
+    customer_id: str, ad_group_id: str, count: int, start_id: int = 100
+) -> Mock:
+    """Helper to create a mock MutateAdGroupCriteriaResponse."""
+    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
+    mock_response.results = []
+    for i in range(count):
+        result = Mock()
+        result.resource_name = (
+            f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~{i + start_id}"
+        )
+        mock_response.results.append(result)  # type: ignore
+    return mock_response
+
+
 @pytest.mark.asyncio
 async def test_add_keywords(
     ad_group_criterion_service: AdGroupCriterionService,
@@ -63,14 +81,7 @@ async def test_add_keywords(
     negative = False
 
     # Create mock response
-    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
-    mock_response.results = []
-    for i, _ in enumerate(keywords):
-        result = Mock()
-        result.resource_name = (
-            f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~{i + 100}"
-        )
-        mock_response.results.append(result)  # type: ignore
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(keywords))
 
     # Get the mocked ad group criterion service client
     mock_ad_group_criterion_client = ad_group_criterion_service.client  # type: ignore
@@ -150,14 +161,7 @@ async def test_add_negative_keywords(
     negative = True
 
     # Create mock response
-    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
-    mock_response.results = []
-    for i, _ in enumerate(keywords):
-        result = Mock()
-        result.resource_name = (
-            f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~{i + 200}"
-        )
-        mock_response.results.append(result)  # type: ignore
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(keywords), 200)
 
     # Get the mocked ad group criterion service client
     mock_ad_group_criterion_client = ad_group_criterion_service.client  # type: ignore
@@ -213,14 +217,9 @@ async def test_add_audience_criteria(
     bid_modifier = 1.2
 
     # Create mock response
-    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
-    mock_response.results = []
-    for i, _ in enumerate(user_list_ids):
-        result = Mock()
-        result.resource_name = (
-            f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~{i + 300}"
-        )
-        mock_response.results.append(result)  # type: ignore
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(user_list_ids), 300
+    )
 
     # Get the mocked ad group criterion service client
     mock_ad_group_criterion_client = ad_group_criterion_service.client  # type: ignore
@@ -336,14 +335,9 @@ async def test_add_demographic_criteria(
     ]
 
     # Create mock response
-    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
-    mock_response.results = []
-    for i, _ in enumerate(demographics):
-        result = Mock()
-        result.resource_name = (
-            f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~{i + 400}"
-        )
-        mock_response.results.append(result)  # type: ignore
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(demographics), 400
+    )
 
     # Get the mocked ad group criterion service client
     mock_ad_group_criterion_client = ad_group_criterion_service.client  # type: ignore
@@ -483,6 +477,633 @@ async def test_add_demographic_criteria_unknown_type(
         request.operations[0].create.age_range.type_
         == AgeRangeTypeEnum.AgeRangeType.AGE_RANGE_25_34
     )
+
+
+@pytest.mark.asyncio
+async def test_add_placement_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding placement criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    urls = ["example.com", "youtube.com"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(urls), 500)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_placement_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            urls=urls,
+            negative=True,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert request.operations[0].create.placement.url == "example.com"
+    assert request.operations[0].create.negative is True
+    assert request.operations[1].create.placement.url == "youtube.com"
+
+
+@pytest.mark.asyncio
+async def test_add_mobile_app_category_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding mobile app category criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    categories = ["mobileAppCategoryConstants/123", "mobileAppCategoryConstants/456"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(categories), 600)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_mobile_app_category_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            mobile_app_category_constants=categories,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert (
+        request.operations[0].create.mobile_app_category.mobile_app_category_constant
+        == "mobileAppCategoryConstants/123"
+    )
+
+
+@pytest.mark.asyncio
+async def test_add_mobile_application_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding mobile application criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    app_ids = ["1-123456789"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(app_ids), 700)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_mobile_application_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            app_ids=app_ids,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.operations[0].create.mobile_application.app_id == "1-123456789"
+
+
+@pytest.mark.asyncio
+async def test_add_youtube_video_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding YouTube video criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    video_ids = ["dQw4w9WgXcQ", "abc123"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(video_ids), 800)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_youtube_video_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            video_ids=video_ids,
+            negative=True,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert request.operations[0].create.youtube_video.video_id == "dQw4w9WgXcQ"
+    assert request.operations[0].create.negative is True
+
+
+@pytest.mark.asyncio
+async def test_add_youtube_channel_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding YouTube channel criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    channel_ids = ["UCxyz123"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(channel_ids), 900)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_youtube_channel_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            channel_ids=channel_ids,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.operations[0].create.youtube_channel.channel_id == "UCxyz123"
+
+
+@pytest.mark.asyncio
+async def test_add_topic_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding topic criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    topics = ["topicConstants/123", "topicConstants/456"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(topics), 1000)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_topic_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            topic_constant_resource_names=topics,
+            bid_modifier=1.5,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert request.operations[0].create.topic.topic_constant == "topicConstants/123"
+    assert abs(request.operations[0].create.bid_modifier - 1.5) < 0.001
+
+
+@pytest.mark.asyncio
+async def test_add_user_interest_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding user interest criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    interests = ["customers/1234567890/userInterests/123"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(interests), 1100)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_user_interest_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            user_interest_resource_names=interests,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert (
+        request.operations[0].create.user_interest.user_interest_category
+        == "customers/1234567890/userInterests/123"
+    )
+
+
+@pytest.mark.asyncio
+async def test_add_webpage_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding webpage criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    conditions = [
+        {"operand": "URL", "argument": "example.com/shoes"},
+        {"operand": "PAGE_TITLE", "argument": "running", "operator": "CONTAINS"},
+    ]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 1200)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_webpage_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            criterion_name="Shoes pages",
+            conditions=conditions,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.webpage.criterion_name == "Shoes pages"
+    assert len(criterion.webpage.conditions) == 2
+    assert (
+        criterion.webpage.conditions[0].operand
+        == WebpageConditionOperandEnum.WebpageConditionOperand.URL
+    )
+    assert criterion.webpage.conditions[0].argument == "example.com/shoes"
+
+
+@pytest.mark.asyncio
+async def test_add_custom_affinity_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding custom affinity criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    affinities = ["customers/1234567890/customAffinities/123"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(affinities), 1300)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_custom_affinity_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            custom_affinity_resource_names=affinities,
+            bid_modifier=1.3,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert (
+        request.operations[0].create.custom_affinity.custom_affinity
+        == "customers/1234567890/customAffinities/123"
+    )
+    assert abs(request.operations[0].create.bid_modifier - 1.3) < 0.001
+
+
+@pytest.mark.asyncio
+async def test_add_custom_audience_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding custom audience criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    audiences = ["customers/1234567890/customAudiences/789"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(audiences), 1400)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_custom_audience_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            custom_audience_resource_names=audiences,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert (
+        request.operations[0].create.custom_audience.custom_audience
+        == "customers/1234567890/customAudiences/789"
+    )
+
+
+@pytest.mark.asyncio
+async def test_add_combined_audience_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding combined audience criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    audiences = ["customers/1234567890/combinedAudiences/111"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(audiences), 1500)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_combined_audience_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            combined_audience_resource_names=audiences,
+            bid_modifier=0.8,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert (
+        request.operations[0].create.combined_audience.combined_audience
+        == "customers/1234567890/combinedAudiences/111"
+    )
+    assert abs(request.operations[0].create.bid_modifier - 0.8) < 0.001
+
+
+@pytest.mark.asyncio
+async def test_add_location_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding location criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    location_ids = ["2840", "2826"]
+
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(location_ids), 1600
+    )
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_location_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            location_ids=location_ids,
+            bid_modifier=1.2,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert (
+        request.operations[0].create.location.geo_target_constant
+        == "geoTargetConstants/2840"
+    )
+    assert abs(request.operations[0].create.bid_modifier - 1.2) < 0.001
+
+
+@pytest.mark.asyncio
+async def test_add_language_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding language criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    language_ids = ["1000", "1003"]
+
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(language_ids), 1700
+    )
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_language_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            language_ids=language_ids,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert (
+        request.operations[0].create.language.language_constant
+        == "languageConstants/1000"
+    )
+
+
+@pytest.mark.asyncio
+async def test_add_life_event_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding life event criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    life_event_ids = [123, 456]
+
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(life_event_ids), 1800
+    )
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_life_event_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            life_event_ids=life_event_ids,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert request.operations[0].create.life_event.life_event_id == 123
+
+
+@pytest.mark.asyncio
+async def test_add_video_lineup_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding video lineup criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    lineup_ids = [100, 200]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, len(lineup_ids), 1900)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_video_lineup_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            video_lineup_ids=lineup_ids,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 2
+    assert request.operations[0].create.video_lineup.video_lineup_id == 100
+
+
+@pytest.mark.asyncio
+async def test_add_extended_demographic_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding extended demographic criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    demographic_ids = [1, 2, 3]
+
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(demographic_ids), 2000
+    )
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_extended_demographic_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            extended_demographic_ids=demographic_ids,
+            bid_modifier=1.1,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert len(request.operations) == 3
+    assert (
+        request.operations[0].create.extended_demographic.extended_demographic_id == 1
+    )
+    assert abs(request.operations[0].create.bid_modifier - 1.1) < 0.001
+
+
+@pytest.mark.asyncio
+async def test_add_brand_list_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding brand list criteria to an ad group."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    shared_set = "customers/1234567890/sharedSets/456"
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2100)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_brand_list_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            shared_set_resource_name=shared_set,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.operations[0].create.brand_list.shared_set == shared_set
 
 
 @pytest.mark.asyncio
@@ -842,6 +1463,123 @@ async def test_error_handling_remove_criterion(
     )
 
 
+@pytest.mark.asyncio
+async def test_error_handling_placement_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+    google_ads_exception: Any,
+) -> None:
+    """Test error handling when adding placement criteria fails."""
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.side_effect = google_ads_exception  # type: ignore
+
+    with pytest.raises(Exception) as exc_info:
+        await ad_group_criterion_service.add_placement_criteria(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            ad_group_id="9876543210",
+            urls=["example.com"],
+        )
+
+    assert "Failed to add placement criteria" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+async def test_error_handling_topic_criteria(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+    google_ads_exception: Any,
+) -> None:
+    """Test error handling when adding topic criteria fails."""
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.side_effect = google_ads_exception  # type: ignore
+
+    with pytest.raises(Exception) as exc_info:
+        await ad_group_criterion_service.add_topic_criteria(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            ad_group_id="9876543210",
+            topic_constant_resource_names=["topicConstants/123"],
+        )
+
+    assert "Failed to add topic criteria" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+async def test_add_placement_criteria_with_bid_modifier(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test adding placement criteria with bid modifier (non-negative)."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    urls = ["example.com"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2200)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        result = await ad_group_criterion_service.add_placement_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            urls=urls,
+            negative=False,
+            bid_modifier=1.5,
+        )
+
+    assert result == expected_result
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert abs(request.operations[0].create.bid_modifier - 1.5) < 0.001
+    assert request.operations[0].create.negative is False
+
+
+@pytest.mark.asyncio
+async def test_add_negative_placement_no_bid_modifier(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test that negative placements don't get bid modifiers even if specified."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    urls = ["badsite.com"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2300)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        await ad_group_criterion_service.add_placement_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            urls=urls,
+            negative=True,
+            bid_modifier=1.5,
+        )
+
+    call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.negative is True
+    # bid_modifier should not be set for negative criteria
+    assert not hasattr(criterion, "bid_modifier") or criterion.bid_modifier == 0
+
+
 def test_register_ad_group_criterion_tools() -> None:
     """Test tool registration."""
     # Arrange
@@ -854,7 +1592,7 @@ def test_register_ad_group_criterion_tools() -> None:
     assert isinstance(service, AdGroupCriterionService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 22  # 22 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -864,6 +1602,23 @@ def test_register_ad_group_criterion_tools() -> None:
         "add_keywords",
         "add_audience_criteria",
         "add_demographic_criteria",
+        "add_placement_criteria",
+        "add_mobile_app_category_criteria",
+        "add_mobile_application_criteria",
+        "add_youtube_video_criteria",
+        "add_youtube_channel_criteria",
+        "add_topic_criteria",
+        "add_user_interest_criteria",
+        "add_webpage_criteria",
+        "add_custom_affinity_criteria",
+        "add_custom_audience_criteria",
+        "add_combined_audience_criteria",
+        "add_location_criteria",
+        "add_language_criteria",
+        "add_life_event_criteria",
+        "add_video_lineup_criteria",
+        "add_extended_demographic_criteria",
+        "add_brand_list_criteria",
         "update_criterion_bid",
         "remove_ad_group_criterion",
     ]

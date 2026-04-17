@@ -5,10 +5,13 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.bidding import (
+    EnhancedCpc,
+    MaximizeConversionValue,
     MaximizeConversions,
     TargetCpa,
     TargetImpressionShare,
     TargetRoas,
+    TargetSpend,
 )
 from google.ads.googleads.v23.enums.types.bidding_strategy_status import (
     BiddingStrategyStatusEnum,
@@ -287,6 +290,235 @@ class BiddingStrategyService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to create Maximize Conversions strategy: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_enhanced_cpc_strategy(
+        self,
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create an Enhanced CPC bidding strategy that adjusts manual bids to maximize conversions.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            name: Strategy name
+            status: Strategy status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created bidding strategy details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            # Create bidding strategy
+            bidding_strategy = BiddingStrategy()
+            bidding_strategy.name = name
+            bidding_strategy.status = getattr(
+                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
+            )
+            bidding_strategy.type_ = (
+                BiddingStrategyTypeEnum.BiddingStrategyType.ENHANCED_CPC
+            )
+
+            # Configure Enhanced CPC
+            bidding_strategy.enhanced_cpc = EnhancedCpc()
+
+            # Create operation
+            operation = BiddingStrategyOperation()
+            operation.create = bidding_strategy
+
+            # Create request
+            request = MutateBiddingStrategiesRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateBiddingStrategiesResponse = (
+                self.client.mutate_bidding_strategies(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created Enhanced CPC strategy '{name}'",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create Enhanced CPC strategy: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_maximize_conversion_value_strategy(
+        self,
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        target_roas: Optional[float] = None,
+        status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a Maximize Conversion Value strategy. Optionally set target_roas (e.g. 2.0 for 200% return).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            name: Strategy name
+            target_roas: Optional target return on ad spend
+            status: Strategy status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created bidding strategy details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            # Create bidding strategy
+            bidding_strategy = BiddingStrategy()
+            bidding_strategy.name = name
+            bidding_strategy.status = getattr(
+                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
+            )
+            bidding_strategy.type_ = (
+                BiddingStrategyTypeEnum.BiddingStrategyType.MAXIMIZE_CONVERSION_VALUE
+            )
+
+            # Configure Maximize Conversion Value
+            mcv = MaximizeConversionValue()
+            if target_roas is not None:
+                mcv.target_roas = target_roas
+            bidding_strategy.maximize_conversion_value = mcv
+
+            # Create operation
+            operation = BiddingStrategyOperation()
+            operation.create = bidding_strategy
+
+            # Create request
+            request = MutateBiddingStrategiesRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateBiddingStrategiesResponse = (
+                self.client.mutate_bidding_strategies(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created Maximize Conversion Value strategy '{name}'",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create Maximize Conversion Value strategy: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_target_spend_strategy(
+        self,
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        target_spend_micros: Optional[int] = None,
+        status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a Target Spend (Maximize Clicks) strategy. Optionally set a spending target in micros.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            name: Strategy name
+            target_spend_micros: Optional spending target in micros
+            status: Strategy status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created bidding strategy details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            # Create bidding strategy
+            bidding_strategy = BiddingStrategy()
+            bidding_strategy.name = name
+            bidding_strategy.status = getattr(
+                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
+            )
+            bidding_strategy.type_ = (
+                BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_SPEND
+            )
+
+            # Configure Target Spend
+            ts = TargetSpend()
+            if target_spend_micros is not None:
+                ts.target_spend_micros = target_spend_micros
+            bidding_strategy.target_spend = ts
+
+            # Create operation
+            operation = BiddingStrategyOperation()
+            operation.create = bidding_strategy
+
+            # Create request
+            request = MutateBiddingStrategiesRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response: MutateBiddingStrategiesResponse = (
+                self.client.mutate_bidding_strategies(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created Target Spend strategy '{name}'",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create Target Spend strategy: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -733,6 +965,99 @@ def create_bidding_strategy_tools(
             response_content_type=response_content_type,
         )
 
+    async def create_enhanced_cpc_strategy(
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create an Enhanced CPC bidding strategy that adjusts manual bids to maximize conversions.
+
+        Args:
+            customer_id: The customer ID
+            name: Strategy name
+            status: Strategy status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created bidding strategy details
+        """
+        return await service.create_enhanced_cpc_strategy(
+            ctx=ctx,
+            customer_id=customer_id,
+            name=name,
+            status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_maximize_conversion_value_strategy(
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        target_roas: Optional[float] = None,
+        status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a Maximize Conversion Value strategy. Optionally set target_roas (e.g. 2.0 for 200% return).
+
+        Args:
+            customer_id: The customer ID
+            name: Strategy name
+            target_roas: Optional target return on ad spend (e.g., 2.0 for 200% return)
+            status: Strategy status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created bidding strategy details
+        """
+        return await service.create_maximize_conversion_value_strategy(
+            ctx=ctx,
+            customer_id=customer_id,
+            name=name,
+            target_roas=target_roas,
+            status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_target_spend_strategy(
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        target_spend_micros: Optional[int] = None,
+        status: str = "ENABLED",
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a Target Spend (Maximize Clicks) strategy. Optionally set a spending target in micros.
+
+        Args:
+            customer_id: The customer ID
+            name: Strategy name
+            target_spend_micros: Optional spending target in micros
+            status: Strategy status (ENABLED, PAUSED, REMOVED)
+
+        Returns:
+            Created bidding strategy details
+        """
+        return await service.create_target_spend_strategy(
+            ctx=ctx,
+            customer_id=customer_id,
+            name=name,
+            target_spend_micros=target_spend_micros,
+            status=status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     async def remove_bidding_strategy(
         ctx: Context,
         customer_id: str,
@@ -818,6 +1143,9 @@ def create_bidding_strategy_tools(
             create_target_cpa_strategy,
             create_target_roas_strategy,
             create_maximize_conversions_strategy,
+            create_enhanced_cpc_strategy,
+            create_maximize_conversion_value_strategy,
+            create_target_spend_strategy,
             create_target_impression_share_strategy,
             update_bidding_strategy,
             remove_bidding_strategy,

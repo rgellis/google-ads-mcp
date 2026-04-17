@@ -5,8 +5,14 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
+    BrandInfo,
     KeywordInfo,
+    MobileAppCategoryInfo,
+    MobileApplicationInfo,
     PlacementInfo,
+    WebpageInfo,
+    YouTubeChannelInfo,
+    YouTubeVideoInfo,
 )
 from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
 from google.ads.googleads.v23.resources.types.shared_criterion import SharedCriterion
@@ -231,6 +237,506 @@ class SharedCriterionService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to add placements to shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_youtube_videos_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        video_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube video criteria to a shared set.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            video_ids: List of YouTube video IDs
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for video_id in video_ids:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                video_info = YouTubeVideoInfo()
+                video_info.video_id = video_id
+                shared_criterion.youtube_video = video_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "shared_criterion_id": criterion_id,
+                        "type": "YOUTUBE_VIDEO",
+                        "video_id": video_ids[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} YouTube videos to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add YouTube videos to shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_youtube_channels_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        channel_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube channel criteria to a shared set.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            channel_ids: List of YouTube channel IDs
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for channel_id in channel_ids:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                channel_info = YouTubeChannelInfo()
+                channel_info.channel_id = channel_id
+                shared_criterion.youtube_channel = channel_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "shared_criterion_id": criterion_id,
+                        "type": "YOUTUBE_CHANNEL",
+                        "channel_id": channel_ids[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} YouTube channels to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add YouTube channels to shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_mobile_app_categories_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        category_constants: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile app category criteria to a shared set.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            category_constants: List of mobile app category constant resource names
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for constant in category_constants:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                category_info = MobileAppCategoryInfo()
+                category_info.mobile_app_category_constant = constant
+                shared_criterion.mobile_app_category = category_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "shared_criterion_id": criterion_id,
+                        "type": "MOBILE_APP_CATEGORY",
+                        "mobile_app_category_constant": category_constants[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} mobile app categories to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add mobile app categories to shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_mobile_applications_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        app_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile application criteria to a shared set.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            app_ids: List of mobile app IDs
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for app_id in app_ids:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                mobile_app_info = MobileApplicationInfo()
+                mobile_app_info.app_id = app_id
+                shared_criterion.mobile_application = mobile_app_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                results.append(
+                    {
+                        "resource_name": criterion_resource,
+                        "shared_criterion_id": criterion_id,
+                        "type": "MOBILE_APPLICATION",
+                        "app_id": app_ids[i],
+                    }
+                )
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} mobile applications to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add mobile applications to shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_brands_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        brands: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add brand criteria to a shared set.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            brands: List of brand dicts with optional keys:
+                - entity_id: The brand entity ID
+                - display_name: The brand display name
+                - primary_url: The brand primary URL
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for brand in brands:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                brand_info = BrandInfo()
+                if "entity_id" in brand:
+                    brand_info.entity_id = brand["entity_id"]
+                if "display_name" in brand:
+                    brand_info.display_name = brand["display_name"]
+                if "primary_url" in brand:
+                    brand_info.primary_url = brand["primary_url"]
+                shared_criterion.brand = brand_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                result_dict: Dict[str, Any] = {
+                    "resource_name": criterion_resource,
+                    "shared_criterion_id": criterion_id,
+                    "type": "BRAND",
+                }
+                result_dict.update(brands[i])
+                results.append(result_dict)
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} brands to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add brands to shared set: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_webpages_to_shared_set(
+        self,
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        webpages: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> List[Dict[str, Any]]:
+        """Add webpage criteria to a shared set.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            webpages: List of webpage dicts with:
+                - criterion_name: Name for the webpage criterion
+
+        Returns:
+            List of created shared criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+
+            operations = []
+            for webpage in webpages:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                webpage_info = WebpageInfo()
+                if "criterion_name" in webpage:
+                    webpage_info.criterion_name = webpage["criterion_name"]
+                shared_criterion.webpage = webpage_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+
+            request = MutateSharedCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateSharedCriteriaResponse = self.client.mutate_shared_criteria(
+                request=request
+            )
+
+            results = []
+            for i, result in enumerate(response.results):
+                criterion_resource = result.resource_name
+                criterion_id = (
+                    criterion_resource.split("/")[-1] if criterion_resource else ""
+                )
+                result_dict: Dict[str, Any] = {
+                    "resource_name": criterion_resource,
+                    "shared_criterion_id": criterion_id,
+                    "type": "WEBPAGE",
+                }
+                result_dict.update(webpages[i])
+                results.append(result_dict)
+
+            await ctx.log(
+                level="info",
+                message=f"Added {len(results)} webpages to shared set {shared_set_id}",
+            )
+
+            return results
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add webpages to shared set: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -492,10 +998,195 @@ def create_shared_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_youtube_videos_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        video_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube video criteria to a shared set.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            video_ids: List of YouTube video IDs (e.g., ["dQw4w9WgXcQ"])
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_youtube_videos_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            video_ids=video_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_youtube_channels_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        channel_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add YouTube channel criteria to a shared set.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            channel_ids: List of YouTube channel IDs (e.g., ["UCxxxxxx"])
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_youtube_channels_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            channel_ids=channel_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_mobile_app_categories_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        category_constants: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile app category criteria to a shared set.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            category_constants: List of mobile app category constant resource names
+                (e.g., ["mobileAppCategoryConstants/60001"])
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_mobile_app_categories_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            category_constants=category_constants,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_mobile_applications_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        app_ids: List[str],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add mobile application criteria to a shared set.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            app_ids: List of mobile app IDs (e.g., ["com.example.app"])
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_mobile_applications_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            app_ids=app_ids,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_brands_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        brands: List[Dict[str, str]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add brand criteria to a shared set.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            brands: List of brand dicts with optional keys:
+                - entity_id: The brand entity ID
+                - display_name: The brand display name
+                - primary_url: The brand primary URL
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_brands_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            brands=brands,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_webpages_to_shared_set(
+        ctx: Context,
+        customer_id: str,
+        shared_set_id: str,
+        webpages: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Add webpage criteria to a shared set.
+
+        Args:
+            customer_id: The customer ID
+            shared_set_id: The shared set ID
+            webpages: List of webpage dicts with:
+                - criterion_name: Name for the webpage criterion
+
+        Returns:
+            List of created shared criteria with resource names and IDs
+        """
+        return await service.add_webpages_to_shared_set(
+            ctx=ctx,
+            customer_id=customer_id,
+            shared_set_id=shared_set_id,
+            webpages=webpages,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             add_keywords_to_shared_set,
             add_placements_to_shared_set,
+            add_youtube_videos_to_shared_set,
+            add_youtube_channels_to_shared_set,
+            add_mobile_app_categories_to_shared_set,
+            add_mobile_applications_to_shared_set,
+            add_brands_to_shared_set,
+            add_webpages_to_shared_set,
             list_shared_criteria,
             remove_shared_criterion,
         ]
