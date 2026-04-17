@@ -232,6 +232,11 @@ class GoogleAdsService:
             # Execute mutations
             response: MutateGoogleAdsResponse = self.client.mutate(request=request)
 
+            await ctx.log(
+                level="info",
+                message=f"Executed {len(operations)} mutate operations",
+            )
+
             # Process results
             results: List[Dict[str, Any]] = []
             result: MutateOperationResponse

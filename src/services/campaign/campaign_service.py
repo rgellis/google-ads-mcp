@@ -311,6 +311,11 @@ class CampaignService:
                 self.client.enable_p_max_brand_guidelines(request=request)
             )
 
+            await ctx.log(
+                level="info",
+                message="Enabled PMax brand guidelines",
+            )
+
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
