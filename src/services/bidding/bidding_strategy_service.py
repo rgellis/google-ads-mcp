@@ -379,6 +379,65 @@ class BiddingStrategyService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_bidding_strategy(
+        self,
+        ctx: Context,
+        customer_id: str,
+        bidding_strategy_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a bidding strategy permanently.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            bidding_strategy_id: The bidding strategy ID to remove
+
+        Returns:
+            Removal result details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = (
+                f"customers/{customer_id}/biddingStrategies/{bidding_strategy_id}"
+            )
+
+            # Create operation
+            operation = BiddingStrategyOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateBiddingStrategiesRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response = self.client.mutate_bidding_strategies(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Removed bidding strategy {bidding_strategy_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove bidding strategy: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_bidding_strategy_tools(
     service: BiddingStrategyService,
@@ -524,12 +583,39 @@ def create_bidding_strategy_tools(
             response_content_type=response_content_type,
         )
 
+    async def remove_bidding_strategy(
+        ctx: Context,
+        customer_id: str,
+        bidding_strategy_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Remove a bidding strategy permanently. This action is irreversible.
+
+        Args:
+            customer_id: The customer ID
+            bidding_strategy_id: The bidding strategy ID to remove
+
+        Returns:
+            Removal result details
+        """
+        return await service.remove_bidding_strategy(
+            ctx=ctx,
+            customer_id=customer_id,
+            bidding_strategy_id=bidding_strategy_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_target_cpa_strategy,
             create_target_roas_strategy,
             create_maximize_conversions_strategy,
             create_target_impression_share_strategy,
+            remove_bidding_strategy,
         ]
     )
     return tools

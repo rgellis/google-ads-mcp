@@ -496,8 +496,14 @@ class AudienceService:
         ctx: Context,
         customer_id: str,
         audience_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Remove an audience.
+        """Remove an audience by setting its status to REMOVED.
+
+        Note: The Google Ads API does not support a remove operation for audiences.
+        This sets the status to REMOVED via an update operation.
 
         Args:
             ctx: FastMCP context
@@ -505,14 +511,16 @@ class AudienceService:
             audience_id: The audience ID to remove
 
         Returns:
-            Removal result
+            Updated audience details
         """
-        # Since there's no remove operation, update status to REMOVED
         return await self.update_audience(
             ctx=ctx,
             customer_id=customer_id,
             audience_id=audience_id,
             status="REMOVED",
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
 
@@ -638,20 +646,30 @@ def create_audience_tools(
         ctx: Context,
         customer_id: str,
         audience_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Remove an audience.
+        """Remove an audience by setting its status to REMOVED.
+
+        The Google Ads API does not support a direct remove operation for audiences.
+        This sets the status to REMOVED via an update, which hides the audience
+        from future use but preserves historical data.
 
         Args:
             customer_id: The customer ID
             audience_id: The audience ID to remove
 
         Returns:
-            Removal result with status
+            Updated audience details
         """
         return await service.remove_audience(
             ctx=ctx,
             customer_id=customer_id,
             audience_id=audience_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
         )
 
     tools.extend(

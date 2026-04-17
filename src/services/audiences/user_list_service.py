@@ -509,6 +509,63 @@ class UserListService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_user_list(
+        self,
+        ctx: Context,
+        customer_id: str,
+        user_list_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a user list permanently.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            user_list_id: The user list ID to remove
+
+        Returns:
+            Removal result details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/userLists/{user_list_id}"
+
+            # Create the operation
+            operation = UserListOperation()
+            operation.remove = resource_name
+
+            # Create the request
+            request = MutateUserListsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response = self.client.mutate_user_lists(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Removed user list {user_list_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove user list: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_user_list_tools(
     service: UserListService,
@@ -710,6 +767,32 @@ def create_user_list_tools(
             response_content_type=response_content_type,
         )
 
+    async def remove_user_list(
+        ctx: Context,
+        customer_id: str,
+        user_list_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Remove a user list permanently. This action is irreversible.
+
+        Args:
+            customer_id: The customer ID
+            user_list_id: The user list ID to remove
+
+        Returns:
+            Removal result details
+        """
+        return await service.remove_user_list(
+            ctx=ctx,
+            customer_id=customer_id,
+            user_list_id=user_list_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_basic_user_list,
@@ -717,6 +800,7 @@ def create_user_list_tools(
             create_similar_user_list,
             create_logical_user_list,
             update_user_list,
+            remove_user_list,
         ]
     )
     return tools

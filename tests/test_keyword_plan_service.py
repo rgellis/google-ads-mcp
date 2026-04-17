@@ -430,7 +430,7 @@ def test_register_keyword_plan_tools() -> None:
     assert isinstance(service, KeywordPlanService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -441,6 +441,61 @@ def test_register_keyword_plan_tools() -> None:
         "get_keyword_ideas",
         "create_keyword_plan_campaign",
         "add_keywords_to_plan",
+        "remove_keyword_plan",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_remove_keyword_plan(
+    keyword_plan_service: KeywordPlanService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a keyword plan."""
+    # Arrange
+    customer_id = "1234567890"
+    keyword_plan_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateKeywordPlansResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"
+
+    # Get the mocked keyword plan service client
+    mock_keyword_plan_client = keyword_plan_service.client  # type: ignore
+    mock_keyword_plan_client.mutate_keyword_plans.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.planning.keyword_plan_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await keyword_plan_service.remove_keyword_plan(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            keyword_plan_id=keyword_plan_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_keyword_plan_client.mutate_keyword_plans.assert_called_once()  # type: ignore
+    call_args = mock_keyword_plan_client.mutate_keyword_plans.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.remove == f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"

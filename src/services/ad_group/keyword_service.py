@@ -58,6 +58,7 @@ class KeywordService:
         ad_group_id: str,
         keywords: List[Dict[str, str]],
         default_cpc_bid_micros: Optional[int] = None,
+        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -70,6 +71,7 @@ class KeywordService:
             ad_group_id: The ad group ID
             keywords: List of keyword dictionaries with 'text' and 'match_type' fields
             default_cpc_bid_micros: Default CPC bid for keywords in micros
+            status: Keyword status - ENABLED or PAUSED (default: ENABLED)
 
         Returns:
             Response with created keyword details
@@ -93,8 +95,8 @@ class KeywordService:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource_name
                 ad_group_criterion.keyword = keyword_info
-                ad_group_criterion.status = (
-                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
+                ad_group_criterion.status = getattr(
+                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus, status
                 )
 
                 # Set CPC bid if provided
@@ -292,6 +294,7 @@ def create_keyword_tools(
         ad_group_id: str,
         keywords: List[Dict[str, str]],
         default_cpc_bid_micros: Optional[int] = None,
+        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -306,6 +309,7 @@ def create_keyword_tools(
                 - match_type: EXACT, PHRASE, or BROAD (default: BROAD)
                 - cpc_bid_micros: Optional CPC bid for this keyword
             default_cpc_bid_micros: Default CPC bid for keywords without individual bids
+            status: Keyword status - ENABLED or PAUSED (default: ENABLED)
 
         Returns:
             Response with created keyword details
@@ -316,6 +320,7 @@ def create_keyword_tools(
             ad_group_id=ad_group_id,
             keywords=keywords,
             default_cpc_bid_micros=default_cpc_bid_micros,
+            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

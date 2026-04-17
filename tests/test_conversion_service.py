@@ -474,7 +474,7 @@ def test_register_conversion_tools() -> None:
     assert isinstance(service, ConversionService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 2  # 2 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -483,6 +483,68 @@ def test_register_conversion_tools() -> None:
     expected_tools = [
         "create_conversion_action",
         "update_conversion_action",
+        "remove_conversion_action",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_remove_conversion_action(
+    conversion_service: ConversionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a conversion action."""
+    # Arrange
+    customer_id = "1234567890"
+    conversion_action_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateConversionActionsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = (
+        f"customers/{customer_id}/conversionActions/{conversion_action_id}"
+    )
+
+    # Get the mocked conversion action service client
+    mock_conversion_action_client = conversion_service.client  # type: ignore
+    mock_conversion_action_client.mutate_conversion_actions.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {
+                "resource_name": f"customers/{customer_id}/conversionActions/{conversion_action_id}"
+            }
+        ]
+    }
+
+    with patch(
+        "src.services.conversions.conversion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await conversion_service.remove_conversion_action(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            conversion_action_id=conversion_action_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_conversion_action_client.mutate_conversion_actions.assert_called_once()  # type: ignore
+    call_args = mock_conversion_action_client.mutate_conversion_actions.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert (
+        operation.remove
+        == f"customers/{customer_id}/conversionActions/{conversion_action_id}"
+    )

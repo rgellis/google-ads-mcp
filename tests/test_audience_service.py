@@ -461,32 +461,21 @@ async def test_remove_audience(
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test removing an audience."""
+    """Test removing an audience (delegates to update with status=REMOVED)."""
     # Arrange
     customer_id = "1234567890"
     audience_id = "111222333"
 
-    # Create mock response
-    mock_response = Mock(spec=MutateAudiencesResponse)
-    mock_result = Mock()
-    mock_result.resource_name = f"customers/{customer_id}/audiences/{audience_id}"
-    mock_response.results = [mock_result]
-
-    # Get the mocked audience service client
-    mock_audience_client = audience_service.client  # type: ignore
-    mock_audience_client.mutate_audiences.return_value = mock_response  # type: ignore
-
-    # Mock serialize_proto_message
+    # Mock update_audience since remove_audience delegates to it
     expected_result = {
         "results": [
             {"resource_name": f"customers/{customer_id}/audiences/{audience_id}"}
         ]
     }
 
-    with patch(
-        "src.services.audiences.audience_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
+    with patch.object(
+        audience_service, "update_audience", return_value=expected_result
+    ) as mock_update:
         # Act
         result = await audience_service.remove_audience(
             ctx=mock_ctx,
@@ -496,20 +485,15 @@ async def test_remove_audience(
 
     # Assert
     assert result == expected_result
-
-    # Verify the API call (remove_audience uses update with REMOVED status)
-    mock_audience_client.mutate_audiences.assert_called_once()  # type: ignore
-    call_args = mock_audience_client.mutate_audiences.call_args  # type: ignore
-    request = call_args[1]["request"]
-    assert request.customer_id == customer_id
-    assert len(request.operations) == 1
-
-    operation = request.operations[0]
-    assert (
-        operation.update.resource_name
-        == f"customers/{customer_id}/audiences/{audience_id}"
+    mock_update.assert_called_once_with(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        audience_id=audience_id,
+        status="REMOVED",
+        partial_failure=False,
+        validate_only=False,
+        response_content_type=None,
     )
-    assert operation.update.status == AudienceStatusEnum.AudienceStatus.REMOVED
 
 
 @pytest.mark.asyncio

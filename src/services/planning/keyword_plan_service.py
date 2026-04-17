@@ -424,6 +424,63 @@ class KeywordPlanService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_keyword_plan(
+        self,
+        ctx: Context,
+        customer_id: str,
+        keyword_plan_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a keyword plan permanently.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            keyword_plan_id: The keyword plan ID to remove
+
+        Returns:
+            Removal result details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/keywordPlans/{keyword_plan_id}"
+
+            # Create operation
+            operation = KeywordPlanOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateKeywordPlansRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response = self.client.mutate_keyword_plans(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Removed keyword plan {keyword_plan_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove keyword plan: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_keyword_plan_tools(
     service: KeywordPlanService,
@@ -575,12 +632,39 @@ def create_keyword_plan_tools(
             response_content_type=response_content_type,
         )
 
+    async def remove_keyword_plan(
+        ctx: Context,
+        customer_id: str,
+        keyword_plan_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Remove a keyword plan permanently. This action is irreversible.
+
+        Args:
+            customer_id: The customer ID
+            keyword_plan_id: The keyword plan ID to remove
+
+        Returns:
+            Removal result details
+        """
+        return await service.remove_keyword_plan(
+            ctx=ctx,
+            customer_id=customer_id,
+            keyword_plan_id=keyword_plan_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_keyword_plan,
             get_keyword_ideas,
             create_keyword_plan_campaign,
             add_keywords_to_plan,
+            remove_keyword_plan,
         ]
     )
     return tools

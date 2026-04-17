@@ -53,6 +53,7 @@ class UserDataService:
         ctx: Context,
         customer_id: str,
         conversion_adjustments: List[Dict[str, Any]],
+        user_identifier_source: str = "FIRST_PARTY",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -63,6 +64,8 @@ class UserDataService:
             ctx: FastMCP context
             customer_id: The customer ID
             conversion_adjustments: List of conversion adjustments with user data
+            user_identifier_source: Source of user identifiers - FIRST_PARTY or THIRD_PARTY
+                (default: FIRST_PARTY)
 
         Returns:
             Upload result with success/failure details
@@ -84,14 +87,19 @@ class UserDataService:
                         identifier = UserIdentifier()
 
                         # Set identifier based on type
+                        source_enum = getattr(
+                            UserIdentifierSourceEnum.UserIdentifierSource,
+                            user_identifier_source,
+                        )
+
                         if "hashed_email" in identifier_dict:
                             identifier.hashed_email = identifier_dict["hashed_email"]
-                            identifier.user_identifier_source = UserIdentifierSourceEnum.UserIdentifierSource.FIRST_PARTY
+                            identifier.user_identifier_source = source_enum
                         elif "hashed_phone_number" in identifier_dict:
                             identifier.hashed_phone_number = identifier_dict[
                                 "hashed_phone_number"
                             ]
-                            identifier.user_identifier_source = UserIdentifierSourceEnum.UserIdentifierSource.FIRST_PARTY
+                            identifier.user_identifier_source = source_enum
                         elif "address_info" in identifier_dict:
                             address_info = OfflineUserAddressInfo()
                             addr = identifier_dict["address_info"]
@@ -112,7 +120,7 @@ class UserDataService:
                                 ]
 
                             identifier.address_info = address_info
-                            identifier.user_identifier_source = UserIdentifierSourceEnum.UserIdentifierSource.FIRST_PARTY
+                            identifier.user_identifier_source = source_enum
 
                         user_data.user_identifiers.append(identifier)
 
@@ -469,6 +477,7 @@ def create_user_data_tools(
         ctx: Context,
         customer_id: str,
         conversion_adjustments: List[Dict[str, Any]],
+        user_identifier_source: str = "FIRST_PARTY",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -481,6 +490,8 @@ def create_user_data_tools(
                 - user_identifiers: List of identifiers (hashed_email, hashed_phone_number, address_info)
                 - transaction_attribute: Transaction details with conversion_action, currency_code,
                   transaction_amount_micros, transaction_date_time, order_id
+            user_identifier_source: Source of user data - FIRST_PARTY (your own data) or
+                THIRD_PARTY (data from a partner)
 
         Returns:
             Upload result with received operations count and any failure details
@@ -489,6 +500,7 @@ def create_user_data_tools(
             ctx=ctx,
             customer_id=customer_id,
             conversion_adjustments=conversion_adjustments,
+            user_identifier_source=user_identifier_source,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

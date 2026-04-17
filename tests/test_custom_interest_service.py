@@ -621,7 +621,7 @@ def test_register_custom_interest_tools() -> None:
     assert isinstance(service, CustomInterestService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -632,6 +632,49 @@ def test_register_custom_interest_tools() -> None:
         "update_custom_interest",
         "list_custom_interests",
         "get_custom_interest_details",
+        "remove_custom_interest",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_remove_custom_interest(
+    custom_interest_service: CustomInterestService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a custom interest (delegates to update with status=REMOVED)."""
+    # Arrange
+    customer_id = "1234567890"
+    custom_interest_id = "12345"
+
+    expected_result = {
+        "results": [
+            {
+                "resource_name": f"customers/{customer_id}/customInterests/{custom_interest_id}"
+            }
+        ]
+    }
+
+    with patch.object(
+        custom_interest_service, "update_custom_interest", return_value=expected_result
+    ) as mock_update:
+        # Act
+        result = await custom_interest_service.remove_custom_interest(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            custom_interest_id=custom_interest_id,
+        )
+
+    # Assert
+    assert result == expected_result
+    mock_update.assert_called_once_with(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        custom_interest_id=custom_interest_id,
+        status="REMOVED",
+        partial_failure=False,
+        validate_only=False,
+        response_content_type=None,
+    )

@@ -531,7 +531,7 @@ def test_register_user_list_tools() -> None:
     assert isinstance(service, UserListService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 6  # 6 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -543,6 +543,61 @@ def test_register_user_list_tools() -> None:
         "create_similar_user_list",
         "create_logical_user_list",
         "update_user_list",
+        "remove_user_list",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_remove_user_list(
+    user_list_service: UserListService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a user list."""
+    # Arrange
+    customer_id = "1234567890"
+    user_list_id = "123"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateUserListsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[
+        0
+    ].resource_name = f"customers/{customer_id}/userLists/{user_list_id}"
+
+    # Get the mocked user list service client
+    mock_user_list_client = user_list_service.client  # type: ignore
+    mock_user_list_client.mutate_user_lists.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {"resource_name": f"customers/{customer_id}/userLists/{user_list_id}"}
+        ]
+    }
+
+    with patch(
+        "src.services.audiences.user_list_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await user_list_service.remove_user_list(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            user_list_id=user_list_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_user_list_client.mutate_user_lists.assert_called_once()  # type: ignore
+    call_args = mock_user_list_client.mutate_user_lists.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert operation.remove == f"customers/{customer_id}/userLists/{user_list_id}"

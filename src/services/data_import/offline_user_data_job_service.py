@@ -56,16 +56,19 @@ class OfflineUserDataJobService:
         self,
         ctx: Context,
         customer_id: str,
+        job_type: str = "CUSTOMER_MATCH_USER_LIST",
         job_name: Optional[str] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
-        """Create a customer match job for uploading user data.
+        """Create an offline user data job for uploading user data.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            job_name: Optional name for the job
+            job_type: Job type - CUSTOMER_MATCH_USER_LIST, STORE_SALES_DIRECT_UPLOAD,
+                or STORE_SALES_UPLOAD_THIRD_PARTY (default: CUSTOMER_MATCH_USER_LIST)
+            job_name: Optional user list resource name for customer match jobs
 
         Returns:
             Created job details with resource_name
@@ -75,7 +78,9 @@ class OfflineUserDataJobService:
 
             # Create offline user data job
             job = OfflineUserDataJob()
-            job.type_ = OfflineUserDataJobTypeEnum.OfflineUserDataJobType.CUSTOMER_MATCH_USER_LIST
+            job.type_ = getattr(
+                OfflineUserDataJobTypeEnum.OfflineUserDataJobType, job_type
+            )
             if job_name:
                 job.customer_match_user_list_metadata.user_list = job_name
 
@@ -458,15 +463,18 @@ def create_offline_user_data_job_tools(
     async def create_customer_match_job(
         ctx: Context,
         customer_id: str,
+        job_type: str = "CUSTOMER_MATCH_USER_LIST",
         job_name: Optional[str] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
-        """Create a customer match job for uploading user data.
+        """Create an offline user data job for uploading user data.
 
         Args:
             customer_id: The customer ID
-            job_name: Optional name for the job
+            job_type: Job type - CUSTOMER_MATCH_USER_LIST, STORE_SALES_DIRECT_UPLOAD,
+                or STORE_SALES_UPLOAD_THIRD_PARTY (default: CUSTOMER_MATCH_USER_LIST)
+            job_name: Optional user list resource name (for customer match jobs)
             validate_only: Whether to only validate the request
             enable_match_rate_range_preview: Whether to enable match rate range preview
 
@@ -476,6 +484,7 @@ def create_offline_user_data_job_tools(
         return await service.create_customer_match_job(
             ctx=ctx,
             customer_id=customer_id,
+            job_type=job_type,
             job_name=job_name,
             validate_only=validate_only,
             enable_match_rate_range_preview=enable_match_rate_range_preview,

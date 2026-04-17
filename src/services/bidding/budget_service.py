@@ -204,6 +204,60 @@ class BudgetService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_campaign_budget(
+        self,
+        ctx: Context,
+        customer_id: str,
+        budget_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a campaign budget permanently.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            budget_id: The budget ID to remove
+
+        Returns:
+            Removal result details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = f"customers/{customer_id}/campaignBudgets/{budget_id}"
+
+            # Create the operation
+            operation = CampaignBudgetOperation()
+            operation.remove = resource_name
+
+            # Create the request
+            request = MutateCampaignBudgetsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response = self.client.mutate_campaign_budgets(request=request)
+
+            await ctx.log(level="info", message=f"Removed campaign budget {budget_id}")
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove campaign budget: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[Any]]]:
     """Create tool functions for the budget service.
@@ -283,7 +337,35 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             response_content_type=response_content_type,
         )
 
-    tools.extend([create_campaign_budget, update_campaign_budget])
+    async def remove_campaign_budget(
+        ctx: Context,
+        customer_id: str,
+        budget_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Remove a campaign budget permanently. This action is irreversible.
+
+        Args:
+            customer_id: The customer ID
+            budget_id: The budget ID to remove
+
+        Returns:
+            Removal result details
+        """
+        return await service.remove_campaign_budget(
+            ctx=ctx,
+            customer_id=customer_id,
+            budget_id=budget_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    tools.extend(
+        [create_campaign_budget, update_campaign_budget, remove_campaign_budget]
+    )
     return tools
 
 

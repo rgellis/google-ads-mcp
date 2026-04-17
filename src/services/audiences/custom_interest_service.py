@@ -400,6 +400,38 @@ class CustomInterestService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_custom_interest(
+        self,
+        ctx: Context,
+        customer_id: str,
+        custom_interest_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a custom interest by setting its status to REMOVED.
+
+        Note: The Google Ads API does not support a remove operation for custom interests.
+        This sets the status to REMOVED via an update operation.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            custom_interest_id: The custom interest ID to remove
+
+        Returns:
+            Updated custom interest details
+        """
+        return await self.update_custom_interest(
+            ctx=ctx,
+            customer_id=customer_id,
+            custom_interest_id=custom_interest_id,
+            status="REMOVED",
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
 
 def create_custom_interest_tools(
     service: CustomInterestService,
@@ -536,12 +568,42 @@ def create_custom_interest_tools(
             custom_interest_id=custom_interest_id,
         )
 
+    async def remove_custom_interest(
+        ctx: Context,
+        customer_id: str,
+        custom_interest_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Remove a custom interest by setting its status to REMOVED.
+
+        The Google Ads API does not support a direct remove operation for custom interests.
+        This sets the status to REMOVED via an update.
+
+        Args:
+            customer_id: The customer ID
+            custom_interest_id: The custom interest ID to remove
+
+        Returns:
+            Updated custom interest details
+        """
+        return await service.remove_custom_interest(
+            ctx=ctx,
+            customer_id=customer_id,
+            custom_interest_id=custom_interest_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_custom_interest,
             update_custom_interest,
             list_custom_interests,
             get_custom_interest_details,
+            remove_custom_interest,
         ]
     )
     return tools

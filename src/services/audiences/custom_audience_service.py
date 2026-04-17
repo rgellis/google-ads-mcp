@@ -432,6 +432,65 @@ class CustomAudienceService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_custom_audience(
+        self,
+        ctx: Context,
+        customer_id: str,
+        custom_audience_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Remove a custom audience permanently.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            custom_audience_id: The custom audience ID to remove
+
+        Returns:
+            Removal result details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            resource_name = (
+                f"customers/{customer_id}/customAudiences/{custom_audience_id}"
+            )
+
+            # Create operation
+            operation = CustomAudienceOperation()
+            operation.remove = resource_name
+
+            # Create request
+            request = MutateCustomAudiencesRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            # Make the API call
+            response = self.client.mutate_custom_audiences(request=request)
+
+            await ctx.log(
+                level="info",
+                message=f"Removed custom audience {custom_audience_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to remove custom audience: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_custom_audience_tools(
     service: CustomAudienceService,
@@ -571,12 +630,39 @@ def create_custom_audience_tools(
             custom_audience_id=custom_audience_id,
         )
 
+    async def remove_custom_audience(
+        ctx: Context,
+        customer_id: str,
+        custom_audience_id: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Remove a custom audience permanently. This action is irreversible.
+
+        Args:
+            customer_id: The customer ID
+            custom_audience_id: The custom audience ID to remove
+
+        Returns:
+            Removal result details
+        """
+        return await service.remove_custom_audience(
+            ctx=ctx,
+            customer_id=customer_id,
+            custom_audience_id=custom_audience_id,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     tools.extend(
         [
             create_custom_audience,
             update_custom_audience,
             list_custom_audiences,
             get_custom_audience_details,
+            remove_custom_audience,
         ]
     )
     return tools

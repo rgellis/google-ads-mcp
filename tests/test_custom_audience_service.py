@@ -622,7 +622,7 @@ def test_register_custom_audience_tools() -> None:
     assert isinstance(service, CustomAudienceService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 5  # 5 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -633,6 +633,67 @@ def test_register_custom_audience_tools() -> None:
         "update_custom_audience",
         "list_custom_audiences",
         "get_custom_audience_details",
+        "remove_custom_audience",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_remove_custom_audience(
+    custom_audience_service: CustomAudienceService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test removing a custom audience."""
+    # Arrange
+    customer_id = "1234567890"
+    custom_audience_id = "12345"
+
+    # Create mock response
+    mock_response = Mock(spec=MutateCustomAudiencesResponse)
+    mock_result = Mock()
+    mock_result.resource_name = (
+        f"customers/{customer_id}/customAudiences/{custom_audience_id}"
+    )
+    mock_response.results = [mock_result]
+
+    # Get the mocked custom service client
+    mock_custom_client = custom_audience_service.client  # type: ignore
+    mock_custom_client.mutate_custom_audiences.return_value = mock_response  # type: ignore
+
+    # Mock serialize_proto_message
+    expected_result = {
+        "results": [
+            {
+                "resource_name": f"customers/{customer_id}/customAudiences/{custom_audience_id}"
+            }
+        ]
+    }
+
+    with patch(
+        "src.services.audiences.custom_audience_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        # Act
+        result = await custom_audience_service.remove_custom_audience(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            custom_audience_id=custom_audience_id,
+        )
+
+    # Assert
+    assert result == expected_result
+
+    # Verify the API call
+    mock_custom_client.mutate_custom_audiences.assert_called_once()  # type: ignore
+    call_args = mock_custom_client.mutate_custom_audiences.call_args  # type: ignore
+    request = call_args[1]["request"]
+    assert request.customer_id == customer_id
+    assert len(request.operations) == 1
+
+    operation = request.operations[0]
+    assert (
+        operation.remove
+        == f"customers/{customer_id}/customAudiences/{custom_audience_id}"
+    )
