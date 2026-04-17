@@ -113,8 +113,8 @@ async def create_campaign(ctx, customer_id, name, ..., status="PAUSED"):
 
 Option B — Auto-generate tool wrappers from service method signatures (more complex, less explicit).
 
-- [ ] Evaluate whether auto-generation is worth the complexity
-- [ ] If not, ensure all tool wrappers are consistently thin (enum conversion only)
+- [x] Evaluated: Option A (thin wrappers) chosen — wrappers are the MCP tool interface, explicit control over docstrings/params matters more than DRY **DONE**
+- [x] Audited all wrapper docstrings for LLM discoverability: enum values, operation structures, return descriptions, mutual exclusivity notes **DONE**
 
 ---
 
