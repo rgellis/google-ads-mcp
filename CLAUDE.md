@@ -1,33 +1,61 @@
 ## Objective
 
-You're working on google-ads-mcp project, it's a MCP(model context protocal) server that wraps the google ads api for LLM's interaction. You will use the tools to search, fetch web page contents to read the docs, and implement.
+MCP server wrapping the entire Google Ads API v23 for LLM interaction. Built on the official Python SDK (`google-ads==30.0.0`) with FastMCP.
 
-### about google ads api
+## Architecture
 
-google ads offers it's own client sdk as well as REST api. Client one has python sdk, built on top of protobuf schema. REST api does not have any existing openapi specs but referenec docs.
-we decided to go with python sdk, since it's well maintained and does most of the heavy lifting, i.e. retries, pagination, etc.
+- `main.py` — Entry point, SERVER_GROUPS dict, `--groups` CLI flag
+- `src/servers/` — 12 domain modules (core, assets, targeting, bidding, etc.) using `create_server()` factory
+- `src/services/` — 113 service files organized by domain (account, ad_group, assets, campaign, etc.)
+- `src/utils.py` — `format_customer_id`, `serialize_proto_message`, `set_request_options`
+- `src/sdk_client.py` — Google Ads SDK client wrapper with lazy initialization
+- `tests/` — 113 test files, one per service, 991+ tests
 
-## resources
+## Rules
 
-here are some high level resources:
+1. Use `uv` for package management. See `pyproject.toml`.
+2. After changes run `uv run ruff format .` and `uv run pyright`.
+3. Every service method must have a test. Run `uv run pytest` to verify.
+4. All code uses v23 imports — never reference v20/v21/v22.
+5. Tool wrapper docstrings are the LLM-facing interface — they must document valid enum values, campaign type restrictions, and targeting level constraints.
 
-1. read the `./refs/googleads.llms.txt` for resources related to google ads api
-2. use the `./refs/fastmcp.llms.txt` for full list of docs on how mcp server works.
-3. use the cloudflare tools fetch urls via md/html, which is cleaner and easy to digest.
-4. you have access to `google-ads-python` which contains source code for the python sdk, as well as all the types generated from protocol buffers.
+## Service Pattern
 
-## RULES
+Every service follows this structure:
 
-1. we use `uv` for pagkage management, see `pyproject.toml` for details & configs.
-2. after changes run `uv run ruff format .`and `uv run pyright`
-3. Our goal is to provide 1:1 mapping to ALL google ads services, and wrap them to MCP tools for LLMs to interact with. You can use files to help you track progress. use the API reference or the google-ads python codebase to read all the services available, and implement it. For each service, implement tests and make sure they pass. The implementation should be FULLY typed, using generated types from google ads v23 services.
+```python
+class FooService:
+    # Lazy client via @property
+    # Async methods with try/except GoogleAdsException + Exception
+    # Returns serialize_proto_message(response)
 
-## CURRENT TASK
+def create_foo_tools(service):
+    # String enum params → SDK enums via getattr()
+    # Docstrings = what the LLM reads to select and use the tool
 
-Here is the current task you're working on. Prioritize this over everything else.
+def register_foo_tools(mcp):
+    # Instantiate service, register tools
+```
 
-We're in the middle of creating MCP tools based on google ads api. We need to ensure 1:1 mapping and fully type safe. You will create a `TRACKER.md`, list down all the existing services in google-ads-python, and then audit the current progress and mark them. Start with everything as "not impl". Next, we will start one by one.
+## Critical Rules
 
-FOR each service, we will using the generated proto buf types, fully annotate the endpoints/operations, and create lightweight tools for MCP. Some existing implementations might exist, but theymight NOT be ideal, since we need to ensure the inputs & outputs are fully using generated types for consistency. After you implement each service, write tests to cover it. Next, move on to next service until we're done. NOTE, we only focus on google ads V20 api, only implement services exist.
+- **Never set proto fields to default values explicitly** — `criterion.negative = False` marks the field as "set" on the wire. Google's API rejects fields that shouldn't be present even if the value is the default. Let proto defaults work implicitly.
+- **Campaign-level demographics on Search are exclusion-only** — bid adjustments must be done at ad group level.
+- **custom_audience/custom_affinity** only work on Display, Demand Gen, and Video campaigns.
 
-in the `TRACKER.md`, note down the task you're working on and high level steps. so that other agents can pick it up from you easily w/ context.
+## Resources
+
+- `./refs/googleads.llms.txt` — Google Ads API resource links
+- `./refs/fastmcp.llms.txt` — FastMCP documentation
+- `google-ads-python/` — SDK source code with proto-generated types
+- `AGENTS.md` — Full agent guide for both codebase contributors and MCP tool users
+
+## Commands
+
+```bash
+uv run main.py                    # Run server (core group only)
+uv run main.py --groups all       # All 113 servers
+uv run pytest                     # 991+ tests
+uv run pyright                    # Type check (0 errors)
+uv run ruff format .              # Format
+```
