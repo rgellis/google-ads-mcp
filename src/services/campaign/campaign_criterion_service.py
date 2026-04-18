@@ -3026,7 +3026,8 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             location_ids: List of geo target constant IDs (e.g., ["1014044"] for California)
             negative: Whether these are negative criteria (exclude locations)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%, 0.8 for -20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3052,7 +3053,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add language targeting criteria to a campaign.
+        """Add language targeting criteria to a campaign. Positive targeting only.
 
         Args:
             customer_id: The customer ID
@@ -3082,7 +3083,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add device targeting criteria to a campaign.
+        """Campaign-level only. Positive targeting only. Add device targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3121,6 +3122,9 @@ def create_campaign_criterion_tools(
     ) -> Dict[str, Any]:
         """Add negative keyword criteria to a campaign.
 
+        Campaign-level keywords are negative (exclusion) only. For positive keyword
+        targeting, use ad group criterion tools.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
@@ -3153,7 +3157,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add ad schedule (day/time) targeting criteria to a campaign.
+        """Campaign-level only. Cannot be set at ad group level. Positive targeting only — cannot be used as an exclusion. Add ad schedule (day/time) targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3165,7 +3169,8 @@ def create_campaign_criterion_tools(
                 - start_minute: Start minute. Valid values: ZERO, FIFTEEN, THIRTY, FORTY_FIVE
                 - end_hour: End hour (0-24)
                 - end_minute: End minute. Valid values: ZERO, FIFTEEN, THIRTY, FORTY_FIVE
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3200,7 +3205,8 @@ def create_campaign_criterion_tools(
             user_list_resource_names: List of user list resource names
                 (e.g., ["customers/123/userLists/456"])
             negative: Whether these are negative criteria (exclude audiences)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3229,6 +3235,10 @@ def create_campaign_criterion_tools(
     ) -> Dict[str, Any]:
         """Add age range demographic targeting criteria to a campaign.
 
+        Note: On Search campaigns, campaign-level demographics are negative
+        (exclusion) only and do not support bid modifiers. For demographic bid
+        adjustments on Search campaigns, use the ad group criterion tools instead.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
@@ -3236,7 +3246,8 @@ def create_campaign_criterion_tools(
                 AGE_RANGE_18_24, AGE_RANGE_25_34, AGE_RANGE_35_44,
                 AGE_RANGE_45_54, AGE_RANGE_55_64, AGE_RANGE_65_UP,
                 AGE_RANGE_UNDETERMINED
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3269,11 +3280,16 @@ def create_campaign_criterion_tools(
     ) -> Dict[str, Any]:
         """Add gender demographic targeting criteria to a campaign.
 
+        Note: On Search campaigns, campaign-level demographics are negative
+        (exclusion) only and do not support bid modifiers. For demographic bid
+        adjustments on Search campaigns, use the ad group criterion tools instead.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             genders: List of gender values. Valid values: MALE, FEMALE, UNDETERMINED
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3305,6 +3321,10 @@ def create_campaign_criterion_tools(
     ) -> Dict[str, Any]:
         """Add income range demographic targeting criteria to a campaign.
 
+        Note: On Search campaigns, campaign-level demographics are negative
+        (exclusion) only and do not support bid modifiers. For demographic bid
+        adjustments on Search campaigns, use the ad group criterion tools instead.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
@@ -3312,7 +3332,8 @@ def create_campaign_criterion_tools(
                 INCOME_RANGE_0_50, INCOME_RANGE_50_60, INCOME_RANGE_60_70,
                 INCOME_RANGE_70_80, INCOME_RANGE_80_90, INCOME_RANGE_90_100,
                 INCOME_RANGE_UNDETERMINED
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3347,7 +3368,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add proximity (radius) targeting criteria to a campaign.
+        """Campaign-level only. Positive targeting only. Add proximity (radius) targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3357,7 +3378,8 @@ def create_campaign_criterion_tools(
             radius: Radius distance
             radius_units: Radius units. Valid values: MILES, KILOMETERS
             address: Optional address string for display purposes
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3393,12 +3415,17 @@ def create_campaign_criterion_tools(
     ) -> Dict[str, Any]:
         """Add parental status demographic targeting criteria to a campaign.
 
+        Note: On Search campaigns, campaign-level demographics are negative
+        (exclusion) only and do not support bid modifiers. For demographic bid
+        adjustments on Search campaigns, use the ad group criterion tools instead.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             parental_statuses: List of parental status values. Valid values:
                 PARENT, NOT_A_PARENT, UNDETERMINED
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3438,7 +3465,8 @@ def create_campaign_criterion_tools(
             user_interest_resource_names: List of user interest resource names
                 (e.g., ["customers/123/userInterests/456"])
             negative: Whether these are negative criteria (exclude interests)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3474,7 +3502,8 @@ def create_campaign_criterion_tools(
             topic_constant_resource_names: List of topic constant resource names
                 (e.g., ["topicConstants/123"])
             negative: Whether these are negative criteria (exclude topics)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3501,7 +3530,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add placement (website/app) targeting criteria to a campaign.
+        """Negative (exclusion) only at campaign level. Add placement (website/app) targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3597,7 +3626,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add content label exclusion criteria to a campaign.
+        """Negative (exclusion) only. Used to exclude content categories. Add content label exclusion criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3639,7 +3668,11 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add custom audience targeting criteria to a campaign.
+        """Positive targeting only. Add custom audience targeting criteria to a campaign.
+
+        Only supported on Display, Demand Gen, and Video campaigns. Not available
+        on Search campaigns -- use add_user_interest_criteria or
+        add_audience_criteria instead.
 
         Args:
             customer_id: The customer ID
@@ -3647,7 +3680,8 @@ def create_campaign_criterion_tools(
             custom_audience_resource_names: List of custom audience resource names
                 (e.g., ["customers/123/customAudiences/456"])
             negative: Whether these are negative criteria (exclude audiences)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3675,7 +3709,11 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add custom affinity audience targeting criteria to a campaign.
+        """Positive targeting only. Add custom affinity audience targeting criteria to a campaign.
+
+        Only supported on Display, Demand Gen, and Video campaigns. Not available
+        on Search campaigns -- use add_user_interest_criteria or
+        add_audience_criteria instead.
 
         Args:
             customer_id: The customer ID
@@ -3683,7 +3721,8 @@ def create_campaign_criterion_tools(
             custom_affinity_resource_names: List of custom affinity resource names
                 (e.g., ["customers/123/customAffinities/456"])
             negative: Whether these are negative criteria (exclude affinities)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3711,7 +3750,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add combined audience targeting criteria to a campaign.
+        """Positive targeting only. Add combined audience targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3719,7 +3758,8 @@ def create_campaign_criterion_tools(
             combined_audience_resource_names: List of combined audience resource names
                 (e.g., ["customers/123/combinedAudiences/456"])
             negative: Whether these are negative criteria (exclude audiences)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3747,7 +3787,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add life event targeting criteria to a campaign.
+        """Campaign-level only. Add life event targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3755,7 +3795,8 @@ def create_campaign_criterion_tools(
             life_event_resource_names: List of life event resource names
                 (e.g., ["customers/123/lifeEvents/456"])
             negative: Whether these are negative criteria (exclude life events)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3781,7 +3822,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add keyword theme criteria to a smart campaign.
+        """Campaign-level only. Add keyword theme criteria to a smart campaign.
 
         Args:
             customer_id: The customer ID
@@ -3811,7 +3852,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add IP address exclusion criteria to a campaign.
+        """Campaign-level only. Add IP address exclusion criteria to a campaign.
 
         IP blocks are always negative (exclusion) criteria.
 
@@ -3844,7 +3885,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add mobile carrier targeting criteria to a campaign.
+        """Campaign-level only. Positive targeting only. Add mobile carrier targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3852,7 +3893,8 @@ def create_campaign_criterion_tools(
             carrier_constants: List of carrier constant resource names
                 (e.g., "carrierConstants/123")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3944,7 +3986,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add mobile device model targeting criteria to a campaign.
+        """Campaign-level only. Positive targeting only. Add mobile device model targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -3977,7 +4019,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add operating system version targeting criteria to a campaign.
+        """Campaign-level only. Positive targeting only. Add operating system version targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -4015,7 +4057,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add location group targeting criteria to a campaign.
+        """Campaign-level only. Add location group targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -4057,7 +4099,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add listing scope criteria to a campaign (Shopping/PMax product filters).
+        """Campaign-level only. Add listing scope criteria to a campaign (Shopping/PMax product filters).
 
         Args:
             customer_id: The customer ID
@@ -4160,7 +4202,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add local service ID targeting criteria to a campaign.
+        """Campaign-level only. For Local Services campaigns. Add local service ID targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -4231,7 +4273,7 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add YouTube video lineup targeting criteria to a campaign.
+        """Campaign-level only. Add YouTube video lineup targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
@@ -4264,14 +4306,15 @@ def create_campaign_criterion_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add extended demographic targeting criteria to a campaign.
+        """Campaign-level only. Add extended demographic targeting criteria to a campaign.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             extended_demographic_ids: List of extended demographic IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
+                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria

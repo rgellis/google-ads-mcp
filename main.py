@@ -251,7 +251,14 @@ mcp = FastMCP(
     The Google Ads SDK client is initialized automatically when the server starts.
     All customer IDs can be provided with or without hyphens.
 
-    This implementation uses the Google Ads Python SDK for all operations with full type safety.""",
+    This implementation uses the Google Ads Python SDK for all operations with full type safety.
+
+    Key targeting rules:
+    - Search campaigns: Demographic bid adjustments (age, gender, income) must be done at the AD GROUP level, not campaign level. Campaign-level demographics on Search are exclusion-only.
+    - Custom audience and custom affinity criteria only work on Display, Demand Gen, and Video campaigns. For Search campaigns, use user_list or user_interest criteria instead.
+    - Campaign-level keywords are negative (exclusion) only. For positive keyword targeting, use ad group criterion tools.
+    - Ad schedules, devices, carriers, and proximity targeting are campaign-level only.
+    - bid_modifier is a multiplier: 1.0 = no change, 1.5 = +50%, 0.5 = -50%, 0.0 = exclude.""",
     lifespan=lifespan,
 )
 

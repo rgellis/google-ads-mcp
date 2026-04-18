@@ -198,7 +198,7 @@ class AdGroupCriterionService:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             user_list_ids: List of user list IDs
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             List of created ad group criteria
@@ -406,7 +406,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             urls: List of placement URLs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -483,7 +483,7 @@ class AdGroupCriterionService:
             mobile_app_category_constants: List of mobile app category constant
                 resource names (e.g., "mobileAppCategoryConstants/123")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -560,7 +560,7 @@ class AdGroupCriterionService:
             app_ids: List of mobile application IDs (e.g., "1-123456789" for
                 Android or "1-com.example.app" format)
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -636,7 +636,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             video_ids: List of YouTube video IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -712,7 +712,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             channel_ids: List of YouTube channel IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -789,7 +789,7 @@ class AdGroupCriterionService:
             topic_constant_resource_names: List of topic constant resource names
                 (e.g., ["topicConstants/123"])
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -865,7 +865,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             user_interest_resource_names: List of user interest resource names
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -948,7 +948,7 @@ class AdGroupCriterionService:
                 - operator: Optional operator. Valid values: EQUALS, CONTAINS
                     (defaults to CONTAINS if not specified)
             negative: Whether this is a negative criterion
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1036,7 +1036,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             custom_affinity_resource_names: List of custom affinity resource names
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1112,7 +1112,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             custom_audience_resource_names: List of custom audience resource names
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1188,7 +1188,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             combined_audience_resource_names: List of combined audience resource names
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1264,7 +1264,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             location_ids: List of geo target constant IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1408,7 +1408,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             life_event_ids: List of life event taxonomy IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1484,7 +1484,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             video_lineup_ids: List of video lineup IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1560,7 +1560,7 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             extended_demographic_ids: List of extended demographic IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1772,7 +1772,7 @@ class AdGroupCriterionService:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             app_payment_model_type: The app payment model type (PAID)
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Mutation response with created ad group criteria
@@ -2055,6 +2055,8 @@ def create_ad_group_criterion_tools(
     ) -> Dict[str, Any]:
         """Add keyword criteria to an ad group.
 
+        Ad group-level only. For campaign-level negative keywords, use campaign criterion tools.
+
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
@@ -2090,11 +2092,13 @@ def create_ad_group_criterion_tools(
     ) -> List[Dict[str, Any]]:
         """Add audience (user list) targeting criteria to an ad group.
 
+        Ad group-level. Supports both targeting and observation (bid-only) modes.
+
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             user_list_ids: List of user list IDs for remarketing
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%, 0.8 for -20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             List of created ad group criteria with resource names and IDs
@@ -2121,13 +2125,15 @@ def create_ad_group_criterion_tools(
     ) -> Dict[str, Any]:
         """Add demographic targeting criteria to an ad group.
 
+        Ad group-level. For Search campaigns, use ad group-level demographics for bid adjustments (campaign-level demographics are exclusion-only).
+
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             demographics: List of demographic dicts with:
                 - type: AGE_RANGE, GENDER, PARENTAL_STATUS, or INCOME_RANGE
                 - value: Specific value for the type (e.g., AGE_RANGE_18_24, MALE, PARENT)
-                - bid_modifier: Optional bid modifier
+                - bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             List of created ad group criteria with resource names and IDs
@@ -2160,7 +2166,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             urls: List of placement URLs (e.g., "example.com", "youtube.com")
             negative: Whether these are negative placements (exclusions)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group placement criteria
@@ -2196,7 +2202,7 @@ def create_ad_group_criterion_tools(
             mobile_app_category_constants: List of mobile app category constant
                 resource names (e.g., "mobileAppCategoryConstants/123")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group mobile app category criteria
@@ -2232,7 +2238,7 @@ def create_ad_group_criterion_tools(
             app_ids: List of mobile application IDs (e.g., "1-123456789" for
                 Android or "1-com.example.app" format)
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group mobile application criteria
@@ -2267,7 +2273,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             video_ids: List of YouTube video IDs
             negative: Whether these are negative criteria (exclusions)
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group YouTube video criteria
@@ -2302,7 +2308,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             channel_ids: List of YouTube channel IDs
             negative: Whether these are negative criteria (exclusions)
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group YouTube channel criteria
@@ -2338,7 +2344,7 @@ def create_ad_group_criterion_tools(
             topic_constant_resource_names: List of topic constant resource names
                 (e.g., "topicConstants/123")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group topic criteria
@@ -2374,7 +2380,7 @@ def create_ad_group_criterion_tools(
             user_interest_resource_names: List of user interest resource names
                 (e.g., "customers/123/userInterests/456")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group user interest criteria
@@ -2414,7 +2420,7 @@ def create_ad_group_criterion_tools(
                 - argument: The argument string to match
                 - operator: Optional. EQUALS or CONTAINS (defaults to CONTAINS)
             negative: Whether this is a negative criterion
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group webpage criteria
@@ -2451,7 +2457,7 @@ def create_ad_group_criterion_tools(
             custom_affinity_resource_names: List of custom affinity resource names
                 (e.g., "customers/123/customAffinities/456")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group custom affinity criteria
@@ -2487,7 +2493,7 @@ def create_ad_group_criterion_tools(
             custom_audience_resource_names: List of custom audience resource names
                 (e.g., "customers/123/customAudiences/456")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group custom audience criteria
@@ -2523,7 +2529,7 @@ def create_ad_group_criterion_tools(
             combined_audience_resource_names: List of combined audience resource names
                 (e.g., "customers/123/combinedAudiences/456")
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group combined audience criteria
@@ -2558,7 +2564,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             location_ids: List of geo target constant IDs (e.g., "2840" for US)
             negative: Whether these are negative criteria (exclusions)
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group location criteria
@@ -2622,7 +2628,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             life_event_ids: List of life event taxonomy IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group life event criteria
@@ -2657,7 +2663,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             video_lineup_ids: List of video lineup IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group video lineup criteria
@@ -2692,7 +2698,7 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             extended_demographic_ids: List of extended demographic IDs
             negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier (e.g., 1.2 for +20%)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group extended demographic criteria
@@ -2752,6 +2758,8 @@ def create_ad_group_criterion_tools(
     ) -> Dict[str, Any]:
         """Add listing group criteria to an ad group for Shopping campaigns.
 
+        Ad group-level only. For Shopping campaigns product group targeting.
+
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
@@ -2786,11 +2794,13 @@ def create_ad_group_criterion_tools(
     ) -> Dict[str, Any]:
         """Add app payment model criteria to an ad group.
 
+        Ad group-level only.
+
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             app_payment_model_type: The app payment model type (PAID)
-            bid_modifier: Optional bid modifier
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
 
         Returns:
             Response with created ad group app payment model criteria
@@ -2855,7 +2865,7 @@ def create_ad_group_criterion_tools(
             customer_id: The customer ID
             criterion_resource_name: The full resource name of the criterion
             cpc_bid_micros: New CPC bid in micros (for keywords)
-            bid_modifier: New bid modifier (for audiences, demographics)
+            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%. (for audiences, demographics)
 
         Returns:
             Updated criterion details with updated fields
