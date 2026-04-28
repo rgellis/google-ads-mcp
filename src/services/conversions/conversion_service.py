@@ -70,8 +70,8 @@ class ConversionService:
         value_settings: Optional[Dict[str, Any]] = None,
         counting_type: str = "ONE_PER_CLICK",
         attribution_model: str = "GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN",
-        click_through_lookback_window_days: int = 30,
-        view_through_lookback_window_days: int = 1,
+        click_through_lookback_window_days: Optional[int] = None,
+        view_through_lookback_window_days: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -88,8 +88,12 @@ class ConversionService:
             value_settings: Optional dict with default_value and always_use_default_value
             counting_type: ONE_PER_CLICK or MANY_PER_CLICK
             attribution_model: Attribution model (DATA_DRIVEN, LAST_CLICK, etc.)
-            click_through_lookback_window_days: Click lookback window (1-90)
-            view_through_lookback_window_days: View lookback window (1-30)
+            click_through_lookback_window_days: Click lookback window (1-90).
+                Omit (None) to let the API apply its default. Must be unset for
+                AD_CALL and WEBSITE_CALL types.
+            view_through_lookback_window_days: View lookback window (1-30).
+                Omit (None) to let the API apply its default. Must be unset for
+                AD_CALL and WEBSITE_CALL types.
 
         Returns:
             Created conversion action details
@@ -137,13 +141,18 @@ class ConversionService:
             )
             conversion_action.attribution_model_settings = attribution_settings
 
-            # Set lookback windows
-            conversion_action.click_through_lookback_window_days = (
-                click_through_lookback_window_days
-            )
-            conversion_action.view_through_lookback_window_days = (
-                view_through_lookback_window_days
-            )
+            # Set lookback windows only when explicitly provided. AD_CALL and
+            # WEBSITE_CALL conversion types require view_through_lookback_window_days
+            # to be unset on the wire — assigning even the default would set
+            # the field and trigger VALUE_MUST_BE_UNSET.
+            if click_through_lookback_window_days is not None:
+                conversion_action.click_through_lookback_window_days = (
+                    click_through_lookback_window_days
+                )
+            if view_through_lookback_window_days is not None:
+                conversion_action.view_through_lookback_window_days = (
+                    view_through_lookback_window_days
+                )
 
             # Create operation
             operation = ConversionActionOperation()
@@ -365,8 +374,8 @@ def create_conversion_tools(
         value_settings: Optional[Dict[str, Any]] = None,
         counting_type: str = "ONE_PER_CLICK",
         attribution_model: str = "GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN",
-        click_through_lookback_window_days: int = 30,
-        view_through_lookback_window_days: int = 1,
+        click_through_lookback_window_days: Optional[int] = None,
+        view_through_lookback_window_days: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -384,8 +393,10 @@ def create_conversion_tools(
                 - always_use_default_value: Whether to always use default value
             counting_type: ONE_PER_CLICK or MANY_PER_CLICK
             attribution_model: Attribution model - GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN, GOOGLE_ADS_LAST_CLICK, GOOGLE_SEARCH_ATTRIBUTION_FIRST_CLICK, GOOGLE_SEARCH_ATTRIBUTION_LINEAR, GOOGLE_SEARCH_ATTRIBUTION_TIME_DECAY, GOOGLE_SEARCH_ATTRIBUTION_POSITION_BASED
-            click_through_lookback_window_days: Click lookback window (1-90 days)
-            view_through_lookback_window_days: View lookback window (1-30 days)
+            click_through_lookback_window_days: Click lookback window (1-90 days).
+                Omit to use API default. Must be omitted for AD_CALL and WEBSITE_CALL.
+            view_through_lookback_window_days: View lookback window (1-30 days).
+                Omit to use API default. Must be omitted for AD_CALL and WEBSITE_CALL.
 
         Returns:
             Created conversion action details
