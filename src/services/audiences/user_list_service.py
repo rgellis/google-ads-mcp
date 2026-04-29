@@ -10,6 +10,7 @@ from google.ads.googleads.v23.common.types.user_lists import (
     LogicalUserListInfo,
     LogicalUserListOperandInfo,
     SimilarUserListInfo,
+    UserListActionInfo,
     UserListLogicalRuleInfo,
 )
 from google.ads.googleads.v23.enums.types.user_list_logical_rule_operator import (
@@ -61,6 +62,7 @@ class UserListService:
         ctx: Context,
         customer_id: str,
         name: str,
+        actions: List[Dict[str, str]],
         description: Optional[str] = None,
         membership_life_span: int = 30,
         membership_status: str = "OPEN",
@@ -74,6 +76,11 @@ class UserListService:
             ctx: FastMCP context
             customer_id: The customer ID
             name: User list name
+            actions: List of action dicts that build BasicUserListInfo.actions.
+                Each dict must have exactly ONE of:
+                  - "conversion_action": resource name of a ConversionAction
+                  - "remarketing_action": resource name of a RemarketingAction
+                A BasicUserList without actions is unusable, so this is required.
             description: Optional description
             membership_life_span: How long users remain in the list (days)
             membership_status: OPEN or CLOSED
@@ -81,6 +88,12 @@ class UserListService:
         Returns:
             Created user list details
         """
+        if not actions:
+            raise ValueError(
+                "create_basic_user_list requires at least one action; a "
+                "BasicUserList with no actions is unusable."
+            )
+
         try:
             customer_id = format_customer_id(customer_id)
 
@@ -95,8 +108,25 @@ class UserListService:
             )
             user_list.membership_life_span = membership_life_span
 
-            # Create basic user list info
+            # Create basic user list info with the caller-supplied actions.
             basic_user_list = BasicUserListInfo()
+            for idx, action in enumerate(actions):
+                action_info = UserListActionInfo()
+                if "conversion_action" in action and "remarketing_action" in action:
+                    raise ValueError(
+                        f"actions[{idx}]: pass exactly one of conversion_action "
+                        "or remarketing_action (they are members of the same oneof)."
+                    )
+                if "conversion_action" in action:
+                    action_info.conversion_action = action["conversion_action"]
+                elif "remarketing_action" in action:
+                    action_info.remarketing_action = action["remarketing_action"]
+                else:
+                    raise ValueError(
+                        f"actions[{idx}]: must contain conversion_action or "
+                        "remarketing_action key."
+                    )
+                basic_user_list.actions.append(action_info)
             user_list.basic_user_list = basic_user_list
 
             # Create operation
@@ -581,6 +611,7 @@ def create_user_list_tools(
         ctx: Context,
         customer_id: str,
         name: str,
+        actions: List[Dict[str, str]],
         description: Optional[str] = None,
         membership_life_span: int = 30,
         membership_status: str = "OPEN",
@@ -593,6 +624,10 @@ def create_user_list_tools(
         Args:
             customer_id: The customer ID
             name: User list name
+            actions: List of action dicts populating BasicUserListInfo.actions.
+                Each dict must have exactly ONE of "conversion_action" or
+                "remarketing_action" (resource name). Required — a list with
+                no actions is unusable.
             description: Optional description
             membership_life_span: How long users remain in the list (days, 0-540)
             membership_status: OPEN (can add users) or CLOSED
@@ -604,6 +639,7 @@ def create_user_list_tools(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
+            actions=actions,
             description=description,
             membership_life_span=membership_life_span,
             membership_status=membership_status,

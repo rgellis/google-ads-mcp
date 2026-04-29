@@ -936,6 +936,7 @@ class AssetService:
         description: str,
         privacy_policy_url: str,
         call_to_action_type: str,
+        call_to_action_description: str,
         fields: List[Dict[str, str]],
         name: Optional[str] = None,
         partial_failure: bool = False,
@@ -952,6 +953,9 @@ class AssetService:
             description: The description text
             privacy_policy_url: URL to the privacy policy
             call_to_action_type: Call to action type (e.g., "SIGN_UP", "LEARN_MORE")
+            call_to_action_description: Required text giving a clear value
+                proposition for filling out the form. Required by the v23
+                LeadFormAsset proto.
             fields: List of form fields, each with key "input_type"
                 (e.g., "FULL_NAME", "EMAIL", "PHONE_NUMBER")
             name: Optional name for the asset
@@ -974,6 +978,7 @@ class AssetService:
             lead_form_asset.call_to_action_type = CallToActionTypeEnum.CallToActionType[
                 call_to_action_type
             ]
+            lead_form_asset.call_to_action_description = call_to_action_description
 
             for field_data in fields:
                 lead_form_field = LeadFormField()

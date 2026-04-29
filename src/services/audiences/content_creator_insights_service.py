@@ -66,12 +66,12 @@ class ContentCreatorInsightsService:
         self,
         ctx: Context,
         customer_id: str,
+        customer_insights_group: str,
         country_locations: List[str],
         sub_country_locations: Optional[List[str]] = None,
         search_channel_ids: Optional[List[str]] = None,
         search_brand_names: Optional[List[str]] = None,
         search_audience_interests: Optional[List[str]] = None,
-        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate YouTube creator insights.
 
@@ -81,12 +81,13 @@ class ContentCreatorInsightsService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
+            customer_insights_group: User-defined grouping label. Required by
+                the v23 GenerateCreatorInsightsRequest proto.
             country_locations: Geo target constant resource names (e.g. geoTargetConstants/2840)
             sub_country_locations: Sub-country geo target constants for finer targeting
             search_channel_ids: YouTube channel IDs to search for specific creators
             search_brand_names: Knowledge graph entity IDs to search by brand (e.g. /m/0d8h3k)
             search_audience_interests: Knowledge graph entity IDs for audience interest targeting
-            customer_insights_group: User-defined grouping label
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -126,8 +127,7 @@ class ContentCreatorInsightsService:
                         _make_attr_knowledge_graph(interest)
                     )
 
-            if customer_insights_group:
-                request.customer_insights_group = customer_insights_group
+            request.customer_insights_group = customer_insights_group
 
             response: GenerateCreatorInsightsResponse = (
                 self.client.generate_creator_insights(request=request)
@@ -148,10 +148,10 @@ class ContentCreatorInsightsService:
         self,
         ctx: Context,
         customer_id: str,
+        customer_insights_group: str,
         country_location: str,
         search_topic_names: Optional[List[str]] = None,
         search_audience_interests: Optional[List[str]] = None,
-        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate YouTube trending content insights.
 
@@ -161,10 +161,11 @@ class ContentCreatorInsightsService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
+            customer_insights_group: User-defined grouping label. Required by
+                the v23 GenerateTrendingInsightsRequest proto.
             country_location: Geo target constant resource name
             search_topic_names: Knowledge graph entity IDs to filter by topic (e.g. /m/027x7n)
             search_audience_interests: Knowledge graph entity IDs for audience targeting
-            customer_insights_group: User-defined grouping label
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -191,8 +192,7 @@ class ContentCreatorInsightsService:
                         _make_attr_knowledge_graph(interest)
                     )
 
-            if customer_insights_group:
-                request.customer_insights_group = customer_insights_group
+            request.customer_insights_group = customer_insights_group
 
             response: GenerateTrendingInsightsResponse = (
                 self.client.generate_trending_insights(request=request)
@@ -218,12 +218,12 @@ def create_content_creator_insights_tools(
     async def generate_creator_insights(
         ctx: Context,
         customer_id: str,
+        customer_insights_group: str,
         country_locations: List[str],
         sub_country_locations: Optional[List[str]] = None,
         search_channel_ids: Optional[List[str]] = None,
         search_brand_names: Optional[List[str]] = None,
         search_audience_interests: Optional[List[str]] = None,
-        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate YouTube creator insights to find relevant content creators for advertising.
 
@@ -233,12 +233,13 @@ def create_content_creator_insights_tools(
 
         Args:
             customer_id: The customer ID
+            customer_insights_group: Grouping label for organizing requests.
+                Required by the v23 GenerateCreatorInsightsRequest proto.
             country_locations: Country geo target constants (e.g. geoTargetConstants/2840 for US)
             sub_country_locations: Sub-country geo targets for finer geographic targeting
             search_channel_ids: YouTube channel resource names to analyze specific creators (mode 1)
             search_brand_names: Brand names (knowledge graph entities) to find related creators (mode 2)
             search_audience_interests: Audience interest topics to find creators whose audience matches (mode 3)
-            customer_insights_group: Grouping label for organizing requests
 
         Returns:
             Creator insights including audience demographics, channel metrics, and content topics
@@ -246,21 +247,21 @@ def create_content_creator_insights_tools(
         return await service.generate_creator_insights(
             ctx=ctx,
             customer_id=customer_id,
+            customer_insights_group=customer_insights_group,
             country_locations=country_locations,
             sub_country_locations=sub_country_locations,
             search_channel_ids=search_channel_ids,
             search_brand_names=search_brand_names,
             search_audience_interests=search_audience_interests,
-            customer_insights_group=customer_insights_group,
         )
 
     async def generate_trending_insights(
         ctx: Context,
         customer_id: str,
+        customer_insights_group: str,
         country_location: str,
         search_topic_names: Optional[List[str]] = None,
         search_audience_interests: Optional[List[str]] = None,
-        customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate YouTube trending content insights to discover what's popular.
 
@@ -269,10 +270,11 @@ def create_content_creator_insights_tools(
 
         Args:
             customer_id: The customer ID
+            customer_insights_group: Grouping label for organizing requests.
+                Required by the v23 GenerateTrendingInsightsRequest proto.
             country_location: Country geo target constant (e.g. geoTargetConstants/2840 for US)
             search_topic_names: Topic names (knowledge graph entities) to filter trends (mode 1)
             search_audience_interests: Audience interests to filter which trends matter (mode 2)
-            customer_insights_group: Grouping label for organizing requests
 
         Returns:
             Trending content insights including topics, creators, and engagement metrics
@@ -280,10 +282,10 @@ def create_content_creator_insights_tools(
         return await service.generate_trending_insights(
             ctx=ctx,
             customer_id=customer_id,
+            customer_insights_group=customer_insights_group,
             country_location=country_location,
             search_topic_names=search_topic_names,
             search_audience_interests=search_audience_interests,
-            customer_insights_group=customer_insights_group,
         )
 
     tools.extend([generate_creator_insights, generate_trending_insights])

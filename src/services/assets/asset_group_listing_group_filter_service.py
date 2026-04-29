@@ -4,8 +4,21 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
+from google.ads.googleads.v23.enums.types.listing_group_filter_product_channel import (
+    ListingGroupFilterProductChannelEnum,
+)
+from google.ads.googleads.v23.enums.types.listing_group_filter_product_condition import (
+    ListingGroupFilterProductConditionEnum,
+)
+from google.ads.googleads.v23.enums.types.listing_group_filter_custom_attribute_index import (
+    ListingGroupFilterCustomAttributeIndexEnum,
+)
+from google.ads.googleads.v23.enums.types.listing_group_filter_product_type_level import (
+    ListingGroupFilterProductTypeLevelEnum,
+)
 from google.ads.googleads.v23.resources.types.asset_group_listing_group_filter import (
     AssetGroupListingGroupFilter,
+    ListingGroupFilterDimension,
 )
 from google.ads.googleads.v23.services.services.asset_group_listing_group_filter_service import (
     AssetGroupListingGroupFilterServiceClient,
@@ -27,6 +40,71 @@ from src.utils import (
 )
 
 logger = get_logger(__name__)
+
+
+def _build_listing_dimension(
+    case_value: Dict[str, Any],
+) -> ListingGroupFilterDimension:
+    """Build a ListingGroupFilterDimension from a single-key dict.
+
+    Supported keys (each maps to one oneof member):
+      - "product_brand": str
+      - "product_item_id": str
+      - "product_type": {"value": str, "level": str}
+      - "product_channel": str (enum like "ONLINE")
+      - "product_condition": str (enum like "NEW")
+      - "product_custom_attribute": {"value": str, "index": str}
+
+    product_category and webpage are not yet supported by this helper.
+    """
+    if len(case_value) != 1:
+        raise ValueError(
+            "case_value must contain exactly one dimension key; got "
+            f"{sorted(case_value.keys())}"
+        )
+    [(dim_key, dim_value)] = case_value.items()
+    dim = ListingGroupFilterDimension()
+    if dim_key == "product_brand":
+        dim.product_brand = ListingGroupFilterDimension.ProductBrand(value=dim_value)
+    elif dim_key == "product_item_id":
+        dim.product_item_id = ListingGroupFilterDimension.ProductItemId(value=dim_value)
+    elif dim_key == "product_type":
+        pt = ListingGroupFilterDimension.ProductType(value=dim_value["value"])
+        pt.level = getattr(
+            ListingGroupFilterProductTypeLevelEnum.ListingGroupFilterProductTypeLevel,
+            dim_value["level"],
+        )
+        dim.product_type = pt
+    elif dim_key == "product_channel":
+        dim.product_channel = ListingGroupFilterDimension.ProductChannel(
+            channel=getattr(
+                ListingGroupFilterProductChannelEnum.ListingGroupFilterProductChannel,
+                dim_value,
+            )
+        )
+    elif dim_key == "product_condition":
+        dim.product_condition = ListingGroupFilterDimension.ProductCondition(
+            condition=getattr(
+                ListingGroupFilterProductConditionEnum.ListingGroupFilterProductCondition,
+                dim_value,
+            )
+        )
+    elif dim_key == "product_custom_attribute":
+        pca = ListingGroupFilterDimension.ProductCustomAttribute(
+            value=dim_value["value"]
+        )
+        pca.index = getattr(
+            ListingGroupFilterCustomAttributeIndexEnum.ListingGroupFilterCustomAttributeIndex,
+            dim_value["index"],
+        )
+        dim.product_custom_attribute = pca
+    else:
+        raise ValueError(
+            f"Unsupported case_value dimension: {dim_key!r}. Supported: "
+            "product_brand, product_item_id, product_type, product_channel, "
+            "product_condition, product_custom_attribute."
+        )
+    return dim
 
 
 class AssetGroupListingGroupFilterService:
@@ -52,6 +130,7 @@ class AssetGroupListingGroupFilterService:
         asset_group_resource_name: str,
         filter_type: str,
         parent_listing_group_filter: Optional[str] = None,
+        case_value: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -63,7 +142,15 @@ class AssetGroupListingGroupFilterService:
             customer_id: The customer ID
             asset_group_resource_name: Resource name of the asset group
             filter_type: Filter type (UNIT_INCLUDED, UNIT_EXCLUDED, SUBDIVISION)
-            parent_listing_group_filter: Resource name of parent filter (for subdivisions)
+            parent_listing_group_filter: Resource name of parent filter
+                (for subdivisions). Required for non-root nodes.
+            case_value: Optional dict with one key naming the dimension type
+                and its value. Required for non-root nodes. Supported keys:
+                "product_brand" (str), "product_item_id" (str),
+                "product_type" ({"value": str, "level": str}),
+                "product_channel" (str enum: ONLINE, LOCAL, ...),
+                "product_condition" (str enum: NEW, USED, REFURBISHED),
+                "product_custom_attribute" ({"value": str, "index": str enum}).
 
         Returns:
             Created listing group filter details
@@ -82,6 +169,8 @@ class AssetGroupListingGroupFilterService:
             )
             if parent_listing_group_filter:
                 lgf.parent_listing_group_filter = parent_listing_group_filter
+            if case_value is not None:
+                lgf.case_value = _build_listing_dimension(case_value)
 
             operation = AssetGroupListingGroupFilterOperation()
             operation.create = lgf
@@ -118,20 +207,25 @@ class AssetGroupListingGroupFilterService:
         ctx: Context,
         customer_id: str,
         listing_group_filter_resource_name: str,
-        filter_type: Optional[str] = None,
-        parent_listing_group_filter: Optional[str] = None,
+        case_value: Dict[str, Any],
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Update a listing group filter for a Performance Max asset group.
+        """Update a listing group filter's case_value.
+
+        Per the v23 proto, ``type_``, ``listing_source``, ``asset_group``,
+        and ``parent_listing_group_filter`` are all Immutable. The only
+        mutable field on this resource is ``case_value``. To change a
+        node's type or parent, remove and recreate it.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            listing_group_filter_resource_name: Resource name of the listing group filter
-            filter_type: Filter type (UNIT_INCLUDED, UNIT_EXCLUDED, SUBDIVISION)
-            parent_listing_group_filter: Resource name of parent filter
+            listing_group_filter_resource_name: Resource name of the listing
+                group filter
+            case_value: New dimension value (see create_listing_group_filter
+                docstring for the dict format)
 
         Returns:
             Updated listing group filter details
@@ -141,25 +235,8 @@ class AssetGroupListingGroupFilterService:
 
             lgf = AssetGroupListingGroupFilter()
             lgf.resource_name = listing_group_filter_resource_name
-
-            update_mask_fields: list[str] = []
-
-            if filter_type is not None:
-                from google.ads.googleads.v23.enums.types.listing_group_filter_type_enum import (
-                    ListingGroupFilterTypeEnum,
-                )
-
-                lgf.type_ = getattr(
-                    ListingGroupFilterTypeEnum.ListingGroupFilterType, filter_type
-                )
-                update_mask_fields.append("type")
-
-            if parent_listing_group_filter is not None:
-                lgf.parent_listing_group_filter = parent_listing_group_filter
-                update_mask_fields.append("parent_listing_group_filter")
-
-            if not update_mask_fields:
-                raise ValueError("At least one field must be provided for update")
+            lgf.case_value = _build_listing_dimension(case_value)
+            update_mask_fields: list[str] = ["case_value"]
 
             operation = AssetGroupListingGroupFilterOperation()
             operation.update = lgf
@@ -265,6 +342,7 @@ def create_asset_group_listing_group_filter_tools(
         asset_group_resource_name: str,
         filter_type: str,
         parent_listing_group_filter: Optional[str] = None,
+        case_value: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -275,7 +353,15 @@ def create_asset_group_listing_group_filter_tools(
             customer_id: The customer ID
             asset_group_resource_name: Resource name of the asset group
             filter_type: UNIT_INCLUDED, UNIT_EXCLUDED, or SUBDIVISION
-            parent_listing_group_filter: Parent filter resource name (for subdivisions)
+            parent_listing_group_filter: Parent filter resource name
+                (for subdivisions). Required for non-root nodes.
+            case_value: Dict with one dimension key. Required for non-root
+                nodes. Supported keys: product_brand (str),
+                product_item_id (str),
+                product_type ({"value": str, "level": str}),
+                product_channel (str enum: ONLINE, LOCAL, ...),
+                product_condition (str enum: NEW, USED, REFURBISHED),
+                product_custom_attribute ({"value": str, "index": str enum}).
 
         Returns:
             Created filter details
@@ -286,6 +372,7 @@ def create_asset_group_listing_group_filter_tools(
             asset_group_resource_name=asset_group_resource_name,
             filter_type=filter_type,
             parent_listing_group_filter=parent_listing_group_filter,
+            case_value=case_value,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -321,23 +408,22 @@ def create_asset_group_listing_group_filter_tools(
         ctx: Context,
         customer_id: str,
         listing_group_filter_resource_name: str,
-        filter_type: Optional[str] = None,
-        parent_listing_group_filter: Optional[str] = None,
+        case_value: Dict[str, Any],
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update a listing group filter for PMax product feed targeting using partial update with field mask.
+        """Update a listing group filter's case_value (the only mutable field).
 
-        Updatable fields:
-            - filter_type (str): Filter type - UNIT_INCLUDED, UNIT_EXCLUDED, or SUBDIVISION
-            - parent_listing_group_filter (str): Resource name of the parent filter
+        Per the v23 proto, the type, parent, listing_source, and asset_group
+        are all Immutable. Only case_value can be updated. To change the
+        type or parent, remove and recreate the node.
 
         Args:
             customer_id: The customer ID
-            listing_group_filter_resource_name: Full resource name of the listing group filter
-            filter_type: UNIT_INCLUDED, UNIT_EXCLUDED, or SUBDIVISION
-            parent_listing_group_filter: Parent filter resource name (for subdivisions)
+            listing_group_filter_resource_name: Resource name of the filter
+            case_value: New dimension value (see create_listing_group_filter
+                for the dict format)
 
         Returns:
             Updated filter details
@@ -346,8 +432,7 @@ def create_asset_group_listing_group_filter_tools(
             ctx=ctx,
             customer_id=customer_id,
             listing_group_filter_resource_name=listing_group_filter_resource_name,
-            filter_type=filter_type,
-            parent_listing_group_filter=parent_listing_group_filter,
+            case_value=case_value,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

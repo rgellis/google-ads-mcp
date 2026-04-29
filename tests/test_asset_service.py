@@ -650,6 +650,7 @@ async def test_create_lead_form_asset(
             description="Fill out the form",
             privacy_policy_url="https://example.com/privacy",
             call_to_action_type="SIGN_UP",
+            call_to_action_description="Tell us a bit about your project",
             fields=[{"input_type": "FULL_NAME"}, {"input_type": "EMAIL"}],
         )
     assert result == expected

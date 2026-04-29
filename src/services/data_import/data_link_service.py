@@ -57,6 +57,9 @@ class DataLinkService:
     ) -> Dict[str, Any]:
         """Create a data link.
 
+        At least one of youtube_video_channel_id or youtube_video_video_id
+        must be supplied — an empty DataLink is rejected by the API.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
@@ -66,15 +69,21 @@ class DataLinkService:
         Returns:
             Created data link details
         """
+        if not (youtube_video_channel_id or youtube_video_video_id):
+            raise ValueError(
+                "create_data_link requires at least one identifier. Pass "
+                "youtube_video_channel_id and/or youtube_video_video_id; an "
+                "empty DataLink is rejected by the API."
+            )
+
         try:
             customer_id = format_customer_id(customer_id)
 
             data_link = DataLink()
-            if youtube_video_channel_id or youtube_video_video_id:
-                if youtube_video_channel_id:
-                    data_link.youtube_video.channel_id = youtube_video_channel_id
-                if youtube_video_video_id:
-                    data_link.youtube_video.video_id = youtube_video_video_id
+            if youtube_video_channel_id:
+                data_link.youtube_video.channel_id = youtube_video_channel_id
+            if youtube_video_video_id:
+                data_link.youtube_video.video_id = youtube_video_video_id
 
             request = CreateDataLinkRequest()
             request.customer_id = customer_id

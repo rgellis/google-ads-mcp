@@ -4,6 +4,9 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
+from google.ads.googleads.v23.enums.types.recommendation_subscription_status import (
+    RecommendationSubscriptionStatusEnum,
+)
 from google.ads.googleads.v23.enums.types.recommendation_type import (
     RecommendationTypeEnum,
 )
@@ -52,16 +55,23 @@ class RecommendationSubscriptionService:
         ctx: Context,
         customer_id: str,
         recommendation_type: str,
+        status: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a recommendation subscription to auto-apply a recommendation type.
 
+        Per the v23 RecommendationSubscription proto, both ``type_`` and
+        ``status`` are Required. Status is also the only mutable field
+        post-create (``type_`` is Immutable).
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            recommendation_type: Type of recommendation to auto-apply (e.g. CAMPAIGN_BUDGET, KEYWORD)
+            recommendation_type: Type of recommendation to auto-apply (e.g.
+                CAMPAIGN_BUDGET, KEYWORD)
+            status: Subscription status. ENABLED or PAUSED. Required by proto.
 
         Returns:
             Created subscription details
@@ -72,6 +82,10 @@ class RecommendationSubscriptionService:
             subscription = RecommendationSubscription()
             subscription.type_ = getattr(
                 RecommendationTypeEnum.RecommendationType, recommendation_type
+            )
+            subscription.status = getattr(
+                RecommendationSubscriptionStatusEnum.RecommendationSubscriptionStatus,
+                status,
             )
 
             operation = RecommendationSubscriptionOperation()
@@ -112,18 +126,23 @@ class RecommendationSubscriptionService:
         ctx: Context,
         customer_id: str,
         subscription_resource_name: str,
-        recommendation_type: Optional[str] = None,
+        status: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Update a recommendation subscription.
+        """Update a recommendation subscription's status.
+
+        Per the v23 proto, ``type_`` is Required+Immutable — it cannot be
+        updated. ``status`` is the only mutable field on this resource.
+        To change the recommendation type, remove the subscription and
+        create a new one.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             subscription_resource_name: Resource name of the subscription
-            recommendation_type: New recommendation type
+            status: New status. ENABLED or PAUSED.
 
         Returns:
             Updated subscription details
@@ -133,19 +152,14 @@ class RecommendationSubscriptionService:
 
             subscription = RecommendationSubscription()
             subscription.resource_name = subscription_resource_name
-
-            update_mask_fields = []
-            if recommendation_type is not None:
-                subscription.type_ = getattr(
-                    RecommendationTypeEnum.RecommendationType, recommendation_type
-                )
-                update_mask_fields.append("type")
+            subscription.status = getattr(
+                RecommendationSubscriptionStatusEnum.RecommendationSubscriptionStatus,
+                status,
+            )
 
             operation = RecommendationSubscriptionOperation()
             operation.update = subscription
-            operation.update_mask.CopyFrom(
-                field_mask_pb2.FieldMask(paths=update_mask_fields)
-            )
+            operation.update_mask.CopyFrom(field_mask_pb2.FieldMask(paths=["status"]))
 
             request = MutateRecommendationSubscriptionRequest()
             request.customer_id = customer_id
@@ -188,16 +202,20 @@ def create_recommendation_subscription_tools(
         ctx: Context,
         customer_id: str,
         recommendation_type: str,
+        status: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a subscription to auto-apply a recommendation type.
 
+        Per the v23 proto, both recommendation_type and status are Required.
+
         Args:
             customer_id: The customer ID
             recommendation_type: Type to auto-apply - CAMPAIGN_BUDGET, KEYWORD,
                 MAXIMIZE_CLICKS_OPT_IN, TARGET_CPA_OPT_IN, etc.
+            status: ENABLED or PAUSED. Required.
 
         Returns:
             Created subscription details
@@ -206,6 +224,7 @@ def create_recommendation_subscription_tools(
             ctx=ctx,
             customer_id=customer_id,
             recommendation_type=recommendation_type,
+            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -215,17 +234,21 @@ def create_recommendation_subscription_tools(
         ctx: Context,
         customer_id: str,
         subscription_resource_name: str,
-        recommendation_type: Optional[str] = None,
+        status: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update a recommendation subscription.
+        """Update a recommendation subscription's status.
+
+        Status is the only mutable field on this resource — type_ is
+        Required+Immutable per the v23 proto. To change the type, remove
+        the subscription and create a new one.
 
         Args:
             customer_id: The customer ID
             subscription_resource_name: Resource name of the subscription
-            recommendation_type: New recommendation type
+            status: New status. ENABLED or PAUSED.
 
         Returns:
             Updated subscription details
@@ -234,7 +257,7 @@ def create_recommendation_subscription_tools(
             ctx=ctx,
             customer_id=customer_id,
             subscription_resource_name=subscription_resource_name,
-            recommendation_type=recommendation_type,
+            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

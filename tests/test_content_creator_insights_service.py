@@ -45,6 +45,7 @@ async def test_generate_creator_insights(
         result = await service.generate_creator_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
+            customer_insights_group="my_group",
             country_locations=["geoTargetConstants/2840"],
         )
 
@@ -54,6 +55,7 @@ async def test_generate_creator_insights(
     request = call_args[1]["request"]
     assert request.customer_id == "1234567890"
     assert len(request.country_locations) == 1
+    assert request.customer_insights_group == "my_group"
 
 
 @pytest.mark.asyncio
@@ -72,10 +74,10 @@ async def test_generate_creator_insights_with_all_options(
         result = await service.generate_creator_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
+            customer_insights_group="my_analysis",
             country_locations=["geoTargetConstants/2840"],
             sub_country_locations=["geoTargetConstants/21167"],
             search_channel_ids=["UC12345"],
-            customer_insights_group="my_analysis",
         )
 
     call_args = mock_client.generate_creator_insights.call_args  # type: ignore
@@ -100,6 +102,7 @@ async def test_generate_creator_insights_error(
         await service.generate_creator_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
+            customer_insights_group="grp",
             country_locations=["geoTargetConstants/2840"],
         )
 
@@ -124,6 +127,7 @@ async def test_generate_trending_insights(
         result = await service.generate_trending_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
+            customer_insights_group="trend",
             country_location="geoTargetConstants/2840",
         )
 
@@ -147,9 +151,9 @@ async def test_generate_trending_insights_with_all_options(
         result = await service.generate_trending_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
+            customer_insights_group="trend_check",
             country_location="geoTargetConstants/2840",
             search_topic_names=["/m/027x7n"],
-            customer_insights_group="trend_check",
         )
 
     call_args = mock_client.generate_trending_insights.call_args  # type: ignore
@@ -172,6 +176,7 @@ async def test_generate_trending_insights_error(
         await service.generate_trending_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
+            customer_insights_group="grp",
             country_location="geoTargetConstants/2840",
         )
 

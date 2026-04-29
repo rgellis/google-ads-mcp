@@ -81,6 +81,9 @@ async def test_create_basic_user_list(
             ctx=mock_ctx,
             customer_id=customer_id,
             name=name,
+            actions=[
+                {"remarketing_action": "customers/1234567890/remarketingActions/9999"}
+            ],
             description=description,
             membership_life_span=membership_life_span,
             membership_status=membership_status,
@@ -507,6 +510,9 @@ async def test_error_handling(
             ctx=mock_ctx,
             customer_id=customer_id,
             name="Test User List",
+            actions=[
+                {"remarketing_action": "customers/1234567890/remarketingActions/9999"}
+            ],
         )
 
     assert "Failed to create basic user list" in str(exc_info.value)

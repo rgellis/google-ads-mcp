@@ -48,6 +48,7 @@ async def test_create_subscription(
             ctx=mock_ctx,
             customer_id="1234567890",
             recommendation_type="CAMPAIGN_BUDGET",
+            status="ENABLED",
         )
 
     assert result == expected_result
@@ -81,7 +82,7 @@ async def test_update_subscription(
             ctx=mock_ctx,
             customer_id="1234567890",
             subscription_resource_name=resource_name,
-            recommendation_type="KEYWORD",
+            status="PAUSED",
         )
 
     assert result == expected_result
@@ -90,7 +91,8 @@ async def test_update_subscription(
     request = call_args[1]["request"]
     operation = request.operations[0]
     assert operation.update.resource_name == resource_name
-    assert "type" in operation.update_mask.paths
+    # Only status is mutable on RecommendationSubscription per S1.22.
+    assert list(operation.update_mask.paths) == ["status"]
 
 
 @pytest.mark.asyncio
@@ -108,6 +110,7 @@ async def test_create_subscription_error(
             ctx=mock_ctx,
             customer_id="1234567890",
             recommendation_type="CAMPAIGN_BUDGET",
+            status="ENABLED",
         )
 
     assert "Failed to create recommendation subscription" in str(exc_info.value)
@@ -128,6 +131,7 @@ async def test_update_subscription_error(
             ctx=mock_ctx,
             customer_id="1234567890",
             subscription_resource_name="customers/1234567890/recommendationSubscriptions/1",
+            status="ENABLED",
         )
 
     assert "Failed to update recommendation subscription" in str(exc_info.value)

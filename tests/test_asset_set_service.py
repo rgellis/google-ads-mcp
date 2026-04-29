@@ -79,6 +79,7 @@ async def test_create_asset_set(
             name=name,
             asset_set_type=asset_set_type,
             status=status,
+            merchant_id=12345,
         )
 
     # Assert
@@ -95,6 +96,7 @@ async def test_create_asset_set(
     assert operation.create.name == name
     assert operation.create.type_ == asset_set_type
     assert operation.create.status == status
+    assert operation.create.merchant_center_feed.merchant_id == 12345
 
 
 @pytest.mark.asyncio
@@ -494,6 +496,7 @@ async def test_error_handling(
             customer_id=customer_id,
             name="Test",
             asset_set_type=AssetSetTypeEnum.AssetSetType.MERCHANT_CENTER_FEED,
+            merchant_id=12345,
         )
 
     assert "Failed to create asset set" in str(exc_info.value)

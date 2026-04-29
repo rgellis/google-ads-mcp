@@ -195,7 +195,7 @@ async def test_update_listing_group_filter(
             ctx=mock_ctx,
             customer_id="1234567890",
             listing_group_filter_resource_name=resource_name,
-            filter_type="UNIT_EXCLUDED",
+            case_value={"product_brand": "Nike"},
         )
 
     assert result == expected_result
@@ -206,7 +206,9 @@ async def test_update_listing_group_filter(
     assert len(request.operations) == 1
 
     operation = request.operations[0]
-    assert "type" in operation.update_mask.paths
+    # Only case_value is mutable on AssetGroupListingGroupFilter (S1.29).
+    assert list(operation.update_mask.paths) == ["case_value"]
+    assert operation.update.case_value.product_brand.value == "Nike"
 
 
 def test_register_tools() -> None:
