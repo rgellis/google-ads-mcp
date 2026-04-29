@@ -64,7 +64,7 @@ async def test_mutate_campaign_goal_configs_create(
 async def test_mutate_campaign_goal_configs_update(
     service: CampaignGoalConfigService, mock_ctx: Context
 ) -> None:
-    """Test updating a campaign goal config."""
+    """Test updating a campaign goal config (retention settings only)."""
     mock_client = service.client
     mock_client.mutate_campaign_goal_configs.return_value = Mock()  # type: ignore
 
@@ -80,15 +80,24 @@ async def test_mutate_campaign_goal_configs_update(
         result = await service.mutate_campaign_goal_configs(
             ctx=mock_ctx,
             customer_id="1234567890",
-            campaign_resource_name=config_rn,
+            config_resource_name=config_rn,
             operation_type="update",
+            retention_additional_value=20.0,
         )
 
     assert result == expected_result
     mock_client.mutate_campaign_goal_configs.assert_called_once()  # type: ignore
     call_args = mock_client.mutate_campaign_goal_configs.call_args  # type: ignore
     request = call_args[1]["request"]
-    assert request.operations[0].update.resource_name == config_rn
+    op = request.operations[0]
+    assert op.update.resource_name == config_rn
+    assert (
+        op.update.campaign_retention_settings.value_settings_override.additional_value
+        == 20.0
+    )
+    assert list(op.update_mask.paths) == [
+        "campaign_retention_settings.value_settings_override.additional_value"
+    ]
 
 
 @pytest.mark.asyncio
@@ -111,7 +120,7 @@ async def test_mutate_campaign_goal_configs_remove(
         result = await service.mutate_campaign_goal_configs(
             ctx=mock_ctx,
             customer_id="1234567890",
-            campaign_resource_name=config_rn,
+            config_resource_name=config_rn,
             operation_type="remove",
         )
 
@@ -119,6 +128,20 @@ async def test_mutate_campaign_goal_configs_remove(
     call_args = mock_client.mutate_campaign_goal_configs.call_args  # type: ignore
     request = call_args[1]["request"]
     assert request.operations[0].remove == config_rn
+
+
+@pytest.mark.asyncio
+async def test_mutate_campaign_goal_configs_create_requires_goal(
+    service: CampaignGoalConfigService, mock_ctx: Context
+) -> None:
+    """Create requires goal_resource_name (proto field is Immutable but settable)."""
+    with pytest.raises(Exception, match="goal_resource_name is required"):
+        await service.mutate_campaign_goal_configs(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            campaign_resource_name="customers/1234567890/campaigns/111",
+            operation_type="create",
+        )
 
 
 @pytest.mark.asyncio
@@ -136,6 +159,7 @@ async def test_mutate_campaign_goal_configs_error(
             ctx=mock_ctx,
             customer_id="1234567890",
             campaign_resource_name="customers/1234567890/campaigns/111",
+            goal_resource_name="customers/1234567890/goals/1",
             operation_type="create",
         )
 

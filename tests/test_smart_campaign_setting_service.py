@@ -78,7 +78,7 @@ async def test_update_smart_campaign_setting(
     service: SmartCampaignSettingService,
     mock_ctx: Context,
 ) -> None:
-    """Test updating smart campaign setting."""
+    """Test updating smart campaign setting via typed value parameters."""
     mock_client = service.client
     mock_client.mutate_smart_campaign_settings.return_value = Mock()  # type: ignore
 
@@ -94,7 +94,9 @@ async def test_update_smart_campaign_setting(
             ctx=mock_ctx,
             customer_id="1234567890",
             setting_resource_name="customers/1234567890/smartCampaignSettings/111",
-            update_fields=["advertising_language_code"],
+            advertising_language_code="en",
+            final_url="https://example.com",
+            business_name="Example Business",
         )
 
     assert result == expected_result
@@ -103,6 +105,45 @@ async def test_update_smart_campaign_setting(
     request = call_args[1]["request"]
     assert request.customer_id == "1234567890"
     assert len(request.operations) == 1
+    op = request.operations[0]
+    assert op.update.advertising_language_code == "en"
+    assert op.update.final_url == "https://example.com"
+    assert op.update.business_name == "Example Business"
+    assert set(op.update_mask.paths) == {
+        "advertising_language_code",
+        "final_url",
+        "business_name",
+    }
+
+
+@pytest.mark.asyncio
+async def test_update_smart_campaign_setting_oneof_violation(
+    service: SmartCampaignSettingService,
+    mock_ctx: Context,
+) -> None:
+    """Setting both members of an oneof raises."""
+    with pytest.raises(Exception, match="business_setting"):
+        await service.update_smart_campaign_setting(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            setting_resource_name="customers/1234567890/smartCampaignSettings/111",
+            business_name="A",
+            business_profile_location="locations/123",
+        )
+
+
+@pytest.mark.asyncio
+async def test_update_smart_campaign_setting_no_fields(
+    service: SmartCampaignSettingService,
+    mock_ctx: Context,
+) -> None:
+    """No fields raises (empty update_mask is rejected by API)."""
+    with pytest.raises(Exception, match="At least one updatable field"):
+        await service.update_smart_campaign_setting(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            setting_resource_name="customers/1234567890/smartCampaignSettings/111",
+        )
 
 
 @pytest.mark.asyncio
@@ -120,7 +161,7 @@ async def test_update_smart_campaign_setting_error(
             ctx=mock_ctx,
             customer_id="1234567890",
             setting_resource_name="customers/1234567890/smartCampaignSettings/111",
-            update_fields=["advertising_language_code"],
+            advertising_language_code="en",
         )
 
     assert "Test Google Ads Exception" in str(exc_info.value)

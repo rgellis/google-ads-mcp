@@ -4,6 +4,10 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
+from google.ads.googleads.v23.common.types.goal_common import (
+    CustomerLifecycleOptimizationValueSettings,
+)
+from google.ads.googleads.v23.common.types.goal_setting import GoalSetting
 from google.ads.googleads.v23.resources.types.goal import Goal
 from google.ads.googleads.v23.services.services.goal_service import (
     GoalServiceClient,
@@ -26,6 +30,21 @@ from src.utils import (
 logger = get_logger(__name__)
 
 
+def _build_retention_goal(
+    additional_value: Optional[float],
+    additional_high_lifetime_value: Optional[float],
+) -> GoalSetting.RetentionGoal:
+    """Build a RetentionGoal submessage from optional value parameters."""
+    value_settings = CustomerLifecycleOptimizationValueSettings()
+    if additional_value is not None:
+        value_settings.additional_value = additional_value
+    if additional_high_lifetime_value is not None:
+        value_settings.additional_high_lifetime_value = additional_high_lifetime_value
+    retention = GoalSetting.RetentionGoal()
+    retention.value_settings = value_settings
+    return retention
+
+
 class GoalService:
     """Service for managing account-level goals."""
 
@@ -44,36 +63,98 @@ class GoalService:
         self,
         ctx: Context,
         customer_id: str,
+        operation_type: str,
         goal_resource_name: Optional[str] = None,
-        operation_type: str = "create",
+        retention_additional_value: Optional[float] = None,
+        retention_additional_high_lifetime_value: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create or update account-level goals.
+        """Create or update an account-level retention Goal.
+
+        Goal proto only has one settable submessage on the entity itself:
+        ``retention_goal_settings`` (a oneof). Identity (``resource_name``,
+        ``goal_id``, ``goal_type``, ``owner_customer``,
+        ``optimization_eligibility``) is Output-only or Immutable.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            goal_resource_name: Goal resource name (for update)
-            operation_type: create or update
+            operation_type: "create" or "update"
+            goal_resource_name: Goal resource name. Required for update.
+            retention_additional_value: Incremental conversion value for
+                lapsed customers who are not of high value.
+            retention_additional_high_lifetime_value: Incremental conversion
+                value for lapsed customers who ARE of high value. Should be
+                greater than ``retention_additional_value`` if both are set.
+            partial_failure: passthrough
+            validate_only: passthrough
+            response_content_type: passthrough
 
         Returns:
             Mutation result
         """
+        if operation_type not in ("create", "update"):
+            raise ValueError(
+                f"Unsupported operation_type: {operation_type!r}. Use 'create' or 'update'."
+            )
+
         try:
             customer_id = format_customer_id(customer_id)
+
+            has_value_params = (
+                retention_additional_value is not None
+                or retention_additional_high_lifetime_value is not None
+            )
 
             operation = GoalOperation()
 
             if operation_type == "create":
+                if not has_value_params:
+                    raise ValueError(
+                        "Goal create requires at least one of "
+                        "retention_additional_value or "
+                        "retention_additional_high_lifetime_value."
+                    )
                 goal = Goal()
+                goal.retention_goal_settings = _build_retention_goal(
+                    retention_additional_value,
+                    retention_additional_high_lifetime_value,
+                )
                 operation.create = goal
-            elif operation_type == "update" and goal_resource_name:
+            else:  # update
+                if not goal_resource_name:
+                    raise ValueError(
+                        "goal_resource_name is required for update operations."
+                    )
+                if not has_value_params:
+                    raise ValueError(
+                        "Goal update requires at least one of "
+                        "retention_additional_value or "
+                        "retention_additional_high_lifetime_value."
+                    )
                 goal = Goal()
                 goal.resource_name = goal_resource_name
+                goal.retention_goal_settings = _build_retention_goal(
+                    retention_additional_value,
+                    retention_additional_high_lifetime_value,
+                )
+                # The retention_goal_settings.value_settings.* fields are the
+                # only updatable paths on Goal.
+                update_mask_paths: List[str] = []
+                if retention_additional_value is not None:
+                    update_mask_paths.append(
+                        "retention_goal_settings.value_settings.additional_value"
+                    )
+                if retention_additional_high_lifetime_value is not None:
+                    update_mask_paths.append(
+                        "retention_goal_settings.value_settings.additional_high_lifetime_value"
+                    )
                 operation.update = goal
-                operation.update_mask.CopyFrom(field_mask_pb2.FieldMask(paths=[]))
+                operation.update_mask.CopyFrom(
+                    field_mask_pb2.FieldMask(paths=update_mask_paths)
+                )
 
             request = MutateGoalsRequest()
             request.customer_id = customer_id
@@ -113,21 +194,28 @@ def create_goal_tools(
     async def mutate_goal(
         ctx: Context,
         customer_id: str,
+        operation_type: str,
         goal_resource_name: Optional[str] = None,
-        operation_type: str = "create",
+        retention_additional_value: Optional[float] = None,
+        retention_additional_high_lifetime_value: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create or update account-level conversion goals that define which conversions to optimize for.
+        """Create or update an account-level retention Goal.
 
-        Account goals determine the default conversion actions used for bidding and reporting
-        across all campaigns in the account unless overridden at the campaign level.
+        The Goal resource only has the retention_goal_settings submessage as
+        a settable field. Pass at least one of the retention_* parameters.
 
         Args:
             customer_id: The customer ID
+            operation_type: "create" or "update"
             goal_resource_name: Goal resource name (required for update)
-            operation_type: create or update
+            retention_additional_value: Incremental conversion value for
+                lapsed customers who are not of high value
+            retention_additional_high_lifetime_value: Incremental conversion
+                value for lapsed high-value customers. Should be greater than
+                retention_additional_value if both are set.
 
         Returns:
             Mutation result with resource name
@@ -135,8 +223,10 @@ def create_goal_tools(
         return await service.mutate_goals(
             ctx=ctx,
             customer_id=customer_id,
-            goal_resource_name=goal_resource_name,
             operation_type=operation_type,
+            goal_resource_name=goal_resource_name,
+            retention_additional_value=retention_additional_value,
+            retention_additional_high_lifetime_value=retention_additional_high_lifetime_value,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

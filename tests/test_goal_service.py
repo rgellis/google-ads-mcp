@@ -28,7 +28,7 @@ def service(mock_sdk_client: Any) -> GoalService:
 
 @pytest.mark.asyncio
 async def test_mutate_goals_create(service: GoalService, mock_ctx: Context) -> None:
-    """Test creating a goal."""
+    """Test creating a retention goal with value settings."""
     mock_client = service.client
     mock_client.mutate_goals.return_value = Mock()  # type: ignore
 
@@ -42,6 +42,8 @@ async def test_mutate_goals_create(service: GoalService, mock_ctx: Context) -> N
             ctx=mock_ctx,
             customer_id="1234567890",
             operation_type="create",
+            retention_additional_value=10.0,
+            retention_additional_high_lifetime_value=25.0,
         )
 
     assert result == expected_result
@@ -50,11 +52,17 @@ async def test_mutate_goals_create(service: GoalService, mock_ctx: Context) -> N
     request = call_args[1]["request"]
     assert request.customer_id == "1234567890"
     assert len(request.operations) == 1
+    create = request.operations[0].create
+    assert create.retention_goal_settings.value_settings.additional_value == 10.0
+    assert (
+        create.retention_goal_settings.value_settings.additional_high_lifetime_value
+        == 25.0
+    )
 
 
 @pytest.mark.asyncio
 async def test_mutate_goals_update(service: GoalService, mock_ctx: Context) -> None:
-    """Test updating a goal."""
+    """Test updating a retention goal's value settings."""
     mock_client = service.client
     mock_client.mutate_goals.return_value = Mock()  # type: ignore
 
@@ -70,13 +78,32 @@ async def test_mutate_goals_update(service: GoalService, mock_ctx: Context) -> N
             customer_id="1234567890",
             goal_resource_name=goal_rn,
             operation_type="update",
+            retention_additional_value=15.0,
         )
 
     assert result == expected_result
     mock_client.mutate_goals.assert_called_once()  # type: ignore
     call_args = mock_client.mutate_goals.call_args  # type: ignore
     request = call_args[1]["request"]
-    assert request.operations[0].update.resource_name == goal_rn
+    op = request.operations[0]
+    assert op.update.resource_name == goal_rn
+    assert op.update.retention_goal_settings.value_settings.additional_value == 15.0
+    assert list(op.update_mask.paths) == [
+        "retention_goal_settings.value_settings.additional_value"
+    ]
+
+
+@pytest.mark.asyncio
+async def test_mutate_goals_create_requires_value(
+    service: GoalService, mock_ctx: Context
+) -> None:
+    """Create without retention_* params raises (proto has only that field settable)."""
+    with pytest.raises(Exception, match="requires at least one of retention"):
+        await service.mutate_goals(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            operation_type="create",
+        )
 
 
 @pytest.mark.asyncio
@@ -94,6 +121,7 @@ async def test_mutate_goals_error(
             ctx=mock_ctx,
             customer_id="1234567890",
             operation_type="create",
+            retention_additional_value=5.0,
         )
 
     assert "Failed to mutate goal" in str(exc_info.value)
