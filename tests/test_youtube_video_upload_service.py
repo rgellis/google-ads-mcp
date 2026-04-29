@@ -133,7 +133,7 @@ async def test_update_youtube_video_upload(
     service: YouTubeVideoUploadService,
     mock_ctx: Context,
 ) -> None:
-    """Test updating a YouTube video upload."""
+    """Test updating a YouTube video upload's privacy state."""
     mock_client = service.client
     mock_client.update_you_tube_video_upload.return_value = Mock()  # type: ignore
 
@@ -149,7 +149,7 @@ async def test_update_youtube_video_upload(
             ctx=mock_ctx,
             customer_id="1234567890",
             resource_name="customers/1234567890/youTubeVideoUploads/abc123",
-            video_title="Updated Title",
+            video_privacy="PUBLIC",
         )
 
     assert result == expected_result
@@ -161,43 +161,9 @@ async def test_update_youtube_video_upload(
         request.you_tube_video_upload.resource_name
         == "customers/1234567890/youTubeVideoUploads/abc123"
     )
-    assert request.you_tube_video_upload.video_title == "Updated Title"
-    assert "video_title" in list(request.update_mask.paths)
-
-
-@pytest.mark.asyncio
-async def test_update_youtube_video_upload_multiple_fields(
-    service: YouTubeVideoUploadService,
-    mock_ctx: Context,
-) -> None:
-    """Test updating multiple fields of a YouTube video upload."""
-    mock_client = service.client
-    mock_client.update_you_tube_video_upload.return_value = Mock()  # type: ignore
-
-    expected_result = {
-        "resource_name": "customers/1234567890/youTubeVideoUploads/abc123"
-    }
-
-    with patch(
-        "src.services.assets.youtube_video_upload_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        result = await service.update_youtube_video_upload(
-            ctx=mock_ctx,
-            customer_id="1234567890",
-            resource_name="customers/1234567890/youTubeVideoUploads/abc123",
-            video_title="New Title",
-            video_description="New Description",
-            video_privacy="PUBLIC",
-        )
-
-    assert result == expected_result
-    call_args = mock_client.update_you_tube_video_upload.call_args  # type: ignore
-    request = call_args[1]["request"]
-    mask_paths = list(request.update_mask.paths)
-    assert "video_title" in mask_paths
-    assert "video_description" in mask_paths
-    assert "video_privacy" in mask_paths
+    # Only video_privacy is mutable (S1.30); video_title and video_description
+    # are Immutable after creation per the v23 proto.
+    assert list(request.update_mask.paths) == ["video_privacy"]
 
 
 @pytest.mark.asyncio
@@ -215,7 +181,7 @@ async def test_update_youtube_video_upload_error(
             ctx=mock_ctx,
             customer_id="1234567890",
             resource_name="customers/1234567890/youTubeVideoUploads/abc123",
-            video_title="Updated Title",
+            video_privacy="UNLISTED",
         )
 
     assert "Test Google Ads Exception" in str(exc_info.value)

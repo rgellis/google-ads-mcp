@@ -336,12 +336,14 @@ class AudienceService:
         audience_id: str,
         name: Optional[str] = None,
         description: Optional[str] = None,
-        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an audience.
+
+        Per the v23 Audience proto, ``status`` is Output-only and cannot
+        be updated; it's no longer exposed as a parameter.
 
         Args:
             ctx: FastMCP context
@@ -349,7 +351,6 @@ class AudienceService:
             audience_id: The audience ID to update
             name: Optional new name
             description: Optional new description
-            status: Optional new status
 
         Returns:
             Updated audience details
@@ -373,9 +374,10 @@ class AudienceService:
                 audience.description = description
                 update_mask_paths.append("description")
 
-            if status is not None:
-                audience.status = getattr(AudienceStatusEnum.AudienceStatus, status)
-                update_mask_paths.append("status")
+            if not update_mask_paths:
+                raise ValueError(
+                    "At least one of name or description must be provided."
+                )
 
             # Create operation
             operation = AudienceOperation()
@@ -491,38 +493,6 @@ class AudienceService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def remove_audience(
-        self,
-        ctx: Context,
-        customer_id: str,
-        audience_id: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
-    ) -> Dict[str, Any]:
-        """Remove an audience by setting its status to REMOVED.
-
-        Note: The Google Ads API does not support a remove operation for audiences.
-        This sets the status to REMOVED via an update operation.
-
-        Args:
-            ctx: FastMCP context
-            customer_id: The customer ID
-            audience_id: The audience ID to remove
-
-        Returns:
-            Updated audience details
-        """
-        return await self.update_audience(
-            ctx=ctx,
-            customer_id=customer_id,
-            audience_id=audience_id,
-            status="REMOVED",
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-
 
 def create_audience_tools(
     service: AudienceService,
@@ -590,19 +560,24 @@ def create_audience_tools(
         audience_id: str,
         name: Optional[str] = None,
         description: Optional[str] = None,
-        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an audience.
 
+        Per the v23 Audience proto, ``status`` is Output-only and cannot be
+        updated. The v23 AudienceService also does not support remove —
+        AudienceOperation has no remove field. To stop using an audience,
+        detach it from campaigns and ad groups via the corresponding
+        criterion services (campaign_criterion_service.add_audience_criteria
+        with negative=True, or ad_group_criterion_service.add_audience_criteria).
+
         Args:
             customer_id: The customer ID
             audience_id: The audience ID to update
             name: Optional new name
             description: Optional new description
-            status: Optional new status - ENABLED or REMOVED
 
         Returns:
             Updated audience details with list of updated fields
@@ -613,7 +588,6 @@ def create_audience_tools(
             audience_id=audience_id,
             name=name,
             description=description,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -642,42 +616,11 @@ def create_audience_tools(
             limit=limit,
         )
 
-    async def remove_audience(
-        ctx: Context,
-        customer_id: str,
-        audience_id: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """Remove an audience by setting its status to REMOVED.
-
-        The Google Ads API does not support a direct remove operation for audiences.
-        This sets the status to REMOVED via an update, which hides the audience
-        from future use but preserves historical data.
-
-        Args:
-            customer_id: The customer ID
-            audience_id: The audience ID to remove
-
-        Returns:
-            Updated audience details
-        """
-        return await service.remove_audience(
-            ctx=ctx,
-            customer_id=customer_id,
-            audience_id=audience_id,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-
     tools.extend(
         [
             create_combined_audience,
             update_audience,
             list_audiences,
-            remove_audience,
         ]
     )
     return tools

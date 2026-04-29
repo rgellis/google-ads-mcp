@@ -165,7 +165,6 @@ async def test_update_asset_set(
     customer_id = "1234567890"
     asset_set_id = "123"
     new_name = "Updated Asset Set"
-    new_status = AssetSetStatusEnum.AssetSetStatus.REMOVED
 
     # Create mock response
     mock_response = Mock(spec=MutateAssetSetsResponse)
@@ -194,7 +193,6 @@ async def test_update_asset_set(
             customer_id=customer_id,
             asset_set_id=asset_set_id,
             name=new_name,
-            status=new_status,
         )
 
     # Assert
@@ -213,8 +211,8 @@ async def test_update_asset_set(
         == f"customers/{customer_id}/assetSets/{asset_set_id}"
     )
     assert operation.update.name == new_name
-    assert operation.update.status == new_status
-    assert set(operation.update_mask.paths) == {"name", "status"}
+    # AssetSet.status is Output-only and cannot be updated (S1.37).
+    assert list(operation.update_mask.paths) == ["name"]
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore

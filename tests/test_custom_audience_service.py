@@ -270,7 +270,6 @@ async def test_update_custom_audience(
             name=name,
             description=description,
             members=members,
-            status=status,
         )
 
     # Assert
@@ -290,16 +289,13 @@ async def test_update_custom_audience(
     )
     assert operation.update.name == name
     assert operation.update.description == description
-    assert (
-        operation.update.status == CustomAudienceStatusEnum.CustomAudienceStatus.REMOVED
-    )
 
-    # Verify update mask
+    # Verify update mask. CustomAudience.status is Output-only and cannot
+    # be updated (S1.36).
     assert set(operation.update_mask.paths) == {
         "name",
         "description",
         "members",
-        "status",
     }
 
     # Verify updated members

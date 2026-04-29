@@ -179,12 +179,15 @@ class CustomAudienceService:
         name: Optional[str] = None,
         description: Optional[str] = None,
         members: Optional[List[Dict[str, Any]]] = None,
-        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing custom audience.
+
+        Per the v23 CustomAudience proto, ``status`` is Output-only and
+        cannot be updated. To stop using a custom audience, call
+        ``remove_custom_audience``.
 
         Args:
             ctx: FastMCP context
@@ -193,7 +196,6 @@ class CustomAudienceService:
             name: New name (optional)
             description: New description (optional)
             members: New list of members (optional, replaces existing)
-            status: New status (optional)
 
         Returns:
             Updated custom audience details
@@ -218,12 +220,6 @@ class CustomAudienceService:
             if description is not None:
                 custom_audience.description = description
                 update_mask_fields.append("description")
-
-            if status is not None:
-                custom_audience.status = getattr(
-                    CustomAudienceStatusEnum.CustomAudienceStatus, status
-                )
-                update_mask_fields.append("status")
 
             if members is not None:
                 # Clear and add new members
@@ -556,12 +552,14 @@ def create_custom_audience_tools(
         name: Optional[str] = None,
         description: Optional[str] = None,
         members: Optional[List[Dict[str, Any]]] = None,
-        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing custom audience.
+
+        Per the v23 proto, ``status`` is Output-only and cannot be updated
+        — use remove_custom_audience to remove an audience.
 
         Args:
             customer_id: The customer ID
@@ -569,7 +567,6 @@ def create_custom_audience_tools(
             name: New name (optional)
             description: New description (optional)
             members: New list of members - replaces existing (optional)
-            status: New status - ENABLED or REMOVED (optional)
 
         Returns:
             Updated custom audience details with updated_fields list
@@ -581,7 +578,6 @@ def create_custom_audience_tools(
             name=name,
             description=description,
             members=members,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

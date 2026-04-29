@@ -166,19 +166,21 @@ class AssetSetService:
         customer_id: str,
         asset_set_id: str,
         name: Optional[str] = None,
-        status: Optional[AssetSetStatusEnum.AssetSetStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an asset set.
 
+        Per the v23 AssetSet proto, ``status`` is ``Output only.
+        Read-only`` and cannot be updated. Use ``remove_asset_set`` to
+        remove an asset set.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             asset_set_id: The asset set ID to update
             name: Optional new name
-            status: Optional new status
 
         Returns:
             Updated asset set details
@@ -198,9 +200,8 @@ class AssetSetService:
                 asset_set.name = name
                 update_mask_paths.append("name")
 
-            if status is not None:
-                asset_set.status = status
-                update_mask_paths.append("status")
+            if not update_mask_paths:
+                raise ValueError("name must be provided to update.")
 
             # Create operation
             operation = AssetSetOperation()
@@ -454,34 +455,29 @@ def create_asset_set_tools(
         ctx: Context,
         customer_id: str,
         asset_set_id: str,
-        name: Optional[str] = None,
-        status: Optional[str] = None,
+        name: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an asset set.
 
+        Per the v23 proto, ``status`` is Output-only and cannot be
+        updated. To remove an asset set, call ``remove_asset_set``.
+
         Args:
             customer_id: The customer ID
             asset_set_id: The asset set ID to update
-            name: Optional new name
-            status: Optional new status - ENABLED or REMOVED
+            name: New name. Required (only mutable field on AssetSet).
 
         Returns:
             Updated asset set details with list of updated fields
         """
-        # Convert string enum to proper enum type if provided
-        status_enum = (
-            getattr(AssetSetStatusEnum.AssetSetStatus, status) if status else None
-        )
-
         return await service.update_asset_set(
             ctx=ctx,
             customer_id=customer_id,
             asset_set_id=asset_set_id,
             name=name,
-            status=status_enum,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

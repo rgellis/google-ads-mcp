@@ -324,7 +324,6 @@ async def test_update_audience(
     audience_id = "111222333"
     name = "Updated Audience Name"
     description = "Updated description"
-    status = "REMOVED"
 
     # Create mock response
     mock_response = Mock(spec=MutateAudiencesResponse)
@@ -354,7 +353,6 @@ async def test_update_audience(
             audience_id=audience_id,
             name=name,
             description=description,
-            status=status,
         )
 
     # Assert
@@ -374,10 +372,8 @@ async def test_update_audience(
     )
     assert operation.update.name == name
     assert operation.update.description == description
-    assert operation.update.status == AudienceStatusEnum.AudienceStatus.REMOVED
-    assert "name" in operation.update_mask.paths
-    assert "description" in operation.update_mask.paths
-    assert "status" in operation.update_mask.paths
+    # Audience.status is Output-only; only name and description are mutable.
+    assert set(operation.update_mask.paths) == {"name", "description"}
 
 
 @pytest.mark.asyncio
@@ -456,47 +452,6 @@ async def test_list_audiences(
 
 
 @pytest.mark.asyncio
-async def test_remove_audience(
-    audience_service: AudienceService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test removing an audience (delegates to update with status=REMOVED)."""
-    # Arrange
-    customer_id = "1234567890"
-    audience_id = "111222333"
-
-    # Mock update_audience since remove_audience delegates to it
-    expected_result = {
-        "results": [
-            {"resource_name": f"customers/{customer_id}/audiences/{audience_id}"}
-        ]
-    }
-
-    with patch.object(
-        audience_service, "update_audience", return_value=expected_result
-    ) as mock_update:
-        # Act
-        result = await audience_service.remove_audience(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            audience_id=audience_id,
-        )
-
-    # Assert
-    assert result == expected_result
-    mock_update.assert_called_once_with(
-        ctx=mock_ctx,
-        customer_id=customer_id,
-        audience_id=audience_id,
-        status="REMOVED",
-        partial_failure=False,
-        validate_only=False,
-        response_content_type=None,
-    )
-
-
-@pytest.mark.asyncio
 async def test_error_handling_create_audience(
     audience_service: AudienceService,
     mock_sdk_client: Any,
@@ -545,8 +500,10 @@ def test_register_audience_tools() -> None:
     # Assert
     assert isinstance(service, AudienceService)
 
-    # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    # Verify that tools were registered. remove_audience was deleted in
+    # S1.35 since the v23 AudienceService doesn't support remove and
+    # status is Output-only.
+    assert mock_mcp.tool.call_count == 3  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -556,7 +513,6 @@ def test_register_audience_tools() -> None:
         "create_combined_audience",
         "update_audience",
         "list_audiences",
-        "remove_audience",
     ]
 
     assert set(tool_names) == set(expected_tools)

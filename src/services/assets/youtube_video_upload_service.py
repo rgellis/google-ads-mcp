@@ -126,22 +126,23 @@ class YouTubeVideoUploadService:
         ctx: Context,
         customer_id: str,
         resource_name: str,
-        video_title: Optional[str] = None,
-        video_description: Optional[str] = None,
-        video_privacy: Optional[str] = None,
+        video_privacy: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Update a YouTube video upload.
+        """Update a YouTube video upload's privacy state.
+
+        Per the v23 YouTubeVideoUpload proto, ``video_title`` and
+        ``video_description`` are ``Input only. Immutable. Immutable after
+        creation``. The only mutable field on this resource is
+        ``video_privacy``.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             resource_name: Resource name of the video upload
-            video_title: New title (optional)
-            video_description: New description (optional)
-            video_privacy: New privacy setting (optional)
+            video_privacy: New privacy state. PUBLIC, PRIVATE, or UNLISTED.
 
         Returns:
             Updated video upload details
@@ -149,25 +150,16 @@ class YouTubeVideoUploadService:
         try:
             customer_id = format_customer_id(customer_id)
 
+            from google.ads.googleads.v23.enums.types.youtube_video_privacy import (
+                YouTubeVideoPrivacyEnum,
+            )
+
             upload = YouTubeVideoUpload()
             upload.resource_name = resource_name
-
-            update_mask_fields = []
-            if video_title is not None:
-                upload.video_title = video_title
-                update_mask_fields.append("video_title")
-            if video_description is not None:
-                upload.video_description = video_description
-                update_mask_fields.append("video_description")
-            if video_privacy is not None:
-                from google.ads.googleads.v23.enums.types.youtube_video_privacy import (
-                    YouTubeVideoPrivacyEnum,
-                )
-
-                upload.video_privacy = getattr(
-                    YouTubeVideoPrivacyEnum.YouTubeVideoPrivacy, video_privacy
-                )
-                update_mask_fields.append("video_privacy")
+            upload.video_privacy = getattr(
+                YouTubeVideoPrivacyEnum.YouTubeVideoPrivacy, video_privacy
+            )
+            update_mask_fields = ["video_privacy"]
 
             request = UpdateYouTubeVideoUploadRequest()
             request.customer_id = customer_id
@@ -300,28 +292,25 @@ def create_youtube_video_upload_tools(
         ctx: Context,
         customer_id: str,
         resource_name: str,
-        video_title: Optional[str] = None,
-        video_description: Optional[str] = None,
-        video_privacy: Optional[str] = None,
+        video_privacy: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update a YouTube video upload.
+        """Update a YouTube video upload's privacy state.
+
+        Per the v23 proto, video_title and video_description are
+        Immutable after creation; only video_privacy can be updated.
 
         Args:
             customer_id: The customer ID
             resource_name: Resource name of the video upload
-            video_title: New title
-            video_description: New description
-            video_privacy: PUBLIC, UNLISTED
+            video_privacy: PUBLIC, PRIVATE, or UNLISTED
         """
         return await service.update_youtube_video_upload(
             ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
-            video_title=video_title,
-            video_description=video_description,
             video_privacy=video_privacy,
             partial_failure=partial_failure,
             validate_only=validate_only,
