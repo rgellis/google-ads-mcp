@@ -350,7 +350,10 @@ class OfflineUserDataJobService:
             if validate_only:
                 request.validate_only = validate_only
 
-            # Make the API call
+            # Make the API call. The SDK returns a long-running operation
+            # whose name is the handle the caller uses to poll status. We
+            # do NOT return a hardcoded "RUNNING" — query the LRO or the
+            # offline_user_data_job.status field for the real state.
             operation = self.client.run_offline_user_data_job(request=request)
 
             await ctx.log(
@@ -360,8 +363,7 @@ class OfflineUserDataJobService:
 
             return {
                 "job_resource_name": job_resource_name,
-                "long_running_operation": str(operation),  # type: ignore
-                "status": "RUNNING",
+                "long_running_operation": operation.operation.name,
             }
 
         except GoogleAdsException as e:
@@ -643,6 +645,74 @@ class OfflineUserDataJobService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def remove_all_user_data_operations(
+        self,
+        ctx: Context,
+        customer_id: str,
+        job_resource_name: str,
+        enable_partial_failure: Optional[bool] = None,
+        validate_only: Optional[bool] = None,
+        enable_warnings: Optional[bool] = None,
+    ) -> Dict[str, Any]:
+        """Clear all user data entries from an offline user data job.
+
+        Sends a single OfflineUserDataJobOperation with ``remove_all=True``,
+        which the API treats as "wipe every entry currently staged on this
+        job". This is irreversible. Use it when you need to reset a job
+        before re-staging entries (e.g. after correcting a hashing bug).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            job_resource_name: The offline user data job resource name
+            enable_partial_failure: Whether to enable partial failure
+            validate_only: Whether to only validate the request
+            enable_warnings: Whether to return warnings on the response
+
+        Returns:
+            Dict with the job resource name and any partial-failure error.
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            operation = OfflineUserDataJobOperation()
+            operation.remove_all = True
+
+            request = AddOfflineUserDataJobOperationsRequest()
+            request.resource_name = job_resource_name
+            request.operations = [operation]
+            if enable_partial_failure is not None:
+                request.enable_partial_failure = enable_partial_failure
+            if validate_only is not None:
+                request.validate_only = validate_only
+            if enable_warnings is not None:
+                request.enable_warnings = enable_warnings
+
+            response: AddOfflineUserDataJobOperationsResponse = (
+                self.client.add_offline_user_data_job_operations(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message="Cleared all user data operations from job",
+            )
+
+            return {
+                "job_resource_name": job_resource_name,
+                "partial_failure_error": str(response.partial_failure_error)
+                if response.partial_failure_error
+                else None,
+            }
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to clear user data operations: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
 
 def create_offline_user_data_job_tools(
     service: OfflineUserDataJobService,
@@ -846,6 +916,40 @@ def create_offline_user_data_job_tools(
             enable_warnings=enable_warnings,
         )
 
+    async def remove_all_user_data_operations(
+        ctx: Context,
+        customer_id: str,
+        job_resource_name: str,
+        enable_partial_failure: Optional[bool] = None,
+        validate_only: Optional[bool] = None,
+        enable_warnings: Optional[bool] = None,
+    ) -> Dict[str, Any]:
+        """Clear ALL user data entries from an offline user data job.
+
+        Sends OfflineUserDataJobOperation.remove_all=True. The API wipes
+        every entry currently staged on the job. This is irreversible —
+        use it to reset a job before re-staging fresh entries (e.g. after
+        a hashing bug).
+
+        Args:
+            customer_id: The customer ID
+            job_resource_name: The offline user data job resource name
+            enable_partial_failure: Whether to enable partial failure
+            validate_only: Whether to only validate the request
+            enable_warnings: Whether to return warnings on the response
+
+        Returns:
+            Dict with job resource name and any partial-failure error.
+        """
+        return await service.remove_all_user_data_operations(
+            ctx=ctx,
+            customer_id=customer_id,
+            job_resource_name=job_resource_name,
+            enable_partial_failure=enable_partial_failure,
+            validate_only=validate_only,
+            enable_warnings=enable_warnings,
+        )
+
     tools.extend(
         [
             create_offline_user_data_job,
@@ -854,6 +958,7 @@ def create_offline_user_data_job_tools(
             get_offline_user_data_job,
             list_offline_user_data_jobs,
             remove_user_data_operations,
+            remove_all_user_data_operations,
         ]
     )
     return tools

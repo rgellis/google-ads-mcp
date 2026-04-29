@@ -94,14 +94,18 @@ async def test_run_offline_user_data_job(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     mock_client = service.client
-    mock_client.run_offline_user_data_job.return_value = Mock()
+    mock_lro = Mock()
+    mock_lro.operation.name = "operations/abc"
+    mock_client.run_offline_user_data_job.return_value = mock_lro
     result = await service.run_offline_user_data_job(
         ctx=mock_ctx,
         customer_id="1234567890",
         job_resource_name="customers/1234567890/offlineUserDataJobs/1",
     )
-    assert result["status"] == "RUNNING"
+    # No hardcoded "RUNNING" — caller polls the LRO.
     assert result["job_resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
+    assert result["long_running_operation"] == "operations/abc"
+    assert "status" not in result
 
 
 @pytest.mark.asyncio
@@ -285,6 +289,32 @@ async def test_list_offline_user_data_jobs(
     assert result[0]["resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
     assert result[0]["status"] == "SUCCESS"
     mock_google_ads_service.search.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_remove_all_user_data_operations(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    """remove_all sends a single OfflineUserDataJobOperation with
+    remove_all=True to wipe every staged entry on the job."""
+    mock_client = service.client
+    mock_response = Mock()
+    mock_response.partial_failure_error = None
+    mock_client.add_offline_user_data_job_operations.return_value = mock_response
+
+    result = await service.remove_all_user_data_operations(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        job_resource_name="customers/1234567890/offlineUserDataJobs/1",
+    )
+
+    assert result["job_resource_name"] == "customers/1234567890/offlineUserDataJobs/1"
+    assert result["partial_failure_error"] is None
+    mock_client.add_offline_user_data_job_operations.assert_called_once()
+    call_args = mock_client.add_offline_user_data_job_operations.call_args
+    request = call_args[1]["request"]
+    assert len(request.operations) == 1
+    assert request.operations[0].remove_all is True
 
 
 def test_register_tools() -> None:

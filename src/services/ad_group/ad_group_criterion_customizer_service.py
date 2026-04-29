@@ -81,7 +81,15 @@ class AdGroupCriterionCustomizerService:
 
             # Convert operations
             mutate_operations = []
-            for op in operations:
+            for idx, op in enumerate(operations):
+                if "create" not in op and "remove" not in op:
+                    raise ValueError(
+                        f"operations[{idx}] must contain a 'create' or "
+                        "'remove' key. AdGroupCriterionCustomizerOperation "
+                        "supports only those two; an empty dict produces "
+                        "no operation and is silently dropped by the API."
+                    )
+
                 operation = AdGroupCriterionCustomizerOperation()
 
                 if "create" in op:

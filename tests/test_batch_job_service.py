@@ -180,9 +180,18 @@ async def test_add_operations_to_batch_job(
     # Arrange
     customer_id = "1234567890"
     batch_job_resource_name = f"customers/{customer_id}/batchJobs/123"
+    # Each entry must be a one-key dict naming a MutateOperation field;
+    # the wrapper rejects unknown keys to prevent silent drops.
+    from google.ads.googleads.v23.services.types.campaign_service import (
+        CampaignOperation,
+    )
+    from google.ads.googleads.v23.services.types.ad_group_service import (
+        AdGroupOperation,
+    )
+
     operations_data = [
-        {"type": "campaign", "name": "Test Campaign 1"},
-        {"type": "ad_group", "name": "Test Ad Group 1"},
+        {"campaign_operation": CampaignOperation()},
+        {"ad_group_operation": AdGroupOperation()},
     ]
 
     # Create mock response
@@ -241,13 +250,14 @@ async def test_run_batch_job(
     customer_id = "1234567890"
     batch_job_resource_name = f"customers/{customer_id}/batchJobs/123"
 
-    # Create mock long running operation
-    mock_operation = Mock()
-    mock_operation.name = "operations/12345"
+    # Create mock long running operation. The SDK returns an Operation
+    # wrapper whose nested `.operation.name` is the LRO handle.
+    mock_lro = Mock()
+    mock_lro.operation.name = "operations/12345"
 
     # Get the mocked batch job service client
     mock_batch_job_client = batch_job_service.client  # type: ignore
-    mock_batch_job_client.run_batch_job.return_value = mock_operation  # type: ignore
+    mock_batch_job_client.run_batch_job.return_value = mock_lro  # type: ignore
 
     # Act
     result = await batch_job_service.run_batch_job(
@@ -256,10 +266,10 @@ async def test_run_batch_job(
         batch_job_resource_name=batch_job_resource_name,
     )
 
-    # Assert
+    # Assert — no hardcoded "RUNNING" status; caller polls the LRO.
     assert result["batch_job_resource_name"] == batch_job_resource_name
-    assert result["status"] == "RUNNING"
-    assert "long_running_operation" in result
+    assert result["long_running_operation"] == "operations/12345"
+    assert "status" not in result
 
     # Verify the API call
     mock_batch_job_client.run_batch_job.assert_called_once()  # type: ignore
@@ -286,60 +296,32 @@ async def test_list_batch_job_results(
     batch_job_resource_name = f"customers/{customer_id}/batchJobs/123"
     page_size = 100
 
-    # Create mock response
-    mock_response = Mock(spec=ListBatchJobResultsResponse)
-    mock_response.results = []
-
-    # Create mock results
+    # The SDK returns a ListBatchJobResultsPager; we iterate its `.pages`
+    # to honor the wrapper's page-at-a-time pagination contract.
     result1 = Mock()
-    result1.operation_index = 0
-    result1.mutate_operation_response = Mock()
-    result1.mutate_operation_response.campaign_result = Mock()
-    result1.mutate_operation_response.campaign_result.resource_name = (
-        f"customers/{customer_id}/campaigns/456"
-    )
-
     result2 = Mock()
-    result2.operation_index = 1
-    result2.mutate_operation_response = Mock()
-    result2.mutate_operation_response.ad_group_result = Mock()
-    result2.mutate_operation_response.ad_group_result.resource_name = (
-        f"customers/{customer_id}/adGroups/789"
-    )
 
-    mock_response.results.extend([result1, result2])  # type: ignore
-    mock_response.next_page_token = "next123"
+    mock_first_page = Mock()
+    mock_first_page.results = [result1, result2]
+    mock_first_page.next_page_token = "next123"
+
+    mock_pager = Mock()
+    mock_pager.pages = iter([mock_first_page])
 
     # Get the mocked batch job service client
     mock_batch_job_client = batch_job_service.client  # type: ignore
-    mock_batch_job_client.list_batch_job_results.return_value = mock_response  # type: ignore
+    mock_batch_job_client.list_batch_job_results.return_value = mock_pager  # type: ignore
 
-    # Mock serialize_proto_message
-    expected_result = {
-        "results": [
-            {
-                "operation_index": 0,
-                "mutate_operation_response": {
-                    "campaign_result": {
-                        "resource_name": f"customers/{customer_id}/campaigns/456"
-                    }
-                },
-            },
-            {
-                "operation_index": 1,
-                "mutate_operation_response": {
-                    "ad_group_result": {
-                        "resource_name": f"customers/{customer_id}/adGroups/789"
-                    }
-                },
-            },
-        ],
-        "next_page_token": "next123",
-    }
+    # serialize_proto_message is called per-result; return distinct dicts
+    # so we can verify ordering.
+    serialized = [
+        {"operation_index": 0},
+        {"operation_index": 1},
+    ]
 
     with patch(
         "src.services.data_import.batch_job_service.serialize_proto_message",
-        return_value=expected_result,
+        side_effect=serialized,
     ):
         # Act
         result = await batch_job_service.list_batch_job_results(
@@ -350,8 +332,10 @@ async def test_list_batch_job_results(
         )
 
     # Assert
-    assert result == expected_result
-    assert len(result["results"]) == 2
+    assert result == {
+        "results": [{"operation_index": 0}, {"operation_index": 1}],
+        "next_page_token": "next123",
+    }
 
     # Verify the API call
     mock_batch_job_client.list_batch_job_results.assert_called_once()  # type: ignore

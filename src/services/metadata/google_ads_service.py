@@ -367,11 +367,33 @@ def create_google_ads_tools(
         This is the most flexible mutation method, allowing operations on
         multiple resource types in a single atomic request.
 
+        Each entry in ``operations`` must be a dict with exactly one key
+        naming the underlying MutateOperation field (e.g.
+        ``campaign_operation``, ``ad_group_operation``,
+        ``campaign_budget_operation``). Unknown keys are rejected so silent
+        drops can't corrupt the request.
+
+        Temp-ID forward references: any negative integer in a resource name
+        creates a temporary identifier that can be referenced from later
+        operations in the same call. Example::
+
+            operations=[
+                {"campaign_budget_operation": {"create": {
+                    "resource_name": "customers/123/campaignBudgets/-1",
+                    "name": "Daily budget",
+                    "amount_micros": 50000000,
+                }}},
+                {"campaign_operation": {"create": {
+                    # references the budget created above by its temp ID
+                    "campaign_budget": "customers/123/campaignBudgets/-1",
+                    "name": "My campaign",
+                    ...
+                }}},
+            ]
+
         Args:
             customer_id: The customer ID
-            operations: List of mutate operation dicts. Each dict should have
-                exactly one key matching a resource type (e.g. 'campaign_operation',
-                'ad_group_operation') with the operation details as value.
+            operations: List of mutate operation dicts as described above
             partial_failure: If true, valid operations succeed even if others fail
             validate_only: If true, only validates without executing
 
@@ -379,11 +401,22 @@ def create_google_ads_tools(
             Mutation results with per-operation responses
         """
         mutate_ops = []
-        for op_data in operations:
+        for idx, op_data in enumerate(operations):
+            if not isinstance(op_data, dict) or len(op_data) != 1:
+                raise ValueError(
+                    f"operations[{idx}] must be a dict with exactly one key "
+                    "naming the operation field (e.g. 'campaign_operation'). "
+                    f"Got {list(op_data.keys()) if isinstance(op_data, dict) else type(op_data).__name__}"
+                )
             mutate_op = MutateOperation()
-            for key, value in op_data.items():
-                if hasattr(mutate_op, key):
-                    setattr(mutate_op, key, value)
+            key, value = next(iter(op_data.items()))
+            if not hasattr(mutate_op, key):
+                raise ValueError(
+                    f"operations[{idx}]: {key!r} is not a valid "
+                    "MutateOperation field. See the v23 MutateOperation "
+                    "proto for valid keys."
+                )
+            setattr(mutate_op, key, value)
             mutate_ops.append(mutate_op)
 
         return await service.mutate(

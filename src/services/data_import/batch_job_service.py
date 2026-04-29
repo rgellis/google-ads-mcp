@@ -182,11 +182,35 @@ class BatchJobService:
     ) -> Dict[str, Any]:
         """Add operations to a batch job.
 
+        Each entry in ``operations_data`` must be a dict with exactly one key
+        naming the underlying MutateOperation field
+        (e.g. ``campaign_operation``, ``ad_group_operation``,
+        ``campaign_budget_operation``, ``ad_group_ad_operation``). Unknown
+        keys are rejected so silent drops can't corrupt a batch.
+
+        Temp-ID forward references: any negative integer in a resource name
+        creates a temporary identifier that can be referenced from later
+        operations in the same batch. Example::
+
+            operations_data=[
+                {"campaign_budget_operation": {"create": {
+                    "resource_name": "customers/123/campaignBudgets/-1",
+                    "name": "Daily budget",
+                    "amount_micros": 50000000,
+                }}},
+                {"campaign_operation": {"create": {
+                    # references the budget created above by its temp ID
+                    "campaign_budget": "customers/123/campaignBudgets/-1",
+                    "name": "My campaign",
+                    ...
+                }}},
+            ]
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             batch_job_resource_name: The batch job resource name
-            operations_data: List of operation data (simplified format)
+            operations_data: List of operation dicts as described above
             sequence_token: Token for resumable uploads across multiple calls.
                 Use the next_sequence_token from the previous response.
 
@@ -197,11 +221,24 @@ class BatchJobService:
             customer_id = format_customer_id(customer_id)
 
             operations = []
-            for op_data in operations_data:
+            for idx, op_data in enumerate(operations_data):
+                if not isinstance(op_data, dict) or len(op_data) != 1:
+                    raise ValueError(
+                        f"operations_data[{idx}] must be a dict with exactly "
+                        "one key naming the operation field "
+                        "(e.g. 'campaign_operation'). Got "
+                        f"{list(op_data.keys()) if isinstance(op_data, dict) else type(op_data).__name__}"
+                    )
                 operation = MutateOperation()
-                for key, value in op_data.items():
-                    if hasattr(operation, key):
-                        setattr(operation, key, value)
+                key, value = next(iter(op_data.items()))
+                if not hasattr(operation, key):
+                    raise ValueError(
+                        f"operations_data[{idx}]: {key!r} is not a valid "
+                        "MutateOperation field. See the v23 MutateOperation "
+                        "proto for valid keys (e.g. 'campaign_operation', "
+                        "'ad_group_operation', 'campaign_budget_operation')."
+                    )
+                setattr(operation, key, value)
                 operations.append(operation)
 
             request = AddBatchJobOperationsRequest()
@@ -255,7 +292,11 @@ class BatchJobService:
             request = RunBatchJobRequest()
             request.resource_name = batch_job_resource_name
 
-            # Make the API call
+            # Make the API call. RunBatchJob returns a long-running
+            # operation; the LRO's name is the handle the caller uses to
+            # poll status. We deliberately do NOT return a hardcoded
+            # "RUNNING" status — query the LRO or batch_job.status to find
+            # out the real state.
             operation = self.client.run_batch_job(request=request)
 
             await ctx.log(
@@ -265,8 +306,7 @@ class BatchJobService:
 
             return {
                 "batch_job_resource_name": batch_job_resource_name,
-                "long_running_operation": str(operation),  # type: ignore
-                "status": "RUNNING",
+                "long_running_operation": operation.operation.name,
             }
 
         except GoogleAdsException as e:
@@ -293,10 +333,12 @@ class BatchJobService:
             customer_id: The customer ID
             batch_job_resource_name: The batch job resource name
             page_size: Number of results per page
-            page_token: Token for pagination
+            page_token: Token for pagination — pass the previous response's
+                ``next_page_token`` to fetch the next page.
 
         Returns:
-            Batch job results
+            Dict with ``results`` (list of BatchJobResult dicts) and
+            ``next_page_token`` (empty string when no more pages).
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -308,15 +350,22 @@ class BatchJobService:
             if page_token:
                 request.page_token = page_token
 
-            # Make the API call
-            response = self.client.list_batch_job_results(request=request)
+            # The SDK returns a pager. Iterate exactly one page so that the
+            # wrapper's page_size / page_token / next_page_token contract
+            # works (the pager itself auto-paginates and would never expose
+            # next_page_token).
+            pager = self.client.list_batch_job_results(request=request)
+            first_page = next(iter(pager.pages))
 
             await ctx.log(
                 level="info",
                 message="Retrieved batch job results",
             )
 
-            return serialize_proto_message(response)
+            return {
+                "results": [serialize_proto_message(r) for r in first_page.results],
+                "next_page_token": first_page.next_page_token,
+            }
 
         except GoogleAdsException as e:
             error_msg = f"Google Ads API error: {e.failure}"

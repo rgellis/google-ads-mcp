@@ -74,7 +74,14 @@ class AdParameterService:
 
             # Convert operations
             mutate_operations = []
-            for op in operations:
+            for idx, op in enumerate(operations):
+                if "create" not in op and "update" not in op and "remove" not in op:
+                    raise ValueError(
+                        f"operations[{idx}] must contain a 'create', "
+                        "'update', or 'remove' key. An empty dict produces "
+                        "no operation and is silently dropped by the API."
+                    )
+
                 operation = AdParameterOperation()
 
                 if "create" in op:
