@@ -141,9 +141,10 @@ class TestAssetGroupAssetService:
         request = mock_client.mutate_asset_group_assets.call_args[1]["request"]  # type: ignore
         operation = request.operations[0]
 
-        # Check resource name format with ~ delimiter
+        # Check resource name format with ~ delimiter — third segment
+        # is the integer enum value (HEADLINE = 2).
         assert operation.update.resource_name == (
-            "customers/1234567890/assetGroupAssets/9876543210~1111111111~HEADLINE"
+            "customers/1234567890/assetGroupAssets/9876543210~1111111111~2"
         )
         assert operation.update.status == AssetLinkStatusEnum.AssetLinkStatus.PAUSED
         assert list(operation.update_mask.paths) == ["status"]
@@ -173,7 +174,7 @@ class TestAssetGroupAssetService:
 
         # Check resource name format with ~ delimiter
         assert operation.remove == (
-            "customers/1234567890/assetGroupAssets/9876543210~3333333333~YOUTUBE_VIDEO"
+            "customers/1234567890/assetGroupAssets/9876543210~3333333333~7"
         )
 
         # Verify logging

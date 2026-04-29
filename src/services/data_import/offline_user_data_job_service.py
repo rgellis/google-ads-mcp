@@ -190,21 +190,27 @@ class OfflineUserDataJobService:
 
                         user_data.user_identifiers.append(identifier)
 
-                # Set transaction attributes if provided
+                # Set transaction attributes if provided. Each field is gated
+                # on key presence — passing None to a proto field raises
+                # TypeError, so partial dicts must not silently inject None.
                 if "transaction_attribute" in user_data_dict:
                     trans_attr = user_data_dict["transaction_attribute"]
-                    user_data.transaction_attribute.conversion_action = trans_attr.get(
-                        "conversion_action"
-                    )
-                    user_data.transaction_attribute.currency_code = trans_attr.get(
-                        "currency_code"
-                    )
-                    user_data.transaction_attribute.transaction_amount_micros = (
-                        trans_attr.get("transaction_amount_micros")
-                    )
-                    user_data.transaction_attribute.transaction_date_time = (
-                        trans_attr.get("transaction_date_time")
-                    )
+                    if "conversion_action" in trans_attr:
+                        user_data.transaction_attribute.conversion_action = trans_attr[
+                            "conversion_action"
+                        ]
+                    if "currency_code" in trans_attr:
+                        user_data.transaction_attribute.currency_code = trans_attr[
+                            "currency_code"
+                        ]
+                    if "transaction_amount_micros" in trans_attr:
+                        user_data.transaction_attribute.transaction_amount_micros = (
+                            trans_attr["transaction_amount_micros"]
+                        )
+                    if "transaction_date_time" in trans_attr:
+                        user_data.transaction_attribute.transaction_date_time = (
+                            trans_attr["transaction_date_time"]
+                        )
 
                 # Note: OfflineUserData handling - simplified implementation
                 # operation.create = user_data  # Simplified approach

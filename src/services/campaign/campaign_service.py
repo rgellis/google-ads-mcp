@@ -38,6 +38,21 @@ from src.utils import (
 logger = get_logger(__name__)
 
 
+def _normalize_campaign_datetime(value: str) -> str:
+    """Normalize a caller-supplied date or datetime to Campaign's wire format.
+
+    Campaign.start_date_time and Campaign.end_date_time expect the format
+    "yyyy-MM-dd HH:mm:ss" per the v23 proto. Callers often pass a bare date;
+    pad with "00:00:00" so the date is interpreted at the start of the day.
+    For end_date this means the date is exclusive — the campaign stops
+    serving at midnight at the start of that day.
+    """
+    value = value.strip()
+    if len(value) == 10 and value.count("-") == 2:
+        return f"{value} 00:00:00"
+    return value
+
+
 class CampaignService:
     """Campaign service for managing Google Ads campaigns."""
 
@@ -99,8 +114,11 @@ class CampaignService:
             target_roas: Target ROAS (for TARGET_ROAS strategy, e.g. 1.5 for 150%)
             eu_political_advertising: EU political advertising status -
                 DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING or CONTAINS_EU_POLITICAL_ADVERTISING
-            start_date: Campaign start date (YYYY-MM-DD)
-            end_date: Campaign end date (YYYY-MM-DD)
+            start_date: Campaign start. Accepts "YYYY-MM-DD" (interpreted as
+                start of day, inclusive) or full "YYYY-MM-DD HH:MM:SS"
+            end_date: Campaign end. Accepts "YYYY-MM-DD" (interpreted as
+                start of day, exclusive — campaign does NOT serve on this
+                date) or full "YYYY-MM-DD HH:MM:SS"
 
         Returns:
             Created campaign details
@@ -168,10 +186,17 @@ class CampaignService:
                 from google.ads.googleads.v23.common.types import TargetImpressionShare
 
                 campaign.target_impression_share = TargetImpressionShare()
+            elif bidding_strategy == "MANUAL_CPC":
+                campaign.manual_cpc = ManualCpc()
             else:
-                # Default to ManualCpc
-                manual_cpc: ManualCpc = ManualCpc()
-                campaign.manual_cpc = manual_cpc
+                # Don't silently substitute a strategy. The previous code
+                # used to fall through to ManualCpc, which silently changed
+                # the caller's intent on typos.
+                raise ValueError(
+                    f"Unknown bidding_strategy: {bidding_strategy!r}. Valid: "
+                    "MANUAL_CPC, MAXIMIZE_CONVERSIONS, MAXIMIZE_CONVERSION_VALUE, "
+                    "TARGET_CPA, TARGET_ROAS, TARGET_SPEND, TARGET_IMPRESSION_SHARE"
+                )
 
             # EU political advertising declaration
             campaign.contains_eu_political_advertising = getattr(
@@ -181,9 +206,9 @@ class CampaignService:
 
             # Set dates if provided
             if start_date:
-                campaign.start_date_time = start_date.replace("-", "")
+                campaign.start_date_time = _normalize_campaign_datetime(start_date)
             if end_date:
-                campaign.end_date_time = end_date.replace("-", "")
+                campaign.end_date_time = _normalize_campaign_datetime(end_date)
 
             # Create the operation
             operation = CampaignOperation()
@@ -265,11 +290,11 @@ class CampaignService:
                 update_mask_fields.append("status")
 
             if start_date is not None:
-                campaign.start_date_time = start_date.replace("-", "")
+                campaign.start_date_time = _normalize_campaign_datetime(start_date)
                 update_mask_fields.append("start_date_time")
 
             if end_date is not None:
-                campaign.end_date_time = end_date.replace("-", "")
+                campaign.end_date_time = _normalize_campaign_datetime(end_date)
                 update_mask_fields.append("end_date_time")
 
             # Create the operation
@@ -510,8 +535,11 @@ def create_campaign_tools(
                 (e.g. 1.5 for 150% return)
             eu_political_advertising: EU political advertising status -
                 DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING or CONTAINS_EU_POLITICAL_ADVERTISING
-            start_date: Campaign start date (YYYY-MM-DD)
-            end_date: Campaign end date (YYYY-MM-DD)
+            start_date: Campaign start. Accepts "YYYY-MM-DD" (interpreted as
+                start of day, inclusive) or full "YYYY-MM-DD HH:MM:SS"
+            end_date: Campaign end. Accepts "YYYY-MM-DD" (interpreted as
+                start of day, exclusive — campaign does NOT serve on this
+                date) or full "YYYY-MM-DD HH:MM:SS"
 
         Returns:
             Created campaign details

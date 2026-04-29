@@ -172,16 +172,17 @@ class KeywordPlanService:
             request.customer_id = customer_id
             request.include_adult_keywords = include_adult_keywords
 
-            # Set language (default to English if not specified)
-            request.language = f"languageConstants/{language_id or '1000'}"
+            # Set language only when caller specifies one — proto says
+            # omitting `language` means "include all languages".
+            if language_id:
+                request.language = f"languageConstants/{language_id}"
 
-            # Set locations (default to US if not specified)
+            # Set locations only when caller specifies — proto says an
+            # empty list targets all geos.
             if location_ids:
                 request.geo_target_constants.extend(
                     [f"geoTargetConstants/{loc_id}" for loc_id in location_ids]
                 )
-            else:
-                request.geo_target_constants.append("geoTargetConstants/2840")  # US
 
             # Set seed keywords or URL
             if keywords:

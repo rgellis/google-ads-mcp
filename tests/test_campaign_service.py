@@ -80,6 +80,7 @@ async def test_create_campaign(
             budget_resource_name=budget_resource_name,
             advertising_channel_type=advertising_channel_type,
             status=status,
+            bidding_strategy="MANUAL_CPC",
         )
 
     # Assert
@@ -145,6 +146,7 @@ async def test_create_campaign_with_dates(
             status=status,
             start_date=start_date,
             end_date=end_date,
+            bidding_strategy="MANUAL_CPC",
         )
 
     # Assert
@@ -154,8 +156,8 @@ async def test_create_campaign_with_dates(
     call_args = mock_campaign_client.mutate_campaigns.call_args  # type: ignore
     request = call_args[1]["request"]
     operation = request.operations[0]
-    assert operation.create.start_date_time == "20240301"
-    assert operation.create.end_date_time == "20240331"
+    assert operation.create.start_date_time == "2024-03-01 00:00:00"
+    assert operation.create.end_date_time == "2024-03-31 00:00:00"
 
 
 @pytest.mark.asyncio
@@ -201,6 +203,7 @@ async def test_create_campaign_shopping_channel(
             budget_resource_name=budget_resource_name,
             advertising_channel_type=advertising_channel_type,
             status=status,
+            bidding_strategy="MANUAL_CPC",
         )
 
     # Assert
@@ -331,8 +334,8 @@ async def test_update_campaign_dates_only(
     call_args = mock_campaign_client.mutate_campaigns.call_args  # type: ignore
     request = call_args[1]["request"]
     operation = request.operations[0]
-    assert operation.update.start_date_time == "20240401"
-    assert operation.update.end_date_time == "20240430"
+    assert operation.update.start_date_time == "2024-04-01 00:00:00"
+    assert operation.update.end_date_time == "2024-04-30 00:00:00"
     assert set(operation.update_mask.paths) == {"start_date_time", "end_date_time"}
 
 
@@ -407,6 +410,7 @@ async def test_error_handling_create_campaign(
             customer_id=customer_id,
             name=name,
             budget_resource_name=budget_resource_name,
+            bidding_strategy="MANUAL_CPC",
         )
 
     assert "Failed to create campaign" in str(exc_info.value)
@@ -502,6 +506,7 @@ async def test_tool_wrapper_create_campaign(
             budget_resource_name=budget_resource_name,
             advertising_channel_type=advertising_channel_type_str,
             status=status_str,
+            bidding_strategy="MANUAL_CPC",
         )
 
     # Assert

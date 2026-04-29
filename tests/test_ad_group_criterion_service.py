@@ -438,45 +438,22 @@ async def test_add_demographic_criteria_unknown_type(
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test adding demographic criteria with unknown type (should be skipped)."""
+    """Unknown demographic types now raise instead of silently skipping (S1.15)."""
     # Arrange
     customer_id = "1234567890"
     ad_group_id = "9876543210"
     demographics = [
         {"type": "UNKNOWN_TYPE", "value": "UNKNOWN_VALUE"},
-        {"type": "AGE_RANGE", "value": "AGE_RANGE_25_34"},
     ]
 
-    # Create mock response - only one result since unknown type is skipped
-    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
-    mock_response.results = []
-    result = Mock()
-    result.resource_name = f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~401"
-    mock_response.results.append(result)  # type: ignore
-
-    # Get the mocked ad group criterion service client
-    mock_ad_group_criterion_client = ad_group_criterion_service.client  # type: ignore
-    mock_ad_group_criterion_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
-
-    # Act
-    result = await ad_group_criterion_service.add_demographic_criteria(
-        ctx=mock_ctx,
-        customer_id=customer_id,
-        ad_group_id=ad_group_id,
-        demographics=demographics,
-    )
-
-    # Assert - result is a serialized response dict
-    assert isinstance(result, dict)
-
-    # Verify the API call - only 1 operation since unknown type was skipped
-    call_args = mock_ad_group_criterion_client.mutate_ad_group_criteria.call_args  # type: ignore
-    request = call_args[1]["request"]
-    assert len(request.operations) == 1
-    assert (
-        request.operations[0].create.age_range.type_
-        == AgeRangeTypeEnum.AgeRangeType.AGE_RANGE_25_34
-    )
+    # Act / Assert
+    with pytest.raises(Exception, match="Unknown demographic type"):
+        await ad_group_criterion_service.add_demographic_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            demographics=demographics,
+        )
 
 
 @pytest.mark.asyncio

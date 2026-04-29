@@ -150,10 +150,11 @@ class AssetGroupAssetService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Construct resource name using the unique ~ delimiter format
+            # Construct resource name using the unique ~ delimiter format.
+            # The third segment is the integer enum value, not the name.
             resource_name = (
                 f"customers/{customer_id}/assetGroupAssets/"
-                f"{asset_group_id}~{asset_id}~{field_type.name}"
+                f"{asset_group_id}~{asset_id}~{int(field_type)}"
             )
 
             # Create asset group asset with resource name and new status
@@ -219,10 +220,11 @@ class AssetGroupAssetService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Construct resource name using the unique ~ delimiter format
+            # Construct resource name using the unique ~ delimiter format.
+            # The third segment is the integer enum value, not the name.
             resource_name = (
                 f"customers/{customer_id}/assetGroupAssets/"
-                f"{asset_group_id}~{asset_id}~{field_type.name}"
+                f"{asset_group_id}~{asset_id}~{int(field_type)}"
             )
 
             # Create the operation

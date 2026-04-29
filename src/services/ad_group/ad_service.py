@@ -394,6 +394,7 @@ class AdService:
         final_urls: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
+        ad_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -407,11 +408,17 @@ class AdService:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_resource_name: Resource name of the ad (e.g. customers/123/ads/456)
-            headlines: New headline texts (for responsive search ads)
-            descriptions: New description texts (for responsive search ads)
-            final_urls: New landing page URLs
-            path1: New first path component for display URL
-            path2: New second path component for display URL
+            headlines: New headline texts. Currently only RESPONSIVE_SEARCH_AD
+                is supported by this wrapper.
+            descriptions: New description texts. RESPONSIVE_SEARCH_AD only.
+            final_urls: New landing page URLs (works for any ad type)
+            path1: New first path component for display URL.
+                RESPONSIVE_SEARCH_AD only.
+            path2: New second path component. RESPONSIVE_SEARCH_AD only.
+            ad_type: Required when any of headlines/descriptions/path1/path2 is
+                supplied. Currently only "RESPONSIVE_SEARCH_AD" is supported —
+                pass it explicitly so the wrapper doesn't silently switch the
+                ad's oneof on a non-RSA ad.
 
         Returns:
             Updated ad details
@@ -428,12 +435,27 @@ class AdService:
                 ad.final_urls[:] = final_urls
                 update_mask_fields.append("final_urls")
 
-            if (
+            rsa_fields_supplied = (
                 headlines is not None
                 or descriptions is not None
                 or path1 is not None
                 or path2 is not None
-            ):
+            )
+            if rsa_fields_supplied:
+                if ad_type is None:
+                    raise ValueError(
+                        "ad_type is required when updating headlines, "
+                        "descriptions, or path components. Pass "
+                        "ad_type='RESPONSIVE_SEARCH_AD'. The wrapper does not "
+                        "silently substitute an ad type — to update other ad "
+                        "types use a type-specific update path."
+                    )
+                if ad_type != "RESPONSIVE_SEARCH_AD":
+                    raise ValueError(
+                        f"ad_type {ad_type!r} is not supported by this wrapper. "
+                        "Only RESPONSIVE_SEARCH_AD updates are implemented; "
+                        "other types need their own update method."
+                    )
                 rsa = ResponsiveSearchAdInfo()
                 if headlines is not None:
                     for text in headlines:
@@ -2336,6 +2358,15 @@ class AdService:
         try:
             customer_id = format_customer_id(customer_id)
             ad_group_resource_name = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            # ImageAdInfo's `image` oneof requires exactly one of image_asset
+            # or data. Reject both-or-neither up-front so the wrapper doesn't
+            # send an empty/conflicting oneof.
+            if (image_asset is None) == (data is None):
+                raise ValueError(
+                    "create_image_ad requires exactly one of image_asset or "
+                    "data — got both or neither."
+                )
 
             ad = Ad()
             if final_urls:

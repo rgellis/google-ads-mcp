@@ -1517,7 +1517,7 @@ async def test_add_life_event_criteria(
             ctx=mock_ctx,
             customer_id=customer_id,
             campaign_id=campaign_id,
-            life_event_resource_names=["456"],
+            life_event_ids=[456],
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
@@ -1962,8 +1962,7 @@ async def test_add_webpage_list_criteria(
             ctx=mock_ctx,
             customer_id=customer_id,
             campaign_id=campaign_id,
-            criterion_name="test",
-            conditions=[{"operand": "URL", "argument": "example.com"}],
+            shared_set_resource_name=f"customers/{customer_id}/sharedSets/789",
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore

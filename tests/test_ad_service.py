@@ -634,6 +634,7 @@ async def test_update_ad(
             headlines=["New Headline 1", "New Headline 2", "New Headline 3"],
             descriptions=["New Description 1", "New Description 2"],
             final_urls=["https://example.com/new"],
+            ad_type="RESPONSIVE_SEARCH_AD",
         )
 
     # Assert

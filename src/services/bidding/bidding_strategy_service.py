@@ -689,35 +689,39 @@ class BiddingStrategyService:
                 bidding_strategy.maximize_conversions = maximize_conversions
                 update_mask_fields.append("maximize_conversions.target_cpa_micros")
 
-            if target_impression_share_location is not None:
+            # Build a single TargetImpressionShare submessage if any of its
+            # fields are being updated. Reading bidding_strategy.target_impression_share
+            # via proto-plus would auto-create the submessage and silently
+            # switch the strategy oneof — even when the caller only meant to
+            # tweak a single field on an already-TargetImpressionShare strategy.
+            tis_fields_supplied = (
+                target_impression_share_location is not None
+                or target_impression_share_location_fraction_micros is not None
+                or target_impression_share_cpc_bid_ceiling_micros is not None
+            )
+            if tis_fields_supplied:
                 tis = TargetImpressionShare()
-                tis.location = getattr(
-                    TargetImpressionShareLocationEnum.TargetImpressionShareLocation,
-                    target_impression_share_location,
-                )
-                bidding_strategy.target_impression_share = tis
-                update_mask_fields.append("target_impression_share.location")
-
-            if target_impression_share_location_fraction_micros is not None:
-                if not bidding_strategy.target_impression_share.location_fraction_micros:
-                    bidding_strategy.target_impression_share = (
-                        bidding_strategy.target_impression_share
-                        or TargetImpressionShare()
+                if target_impression_share_location is not None:
+                    tis.location = getattr(
+                        TargetImpressionShareLocationEnum.TargetImpressionShareLocation,
+                        target_impression_share_location,
                     )
-                bidding_strategy.target_impression_share.location_fraction_micros = (
-                    target_impression_share_location_fraction_micros
-                )
-                update_mask_fields.append(
-                    "target_impression_share.location_fraction_micros"
-                )
-
-            if target_impression_share_cpc_bid_ceiling_micros is not None:
-                bidding_strategy.target_impression_share.cpc_bid_ceiling_micros = (
-                    target_impression_share_cpc_bid_ceiling_micros
-                )
-                update_mask_fields.append(
-                    "target_impression_share.cpc_bid_ceiling_micros"
-                )
+                    update_mask_fields.append("target_impression_share.location")
+                if target_impression_share_location_fraction_micros is not None:
+                    tis.location_fraction_micros = (
+                        target_impression_share_location_fraction_micros
+                    )
+                    update_mask_fields.append(
+                        "target_impression_share.location_fraction_micros"
+                    )
+                if target_impression_share_cpc_bid_ceiling_micros is not None:
+                    tis.cpc_bid_ceiling_micros = (
+                        target_impression_share_cpc_bid_ceiling_micros
+                    )
+                    update_mask_fields.append(
+                        "target_impression_share.cpc_bid_ceiling_micros"
+                    )
+                bidding_strategy.target_impression_share = tis
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")

@@ -78,21 +78,23 @@ class SmartCampaignService:
 
                 if country_code:
                     location_info = LocationInfo()
-                    # Map country code to geo target constant
-                    # US = 2840, GB = 2826, etc.
+                    # Map country code to geo target constant.
                     country_map = {"US": "2840", "GB": "2826", "CA": "2124"}
-                    location_id = country_map.get(country_code, "2840")
+                    if country_code not in country_map:
+                        raise ValueError(
+                            f"Unsupported country_code: {country_code!r}. "
+                            f"Known: {sorted(country_map)}. Pass campaign_id "
+                            f"instead, or extend the country map."
+                        )
                     location_info.geo_target_constant = (
-                        f"geoTargetConstants/{location_id}"
+                        f"geoTargetConstants/{country_map[country_code]}"
                     )
                     suggestion_info.location_list.locations.append(location_info)
 
                 if language_code:
-                    # Map language code to language constant
-                    # en = 1000, es = 1003, etc.
-                    language_map = {"en": "1000", "es": "1003", "fr": "1002"}
-                    language_id = language_map.get(language_code, "1000")
-                    suggestion_info.language_code = f"languageConstants/{language_id}"
+                    # Proto field expects a 2-letter code (e.g. "en"), not
+                    # a "languageConstants/{id}" resource name.
+                    suggestion_info.language_code = language_code
 
                 request.suggestion_info = suggestion_info
 
@@ -149,7 +151,7 @@ class SmartCampaignService:
         business_name: Optional[str] = None,
         final_url: Optional[str] = None,
         location_id: Optional[str] = None,
-        language_id: Optional[str] = None,
+        language_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Get keyword theme suggestions for a smart campaign.
 
@@ -159,8 +161,10 @@ class SmartCampaignService:
             keyword_text: Seed keyword text
             business_name: Business name for suggestions
             final_url: Landing page URL
-            location_id: Geo target location ID
-            language_id: Language ID
+            location_id: Geo target location ID (e.g. "2840" for US). Required —
+                no silent fallback.
+            language_code: Two-letter language code (e.g. "en"). The proto field
+                expects a 2-letter code, not a resource name.
 
         Returns:
             List of keyword theme suggestions
@@ -188,20 +192,21 @@ class SmartCampaignService:
                 theme_info.free_form_keyword_theme = keyword_text
                 request.suggestion_info.keyword_themes.append(theme_info)
 
-            # Set location and language
-            if location_id:
-                location_info = LocationInfo()
-                location_info.geo_target_constant = f"geoTargetConstants/{location_id}"
-                request.suggestion_info.location_list.locations.append(location_info)
-            else:
-                # Default to US
-                location_info = LocationInfo()
-                location_info.geo_target_constant = "geoTargetConstants/2840"
-                request.suggestion_info.location_list.locations.append(location_info)
+            # Set location and language. No silent fallbacks — caller must
+            # specify location and language explicitly.
+            if not location_id:
+                raise ValueError("location_id is required (no silent US fallback)")
+            if not language_code:
+                raise ValueError(
+                    "language_code is required (2-letter code, no silent en fallback)"
+                )
 
-            request.suggestion_info.language_code = (
-                f"languageConstants/{language_id or '1000'}"  # Default to English
-            )
+            location_info = LocationInfo()
+            location_info.geo_target_constant = f"geoTargetConstants/{location_id}"
+            request.suggestion_info.location_list.locations.append(location_info)
+
+            # Proto field expects a 2-letter code (e.g. "en"), not a resource name.
+            request.suggestion_info.language_code = language_code
 
             # Make the API call
             response: SuggestKeywordThemesResponse = self.client.suggest_keyword_themes(
@@ -247,7 +252,7 @@ class SmartCampaignService:
         customer_id: str,
         business_name: str,
         final_url: str,
-        language_id: Optional[str] = None,
+        language_code: str,
         keyword_themes: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Get ad content suggestions for a smart campaign.
@@ -257,7 +262,8 @@ class SmartCampaignService:
             customer_id: The customer ID
             business_name: Business name
             final_url: Landing page URL
-            language_id: Language ID
+            language_code: Two-letter language code (e.g. "en"). The proto field
+                expects a 2-letter code, not a resource name. Required.
             keyword_themes: List of keyword themes
 
         Returns:
@@ -273,9 +279,8 @@ class SmartCampaignService:
             # Set business info
             request.suggestion_info.business_context.business_name = business_name
             request.suggestion_info.final_url = final_url
-            request.suggestion_info.language_code = (
-                f"languageConstants/{language_id or '1000'}"
-            )
+            # Proto field expects a 2-letter code (e.g. "en"), not a resource name.
+            request.suggestion_info.language_code = language_code
 
             # Add keyword themes if provided
             if keyword_themes:
@@ -368,21 +373,23 @@ def create_smart_campaign_tools(
     async def suggest_keyword_themes(
         ctx: Context,
         customer_id: str,
+        location_id: str,
+        language_code: str,
         keyword_text: Optional[str] = None,
         business_name: Optional[str] = None,
         final_url: Optional[str] = None,
-        location_id: Optional[str] = None,
-        language_id: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Get keyword theme suggestions for a smart campaign.
 
         Args:
             customer_id: The customer ID
+            location_id: Geo target location ID (e.g., "2840" for US). Required —
+                no silent fallback.
+            language_code: Two-letter language code (e.g., "en"). The proto field
+                expects a 2-letter code, not a resource name. Required.
             keyword_text: Seed keyword text to base suggestions on
             business_name: Business name for generating suggestions
             final_url: Landing page URL to analyze
-            location_id: Geo target location ID (e.g., "2840" for US)
-            language_id: Language ID (e.g., "1000" for English)
 
         Returns:
             List of keyword themes, each with:
@@ -398,7 +405,7 @@ def create_smart_campaign_tools(
             business_name=business_name,
             final_url=final_url,
             location_id=location_id,
-            language_id=language_id,
+            language_code=language_code,
         )
 
     async def suggest_ad_content(
@@ -406,7 +413,7 @@ def create_smart_campaign_tools(
         customer_id: str,
         business_name: str,
         final_url: str,
-        language_id: Optional[str] = None,
+        language_code: str,
         keyword_themes: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Get ad content suggestions for a smart campaign.
@@ -415,7 +422,8 @@ def create_smart_campaign_tools(
             customer_id: The customer ID
             business_name: Business name to feature in ads
             final_url: Landing page URL
-            language_id: Language ID (e.g., "1000" for English)
+            language_code: Two-letter language code (e.g., "en"). The proto field
+                expects a 2-letter code, not a resource name. Required.
             keyword_themes: List of keyword theme resource names
 
         Returns:
@@ -428,7 +436,7 @@ def create_smart_campaign_tools(
             customer_id=customer_id,
             business_name=business_name,
             final_url=final_url,
-            language_id=language_id,
+            language_code=language_code,
             keyword_themes=keyword_themes,
         )
 

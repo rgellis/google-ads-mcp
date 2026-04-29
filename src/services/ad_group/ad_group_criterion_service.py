@@ -17,8 +17,15 @@ from google.ads.googleads.v23.common.types.criteria import (
     KeywordInfo,
     LanguageInfo,
     LifeEventInfo,
+    ListingDimensionInfo,
     ListingGroupInfo,
     LocationInfo,
+    ProductBrandInfo,
+    ProductChannelInfo,
+    ProductConditionInfo,
+    ProductCustomAttributeInfo,
+    ProductItemIdInfo,
+    ProductTypeInfo,
     MobileAppCategoryInfo,
     MobileApplicationInfo,
     ParentalStatusInfo,
@@ -75,6 +82,74 @@ from src.utils import (
 )
 
 logger = get_logger(__name__)
+
+
+def _build_listing_dimension_info(case_value: Dict[str, Any]) -> ListingDimensionInfo:
+    """Build a ListingDimensionInfo from a single-key dict.
+
+    Supported keys (each maps to one oneof member of ListingDimensionInfo):
+      - "product_brand": str
+      - "product_item_id": str
+      - "product_type": {"value": str, "level": str}  (level is enum name)
+      - "product_channel": str  (enum name like "ONLINE")
+      - "product_condition": str  (enum name like "NEW")
+      - "product_custom_attribute": {"value": str, "index": str}  (index enum name)
+
+    Hotel and category dimensions are not yet supported; raise on those.
+    """
+    if len(case_value) != 1:
+        raise ValueError(
+            "case_value must contain exactly one dimension key; got "
+            f"{sorted(case_value.keys())}"
+        )
+    [(dim_key, dim_value)] = case_value.items()
+    info = ListingDimensionInfo()
+    if dim_key == "product_brand":
+        info.product_brand = ProductBrandInfo(value=dim_value)
+    elif dim_key == "product_item_id":
+        info.product_item_id = ProductItemIdInfo(value=dim_value)
+    elif dim_key == "product_type":
+        from google.ads.googleads.v23.enums.types.product_type_level import (
+            ProductTypeLevelEnum,
+        )
+
+        pt = ProductTypeInfo(value=dim_value["value"])
+        pt.level = getattr(ProductTypeLevelEnum.ProductTypeLevel, dim_value["level"])
+        info.product_type = pt
+    elif dim_key == "product_channel":
+        from google.ads.googleads.v23.enums.types.product_channel import (
+            ProductChannelEnum,
+        )
+
+        info.product_channel = ProductChannelInfo(
+            channel=getattr(ProductChannelEnum.ProductChannel, dim_value)
+        )
+    elif dim_key == "product_condition":
+        from google.ads.googleads.v23.enums.types.product_condition import (
+            ProductConditionEnum,
+        )
+
+        info.product_condition = ProductConditionInfo(
+            condition=getattr(ProductConditionEnum.ProductCondition, dim_value)
+        )
+    elif dim_key == "product_custom_attribute":
+        from google.ads.googleads.v23.enums.types.product_custom_attribute_index import (
+            ProductCustomAttributeIndexEnum,
+        )
+
+        pca = ProductCustomAttributeInfo(value=dim_value["value"])
+        pca.index = getattr(
+            ProductCustomAttributeIndexEnum.ProductCustomAttributeIndex,
+            dim_value["index"],
+        )
+        info.product_custom_attribute = pca
+    else:
+        raise ValueError(
+            f"Unsupported case_value dimension: {dim_key!r}. Supported: "
+            "product_brand, product_item_id, product_type, product_channel, "
+            "product_condition, product_custom_attribute."
+        )
+    return info
 
 
 class AdGroupCriterionService:
@@ -347,7 +422,10 @@ class AdGroupCriterionService:
                     )
                     ad_group_criterion.income_range = income_range_info
                 else:
-                    continue  # Skip unknown types
+                    raise ValueError(
+                        f"Unknown demographic type: {demo['type']!r}. Valid: "
+                        "AGE_RANGE, GENDER, PARENTAL_STATUS, INCOME_RANGE"
+                    )
 
                 # Create operation
                 operation = AdGroupCriterionOperation()
@@ -1701,7 +1779,13 @@ class AdGroupCriterionService:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             listing_group_type: Type of listing group: SUBDIVISION or UNIT
-            case_value: Optional case value dict for the listing group
+            case_value: Optional dict with one key naming the dimension type and
+                its value. Required for non-root nodes. Supported keys:
+                "product_brand" (str), "product_item_id" (str),
+                "product_type" ({"value": str, "level": str}),
+                "product_channel" (str enum: ONLINE, LOCAL, ...),
+                "product_condition" (str enum: NEW, USED, REFURBISHED),
+                "product_custom_attribute" ({"value": str, "index": str enum}).
             parent_ad_group_criterion: Optional parent ad group criterion resource name
 
         Returns:
@@ -1719,6 +1803,10 @@ class AdGroupCriterionService:
             )
             if parent_ad_group_criterion is not None:
                 listing_group_info.parent_ad_group_criterion = parent_ad_group_criterion
+            if case_value is not None:
+                listing_group_info.case_value = _build_listing_dimension_info(
+                    case_value
+                )
             ad_group_criterion.listing_group = listing_group_info
 
             operation = AdGroupCriterionOperation()
@@ -2764,7 +2852,13 @@ def create_ad_group_criterion_tools(
             customer_id: The customer ID
             ad_group_id: The ad group ID
             listing_group_type: Type of listing group: SUBDIVISION or UNIT
-            case_value: Optional case value dict for the listing group
+            case_value: Optional dict with one key naming the dimension type and
+                its value. Required for non-root nodes. Supported keys:
+                "product_brand" (str), "product_item_id" (str),
+                "product_type" ({"value": str, "level": str}),
+                "product_channel" (str enum: ONLINE, LOCAL, ...),
+                "product_condition" (str enum: NEW, USED, REFURBISHED),
+                "product_custom_attribute" ({"value": str, "index": str enum}).
             parent_ad_group_criterion: Optional parent ad group criterion resource name
 
         Returns:

@@ -81,15 +81,14 @@ class TestCampaignConversionGoalService:
         assert request.validate_only is False
 
         operation = request.operations[0]
+        # Resource name uses integer enum values (PURCHASE=4, WEBSITE=2),
+        # not enum names.
         assert operation.update.resource_name == (
-            "customers/1234567890/campaignConversionGoals/9876543210~PURCHASE~WEBSITE"
+            "customers/1234567890/campaignConversionGoals/9876543210~4~2"
         )
-        assert operation.update.campaign == "customers/1234567890/campaigns/9876543210"
-        assert (
-            operation.update.category
-            == ConversionActionCategoryEnum.ConversionActionCategory.PURCHASE
-        )
-        assert operation.update.origin == ConversionOriginEnum.ConversionOrigin.WEBSITE
+        # campaign / category / origin are Immutable per proto and are
+        # encoded in the resource_name; the wrapper no longer assigns them
+        # on the update message (S1.6).
         assert operation.update.biddable is True
         assert list(operation.update_mask.paths) == ["biddable"]
 
@@ -121,14 +120,13 @@ class TestCampaignConversionGoalService:
 
         request = mock_client.mutate_campaign_conversion_goals.call_args[1]["request"]  # type: ignore
         operation = request.operations[0]
+        # Resource name uses integer enum values (IMPORTED_LEAD=12, APP=4),
+        # not enum names.
         assert operation.update.resource_name == (
-            "customers/1234567890/campaignConversionGoals/1111111111~IMPORTED_LEAD~APP"
+            "customers/1234567890/campaignConversionGoals/1111111111~12~4"
         )
-        assert (
-            operation.update.category
-            == ConversionActionCategoryEnum.ConversionActionCategory.IMPORTED_LEAD
-        )
-        assert operation.update.origin == ConversionOriginEnum.ConversionOrigin.APP
+        # category / origin are Immutable and not assigned on the update
+        # message (S1.6); they're encoded in the resource_name.
         assert operation.update.biddable is False
 
     async def test_update_with_validate_only(

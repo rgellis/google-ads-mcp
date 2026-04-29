@@ -42,6 +42,7 @@ from google.ads.googleads.v23.common.types.criteria import (
     VideoLineupInfo,
     WebpageConditionInfo,
     WebpageInfo,
+    WebpageListInfo,
     YouTubeChannelInfo,
     YouTubeVideoInfo,
 )
@@ -1639,7 +1640,7 @@ class CampaignCriterionService:
         ctx: Context,
         customer_id: str,
         campaign_id: str,
-        life_event_resource_names: List[str],
+        life_event_ids: List[int],
         negative: bool = False,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
@@ -1652,7 +1653,9 @@ class CampaignCriterionService:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            life_event_resource_names: List of life event resource names
+            life_event_ids: List of life event taxonomy IDs (int64). Per the
+                v23 proto, LifeEventInfo.life_event_id is INT64, not a
+                resource name.
             negative: Whether these are negative criteria
             bid_modifier: Optional bid modifier
 
@@ -1664,7 +1667,7 @@ class CampaignCriterionService:
             campaign_resource = f"customers/{customer_id}/campaigns/{campaign_id}"
 
             operations = []
-            for resource_name in life_event_resource_names:
+            for life_event_id in life_event_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
                 campaign_criterion.negative = negative
@@ -1673,7 +1676,7 @@ class CampaignCriterionService:
                     campaign_criterion.bid_modifier = bid_modifier
 
                 life_event_info = LifeEventInfo()
-                life_event_info.life_event_id = resource_name
+                life_event_info.life_event_id = life_event_id
                 campaign_criterion.life_event = life_event_info
 
                 operation = CampaignCriterionOperation()
@@ -2625,32 +2628,31 @@ class CampaignCriterionService:
         ctx: Context,
         customer_id: str,
         campaign_id: str,
-        criterion_name: str,
-        conditions: List[Dict[str, str]],
+        shared_set_resource_name: str,
         negative: bool = True,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add webpage list targeting criteria to a campaign.
+        """Add a webpage-list criterion to a campaign by referencing a SharedSet.
 
-        This is similar to webpage criteria but intended for predefined URL
-        sets, typically used as negative criteria to exclude specific pages.
+        WebpageListInfo references a pre-built SharedSet of webpages (a
+        webpage list). To define ad-hoc URL conditions inline, use
+        add_webpage_criteria instead. This method only takes a SharedSet
+        resource name — that's the only field WebpageListInfo exposes.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            criterion_name: A name for this webpage list criterion
-            conditions: List of condition dicts, each with keys:
-                - operand: The operand type. Valid values: URL, CATEGORY,
-                    PAGE_TITLE, PAGE_CONTENT, CUSTOM_LABEL
-                - argument: The argument string to match
-                - operator: Optional operator. Valid values: EQUALS, CONTAINS
-            negative: Whether this is a negative criterion (default True)
+            shared_set_resource_name: Resource name of the SharedSet that
+                contains the webpage list (e.g.,
+                "customers/{customer_id}/sharedSets/{shared_set_id}")
+            negative: Whether this is a negative criterion. Defaults to True;
+                webpage lists are typically used to exclude pages.
 
         Returns:
-            Mutation response with created campaign criteria
+            Mutation response with created campaign criterion
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -2660,24 +2662,9 @@ class CampaignCriterionService:
             campaign_criterion.campaign = campaign_resource
             campaign_criterion.negative = negative
 
-            webpage_info = WebpageInfo()
-            webpage_info.criterion_name = criterion_name
-
-            for cond_dict in conditions:
-                condition = WebpageConditionInfo()
-                condition.operand = getattr(
-                    WebpageConditionOperandEnum.WebpageConditionOperand,
-                    cond_dict["operand"],
-                )
-                condition.argument = cond_dict["argument"]
-                if "operator" in cond_dict:
-                    condition.operator = getattr(
-                        WebpageConditionOperatorEnum.WebpageConditionOperator,
-                        cond_dict["operator"],
-                    )
-                webpage_info.conditions.append(condition)
-
-            campaign_criterion.webpage = webpage_info
+            webpage_list_info = WebpageListInfo()
+            webpage_list_info.shared_set = shared_set_resource_name
+            campaign_criterion.webpage_list = webpage_list_info
 
             operation = CampaignCriterionOperation()
             operation.create = campaign_criterion
@@ -3780,7 +3767,7 @@ def create_campaign_criterion_tools(
         ctx: Context,
         customer_id: str,
         campaign_id: str,
-        life_event_resource_names: List[str],
+        life_event_ids: List[int],
         negative: bool = False,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
@@ -3792,8 +3779,9 @@ def create_campaign_criterion_tools(
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            life_event_resource_names: List of life event resource names
-                (e.g., ["customers/123/lifeEvents/456"])
+            life_event_ids: List of life event taxonomy IDs (int64). Per the
+                v23 proto, LifeEventInfo.life_event_id is INT64, not a resource
+                name. Look up taxonomy IDs from Google Ads life event reference.
             negative: Whether these are negative criteria (exclude life events)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
@@ -3805,7 +3793,7 @@ def create_campaign_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             campaign_id=campaign_id,
-            life_event_resource_names=life_event_resource_names,
+            life_event_ids=life_event_ids,
             negative=negative,
             bid_modifier=bid_modifier,
             partial_failure=partial_failure,
@@ -4226,37 +4214,33 @@ def create_campaign_criterion_tools(
         ctx: Context,
         customer_id: str,
         campaign_id: str,
-        criterion_name: str,
-        conditions: List[Dict[str, str]],
+        shared_set_resource_name: str,
         negative: bool = True,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add webpage list targeting criteria to a campaign.
+        """Add a webpage-list criterion to a campaign by referencing a SharedSet.
 
-        Similar to webpage criteria but intended for predefined URL sets,
-        typically used as negative criteria to exclude specific pages.
+        WebpageListInfo references a pre-built SharedSet of webpages. To
+        define ad-hoc URL conditions inline, use add_webpage_criteria instead.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            criterion_name: A name for this webpage list criterion
-            conditions: List of condition dicts, each with keys:
-                - operand: Valid values: URL, CATEGORY, PAGE_TITLE, PAGE_CONTENT, CUSTOM_LABEL
-                - argument: The argument string to match
-                - operator: Optional. Valid values: EQUALS, CONTAINS
+            shared_set_resource_name: Resource name of the SharedSet that
+                contains the webpage list (e.g.,
+                "customers/{customer_id}/sharedSets/{shared_set_id}")
             negative: Whether this is a negative criterion (default True)
 
         Returns:
-            Mutation response with created campaign criteria
+            Mutation response with created campaign criterion
         """
         return await service.add_webpage_list_criteria(
             ctx=ctx,
             customer_id=customer_id,
             campaign_id=campaign_id,
-            criterion_name=criterion_name,
-            conditions=conditions,
+            shared_set_resource_name=shared_set_resource_name,
             negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,

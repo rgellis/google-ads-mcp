@@ -4,6 +4,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
+from google.ads.googleads.v23.common.types.ad_asset import AdVideoAsset
 from google.ads.googleads.v23.common.types.asset_types import (
     AppDeepLinkAsset,
     BookOnGoogleAsset,
@@ -2710,15 +2711,19 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.YOUTUBE_VIDEO
+            asset.type_ = AssetTypeEnum.AssetType.YOUTUBE_VIDEO_LIST
             if name:
                 asset.name = name
             else:
                 asset.name = f"Video List ({len(youtube_videos)} videos)"
 
             video_list = YouTubeVideoListAsset()
-            for video in youtube_videos:
-                video_list.youtube_videos.append(video)
+            # Proto wants AdVideoAsset messages (each with .asset = resource
+            # name), not bare strings. Caller passes resource names.
+            for video_resource_name in youtube_videos:
+                video_list.youtube_videos.append(
+                    AdVideoAsset(asset=video_resource_name)
+                )
             asset.youtube_video_list_asset = video_list
 
             operation = AssetOperation()

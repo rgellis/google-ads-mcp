@@ -32,6 +32,18 @@ from src.utils import (
 logger = get_logger(__name__)
 
 
+def _asset_field_type_segment(field_type: Any) -> str:
+    """Convert an AssetFieldType enum name or value to its integer wire value.
+
+    CampaignAsset compound resource names use the integer enum value in
+    the third segment, not the enum name. Accepts a string ("HEADLINE"),
+    an int (3), or an enum instance.
+    """
+    if isinstance(field_type, str):
+        return str(getattr(AssetFieldTypeEnum.AssetFieldType, field_type).value)
+    return str(int(field_type))
+
+
 class CampaignAssetService:
     """Campaign asset service for managing assets at the campaign level."""
 
@@ -338,7 +350,8 @@ class CampaignAssetService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            resource_name = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type}"
+            field_type_segment = _asset_field_type_segment(field_type)
+            resource_name = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type_segment}"
 
             campaign_asset = CampaignAsset()
             campaign_asset.resource_name = resource_name
@@ -418,8 +431,10 @@ class CampaignAssetService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            # Campaign asset resource names use ~ as separator
-            campaign_asset_resource = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type}"
+            # Campaign asset resource names use ~ as separator with the
+            # field_type as its integer enum value (not the name).
+            field_type_segment = _asset_field_type_segment(field_type)
+            campaign_asset_resource = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type_segment}"
 
             # Create operation
             operation = CampaignAssetOperation()

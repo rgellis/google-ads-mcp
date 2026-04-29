@@ -463,9 +463,7 @@ async def test_remove_asset_from_campaign(
     campaign_id = "9876543210"
     asset_id = "555666777"
     field_type = AssetFieldTypeEnum.AssetFieldType.SITELINK
-    campaign_asset_resource = (
-        f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type}"
-    )
+    campaign_asset_resource = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{int(field_type)}"
 
     # Create mock response
     mock_response = Mock(spec=MutateCampaignAssetsResponse)
@@ -526,9 +524,8 @@ async def test_update_campaign_asset(
     campaign_id = "9876543210"
     asset_id = "555666777"
     field_type = "SITELINK"
-    campaign_asset_resource = (
-        f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type}"
-    )
+    field_type_segment = AssetFieldTypeEnum.AssetFieldType[field_type].value
+    campaign_asset_resource = f"customers/{customer_id}/campaignAssets/{campaign_id}~{asset_id}~{field_type_segment}"
 
     # Create mock response
     mock_response = Mock(spec=MutateCampaignAssetsResponse)

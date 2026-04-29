@@ -31,6 +31,18 @@ from src.utils import (
 logger = get_logger(__name__)
 
 
+def _asset_field_type_segment(field_type: Any) -> str:
+    """Convert an AssetFieldType enum name or value to its integer wire value.
+
+    AdGroupAsset / CampaignAsset / AssetGroupAsset compound resource names
+    use the integer enum value in the third segment, not the enum name.
+    Accepts a string ("HEADLINE"), an int (3), or an enum instance.
+    """
+    if isinstance(field_type, str):
+        return str(getattr(AssetFieldTypeEnum.AssetFieldType, field_type).value)
+    return str(int(field_type))
+
+
 class AdGroupAssetService:
     """Ad group asset service for managing assets at the ad group level."""
 
@@ -244,8 +256,10 @@ class AdGroupAssetService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            # Ad group asset resource names use ~ as separator
-            resource_name = f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type}"
+            # Ad group asset resource names use ~ as separator with the
+            # field_type as its integer enum value (not the name).
+            field_type_segment = _asset_field_type_segment(field_type)
+            resource_name = f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type_segment}"
 
             # Create ad group asset with updated status
             ad_group_asset = AdGroupAsset()
@@ -425,8 +439,10 @@ class AdGroupAssetService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            # Ad group asset resource names use ~ as separator
-            ad_group_asset_resource = f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type}"
+            # Ad group asset resource names use ~ as separator with the
+            # field_type as its integer enum value (not the name).
+            field_type_segment = _asset_field_type_segment(field_type)
+            ad_group_asset_resource = f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type_segment}"
 
             # Create operation
             operation = AdGroupAssetOperation()

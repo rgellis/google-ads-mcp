@@ -134,22 +134,10 @@ class TestCustomerConversionGoalService:
         assert request.operations[0].update.biddable == False
 
     @pytest.mark.asyncio
-    async def test_mutate_customer_conversion_goals_with_category_and_origin(
+    async def test_mutate_customer_conversion_goals_rejects_category_and_origin(
         self, service: Any, mock_context: Any, mock_client: Any
     ):
-        """Test updating customer conversion goals with category and origin."""
-        # Mock response
-        mock_result = Mock()
-        mock_result.resource_name = (
-            "customers/123/customerConversionGoals/SIGNUP~WEBSITE"
-        )
-
-        mock_response = Mock()
-        mock_response.results = [mock_result]
-
-        mock_client.mutate_customer_conversion_goals.return_value = mock_response  # type: ignore
-
-        # Test data
+        """category/origin are identity-immutable and must be rejected (S1.5)."""
         operations = [
             {
                 "update": {
@@ -161,20 +149,12 @@ class TestCustomerConversionGoalService:
             }
         ]
 
-        # Call the method
-        _ = await service.mutate_customer_conversion_goals(
-            ctx=mock_context,
-            customer_id="123",
-            operations=operations,
-        )
-
-        # Verify the API call
-        mock_client.mutate_customer_conversion_goals.assert_called_once()  # type: ignore
-        call_args = mock_client.mutate_customer_conversion_goals.call_args[1]  # type: ignore
-        request = call_args["request"]
-
-        # Note: category and origin are typically immutable, but we include them for completeness
-        assert request.operations[0].update.biddable == True
+        with pytest.raises(Exception, match="identity-immutable"):
+            await service.mutate_customer_conversion_goals(
+                ctx=mock_context,
+                customer_id="123",
+                operations=operations,
+            )
 
     @pytest.mark.asyncio
     async def test_mutate_customer_conversion_goals_multiple_operations(

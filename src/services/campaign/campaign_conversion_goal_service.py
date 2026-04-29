@@ -87,20 +87,21 @@ class CampaignConversionGoalService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            campaign_resource = f"customers/{customer_id}/campaigns/{campaign_id}"
 
-            # Create resource name based on campaign, category, and origin
+            # Create resource name based on campaign, category, and origin.
+            # The category and origin segments are integer enum values, not names.
             resource_name = (
                 f"customers/{customer_id}/campaignConversionGoals/"
-                f"{campaign_id}~{category.name}~{origin.name}"
+                f"{campaign_id}~{int(category)}~{int(origin)}"
             )
 
-            # Create campaign conversion goal
+            # Create campaign conversion goal. Only biddable is mutable —
+            # campaign / category / origin are Immutable per proto and are
+            # already encoded in the resource_name. Setting them here would
+            # cause FIELD_CANNOT_BE_MODIFIED on the wire even when omitted
+            # from the update_mask.
             conversion_goal = CampaignConversionGoal()
             conversion_goal.resource_name = resource_name
-            conversion_goal.campaign = campaign_resource
-            conversion_goal.category = category
-            conversion_goal.origin = origin
             conversion_goal.biddable = biddable
 
             # Create the operation - only biddable can be updated

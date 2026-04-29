@@ -152,6 +152,8 @@ async def test_suggest_keyword_themes(
         customer_id=customer_id,
         final_url=final_url,
         business_name=business_name,
+        location_id="2840",
+        language_code="en",
     )
 
     # Assert
@@ -223,6 +225,7 @@ async def test_suggest_ad_content(
         customer_id=customer_id,
         business_name=business_name,
         final_url=final_url,
+        language_code="en",
     )
 
     # Assert
@@ -309,6 +312,7 @@ async def test_error_handling_suggest_ad_content(
             customer_id=customer_id,
             business_name=business_name,
             final_url=final_url,
+            language_code="en",
         )
 
     assert "Failed to get ad content suggestions" in str(exc_info.value)

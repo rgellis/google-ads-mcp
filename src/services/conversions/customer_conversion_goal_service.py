@@ -14,12 +14,6 @@ from google.ads.googleads.v23.services.types.customer_conversion_goal_service im
 from google.ads.googleads.v23.resources.types.customer_conversion_goal import (
     CustomerConversionGoal,
 )
-from google.ads.googleads.v23.enums.types.conversion_action_category import (
-    ConversionActionCategoryEnum,
-)
-from google.ads.googleads.v23.enums.types.conversion_origin import (
-    ConversionOriginEnum,
-)
 from google.ads.googleads.errors import GoogleAdsException
 from google.protobuf import field_mask_pb2
 
@@ -77,22 +71,25 @@ class CustomerConversionGoalService:
 
                 if "update" in op:
                     update_data = op["update"]
+
+                    # Reject identity-immutable keys explicitly. Per the
+                    # CustomerConversionGoal proto, category and origin are
+                    # part of the resource-name identity and cannot be
+                    # updated. Silently dropping them used to mask caller
+                    # mistakes.
+                    immutable_keys = {"category", "origin"}
+                    bad_keys = immutable_keys & set(update_data.keys())
+                    if bad_keys:
+                        raise ValueError(
+                            f"CustomerConversionGoal cannot update "
+                            f"{sorted(bad_keys)}; these are identity-immutable. "
+                            f"Recreate the resource if you need to change them."
+                        )
+
                     conversion_goal = CustomerConversionGoal()
 
                     if "resource_name" in update_data:
                         conversion_goal.resource_name = update_data["resource_name"]
-
-                    if "category" in update_data:
-                        conversion_goal.category = getattr(
-                            ConversionActionCategoryEnum.ConversionActionCategory,
-                            update_data["category"],
-                        )
-
-                    if "origin" in update_data:
-                        conversion_goal.origin = getattr(
-                            ConversionOriginEnum.ConversionOrigin,
-                            update_data["origin"],
-                        )
 
                     if "biddable" in update_data:
                         conversion_goal.biddable = bool(update_data["biddable"])
