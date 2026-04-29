@@ -154,6 +154,9 @@ class ConversionValueRuleSetService:
                 rule_set.conversion_value_rules = conversion_value_rules
                 update_mask_fields.append("conversion_value_rules")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             operation = ConversionValueRuleSetOperation()
             operation.update = rule_set
             operation.update_mask.CopyFrom(

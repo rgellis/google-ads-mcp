@@ -130,6 +130,9 @@ class CampaignGroupService:
                 campaign_group.name = name
                 update_mask_fields.append("name")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             operation = CampaignGroupOperation()
             operation.update = campaign_group
             operation.update_mask.CopyFrom(

@@ -110,6 +110,11 @@ class AdParameterService:
                     update_mask = field_mask_pb2.FieldMask()
                     if "insertion_text" in update_data:
                         update_mask.paths.append("insertion_text")
+                    if not update_mask.paths:
+                        raise ValueError(
+                            "update operation requires at least one updatable "
+                            "field (insertion_text)"
+                        )
                     operation.update_mask = update_mask
 
                     operation.update = ad_parameter

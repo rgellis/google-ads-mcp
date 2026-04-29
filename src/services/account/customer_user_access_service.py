@@ -86,6 +86,9 @@ class CustomerUserAccessService:
                 user_access.access_role = access_role
                 update_mask_paths.append("access_role")
 
+            if not update_mask_paths:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = CustomerUserAccessOperation()
             operation.update = user_access

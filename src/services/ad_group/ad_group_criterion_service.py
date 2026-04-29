@@ -2027,6 +2027,9 @@ class AdGroupCriterionService:
                 ad_group_criterion.bid_modifier = bid_modifier
                 update_mask_fields.append("bid_modifier")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = AdGroupCriterionOperation()
             operation.update = ad_group_criterion

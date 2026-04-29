@@ -201,6 +201,9 @@ class AssetGroupService:
                 asset_group.status = status
                 update_mask_paths.append("status")
 
+            if not update_mask_paths:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = AssetGroupOperation()
             operation.update = asset_group

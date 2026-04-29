@@ -256,6 +256,9 @@ class CustomAudienceService:
                     custom_audience.members.append(member)
                 update_mask_fields.append("members")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = CustomAudienceOperation()
             operation.update = custom_audience

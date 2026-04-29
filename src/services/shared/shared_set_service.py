@@ -151,6 +151,9 @@ class SharedSetService:
                 shared_set.name = name
                 update_mask_fields.append("name")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = SharedSetOperation()
             operation.update = shared_set

@@ -429,6 +429,9 @@ class UserListService:
                 user_list.membership_life_span = membership_life_span
                 update_mask_fields.append("membership_life_span")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create the operation
             operation = UserListOperation()
             operation.update = user_list

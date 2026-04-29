@@ -154,6 +154,9 @@ class ExperimentArmService:
             experiment_arm.campaigns = campaigns
             update_mask.append("campaigns")
 
+        if not update_mask:
+            raise ValueError("at least one updatable field must be provided")
+
         return ExperimentArmOperation(
             update=experiment_arm,
             update_mask={"paths": update_mask},

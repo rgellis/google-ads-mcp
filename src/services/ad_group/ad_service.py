@@ -477,6 +477,9 @@ class AdService:
                     update_mask_fields.append("responsive_search_ad.path2")
                 ad.responsive_search_ad = rsa
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             operation = AdOperation()
             operation.update = ad
             operation.update_mask.CopyFrom(

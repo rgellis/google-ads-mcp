@@ -149,6 +149,9 @@ class CampaignDraftService:
                 draft.name = draft_name
                 update_mask_paths.append("name")
 
+            if not update_mask_paths:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = CampaignDraftOperation()
             operation.update = draft

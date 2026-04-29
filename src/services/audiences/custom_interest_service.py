@@ -225,6 +225,9 @@ class CustomInterestService:
                     custom_interest.members.append(ci_member)
                 update_mask_fields.append("members")
 
+            if not update_mask_fields:
+                raise ValueError("at least one updatable field must be provided")
+
             # Create operation
             operation = CustomInterestOperation()
             operation.update = custom_interest

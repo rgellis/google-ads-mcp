@@ -148,6 +148,8 @@ class CustomerAssetService:
             paths = []
             if status is not None:
                 paths.append("status")
+            if not paths:
+                raise ValueError("at least one updatable field must be provided")
             update_mask = field_mask_pb2.FieldMask(paths=paths)
 
         return CustomerAssetOperation(

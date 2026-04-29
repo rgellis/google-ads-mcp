@@ -104,50 +104,23 @@ async def test_update_user_access(
 
 
 @pytest.mark.asyncio
-async def test_update_user_access_no_changes(
+async def test_update_user_access_no_changes_raises(
     customer_user_access_service: CustomerUserAccessService,
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test updating user access with no changes."""
-    # Arrange
+    """An update call with no updatable fields must raise rather than send
+    an empty update_mask (which the API rejects as INVALID_FIELD_MASK)."""
     customer_id = "1234567890"
     user_access_resource_name = "customers/1234567890/customerUserAccesses/111222333"
 
-    # Create mock response
-    mock_response = Mock(spec=MutateCustomerUserAccessResponse)
-    mock_response.result = Mock()
-    mock_response.result.resource_name = user_access_resource_name  # type: ignore
-
-    # Get the mocked customer user access service client
-    mock_customer_user_access_client = customer_user_access_service.client  # type: ignore
-    mock_customer_user_access_client.mutate_customer_user_access.return_value = (  # type: ignore
-        mock_response  # type: ignore
-    )
-
-    # Mock serialize_proto_message
-    expected_result = {"result": {"resource_name": user_access_resource_name}}
-
-    with patch(
-        "src.services.account.customer_user_access_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        # Act
-        result = await customer_user_access_service.update_user_access(
+    with pytest.raises(Exception, match="at least one updatable field"):
+        await customer_user_access_service.update_user_access(
             ctx=mock_ctx,
             customer_id=customer_id,
             user_access_resource_name=user_access_resource_name,
             access_role=None,
         )
-
-    # Assert
-    assert result == expected_result
-
-    # Verify the update mask is empty when no fields are updated
-    call_args = mock_customer_user_access_client.mutate_customer_user_access.call_args  # type: ignore
-    request = call_args[1]["request"]
-    operation = request.operation
-    assert len(operation.update_mask.paths) == 0
 
 
 @pytest.mark.asyncio
