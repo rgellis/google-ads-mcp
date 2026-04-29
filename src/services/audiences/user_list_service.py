@@ -173,7 +173,7 @@ class UserListService:
         description: Optional[str] = None,
         membership_life_span: int = 30,
         upload_key_type: str = "CONTACT_INFO",
-        data_source_type: str = "FIRST_PARTY",
+        data_source_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -187,7 +187,9 @@ class UserListService:
             description: Optional description
             membership_life_span: How long users remain in the list (days)
             upload_key_type: CONTACT_INFO, CRM_ID, or MOBILE_ADVERTISING_ID
-            data_source_type: FIRST_PARTY or THIRD_PARTY
+            data_source_type: Optional source. One of FIRST_PARTY,
+                THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
+                THIRD_PARTY_PARTNER_DATA. Omit to let the API default apply.
 
         Returns:
             Created user list details
@@ -217,6 +219,16 @@ class UserListService:
                 CustomerMatchUploadKeyTypeEnum.CustomerMatchUploadKeyType,
                 upload_key_type,
             )
+
+            if data_source_type is not None:
+                from google.ads.googleads.v23.enums.types.user_list_crm_data_source_type import (
+                    UserListCrmDataSourceTypeEnum,
+                )
+
+                crm_user_list.data_source_type = getattr(
+                    UserListCrmDataSourceTypeEnum.UserListCrmDataSourceType,
+                    data_source_type,
+                )
 
             user_list.crm_based_user_list = crm_user_list
 
@@ -263,7 +275,6 @@ class UserListService:
         customer_id: str,
         name: str,
         rules: List[Dict[str, Any]],
-        rule_operator: str = "ALL",
         description: Optional[str] = None,
         membership_life_span: int = 30,
         partial_failure: bool = False,
@@ -276,8 +287,10 @@ class UserListService:
             ctx: FastMCP context
             customer_id: The customer ID
             name: User list name
-            rules: List of rule dictionaries with user_list_ids and operator
-            rule_operator: ALL, ANY, or NONE
+            rules: List of rule dictionaries. Each dict has:
+                - user_list_ids: list of user list IDs
+                - operator: ALL, ANY, or NONE (per-rule; the proto has no
+                  top-level operator)
             description: Optional description
             membership_life_span: How long users remain in the list (days)
 
@@ -570,7 +583,7 @@ def create_user_list_tools(
         description: Optional[str] = None,
         membership_life_span: int = 30,
         upload_key_type: str = "CONTACT_INFO",
-        data_source_type: str = "FIRST_PARTY",
+        data_source_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -583,7 +596,9 @@ def create_user_list_tools(
             description: Optional description
             membership_life_span: How long users remain in the list (days, 0-540)
             upload_key_type: Type of data - CONTACT_INFO, CRM_ID, or MOBILE_ADVERTISING_ID
-            data_source_type: FIRST_PARTY or THIRD_PARTY
+            data_source_type: Optional CRM data source. One of FIRST_PARTY,
+                THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
+                THIRD_PARTY_PARTNER_DATA. Omit to use API default.
 
         Returns:
             Created user list details including resource_name and user_list_id
@@ -606,7 +621,6 @@ def create_user_list_tools(
         customer_id: str,
         name: str,
         rules: List[Dict[str, Any]],
-        rule_operator: str = "ALL",
         description: Optional[str] = None,
         membership_life_span: int = 30,
         partial_failure: bool = False,
@@ -620,8 +634,8 @@ def create_user_list_tools(
             name: User list name
             rules: List of rule dictionaries, each with:
                 - user_list_ids: List of user list IDs
-                - operator: ALL, ANY, or NONE
-            rule_operator: Top-level operator - ALL, ANY, or NONE
+                - operator: ALL, ANY, or NONE (per-rule; the proto has no
+                  top-level operator field)
             description: Optional description
             membership_life_span: How long users remain in the list (days, 0-540)
 
@@ -640,7 +654,6 @@ def create_user_list_tools(
             customer_id=customer_id,
             name=name,
             rules=rules,
-            rule_operator=rule_operator,
             description=description,
             membership_life_span=membership_life_span,
             partial_failure=partial_failure,

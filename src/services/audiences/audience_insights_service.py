@@ -72,7 +72,6 @@ class AudienceInsightsService:
         customer_id: str,
         baseline_audience_countries: List[str],
         specific_audience_countries: List[str],
-        dimensions: List[str],
         baseline_audience_ages: Optional[List[str]] = None,
         baseline_audience_genders: Optional[List[str]] = None,
         specific_audience_ages: Optional[List[str]] = None,
@@ -87,7 +86,6 @@ class AudienceInsightsService:
             customer_id: The customer ID
             baseline_audience_countries: List of country location IDs for baseline audience
             specific_audience_countries: List of country location IDs for specific audience
-            dimensions: List of dimensions to analyze (AGE_RANGE, GENDER, LOCATION, USER_INTEREST, etc.)
             baseline_audience_ages: Optional age ranges for baseline (AGE_RANGE_18_24, etc.)
             baseline_audience_genders: Optional genders for baseline (MALE, FEMALE, UNDETERMINED)
             specific_audience_ages: Optional age ranges for specific audience
@@ -205,7 +203,6 @@ class AudienceInsightsService:
         audience_ages: Optional[List[str]] = None,
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
-        audience_attribute_groups: Optional[List[Dict[str, Any]]] = None,
         customer_insights_group: Optional[str] = None,
         data_month: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -218,8 +215,8 @@ class AudienceInsightsService:
             dimensions: List of dimensions to analyze
             audience_ages: Optional age ranges
             audience_genders: Optional genders
-            audience_user_interests: Optional user interest IDs
-            audience_attribute_groups: Optional custom attribute groups
+            audience_user_interests: Optional user interest IDs (added via
+                topic_audience_combinations as user_interest attributes)
             customer_insights_group: Optional user-defined grouping label
             data_month: Optional specific month in YYYY-MM format
 
@@ -252,15 +249,17 @@ class AudienceInsightsService:
                 )
                 audience.gender = gender_info
 
-            # Add attribute groups if provided
-            if audience_attribute_groups:
-                for _ in (
-                    audience_attribute_groups
-                ):  # group_data will be used when fully implemented
-                    attr_group = InsightsAudienceAttributeGroup()
-                    # Process attributes based on group_data structure
-                    # This is a simplified implementation
-                    audience.topic_audience_combinations.append(attr_group)
+            if audience_user_interests:
+                attr_group = InsightsAudienceAttributeGroup()
+                for interest_id in audience_user_interests:
+                    attr = AudienceInsightsAttribute()
+                    interest_info = UserInterestInfo()
+                    interest_info.user_interest_category = (
+                        f"customers/{customer_id}/userInterests/{interest_id}"
+                    )
+                    attr.user_interest = interest_info
+                    attr_group.attributes.append(attr)
+                audience.topic_audience_combinations.append(attr_group)
 
             # Create request
             request = GenerateAudienceCompositionInsightsRequest()
@@ -320,7 +319,8 @@ class AudienceInsightsService:
             audience_countries: List of country location IDs
             audience_ages: Optional age ranges
             audience_genders: Optional genders
-            audience_user_interests: Optional user interest IDs
+            audience_user_interests: Optional user interest IDs (added via
+                topic_audience_combinations as user_interest attributes)
             customer_insights_group: Optional user-defined grouping label
 
         Returns:
@@ -351,6 +351,18 @@ class AudienceInsightsService:
                     GenderTypeEnum.GenderType, audience_genders[0]
                 )
                 audience.gender = gender_info
+
+            if audience_user_interests:
+                attr_group = InsightsAudienceAttributeGroup()
+                for interest_id in audience_user_interests:
+                    attr = AudienceInsightsAttribute()
+                    interest_info = UserInterestInfo()
+                    interest_info.user_interest_category = (
+                        f"customers/{customer_id}/userInterests/{interest_id}"
+                    )
+                    attr.user_interest = interest_info
+                    attr_group.attributes.append(attr)
+                audience.topic_audience_combinations.append(attr_group)
 
             # Create audience definition
             audience_definition = InsightsAudienceDefinition()
@@ -694,7 +706,6 @@ def create_audience_insights_tools(
         customer_id: str,
         baseline_audience_countries: List[str],
         specific_audience_countries: List[str],
-        dimensions: List[str],
         baseline_audience_ages: Optional[List[str]] = None,
         baseline_audience_genders: Optional[List[str]] = None,
         specific_audience_ages: Optional[List[str]] = None,
@@ -708,7 +719,6 @@ def create_audience_insights_tools(
             customer_id: The customer ID
             baseline_audience_countries: Country location IDs for baseline audience (e.g., ["2840"] for US)
             specific_audience_countries: Country location IDs for specific audience
-            dimensions: Dimensions to analyze (AGE_RANGE, GENDER, LOCATION, USER_INTEREST, TOPIC, etc.)
             baseline_audience_ages: Age ranges (AGE_RANGE_18_24, AGE_RANGE_25_34, etc.)
             baseline_audience_genders: Genders (MALE, FEMALE, UNDETERMINED)
             specific_audience_ages: Age ranges for specific audience
@@ -724,7 +734,6 @@ def create_audience_insights_tools(
             customer_id=customer_id,
             baseline_audience_countries=baseline_audience_countries,
             specific_audience_countries=specific_audience_countries,
-            dimensions=dimensions,
             baseline_audience_ages=baseline_audience_ages,
             baseline_audience_genders=baseline_audience_genders,
             specific_audience_ages=specific_audience_ages,
@@ -741,7 +750,6 @@ def create_audience_insights_tools(
         audience_ages: Optional[List[str]] = None,
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
-        audience_attribute_groups: Optional[List[Dict[str, Any]]] = None,
         customer_insights_group: Optional[str] = None,
         data_month: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -753,8 +761,8 @@ def create_audience_insights_tools(
             dimensions: Dimensions to analyze (AGE_RANGE, GENDER, LOCATION, USER_INTEREST, etc.)
             audience_ages: Optional age ranges
             audience_genders: Optional genders
-            audience_user_interests: Optional user interest IDs
-            audience_attribute_groups: Optional custom attribute groups
+            audience_user_interests: Optional user interest IDs (wired through
+                topic_audience_combinations as user_interest attributes)
             customer_insights_group: Optional user-defined grouping label
             data_month: Optional specific month in YYYY-MM format
 
@@ -769,7 +777,6 @@ def create_audience_insights_tools(
             audience_ages=audience_ages,
             audience_genders=audience_genders,
             audience_user_interests=audience_user_interests,
-            audience_attribute_groups=audience_attribute_groups,
             customer_insights_group=customer_insights_group,
             data_month=data_month,
         )

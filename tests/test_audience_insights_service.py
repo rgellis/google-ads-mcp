@@ -53,7 +53,6 @@ async def test_generate_insights_finder_report(
     customer_id = "1234567890"
     baseline_audience_countries = ["2840"]  # US
     specific_audience_countries = ["2840", "2124"]  # US and Canada
-    dimensions = ["AGE_RANGE", "GENDER", "USER_INTEREST"]
     baseline_audience_ages = ["AGE_RANGE_25_34", "AGE_RANGE_35_44"]
     baseline_audience_genders = ["MALE", "FEMALE"]
     specific_audience_ages = ["AGE_RANGE_18_24", "AGE_RANGE_25_34"]
@@ -81,7 +80,6 @@ async def test_generate_insights_finder_report(
             customer_id=customer_id,
             baseline_audience_countries=baseline_audience_countries,
             specific_audience_countries=specific_audience_countries,
-            dimensions=dimensions,
             baseline_audience_ages=baseline_audience_ages,
             baseline_audience_genders=baseline_audience_genders,
             specific_audience_ages=specific_audience_ages,
@@ -140,7 +138,6 @@ async def test_generate_insights_finder_report_minimal(
     customer_id = "1234567890"
     baseline_audience_countries = ["2840"]  # US
     specific_audience_countries = ["2840"]  # US
-    dimensions = ["LOCATION"]
 
     # Create mock response
     mock_response = Mock(spec=GenerateInsightsFinderReportResponse)
@@ -163,7 +160,6 @@ async def test_generate_insights_finder_report_minimal(
             customer_id=customer_id,
             baseline_audience_countries=baseline_audience_countries,
             specific_audience_countries=specific_audience_countries,
-            dimensions=dimensions,
         )
 
     # Assert
@@ -273,62 +269,24 @@ async def test_generate_audience_composition_insights(
     # Verify dimensions
     assert len(request.dimensions) == 4
 
+    # Verify user_interests are wired through topic_audience_combinations
+    assert len(request.audience.topic_audience_combinations) == 1
+    attrs = request.audience.topic_audience_combinations[0].attributes
+    assert len(attrs) == 3
+    assert (
+        attrs[0].user_interest.user_interest_category
+        == f"customers/{customer_id}/userInterests/11111"
+    )
+    assert (
+        attrs[2].user_interest.user_interest_category
+        == f"customers/{customer_id}/userInterests/33333"
+    )
+
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
         level="info",
         message="Generated audience composition insights",
     )
-
-
-@pytest.mark.asyncio
-async def test_generate_audience_composition_insights_with_attribute_groups(
-    audience_insights_service: AudienceInsightsService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test generating audience composition insights with attribute groups."""
-    # Arrange
-    customer_id = "1234567890"
-    audience_countries = ["2840"]
-    dimensions = ["AGE_RANGE"]
-    audience_attribute_groups = [{"type": "custom_affinity"}, {"type": "in_market"}]
-
-    # Create mock response
-    mock_response = Mock(spec=GenerateAudienceCompositionInsightsResponse)
-    mock_response.sections = []
-
-    # Get the mocked insights service client
-    mock_insights_client = audience_insights_service.client  # type: ignore
-    mock_insights_client.generate_audience_composition_insights.return_value = (  # type: ignore
-        mock_response  # type: ignore
-    )
-
-    # Mock serialize_proto_message
-    expected_result = {"sections": []}
-
-    with patch(
-        "src.services.audiences.audience_insights_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        # Act
-        result = await audience_insights_service.generate_audience_composition_insights(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            audience_countries=audience_countries,
-            dimensions=dimensions,
-            audience_attribute_groups=audience_attribute_groups,
-        )
-
-    # Assert
-    assert result == expected_result
-
-    # Verify the API call
-    mock_insights_client.generate_audience_composition_insights.assert_called_once()  # type: ignore
-    call_args = mock_insights_client.generate_audience_composition_insights.call_args  # type: ignore
-    request = call_args[1]["request"]
-
-    # Verify attribute groups were added
-    assert len(request.audience.topic_audience_combinations) == 2
 
 
 @pytest.mark.asyncio
@@ -416,7 +374,19 @@ async def test_generate_suggested_targeting_insights(
     assert len(audience.age_ranges) == 2
     # InsightsAudience only has a single gender field
     assert audience.gender.type_ == GenderTypeEnum.GenderType.FEMALE
-    # Note: In v20, user interests are handled through topic_audience_combinations
+
+    # Verify user_interests are wired through topic_audience_combinations
+    assert len(audience.topic_audience_combinations) == 1
+    attrs = audience.topic_audience_combinations[0].attributes
+    assert len(attrs) == 2
+    assert (
+        attrs[0].user_interest.user_interest_category
+        == f"customers/{customer_id}/userInterests/54321"
+    )
+    assert (
+        attrs[1].user_interest.user_interest_category
+        == f"customers/{customer_id}/userInterests/98765"
+    )
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -490,7 +460,6 @@ async def test_error_handling_generate_insights_finder_report(
     customer_id = "1234567890"
     baseline_audience_countries = ["2840"]
     specific_audience_countries = ["2840"]
-    dimensions = ["AGE_RANGE"]
 
     # Get the mocked insights service client and make it raise exception
     mock_insights_client = audience_insights_service.client  # type: ignore
@@ -505,7 +474,6 @@ async def test_error_handling_generate_insights_finder_report(
             customer_id=customer_id,
             baseline_audience_countries=baseline_audience_countries,
             specific_audience_countries=specific_audience_countries,
-            dimensions=dimensions,
         )
 
     assert "Failed to generate insights finder report" in str(exc_info.value)

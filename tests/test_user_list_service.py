@@ -123,6 +123,10 @@ async def test_create_crm_based_user_list(
     mock_ctx: Context,
 ) -> None:
     """Test creating a CRM-based user list."""
+    from google.ads.googleads.v23.enums.types.user_list_crm_data_source_type import (
+        UserListCrmDataSourceTypeEnum,
+    )
+
     # Arrange
     customer_id = "1234567890"
     name = "Test CRM User List"
@@ -179,12 +183,50 @@ async def test_create_crm_based_user_list(
         operation.create.crm_based_user_list.upload_key_type
         == CustomerMatchUploadKeyTypeEnum.CustomerMatchUploadKeyType.CONTACT_INFO
     )
+    assert (
+        operation.create.crm_based_user_list.data_source_type
+        == UserListCrmDataSourceTypeEnum.UserListCrmDataSourceType.FIRST_PARTY
+    )
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
         level="info",
         message=f"Created CRM-based user list '{name}' for customer match",
     )
+
+
+@pytest.mark.asyncio
+async def test_create_crm_based_user_list_omits_data_source_type_when_none(
+    user_list_service: UserListService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """When data_source_type is omitted, the proto field should not be set
+    (proto-default rule: don't set a field to its default value)."""
+    customer_id = "1234567890"
+
+    mock_response = Mock(spec=MutateUserListsResponse)
+    mock_response.results = [Mock()]
+    mock_user_list_client = user_list_service.client  # type: ignore
+    mock_user_list_client.mutate_user_lists.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.audiences.user_list_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await user_list_service.create_crm_based_user_list(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            name="No source",
+        )
+
+    call_args = mock_user_list_client.mutate_user_lists.call_args  # type: ignore
+    request = call_args[1]["request"]
+    operation = request.operations[0]
+    pb = type(operation.create.crm_based_user_list).pb(
+        operation.create.crm_based_user_list
+    )
+    assert "data_source_type" not in [f.name for f, _ in pb.ListFields()]
 
 
 @pytest.mark.asyncio
@@ -201,7 +243,6 @@ async def test_create_logical_user_list(
         {"user_list_ids": ["100", "200"], "operator": "ALL"},
         {"user_list_ids": ["300"], "operator": "NONE"},
     ]
-    rule_operator = "ALL"
     description = "A test logical user list"
     membership_life_span = 90
 
@@ -229,7 +270,6 @@ async def test_create_logical_user_list(
             customer_id=customer_id,
             name=name,
             rules=rules,
-            rule_operator=rule_operator,
             description=description,
             membership_life_span=membership_life_span,
         )
