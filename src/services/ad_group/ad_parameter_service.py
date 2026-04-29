@@ -54,7 +54,7 @@ class AdParameterService:
         operations: List[Dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: str = "RESOURCE_NAME_ONLY",
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create, update, or remove ad parameters.
 
@@ -125,10 +125,11 @@ class AdParameterService:
             request.operations = mutate_operations
             request.partial_failure = partial_failure
             request.validate_only = validate_only
-            request.response_content_type = getattr(
-                ResponseContentTypeEnum.ResponseContentType,
-                response_content_type,
-            )
+            if response_content_type is not None:
+                request.response_content_type = getattr(
+                    ResponseContentTypeEnum.ResponseContentType,
+                    response_content_type,
+                )
 
             # Make the API call
             response: MutateAdParametersResponse = self.client.mutate_ad_parameters(

@@ -1733,7 +1733,7 @@ class AdService:
         videos: List[str],
         business_name: str,
         logo_images: Optional[List[str]] = None,
-        call_to_actions: Optional[List[str]] = None,
+        call_to_action_asset_resource_names: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
         status: str = "PAUSED",
@@ -1753,7 +1753,10 @@ class AdService:
             videos: List of video asset resource names (1-5)
             business_name: Business name
             logo_images: Optional list of logo image asset resource names
-            call_to_actions: Optional list of call to action texts
+            call_to_action_asset_resource_names: Optional list of CallToActionAsset
+                resource names (each must reference a pre-created Asset of type
+                CALL_TO_ACTION). The v23 proto requires AdCallToActionAsset, not
+                free text.
             breadcrumb1: Optional first breadcrumb
             breadcrumb2: Optional second breadcrumb
             status: Ad status - ENABLED or PAUSED
@@ -1778,14 +1781,16 @@ class AdService:
                 ad_info.descriptions.append(AdTextAsset(text=d))
             for v in videos:
                 ad_info.videos.append(AdVideoAsset(asset=v))
-            ad_info.business_name = business_name
+            ad_info.business_name = AdTextAsset(text=business_name)
 
             if logo_images:
                 for img in logo_images:
                     ad_info.logo_images.append(AdImageAsset(asset=img))
-            if call_to_actions:
-                for cta in call_to_actions:
-                    ad_info.call_to_actions.append(AdTextAsset(text=cta))
+            if call_to_action_asset_resource_names:
+                for cta_resource in call_to_action_asset_resource_names:
+                    ad_info.call_to_actions.append(
+                        AdCallToActionAsset(asset=cta_resource)
+                    )
             if breadcrumb1:
                 ad_info.breadcrumb1 = breadcrumb1
             if breadcrumb2:
@@ -1806,8 +1811,8 @@ class AdService:
                 response_content_type=response_content_type,
             )
 
-            response: MutateAdGroupAdsResponse = (
-                self.ad_group_ad_client.mutate_ad_group_ads(request=request)
+            response: MutateAdGroupAdsResponse = self.client.mutate_ad_group_ads(
+                request=request
             )
 
             await ctx.log(
@@ -3146,7 +3151,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         videos: List[str],
         business_name: str,
         logo_images: Optional[List[str]] = None,
-        call_to_actions: Optional[List[str]] = None,
+        call_to_action_asset_resource_names: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
         status: str = "PAUSED",
@@ -3165,7 +3170,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             videos: List of video asset resource names (1-5)
             business_name: Business name displayed in the ad
             logo_images: Optional logo image asset resource names
-            call_to_actions: Optional call to action texts
+            call_to_action_asset_resource_names: Optional resource names of
+                pre-created CallToActionAsset Assets. Demand Gen v23 requires
+                AdCallToActionAsset references, not free CTA text.
             breadcrumb1: Optional first URL breadcrumb
             breadcrumb2: Optional second URL breadcrumb
             status: Ad status - ENABLED or PAUSED
@@ -3183,7 +3190,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             videos=videos,
             business_name=business_name,
             logo_images=logo_images,
-            call_to_actions=call_to_actions,
+            call_to_action_asset_resource_names=call_to_action_asset_resource_names,
             breadcrumb1=breadcrumb1,
             breadcrumb2=breadcrumb2,
             status=status,

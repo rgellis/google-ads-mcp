@@ -7,7 +7,6 @@ from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
     ContentLabelInfo,
     IpBlockInfo,
-    KeywordInfo,
     MobileAppCategoryInfo,
     MobileApplicationInfo,
     NegativeKeywordListInfo,
@@ -18,7 +17,6 @@ from google.ads.googleads.v23.common.types.criteria import (
 )
 from google.ads.googleads.v23.enums.types.content_label_type import ContentLabelTypeEnum
 from google.ads.googleads.v23.enums.types.criterion_type import CriterionTypeEnum
-from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
 from google.ads.googleads.v23.resources.types.customer_negative_criterion import (
     CustomerNegativeCriterion,
 )
@@ -62,100 +60,6 @@ class CustomerNegativeCriterionService:
             )
         assert self._client is not None
         return self._client
-
-    async def add_negative_keywords(
-        self,
-        ctx: Context,
-        customer_id: str,
-        keywords: List[Dict[str, str]],
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
-    ) -> List[Dict[str, Any]]:
-        """Add negative keywords at the account level.
-
-        Args:
-            ctx: FastMCP context
-            customer_id: The customer ID
-            keywords: List of dicts with 'text' and 'match_type' keys
-
-        Returns:
-            List of created customer negative criteria
-        """
-        try:
-            customer_id = format_customer_id(customer_id)
-
-            # Create operations
-            operations = []
-            for keyword in keywords:
-                # Create customer negative criterion
-                customer_negative_criterion = CustomerNegativeCriterion()
-
-                # Create keyword info
-                keyword_info = KeywordInfo()
-                keyword_info.text = keyword["text"]
-                keyword_info.match_type = getattr(
-                    KeywordMatchTypeEnum.KeywordMatchType, keyword["match_type"]
-                )
-                customer_negative_criterion.keyword = keyword_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.KEYWORD
-                )
-
-                # Create operation
-                operation = CustomerNegativeCriterionOperation()
-                operation.create = customer_negative_criterion
-                operations.append(operation)
-
-            # Create request
-            request = MutateCustomerNegativeCriteriaRequest()
-            request.customer_id = customer_id
-            request.operations = operations
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
-
-            # Make the API call
-            response: MutateCustomerNegativeCriteriaResponse = (
-                self.client.mutate_customer_negative_criteria(request=request)
-            )
-
-            # Process results
-            results = []
-            for i, result in enumerate(response.results):
-                criterion_resource = result.resource_name
-                criterion_id = (
-                    criterion_resource.split("/")[-1] if criterion_resource else ""
-                )
-                keyword = keywords[i]
-                results.append(
-                    {
-                        "resource_name": criterion_resource,
-                        "criterion_id": criterion_id,
-                        "type": "KEYWORD",
-                        "keyword_text": keyword["text"],
-                        "match_type": keyword["match_type"],
-                    }
-                )
-
-            await ctx.log(
-                level="info",
-                message=f"Added {len(results)} negative keywords at account level",
-            )
-
-            return results
-
-        except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-        except Exception as e:
-            error_msg = f"Failed to add negative keywords: {str(e)}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
 
     async def add_placement_exclusions(
         self,
@@ -1040,34 +944,6 @@ def create_customer_negative_criterion_tools(
     """
     tools = []
 
-    async def add_negative_keywords(
-        ctx: Context,
-        customer_id: str,
-        keywords: List[Dict[str, str]],
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
-        """Add negative keywords at the account level.
-
-        Args:
-            customer_id: The customer ID
-            keywords: List of keyword dicts with:
-                - text: Keyword text
-                - match_type: BROAD, PHRASE, or EXACT
-
-        Returns:
-            List of created customer negative criteria with resource names and IDs
-        """
-        return await service.add_negative_keywords(
-            ctx=ctx,
-            customer_id=customer_id,
-            keywords=keywords,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-
     async def add_placement_exclusions(
         ctx: Context,
         customer_id: str,
@@ -1369,7 +1245,6 @@ def create_customer_negative_criterion_tools(
 
     tools.extend(
         [
-            add_negative_keywords,
             add_placement_exclusions,
             add_content_label_exclusions,
             add_mobile_application_exclusions,

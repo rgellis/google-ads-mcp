@@ -1510,7 +1510,7 @@ async def test_create_demand_gen_video_responsive_ad(
         )
 
     assert result == {"results": []}
-    assert mock_ad_info.business_name == business_name
+    assert mock_ad_info.business_name.text == business_name
     assert len(mock_ad_info.headlines) == 1
     assert len(mock_ad_info.videos) == 1
 

@@ -116,7 +116,7 @@ def create_incentive_tools(
             language_code: Language code (e.g. "en")
             country_code: Country code (e.g. "US")
             email: Email address associated with the account
-            incentive_type: Optional filter by type - ACQUISITION or WINBACK
+            incentive_type: Optional filter by type - ACQUISITION (currently the only valid value per the v23 IncentiveType enum)
 
         Returns:
             Available incentive offers with IDs, amounts, and eligibility details
