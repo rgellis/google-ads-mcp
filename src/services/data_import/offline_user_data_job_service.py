@@ -52,27 +52,85 @@ class OfflineUserDataJobService:
         assert self._client is not None
         return self._client
 
-    async def create_customer_match_job(
+    async def create_offline_user_data_job(
         self,
         ctx: Context,
         customer_id: str,
-        job_type: str = "CUSTOMER_MATCH_USER_LIST",
-        job_name: Optional[str] = None,
+        job_type: str,
+        user_list: Optional[str] = None,
+        store_sales_loyalty_fraction: Optional[float] = None,
+        store_sales_transaction_upload_fraction: Optional[float] = None,
+        store_sales_custom_key: Optional[str] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
-        """Create an offline user data job for uploading user data.
+        """Create an offline user data job.
+
+        The OfflineUserDataJob proto has a metadata oneof: each job type
+        needs a specific submessage populated. This wrapper switches on
+        job_type to set the right one.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            job_type: Job type - CUSTOMER_MATCH_USER_LIST, STORE_SALES_DIRECT_UPLOAD,
-                or STORE_SALES_UPLOAD_THIRD_PARTY (default: CUSTOMER_MATCH_USER_LIST)
-            job_name: Optional user list resource name for customer match jobs
+            job_type: Job type. Must be one of:
+                - CUSTOMER_MATCH_USER_LIST: requires ``user_list``
+                - STORE_SALES_UPLOAD_FIRST_PARTY: requires
+                  ``store_sales_loyalty_fraction`` and
+                  ``store_sales_transaction_upload_fraction``
+                - STORE_SALES_UPLOAD_THIRD_PARTY: same as
+                  STORE_SALES_UPLOAD_FIRST_PARTY (third-party metadata not
+                  yet exposed by this wrapper)
+            user_list: UserList resource name. Required for
+                CUSTOMER_MATCH_USER_LIST.
+            store_sales_loyalty_fraction: Fraction of identifiable
+                transactions (0-1, exclusive of 0). Required for store
+                sales jobs.
+            store_sales_transaction_upload_fraction: Fraction of sales
+                being uploaded vs total identifiable sales (0-1,
+                exclusive of 0). Required for store sales jobs.
+            store_sales_custom_key: Optional custom variable key for
+                store sales (only valid on allow-listed customers).
 
         Returns:
             Created job details with resource_name
         """
+        if job_type == "CUSTOMER_MATCH_USER_LIST":
+            if not user_list:
+                raise ValueError(
+                    "user_list is required for CUSTOMER_MATCH_USER_LIST jobs."
+                )
+            if (
+                store_sales_loyalty_fraction is not None
+                or store_sales_transaction_upload_fraction is not None
+                or store_sales_custom_key is not None
+            ):
+                raise ValueError(
+                    "store_sales_* parameters are only valid for "
+                    "STORE_SALES_UPLOAD_FIRST_PARTY and STORE_SALES_UPLOAD_THIRD_PARTY."
+                )
+        elif job_type in (
+            "STORE_SALES_UPLOAD_FIRST_PARTY",
+            "STORE_SALES_UPLOAD_THIRD_PARTY",
+        ):
+            if user_list is not None:
+                raise ValueError(
+                    "user_list is only valid for CUSTOMER_MATCH_USER_LIST jobs."
+                )
+            if (
+                store_sales_loyalty_fraction is None
+                or store_sales_transaction_upload_fraction is None
+            ):
+                raise ValueError(
+                    f"{job_type} requires both store_sales_loyalty_fraction "
+                    "and store_sales_transaction_upload_fraction."
+                )
+        else:
+            raise ValueError(
+                f"Unsupported job_type: {job_type!r}. Use CUSTOMER_MATCH_USER_LIST, "
+                "STORE_SALES_UPLOAD_FIRST_PARTY, or STORE_SALES_UPLOAD_THIRD_PARTY."
+            )
+
         try:
             customer_id = format_customer_id(customer_id)
 
@@ -81,8 +139,17 @@ class OfflineUserDataJobService:
             job.type_ = getattr(
                 OfflineUserDataJobTypeEnum.OfflineUserDataJobType, job_type
             )
-            if job_name:
-                job.customer_match_user_list_metadata.user_list = job_name
+
+            if job_type == "CUSTOMER_MATCH_USER_LIST":
+                job.customer_match_user_list_metadata.user_list = user_list  # type: ignore[assignment]
+            else:
+                # STORE_SALES_* — populate the store_sales_metadata oneof member.
+                job.store_sales_metadata.loyalty_fraction = store_sales_loyalty_fraction
+                job.store_sales_metadata.transaction_upload_fraction = (
+                    store_sales_transaction_upload_fraction
+                )
+                if store_sales_custom_key is not None:
+                    job.store_sales_metadata.custom_key = store_sales_custom_key
 
             # Create request
             request = CreateOfflineUserDataJobRequest()
@@ -102,7 +169,7 @@ class OfflineUserDataJobService:
 
             await ctx.log(
                 level="info",
-                message=f"Created customer match job for customer {customer_id}",
+                message=f"Created {job_type} offline user data job for customer {customer_id}",
             )
 
             return serialize_proto_message(response)
@@ -112,7 +179,7 @@ class OfflineUserDataJobService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
-            error_msg = f"Failed to create customer match job: {str(e)}"
+            error_msg = f"Failed to create offline user data job: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -587,32 +654,51 @@ def create_offline_user_data_job_tools(
     """
     tools = []
 
-    async def create_customer_match_job(
+    async def create_offline_user_data_job(
         ctx: Context,
         customer_id: str,
-        job_type: str = "CUSTOMER_MATCH_USER_LIST",
-        job_name: Optional[str] = None,
+        job_type: str,
+        user_list: Optional[str] = None,
+        store_sales_loyalty_fraction: Optional[float] = None,
+        store_sales_transaction_upload_fraction: Optional[float] = None,
+        store_sales_custom_key: Optional[str] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
         """Create an offline user data job for uploading user data.
 
+        The job's metadata oneof depends on job_type:
+        - CUSTOMER_MATCH_USER_LIST requires user_list
+        - STORE_SALES_UPLOAD_FIRST_PARTY / STORE_SALES_UPLOAD_THIRD_PARTY require
+          store_sales_loyalty_fraction and store_sales_transaction_upload_fraction
+
         Args:
             customer_id: The customer ID
-            job_type: Job type - CUSTOMER_MATCH_USER_LIST, STORE_SALES_DIRECT_UPLOAD,
-                or STORE_SALES_UPLOAD_THIRD_PARTY (default: CUSTOMER_MATCH_USER_LIST)
-            job_name: Optional user list resource name (for customer match jobs)
+            job_type: CUSTOMER_MATCH_USER_LIST, STORE_SALES_UPLOAD_FIRST_PARTY,
+                or STORE_SALES_UPLOAD_THIRD_PARTY
+            user_list: UserList resource name. Required for
+                CUSTOMER_MATCH_USER_LIST.
+            store_sales_loyalty_fraction: Required for store-sales jobs.
+                Fraction of identifiable transactions (0-1, exclusive of 0).
+            store_sales_transaction_upload_fraction: Required for store-sales
+                jobs. Fraction of sales being uploaded vs total identifiable
+                sales (0-1, exclusive of 0).
+            store_sales_custom_key: Optional custom variable key for store
+                sales (only valid on allow-listed customers).
             validate_only: Whether to only validate the request
             enable_match_rate_range_preview: Whether to enable match rate range preview
 
         Returns:
             Created job details with resource_name and status
         """
-        return await service.create_customer_match_job(
+        return await service.create_offline_user_data_job(
             ctx=ctx,
             customer_id=customer_id,
             job_type=job_type,
-            job_name=job_name,
+            user_list=user_list,
+            store_sales_loyalty_fraction=store_sales_loyalty_fraction,
+            store_sales_transaction_upload_fraction=store_sales_transaction_upload_fraction,
+            store_sales_custom_key=store_sales_custom_key,
             validate_only=validate_only,
             enable_match_rate_range_preview=enable_match_rate_range_preview,
         )
@@ -708,7 +794,7 @@ def create_offline_user_data_job_tools(
 
         Args:
             customer_id: The customer ID
-            job_type_filter: Optional job type filter (CUSTOMER_MATCH_USER_LIST, STORE_SALES_DIRECT_UPLOAD)
+            job_type_filter: Optional job type filter (CUSTOMER_MATCH_USER_LIST, STORE_SALES_UPLOAD_FIRST_PARTY)
 
         Returns:
             List of offline user data jobs with status and details
@@ -762,7 +848,7 @@ def create_offline_user_data_job_tools(
 
     tools.extend(
         [
-            create_customer_match_job,
+            create_offline_user_data_job,
             add_user_data_operations,
             run_offline_user_data_job,
             get_offline_user_data_job,

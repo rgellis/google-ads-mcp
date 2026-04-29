@@ -9,7 +9,6 @@ from google.ads.googleads.v23.common.types.user_lists import (
     CrmBasedUserListInfo,
     LogicalUserListInfo,
     LogicalUserListOperandInfo,
-    SimilarUserListInfo,
     UserListActionInfo,
     UserListLogicalRuleInfo,
 )
@@ -255,90 +254,6 @@ class UserListService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to create CRM-based user list: {str(e)}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-
-    async def create_similar_user_list(
-        self,
-        ctx: Context,
-        customer_id: str,
-        name: str,
-        seed_user_list_ids: List[str],
-        description: Optional[str] = None,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
-    ) -> Dict[str, Any]:
-        """Create a similar audiences user list.
-
-        Args:
-            ctx: FastMCP context
-            customer_id: The customer ID
-            name: User list name
-            seed_user_list_ids: List of user list IDs (only first one will be used)
-            description: Optional description
-
-        Returns:
-            Created user list details
-        """
-        try:
-            customer_id = format_customer_id(customer_id)
-
-            # Create user list
-            user_list = UserList()
-            user_list.name = name
-            if description:
-                user_list.description = description
-
-            user_list.membership_status = (
-                UserListMembershipStatusEnum.UserListMembershipStatus.OPEN
-            )
-
-            # Create similar user list info
-            similar_user_list = SimilarUserListInfo()
-            # SimilarUserListInfo only supports a single seed user list
-            if seed_user_list_ids:
-                seed_resource = (
-                    f"customers/{customer_id}/userLists/{seed_user_list_ids[0]}"
-                )
-                similar_user_list.seed_user_list = seed_resource
-
-            user_list.similar_user_list = similar_user_list
-
-            # Create operation
-            operation = UserListOperation()
-            operation.create = user_list
-
-            # Create request
-            request = MutateUserListsRequest()
-            request.customer_id = customer_id
-            request.operations = [operation]
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
-
-            # Make the API call
-            response: MutateUserListsResponse = self.client.mutate_user_lists(
-                request=request
-            )
-
-            await ctx.log(
-                level="info",
-                message=f"Created similar user list '{name}' based on seed list {seed_user_list_ids[0] if seed_user_list_ids else 'none'}",
-            )
-
-            # Return serialized response
-            return serialize_proto_message(response)
-
-        except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-        except Exception as e:
-            error_msg = f"Failed to create similar user list: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -686,38 +601,6 @@ def create_user_list_tools(
             response_content_type=response_content_type,
         )
 
-    async def create_similar_user_list(
-        ctx: Context,
-        customer_id: str,
-        name: str,
-        seed_user_list_ids: List[str],
-        description: Optional[str] = None,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """Create a similar audiences user list.
-
-        Args:
-            customer_id: The customer ID
-            name: User list name
-            seed_user_list_ids: List of user list IDs (only first one will be used)
-            description: Optional description
-
-        Returns:
-            Created user list details including resource_name and user_list_id
-        """
-        return await service.create_similar_user_list(
-            ctx=ctx,
-            customer_id=customer_id,
-            name=name,
-            seed_user_list_ids=seed_user_list_ids,
-            description=description,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-
     async def create_logical_user_list(
         ctx: Context,
         customer_id: str,
@@ -833,7 +716,6 @@ def create_user_list_tools(
         [
             create_basic_user_list,
             create_crm_based_user_list,
-            create_similar_user_list,
             create_logical_user_list,
             update_user_list,
             remove_user_list,

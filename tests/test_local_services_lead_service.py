@@ -113,6 +113,7 @@ async def test_provide_lead_feedback(
             ctx=mock_ctx,
             resource_name="customers/1234567890/localServicesLeads/111",
             survey_answer="SATISFIED",
+            satisfied_reason="BOOKED_CUSTOMER",
         )
 
     assert result == expected_result
@@ -134,6 +135,7 @@ async def test_provide_lead_feedback_error(
             ctx=mock_ctx,
             resource_name="customers/1234567890/localServicesLeads/111",
             survey_answer="SATISFIED",
+            satisfied_reason="BOOKED_CUSTOMER",
         )
 
     assert "Test Google Ads Exception" in str(exc_info.value)

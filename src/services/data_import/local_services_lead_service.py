@@ -75,18 +75,50 @@ class LocalServicesLeadService:
     ) -> Dict[str, Any]:
         """Provide feedback for a Local Services lead.
 
+        The survey_satisfied / survey_dissatisfied submessage is a oneof,
+        so exactly one must be populated based on survey_answer. Each
+        submessage requires its survey_*_reason field; the wrapper
+        validates this up-front rather than sending an incomplete
+        submessage that the API rejects.
+
         Args:
             ctx: FastMCP context
             resource_name: Lead resource name
             survey_answer: Feedback answer - SATISFIED or DISSATISFIED
-            satisfied_reason: Reason for satisfaction (when SATISFIED)
-            satisfied_comment: Additional comment (when SATISFIED)
-            dissatisfied_reason: Reason for dissatisfaction (when DISSATISFIED)
-            dissatisfied_comment: Additional comment (when DISSATISFIED)
+            satisfied_reason: Reason for satisfaction. Required when
+                survey_answer=SATISFIED.
+            satisfied_comment: Additional comment (only valid with SATISFIED)
+            dissatisfied_reason: Reason for dissatisfaction. Required when
+                survey_answer=DISSATISFIED.
+            dissatisfied_comment: Additional comment (only valid with
+                DISSATISFIED)
 
         Returns:
             Feedback submission result
         """
+        if survey_answer == "SATISFIED":
+            if satisfied_reason is None:
+                raise ValueError(
+                    "satisfied_reason is required when survey_answer=SATISFIED."
+                )
+            if dissatisfied_reason is not None or dissatisfied_comment is not None:
+                raise ValueError(
+                    "Pass dissatisfied_* fields only with survey_answer=DISSATISFIED."
+                )
+        elif survey_answer == "DISSATISFIED":
+            if dissatisfied_reason is None:
+                raise ValueError(
+                    "dissatisfied_reason is required when survey_answer=DISSATISFIED."
+                )
+            if satisfied_reason is not None or satisfied_comment is not None:
+                raise ValueError(
+                    "Pass satisfied_* fields only with survey_answer=SATISFIED."
+                )
+        else:
+            raise ValueError(
+                f"Unknown survey_answer: {survey_answer!r}. Use SATISFIED or DISSATISFIED."
+            )
+
         try:
             from google.ads.googleads.v23.enums.types.local_services_lead_survey_answer import (
                 LocalServicesLeadSurveyAnswerEnum,
@@ -103,24 +135,21 @@ class LocalServicesLeadService:
                 survey_answer,
             )
 
-            if satisfied_reason is not None or satisfied_comment is not None:
+            if survey_answer == "SATISFIED":
                 survey_satisfied = SurveySatisfied()
-                if satisfied_reason is not None:
-                    reason_enum = type(survey_satisfied.survey_satisfied_reason)
-                    survey_satisfied.survey_satisfied_reason = reason_enum[
-                        satisfied_reason
-                    ]
+                reason_enum = type(survey_satisfied.survey_satisfied_reason)
+                survey_satisfied.survey_satisfied_reason = reason_enum[
+                    satisfied_reason  # type: ignore[index]
+                ]
                 if satisfied_comment is not None:
                     survey_satisfied.other_reason_comment = satisfied_comment
                 request.survey_satisfied = survey_satisfied
-
-            if dissatisfied_reason is not None or dissatisfied_comment is not None:
+            else:  # DISSATISFIED
                 survey_dissatisfied = SurveyDissatisfied()
-                if dissatisfied_reason is not None:
-                    reason_enum = type(survey_dissatisfied.survey_dissatisfied_reason)
-                    survey_dissatisfied.survey_dissatisfied_reason = reason_enum[
-                        dissatisfied_reason
-                    ]
+                reason_enum = type(survey_dissatisfied.survey_dissatisfied_reason)
+                survey_dissatisfied.survey_dissatisfied_reason = reason_enum[
+                    dissatisfied_reason  # type: ignore[index]
+                ]
                 if dissatisfied_comment is not None:
                     survey_dissatisfied.other_reason_comment = dissatisfied_comment
                 request.survey_dissatisfied = survey_dissatisfied
@@ -176,17 +205,20 @@ def create_local_services_lead_tools(
     ) -> Dict[str, Any]:
         """Provide feedback for a Local Services lead to improve lead quality.
 
+        Pass exactly the *_reason matching survey_answer; the matching reason
+        is required by the proto. Comments are optional.
+
         Args:
             resource_name: Lead resource name (e.g. customers/123/localServicesLeads/456)
             survey_answer: Feedback answer - SATISFIED or DISSATISFIED
-            satisfied_reason: Reason for satisfaction (when SATISFIED) -
+            satisfied_reason: Required when survey_answer=SATISFIED -
                 BOOKED_CUSTOMER, LIKELY_BOOKED_CUSTOMER, SERVICE_RELATED,
                 HIGH_VALUE_SERVICE, OTHER_SATISFIED_REASON
-            satisfied_comment: Additional comment for satisfaction feedback
-            dissatisfied_reason: Reason for dissatisfaction (when DISSATISFIED) -
+            satisfied_comment: Optional additional comment (SATISFIED only)
+            dissatisfied_reason: Required when survey_answer=DISSATISFIED -
                 GEO_MISMATCH, JOB_TYPE_MISMATCH, NOT_READY_TO_BOOK, SPAM,
                 DUPLICATE, SOLICITATION, OTHER_DISSATISFIED_REASON
-            dissatisfied_comment: Additional comment for dissatisfaction feedback
+            dissatisfied_comment: Optional additional comment (DISSATISFIED only)
 
         Returns:
             Feedback submission result

@@ -240,97 +240,6 @@ async def test_upload_customer_match_data(
 
 
 @pytest.mark.asyncio
-async def test_upload_store_sales_data(
-    user_data_service: UserDataService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test uploading store sales data."""
-    # Arrange
-    customer_id = "1234567890"
-    conversion_action = f"customers/{customer_id}/conversionActions/456"
-    store_sales_data = [
-        {
-            "user_identifiers": [
-                {"hashed_email": "customer1@example.com"},
-            ],
-            "transaction_attribute": {
-                "currency_code": "USD",
-                "transaction_amount_micros": 150000000,  # $150
-                "transaction_date_time": "2024-01-18 15:45:00",
-                "order_id": "STORE-ORDER-001",
-                "store_code": "STORE123",
-            },
-        },
-        {
-            "user_identifiers": [
-                {"hashed_phone_number": "9876543210"},
-            ],
-            "transaction_attribute": {
-                "currency_code": "USD",
-                "transaction_amount_micros": 75000000,  # $75
-                "transaction_date_time": "2024-01-19 10:15:00",
-                "order_id": "STORE-ORDER-002",
-                "store_code": "STORE456",
-            },
-        },
-    ]
-
-    # Create mock response
-    mock_response = Mock(spec=UploadUserDataResponse)
-    mock_response.received_operations_count = 2
-    mock_response.upload_date_time = "2024-01-20 14:00:00"
-    mock_response.partial_failure_error = None
-
-    # Get the mocked user data service client
-    mock_user_data_client = user_data_service.client  # type: ignore
-    mock_user_data_client.upload_user_data.return_value = mock_response  # type: ignore
-
-    # Act
-    result = await user_data_service.upload_store_sales_data(
-        ctx=mock_ctx,
-        customer_id=customer_id,
-        conversion_action=conversion_action,
-        store_sales_data=store_sales_data,
-    )
-
-    # Assert
-    assert result["received_operations_count"] == 2
-    assert result["upload_date_time"] == "2024-01-20 14:00:00"
-    assert result["partial_failure_error"] is None
-
-    # Verify the API call
-    mock_user_data_client.upload_user_data.assert_called_once()  # type: ignore
-    call_args = mock_user_data_client.upload_user_data.call_args  # type: ignore
-    request = call_args[1]["request"]
-    assert request.customer_id == customer_id
-    assert len(request.operations) == 2
-
-    # Note: store_sales_metadata is not available in v20 API
-    # Store sales are identified by store_code in transaction_attribute
-
-    # Check first operation
-    op1 = request.operations[0]
-    assert len(op1.create.user_identifiers) == 1
-    assert op1.create.user_identifiers[0].hashed_email == "customer1@example.com"
-    assert op1.create.transaction_attribute.conversion_action == conversion_action
-    assert op1.create.transaction_attribute.transaction_amount_micros == 150000000
-    assert op1.create.transaction_attribute.store_attribute.store_code == "STORE123"
-
-    # Check second operation
-    op2 = request.operations[1]
-    assert len(op2.create.user_identifiers) == 1
-    assert op2.create.user_identifiers[0].hashed_phone_number == "9876543210"
-    assert op2.create.transaction_attribute.store_attribute.store_code == "STORE456"
-
-    # Verify logging
-    mock_ctx.log.assert_called_once_with(  # type: ignore
-        level="info",
-        message="Uploaded 2 store sales operations",
-    )
-
-
-@pytest.mark.asyncio
 async def test_partial_failure_error(
     user_data_service: UserDataService,
     mock_sdk_client: Any,
@@ -420,8 +329,10 @@ def test_register_user_data_tools() -> None:
     # Assert
     assert isinstance(service, UserDataService)
 
-    # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
+    # upload_store_sales_data was deleted in S1.25 — UploadUserDataRequest
+    # has no store_sales_metadata oneof; store sales upload goes through
+    # OfflineUserDataJobService instead.
+    assert mock_mcp.tool.call_count == 2  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -430,7 +341,6 @@ def test_register_user_data_tools() -> None:
     expected_tools = [
         "upload_enhanced_conversions",
         "upload_customer_match_data",
-        "upload_store_sales_data",
     ]
 
     assert set(tool_names) == set(expected_tools)

@@ -47,6 +47,7 @@ class CustomerSkAdNetworkService:
         self,
         ctx: Context,
         customer_id: str,
+        resource_name: str,
         schema: Dict[str, Any],
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -55,14 +56,22 @@ class CustomerSkAdNetworkService:
     ) -> Dict[str, Any]:
         """Update the SKAdNetwork conversion value schema.
 
+        Per the v23 proto, the operation requires a valid ``resource_name``
+        to target the existing schema; the wrapper now requires the
+        caller to supply it.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
+            resource_name: Required. CustomerSkAdNetworkConversionValueSchema
+                resource name (e.g.
+                customers/{customer_id}/customerSkAdNetworkConversionValueSchemas/{account_link_id}).
             schema: Schema data to update
         """
         try:
             customer_id = format_customer_id(customer_id)
             cvs = CustomerSkAdNetworkConversionValueSchema()
+            cvs.resource_name = resource_name
             if "app_id" in schema:
                 cvs.schema.app_id = schema["app_id"]
             if "measurement_window_hours" in schema:
@@ -107,6 +116,7 @@ def create_customer_sk_ad_network_tools(
     async def mutate_sk_ad_network_schema(
         ctx: Context,
         customer_id: str,
+        resource_name: str,
         schema: Dict[str, Any],
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -120,6 +130,8 @@ def create_customer_sk_ad_network_tools(
 
         Args:
             customer_id: The customer ID
+            resource_name: Required. CustomerSkAdNetworkConversionValueSchema
+                resource name targeting the existing schema to update.
             schema: Schema configuration dict with:
                 - app_id: The iOS app ID
                 - measurement_window_hours: Hours after install to measure conversions
@@ -131,6 +143,7 @@ def create_customer_sk_ad_network_tools(
         return await service.mutate_schema(
             ctx=ctx,
             customer_id=customer_id,
+            resource_name=resource_name,
             schema=schema,
             partial_failure=partial_failure,
             validate_only=validate_only,

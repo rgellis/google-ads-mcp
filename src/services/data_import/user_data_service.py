@@ -15,7 +15,6 @@ from google.ads.googleads.v23.common.types.offline_user_data import (
     UserData,
     UserIdentifier,
     TransactionAttribute,
-    StoreAttribute,
     UserAttribute,
     ShoppingLoyalty,
     CustomerMatchUserListMetadata,
@@ -340,128 +339,6 @@ class UserDataService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def upload_store_sales_data(
-        self,
-        ctx: Context,
-        customer_id: str,
-        conversion_action: str,
-        store_sales_data: List[Dict[str, Any]],
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
-    ) -> Dict[str, Any]:
-        """Upload store sales data for enhanced conversions.
-
-        Args:
-            ctx: FastMCP context
-            customer_id: The customer ID
-            conversion_action: The conversion action resource name
-            store_sales_data: List of store sales data
-
-        Returns:
-            Upload result with success/failure details
-        """
-        try:
-            customer_id = format_customer_id(customer_id)
-
-            # Create user data operations
-            operations = []
-            for sales_data in store_sales_data:
-                operation = UserDataOperation()
-
-                # Create user data
-                user_data = UserData()
-
-                # Set user identifiers (same as other methods)
-                if "user_identifiers" in sales_data:
-                    for identifier_dict in sales_data["user_identifiers"]:
-                        identifier = UserIdentifier()
-
-                        if "hashed_email" in identifier_dict:
-                            identifier.hashed_email = identifier_dict["hashed_email"]
-                        elif "hashed_phone_number" in identifier_dict:
-                            identifier.hashed_phone_number = identifier_dict[
-                                "hashed_phone_number"
-                            ]
-                        # Add other identifier types as needed
-
-                        user_data.user_identifiers.append(identifier)
-
-                # Set transaction attribute
-                if "transaction_attribute" in sales_data:
-                    trans_attr_dict = sales_data["transaction_attribute"]
-                    trans_attr = TransactionAttribute()
-
-                    trans_attr.conversion_action = conversion_action
-
-                    if "currency_code" in trans_attr_dict:
-                        trans_attr.currency_code = trans_attr_dict["currency_code"]
-                    if "transaction_amount_micros" in trans_attr_dict:
-                        trans_attr.transaction_amount_micros = trans_attr_dict[
-                            "transaction_amount_micros"
-                        ]
-                    if "transaction_date_time" in trans_attr_dict:
-                        trans_attr.transaction_date_time = trans_attr_dict[
-                            "transaction_date_time"
-                        ]
-                    if "order_id" in trans_attr_dict:
-                        trans_attr.order_id = trans_attr_dict["order_id"]
-
-                    # Set store attribute for store sales
-                    if "store_code" in trans_attr_dict:
-                        store_attr = StoreAttribute()
-                        store_attr.store_code = trans_attr_dict["store_code"]
-                        trans_attr.store_attribute = store_attr
-
-                    user_data.transaction_attribute = trans_attr
-
-                operation.create = user_data
-                operations.append(operation)
-
-            # Create request
-            request = UploadUserDataRequest()
-            request.customer_id = customer_id
-            request.operations = operations
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
-
-            # Note: StoreSalesMetadata is may require additional type handling in current API version
-            # Store sales data is handled through transaction attributes with store_code
-
-            # Make the API call
-            response: UploadUserDataResponse = self.client.upload_user_data(
-                request=request
-            )
-
-            # Process results
-            result = {
-                "received_operations_count": response.received_operations_count,
-                "upload_date_time": response.upload_date_time,
-                "partial_failure_error": str(response.partial_failure_error)
-                if response.partial_failure_error
-                else None,
-            }
-
-            await ctx.log(
-                level="info",
-                message=f"Uploaded {response.received_operations_count} store sales operations",
-            )
-
-            return result
-
-        except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-        except Exception as e:
-            error_msg = f"Failed to upload store sales data: {str(e)}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-
 
 def create_user_data_tools(
     service: UserDataService,
@@ -537,43 +414,10 @@ def create_user_data_tools(
             response_content_type=response_content_type,
         )
 
-    async def upload_store_sales_data(
-        ctx: Context,
-        customer_id: str,
-        conversion_action: str,
-        store_sales_data: List[Dict[str, Any]],
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """Upload store sales data for enhanced conversions from offline sales.
-
-        Args:
-            customer_id: The customer ID
-            conversion_action: The conversion action resource name
-            store_sales_data: List of store sales data. Each should contain:
-                - user_identifiers: List of identifiers (hashed_email, hashed_phone_number)
-                - transaction_attribute: Transaction details with store_code, currency_code,
-                  transaction_amount_micros, transaction_date_time, order_id
-
-        Returns:
-            Upload result with received operations count and any failure details
-        """
-        return await service.upload_store_sales_data(
-            ctx=ctx,
-            customer_id=customer_id,
-            conversion_action=conversion_action,
-            store_sales_data=store_sales_data,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-
     tools.extend(
         [
             upload_enhanced_conversions,
             upload_customer_match_data,
-            upload_store_sales_data,
         ]
     )
     return tools

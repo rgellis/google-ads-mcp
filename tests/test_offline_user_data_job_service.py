@@ -24,22 +24,69 @@ def service(mock_sdk_client: Any) -> OfflineUserDataJobService:
 
 
 @pytest.mark.asyncio
-async def test_create_customer_match_job(
+async def test_create_offline_user_data_job_customer_match(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
+    """Customer match path requires user_list and sets the matching metadata."""
     mock_client = service.client
     mock_client.create_offline_user_data_job.return_value = Mock()
     with patch(
         "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
         return_value={"resource_name": "test"},
     ):
-        result = await service.create_customer_match_job(
+        result = await service.create_offline_user_data_job(
             ctx=mock_ctx,
             customer_id="1234567890",
-            job_name="customers/1234567890/userLists/1",
+            job_type="CUSTOMER_MATCH_USER_LIST",
+            user_list="customers/1234567890/userLists/1",
         )
     assert result == {"resource_name": "test"}
     mock_client.create_offline_user_data_job.assert_called_once()
+    call_args = mock_client.create_offline_user_data_job.call_args
+    job = call_args[1]["request"].job
+    assert (
+        job.customer_match_user_list_metadata.user_list
+        == "customers/1234567890/userLists/1"
+    )
+
+
+@pytest.mark.asyncio
+async def test_create_offline_user_data_job_store_sales(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    """Store sales path requires fractions and sets store_sales_metadata."""
+    mock_client = service.client
+    mock_client.create_offline_user_data_job.return_value = Mock()
+    with patch(
+        "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
+        return_value={"resource_name": "test"},
+    ):
+        await service.create_offline_user_data_job(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            job_type="STORE_SALES_UPLOAD_FIRST_PARTY",
+            store_sales_loyalty_fraction=0.5,
+            store_sales_transaction_upload_fraction=0.8,
+        )
+    call_args = mock_client.create_offline_user_data_job.call_args
+    job = call_args[1]["request"].job
+    assert job.store_sales_metadata.loyalty_fraction == 0.5
+    assert job.store_sales_metadata.transaction_upload_fraction == 0.8
+
+
+@pytest.mark.asyncio
+async def test_create_offline_user_data_job_rejects_mismatched_params(
+    service: OfflineUserDataJobService, mock_ctx: Context
+) -> None:
+    """Customer match params with store sales job_type must raise."""
+    with pytest.raises(Exception, match="store_sales_\\* parameters"):
+        await service.create_offline_user_data_job(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            job_type="CUSTOMER_MATCH_USER_LIST",
+            user_list="customers/1234567890/userLists/1",
+            store_sales_loyalty_fraction=0.5,
+        )
 
 
 @pytest.mark.asyncio
@@ -58,7 +105,7 @@ async def test_run_offline_user_data_job(
 
 
 @pytest.mark.asyncio
-async def test_create_customer_match_job_validate_only(
+async def test_create_offline_user_data_job_validate_only(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     """Test validate_only and enable_match_rate_range_preview reach the request."""
@@ -68,9 +115,11 @@ async def test_create_customer_match_job_validate_only(
         "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
         return_value={"resource_name": "test"},
     ):
-        await service.create_customer_match_job(
+        await service.create_offline_user_data_job(
             ctx=mock_ctx,
             customer_id="1234567890",
+            job_type="CUSTOMER_MATCH_USER_LIST",
+            user_list="customers/1234567890/userLists/1",
             validate_only=True,
             enable_match_rate_range_preview=True,
         )

@@ -47,6 +47,7 @@ async def test_generate_text(
             customer_id="1234567890",
             final_url="https://example.com",
             asset_field_types=["HEADLINE", "DESCRIPTION"],
+            advertising_channel_type="SEARCH",
         )
 
     assert result == expected_result
@@ -101,6 +102,7 @@ async def test_generate_text_error(
             customer_id="1234567890",
             final_url="https://example.com",
             asset_field_types=["HEADLINE"],
+            advertising_channel_type="SEARCH",
         )
 
     assert "Test Google Ads Exception" in str(exc_info.value)
@@ -176,6 +178,7 @@ async def test_generate_text_with_freeform_prompt(
             customer_id="1234567890",
             asset_field_types=["HEADLINE"],
             freeform_prompt="Write headlines for a shoe store",
+            advertising_channel_type="SEARCH",
         )
 
     assert result == expected_result

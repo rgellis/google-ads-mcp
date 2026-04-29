@@ -46,25 +46,53 @@ class AssetGenerationService:
         final_url: Optional[str] = None,
         freeform_prompt: Optional[str] = None,
         keywords: Optional[List[str]] = None,
-        advertising_channel_type: str = "SEARCH",
+        advertising_channel_type: Optional[str] = None,
         existing_asset_group: Optional[str] = None,
         existing_ad_group_ad: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate text assets using AI.
 
-        Provide either final_url or freeform_prompt as the generation source.
+        ``advertising_channel_type`` and ``existing_generation_context``
+        (built from ``existing_asset_group``/``existing_ad_group_ad``) are
+        members of the same oneof in the proto — the wrapper enforces
+        that exactly one is provided.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             asset_field_types: Types to generate (HEADLINE, DESCRIPTION, etc.)
-            final_url: Landing page URL for context (mutually exclusive with freeform_prompt)
-            freeform_prompt: Free-text prompt for generation (mutually exclusive with final_url)
+            final_url: Landing page URL for generation source
+            freeform_prompt: Free-text prompt for generation (mutually
+                exclusive with final_url)
             keywords: Optional keywords for context
-            advertising_channel_type: Channel type (SEARCH, PERFORMANCE_MAX)
-            existing_asset_group: Resource name of existing asset group for context
-            existing_ad_group_ad: Resource name of existing ad group ad for context
+            advertising_channel_type: SEARCH, PERFORMANCE_MAX, DISPLAY, or
+                DEMAND_GEN. Required unless an existing_* parameter is
+                supplied (members of the same proto oneof).
+            existing_asset_group: Resource name of an existing asset group;
+                generation copies its context. Mutually exclusive with
+                ``advertising_channel_type``.
+            existing_ad_group_ad: Resource name of an existing ad group ad;
+                generation copies its context. Mutually exclusive with
+                ``advertising_channel_type``.
         """
+        has_existing = bool(existing_asset_group or existing_ad_group_ad)
+        if existing_asset_group and existing_ad_group_ad:
+            raise ValueError(
+                "existing_asset_group and existing_ad_group_ad are members of "
+                "the same `existing_context` oneof; pass only one."
+            )
+        if has_existing and advertising_channel_type is not None:
+            raise ValueError(
+                "advertising_channel_type and existing_asset_group/"
+                "existing_ad_group_ad are members of the same proto `context` "
+                "oneof; pass exactly one path."
+            )
+        if not has_existing and advertising_channel_type is None:
+            raise ValueError(
+                "Provide either advertising_channel_type or one of "
+                "existing_asset_group/existing_ad_group_ad."
+            )
+
         try:
             customer_id = format_customer_id(customer_id)
             from google.ads.googleads.v23.enums.types.asset_field_type import (
@@ -79,23 +107,24 @@ class AssetGenerationService:
             request.asset_field_types = [
                 getattr(AssetFieldTypeEnum.AssetFieldType, t) for t in asset_field_types
             ]
-            request.advertising_channel_type = getattr(
-                AdvertisingChannelTypeEnum.AdvertisingChannelType,
-                advertising_channel_type,
-            )
+            if has_existing:
+                context = AssetGenerationExistingContext()
+                if existing_asset_group:
+                    context.existing_asset_group = existing_asset_group
+                else:
+                    context.existing_ad_group_ad = existing_ad_group_ad  # type: ignore[assignment]
+                request.existing_generation_context = context
+            else:
+                request.advertising_channel_type = getattr(
+                    AdvertisingChannelTypeEnum.AdvertisingChannelType,
+                    advertising_channel_type,  # type: ignore[arg-type]
+                )
             if final_url:
                 request.final_url = final_url
             if freeform_prompt:
                 request.freeform_prompt = freeform_prompt
             if keywords:
                 request.keywords = keywords
-            if existing_asset_group or existing_ad_group_ad:
-                context = AssetGenerationExistingContext()
-                if existing_asset_group:
-                    context.existing_asset_group = existing_asset_group
-                if existing_ad_group_ad:
-                    context.existing_ad_group_ad = existing_ad_group_ad
-                request.existing_generation_context = context
 
             response: GenerateTextResponse = self.client.generate_text(request=request)
             await ctx.log(
@@ -209,13 +238,15 @@ def create_asset_generation_tools(
         final_url: Optional[str] = None,
         freeform_prompt: Optional[str] = None,
         keywords: Optional[List[str]] = None,
-        advertising_channel_type: str = "SEARCH",
+        advertising_channel_type: Optional[str] = None,
         existing_asset_group: Optional[str] = None,
         existing_ad_group_ad: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate text assets (headlines, descriptions) using AI.
 
-        Provide either final_url or freeform_prompt as the generation source.
+        advertising_channel_type and the existing_* parameters are
+        members of the same proto oneof — pass exactly one. The wrapper
+        raises if both or neither are supplied.
 
         Args:
             customer_id: The customer ID
@@ -223,9 +254,13 @@ def create_asset_generation_tools(
             final_url: Landing page URL for context
             freeform_prompt: Free-text prompt for generation
             keywords: Optional keywords for context
-            advertising_channel_type: SEARCH or PERFORMANCE_MAX
-            existing_asset_group: Existing asset group resource name for context
-            existing_ad_group_ad: Existing ad group ad resource name for context
+            advertising_channel_type: SEARCH, PERFORMANCE_MAX, DISPLAY,
+                or DEMAND_GEN. Required unless an existing_* parameter is
+                supplied.
+            existing_asset_group: Existing asset group resource name for
+                context. Mutually exclusive with advertising_channel_type.
+            existing_ad_group_ad: Existing ad group ad resource name for
+                context. Mutually exclusive with advertising_channel_type.
         """
         return await service.generate_text(
             ctx=ctx,

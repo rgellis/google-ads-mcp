@@ -51,6 +51,7 @@ async def test_mutate_schema(
         result = await service.mutate_schema(
             ctx=mock_ctx,
             customer_id="1234567890",
+            resource_name="customers/1234567890/customerSkAdNetworkConversionValueSchemas/1",
             schema={"app_id": "com.example.app", "measurement_window_hours": 24},
         )
 
@@ -78,6 +79,7 @@ async def test_mutate_schema_minimal(
         result = await service.mutate_schema(
             ctx=mock_ctx,
             customer_id="1234567890",
+            resource_name="customers/1234567890/customerSkAdNetworkConversionValueSchemas/1",
             schema={},
         )
 
@@ -101,6 +103,7 @@ async def test_mutate_schema_error(
         await service.mutate_schema(
             ctx=mock_ctx,
             customer_id="1234567890",
+            resource_name="customers/1234567890/customerSkAdNetworkConversionValueSchemas/1",
             schema={"app_id": "com.example.app"},
         )
 
@@ -125,6 +128,7 @@ async def test_mutate_schema_enable_warnings(
         await service.mutate_schema(
             ctx=mock_ctx,
             customer_id="1234567890",
+            resource_name="customers/1234567890/customerSkAdNetworkConversionValueSchemas/1",
             schema={},
             enable_warnings=True,
         )

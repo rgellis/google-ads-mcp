@@ -51,17 +51,30 @@ class ProductLinkInvitationService:
     ) -> Dict[str, Any]:
         """Create a product link invitation.
 
+        Only MERCHANT_CENTER and HOTEL_CENTER are supported. The wrapper
+        raises on any other link_type rather than sending an empty
+        ProductLinkInvitation that the API rejects.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            link_type: The type of link (e.g., "MERCHANT_CENTER", "GOOGLE_ADS", "DATA_PARTNER")
-            linked_account: The linked account identifier (e.g., Merchant Center ID, customer ID)
+            link_type: The type of link. Must be MERCHANT_CENTER or HOTEL_CENTER.
+            linked_account: The linked account identifier (Merchant Center ID
+                for MERCHANT_CENTER, Hotel Center ID for HOTEL_CENTER).
         """
+        if link_type not in ("MERCHANT_CENTER", "HOTEL_CENTER"):
+            raise ValueError(
+                f"Unsupported link_type: {link_type!r}. Only MERCHANT_CENTER "
+                "and HOTEL_CENTER are supported by this wrapper. The "
+                "ProductLinkInvitation oneof exposes no other identifiers, "
+                "so other types would result in an empty invitation that "
+                "the API rejects."
+            )
+
         try:
             customer_id = format_customer_id(customer_id)
             invitation = ProductLinkInvitation()
 
-            # Set the link target based on link_type
             if link_type == "MERCHANT_CENTER":
                 from google.ads.googleads.v23.resources.types.product_link_invitation import (
                     MerchantCenterLinkInvitationIdentifier,
@@ -70,7 +83,7 @@ class ProductLinkInvitationService:
                 invitation.merchant_center = MerchantCenterLinkInvitationIdentifier(
                     merchant_center_id=int(linked_account)
                 )
-            elif link_type == "HOTEL_CENTER":
+            else:  # HOTEL_CENTER
                 from google.ads.googleads.v23.resources.types.product_link_invitation import (
                     HotelCenterLinkInvitationIdentifier,
                 )
@@ -179,10 +192,15 @@ def create_product_link_invitation_tools(
     ) -> Dict[str, Any]:
         """Create a product link invitation.
 
+        Only MERCHANT_CENTER and HOTEL_CENTER are supported — the
+        ProductLinkInvitation proto has no oneof identifier for other
+        link types, so the wrapper raises on anything else.
+
         Args:
             customer_id: The customer ID
-            link_type: The type of link (MERCHANT_CENTER, GOOGLE_ADS, DATA_PARTNER)
-            linked_account: The linked account identifier
+            link_type: The type of link. Must be MERCHANT_CENTER or HOTEL_CENTER.
+            linked_account: The linked account identifier (Merchant Center ID
+                or Hotel Center ID).
         """
         return await service.create_invitation(
             ctx=ctx,
