@@ -120,7 +120,6 @@ class AssetSetService:
             asset_set = AssetSet()
             asset_set.name = name
             asset_set.type_ = asset_set_type
-            asset_set.status = status
 
             if asset_set_type == merchant_center_type:
                 asset_set.merchant_center_feed.merchant_id = merchant_id  # type: ignore[arg-type]

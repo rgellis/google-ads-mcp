@@ -115,7 +115,6 @@ async def test_create_bidding_data_exclusion_customer_scope(
     exclusion = operation.create
     assert exclusion.name == name
     assert exclusion.scope == SeasonalityEventScopeEnum.SeasonalityEventScope.CUSTOMER
-    assert exclusion.status == SeasonalityEventStatusEnum.SeasonalityEventStatus.ENABLED
     assert exclusion.start_date_time == start_date_time
     assert exclusion.end_date_time == end_date_time
     assert exclusion.description == description
@@ -205,9 +204,7 @@ async def test_create_bidding_data_exclusion_campaign_scope(
     exclusion = operation.create
     assert exclusion.name == name
     assert exclusion.scope == SeasonalityEventScopeEnum.SeasonalityEventScope.CAMPAIGN
-    assert (
-        exclusion.status == SeasonalityEventStatusEnum.SeasonalityEventStatus.ENABLED
-    )  # Default
+    # BiddingDataExclusion.status is Output-only; wrapper no longer writes it.
     assert list(exclusion.campaigns) == campaigns
 
 
@@ -266,7 +263,6 @@ async def test_update_bidding_data_exclusion(
     exclusion = operation.update
     assert exclusion.resource_name == exclusion_resource_name
     assert exclusion.name == new_name
-    assert exclusion.status == SeasonalityEventStatusEnum.SeasonalityEventStatus.REMOVED
     assert exclusion.description == new_description
     assert set(operation.update_mask.paths) == {"name", "status", "description"}
 

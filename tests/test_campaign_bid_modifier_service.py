@@ -103,9 +103,8 @@ async def test_create_interaction_type_bid_modifier(
     assert len(request.operations) == 1
 
     operation = request.operations[0]
-    assert (
-        operation.create.campaign == f"customers/{customer_id}/campaigns/{campaign_id}"
-    )
+    # CampaignBidModifier.campaign is Output-only — the API derives it
+    # from the resource_name path; the wrapper no longer writes it.
     assert operation.create.bid_modifier == bid_modifier
     assert operation.create.interaction_type.type_ == interaction_type
 

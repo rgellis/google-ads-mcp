@@ -220,12 +220,13 @@ class CampaignCriterionService:
             # Create operations
             operations = []
             for language_id in language_ids:
-                # Create campaign criterion
+                # Create campaign criterion. negative=False is the proto
+                # default; setting it explicitly marks the field set on
+                # the wire and the API rejects it for criterion types
+                # that forbid the negative flag (CLAUDE.md proto-default
+                # rule).
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = (
-                    False  # Language targeting can't be negative
-                )
 
                 # Create language info
                 language_info = LanguageInfo()
@@ -299,12 +300,12 @@ class CampaignCriterionService:
             # Create operations
             operations = []
             for device_type in device_types:
-                # Create campaign criterion
+                # Create campaign criterion. Device targeting cannot be
+                # negative, but setting negative=False explicitly still
+                # marks the field on the wire (CLAUDE.md proto-default
+                # rule) — let the API default apply.
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = (
-                    False  # Device targeting can't be negative
-                )
 
                 # Set bid modifier if provided
                 device_type_str = device_type.name

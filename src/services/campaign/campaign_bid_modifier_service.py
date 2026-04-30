@@ -85,9 +85,12 @@ class CampaignBidModifierService:
             customer_id = format_customer_id(customer_id)
             campaign_resource = f"customers/{customer_id}/campaigns/{campaign_id}"
 
-            # Create interaction type bid modifier
+            # Create interaction type bid modifier. CampaignBidModifier.campaign
+            # is Output-only — the API derives it from the resource_name on
+            # update, but for create we don't set it directly. The campaign
+            # association comes via the resource_name on update or via
+            # CustomerService context on create.
             bid_modifier_obj = CampaignBidModifier()
-            bid_modifier_obj.campaign = campaign_resource
             bid_modifier_obj.bid_modifier = bid_modifier
 
             # Set interaction type criterion

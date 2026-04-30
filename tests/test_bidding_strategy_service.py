@@ -98,13 +98,7 @@ async def test_create_target_cpa_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.status
-        == BiddingStrategyStatusEnum.BiddingStrategyStatus.ENABLED
-    )
-    assert (
-        operation.create.type_ == BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_CPA
-    )
+    # type_ is Output-only on BiddingStrategy (API derives from oneof).
     assert operation.create.target_cpa.target_cpa_micros == target_cpa_micros
 
     # Verify logging
@@ -168,14 +162,6 @@ async def test_create_target_roas_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.status
-        == BiddingStrategyStatusEnum.BiddingStrategyStatus.ENABLED
-    )
-    assert (
-        operation.create.type_
-        == BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_ROAS
-    )
     assert operation.create.target_roas.target_roas == target_roas
 
     # Verify logging
@@ -239,14 +225,6 @@ async def test_create_maximize_conversions_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.status
-        == BiddingStrategyStatusEnum.BiddingStrategyStatus.ENABLED
-    )
-    assert (
-        operation.create.type_
-        == BiddingStrategyTypeEnum.BiddingStrategyType.MAXIMIZE_CONVERSIONS
-    )
     assert operation.create.maximize_conversions.target_cpa_micros == target_cpa_micros
 
     # Verify logging
@@ -369,14 +347,6 @@ async def test_create_target_impression_share_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.status
-        == BiddingStrategyStatusEnum.BiddingStrategyStatus.ENABLED
-    )
-    assert (
-        operation.create.type_
-        == BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_IMPRESSION_SHARE
-    )
     assert (
         operation.create.target_impression_share.location
         == TargetImpressionShareLocationEnum.TargetImpressionShareLocation.TOP_OF_PAGE
@@ -624,10 +594,6 @@ async def test_create_enhanced_cpc_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.type_
-        == BiddingStrategyTypeEnum.BiddingStrategyType.ENHANCED_CPC
-    )
     assert operation.create.enhanced_cpc is not None
 
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -680,10 +646,6 @@ async def test_create_maximize_conversion_value_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.type_
-        == BiddingStrategyTypeEnum.BiddingStrategyType.MAXIMIZE_CONVERSION_VALUE
-    )
     assert operation.create.maximize_conversion_value is not None
 
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -734,10 +696,6 @@ async def test_create_target_spend_strategy(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert (
-        operation.create.type_
-        == BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_SPEND
-    )
     assert operation.create.target_spend is not None
 
     mock_ctx.log.assert_called_once_with(  # type: ignore

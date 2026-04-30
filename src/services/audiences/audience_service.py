@@ -94,7 +94,6 @@ class AudienceService:
             audience = Audience()
             audience.name = name
             audience.description = description
-            audience.status = getattr(AudienceStatusEnum.AudienceStatus, status)
 
             # Add dimensions
             for dim_config in dimensions:

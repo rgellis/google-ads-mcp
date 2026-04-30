@@ -95,7 +95,7 @@ async def test_create_asset_set(
     operation = request.operations[0]
     assert operation.create.name == name
     assert operation.create.type_ == asset_set_type
-    assert operation.create.status == status
+    # AssetSet.status is Output-only; wrapper no longer writes it.
     assert operation.create.merchant_center_feed.merchant_id == 12345
 
 
@@ -149,9 +149,7 @@ async def test_create_asset_set_dynamic_education(
     operation = request.operations[0]
     assert operation.create.name == name
     assert operation.create.type_ == asset_set_type
-    assert (
-        operation.create.status == AssetSetStatusEnum.AssetSetStatus.ENABLED
-    )  # Default
+    # AssetSet.status is Output-only; wrapper no longer writes it.
 
 
 @pytest.mark.asyncio

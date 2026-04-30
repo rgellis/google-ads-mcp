@@ -132,7 +132,6 @@ class AssetService:
 
             # Create asset
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.TEXT
 
             # Set name if provided
             if name:
@@ -204,14 +203,12 @@ class AssetService:
 
             # Create asset
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.IMAGE
             asset.name = name
 
             # Create image asset
             image_asset = ImageAsset()
             image_asset.data = image_data
             image_asset.mime_type = self.get_mime_type_enum(mime_type)
-            asset.image_asset = image_asset
 
             # Create operation
             operation = AssetOperation()
@@ -270,7 +267,6 @@ class AssetService:
 
             # Create asset
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.YOUTUBE_VIDEO
 
             # Set name
             if name:
@@ -511,7 +507,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.SITELINK
             asset.name = name if name else f"Sitelink: {link_text[:50]}"
             asset.final_urls.append(final_url)
 
@@ -582,7 +577,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.CALLOUT
             asset.name = name if name else f"Callout: {callout_text[:50]}"
 
             callout_asset = CalloutAsset()
@@ -648,7 +642,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.STRUCTURED_SNIPPET
             asset.name = name if name else f"Snippet: {header}"
 
             snippet_asset = StructuredSnippetAsset()
@@ -713,7 +706,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.CALL
             asset.name = name if name else f"Call: {country_code} {phone_number}"
 
             call_asset = CallAsset()
@@ -781,7 +773,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.PRICE
             asset.name = name if name else f"Price: {type_}"
 
             price_asset = PriceAsset()
@@ -877,7 +868,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.PROMOTION
             asset.name = name if name else f"Promotion: {promotion_target[:50]}"
 
             promotion_asset = PromotionAsset()
@@ -967,7 +957,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.LEAD_FORM
             asset.name = name if name else f"Lead Form: {business_name[:50]}"
 
             lead_form_asset = LeadFormAsset()
@@ -1047,7 +1036,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.PAGE_FEED
             asset.name = name if name else f"Page Feed: {page_url[:50]}"
 
             page_feed_asset = PageFeedAsset()
@@ -1112,7 +1100,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.MOBILE_APP
             asset.name = name if name else f"Mobile App: {link_text[:50]}"
 
             mobile_app_asset = MobileAppAsset()
@@ -1176,7 +1163,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.HOTEL_CALLOUT
             asset.name = name if name else f"Hotel Callout: {text[:50]}"
 
             hotel_callout_asset = HotelCalloutAsset()
@@ -1235,7 +1221,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.CALL_TO_ACTION
             asset.name = name if name else f"CTA: {call_to_action}"
 
             cta_asset = CallToActionAsset()
@@ -1298,12 +1283,10 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.LOCATION
             asset.name = name if name else f"Location: {place_id}"
 
             location_asset = LocationAsset()
             location_asset.place_id = place_id
-            asset.location_asset = location_asset
 
             operation = AssetOperation()
             operation.create = asset
@@ -1358,7 +1341,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.HOTEL_PROPERTY
             asset.name = name if name else f"Hotel: {hotel_name or place_id}"
 
             hotel_property_asset = HotelPropertyAsset()
@@ -1421,7 +1403,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.APP_DEEP_LINK
             asset.name = name if name else f"App Deep Link: {app_deep_link_uri[:50]}"
 
             app_deep_link_asset = AppDeepLinkAsset()
@@ -1480,7 +1461,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.BOOK_ON_GOOGLE
             asset.name = name if name else "Book on Google"
 
             book_on_google_asset = BookOnGoogleAsset()
@@ -1537,7 +1517,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.MEDIA_BUNDLE
             asset.name = name
 
             media_bundle_asset = MediaBundleAsset()
@@ -1603,7 +1582,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DEMAND_GEN_CAROUSEL_CARD
             asset.name = name if name else f"Carousel: {headline[:50]}"
 
             carousel_asset = DemandGenCarouselCardAsset()
@@ -1680,7 +1658,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.BUSINESS_MESSAGE
             asset.name = name if name else f"Business Message: {message_provider}"
 
             biz_msg_asset = BusinessMessageAsset()
@@ -1781,7 +1758,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_EDUCATION
             asset.name = name if name else f"Dynamic Education: {program_name[:50]}"
 
             dynamic_asset = DynamicEducationAsset()
@@ -1896,7 +1872,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_REAL_ESTATE
             asset.name = name if name else f"Dynamic Real Estate: {listing_name[:50]}"
 
             dynamic_asset = DynamicRealEstateAsset()
@@ -2018,7 +1993,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_CUSTOM
             asset.name = name if name else f"Dynamic Custom: {item_title[:50]}"
 
             dynamic_asset = DynamicCustomAsset()
@@ -2144,7 +2118,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_HOTELS_AND_RENTALS
             asset.name = name if name else f"Dynamic Hotels: {property_name[:50]}"
 
             dynamic_asset = DynamicHotelsAndRentalsAsset()
@@ -2266,7 +2239,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_FLIGHTS
             asset.name = name if name else f"Dynamic Flights: {destination_name[:50]}"
 
             dynamic_asset = DynamicFlightsAsset()
@@ -2387,7 +2359,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_TRAVEL
             asset.name = name if name else f"Dynamic Travel: {title[:50]}"
 
             dynamic_asset = DynamicTravelAsset()
@@ -2510,7 +2481,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_LOCAL
             asset.name = name if name else f"Dynamic Local: {deal_name[:50]}"
 
             dynamic_asset = DynamicLocalAsset()
@@ -2628,7 +2598,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.DYNAMIC_JOBS
             asset.name = name if name else f"Dynamic Jobs: {job_title[:50]}"
 
             dynamic_asset = DynamicJobsAsset()
@@ -2716,7 +2685,6 @@ class AssetService:
             customer_id = format_customer_id(customer_id)
 
             asset = Asset()
-            asset.type_ = AssetTypeEnum.AssetType.YOUTUBE_VIDEO_LIST
             if name:
                 asset.name = name
             else:

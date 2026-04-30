@@ -95,10 +95,7 @@ async def test_create_account_link(
     call_args = mock_account_link_client.create_account_link.call_args  # type: ignore
     request = call_args[1]["request"]
     assert request.customer_id == customer_id
-    assert (
-        request.account_link.type_
-        == LinkedAccountTypeEnum.LinkedAccountType.THIRD_PARTY_APP_ANALYTICS
-    )
+    # AccountLink.type_ is Output-only; the wrapper no longer writes it.
     assert (
         request.account_link.third_party_app_analytics.app_analytics_provider_id
         == app_analytics_provider_id

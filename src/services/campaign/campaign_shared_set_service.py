@@ -81,9 +81,6 @@ class CampaignSharedSetService:
             campaign_shared_set = CampaignSharedSet()
             campaign_shared_set.campaign = campaign_resource
             campaign_shared_set.shared_set = shared_set_resource
-            campaign_shared_set.status = getattr(
-                CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status
-            )
 
             # Create operation
             operation = CampaignSharedSetOperation()
@@ -159,9 +156,6 @@ class CampaignSharedSetService:
                 campaign_shared_set = CampaignSharedSet()
                 campaign_shared_set.campaign = campaign_resource
                 campaign_shared_set.shared_set = shared_set_resource
-                campaign_shared_set.status = getattr(
-                    CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status
-                )
 
                 # Create operation
                 operation = CampaignSharedSetOperation()
@@ -256,9 +250,6 @@ class CampaignSharedSetService:
                 campaign_shared_set = CampaignSharedSet()
                 campaign_shared_set.campaign = campaign_resource
                 campaign_shared_set.shared_set = shared_set_resource
-                campaign_shared_set.status = getattr(
-                    CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status
-                )
 
                 create_operation = CampaignSharedSetOperation()
                 create_operation.create = campaign_shared_set

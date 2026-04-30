@@ -111,9 +111,7 @@ async def test_create_custom_audience(
     assert operation.create.name == name
     assert operation.create.description == description
     assert operation.create.type_ == CustomAudienceTypeEnum.CustomAudienceType.AUTO
-    assert (
-        operation.create.status == CustomAudienceStatusEnum.CustomAudienceStatus.ENABLED
-    )
+    # CustomAudience.status is Output-only; the wrapper no longer writes it.
 
     # Verify members
     assert len(operation.create.members) == 4

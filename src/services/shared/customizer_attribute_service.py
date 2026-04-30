@@ -85,9 +85,6 @@ class CustomizerAttributeService:
             attribute.type_ = getattr(
                 CustomizerAttributeTypeEnum.CustomizerAttributeType, attribute_type
             )
-            attribute.status = getattr(
-                CustomizerAttributeStatusEnum.CustomizerAttributeStatus, status
-            )
 
             # Create operation
             operation = CustomizerAttributeOperation()
@@ -156,9 +153,6 @@ class CustomizerAttributeService:
             update_mask_paths = []
 
             if status is not None:
-                attribute.status = getattr(
-                    CustomizerAttributeStatusEnum.CustomizerAttributeStatus, status
-                )
                 update_mask_paths.append("status")
 
             # Create operation

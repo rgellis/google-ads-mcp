@@ -102,9 +102,6 @@ class BiddingDataExclusionService:
             exclusion.scope = getattr(
                 SeasonalityEventScopeEnum.SeasonalityEventScope, scope
             )
-            exclusion.status = getattr(
-                SeasonalityEventStatusEnum.SeasonalityEventStatus, status
-            )
             exclusion.start_date_time = start_date_time
             exclusion.end_date_time = end_date_time
 
@@ -219,9 +216,6 @@ class BiddingDataExclusionService:
                 update_mask_paths.append("end_date_time")
 
             if status is not None:
-                exclusion.status = getattr(
-                    SeasonalityEventStatusEnum.SeasonalityEventStatus, status
-                )
                 update_mask_paths.append("status")
 
             if description is not None:

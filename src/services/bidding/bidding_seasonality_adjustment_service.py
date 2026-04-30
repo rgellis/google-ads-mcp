@@ -110,9 +110,6 @@ class BiddingSeasonalityAdjustmentService:
             adjustment.start_date_time = start_date_time
             adjustment.end_date_time = end_date_time
             adjustment.conversion_rate_modifier = conversion_rate_modifier
-            adjustment.status = getattr(
-                SeasonalityEventStatusEnum.SeasonalityEventStatus, status
-            )
 
             if description:
                 adjustment.description = description

@@ -107,10 +107,7 @@ async def test_attach_shared_set_to_campaign(
         operation.create.shared_set
         == f"customers/{customer_id}/sharedSets/{shared_set_id}"
     )
-    assert (
-        operation.create.status
-        == CampaignSharedSetStatusEnum.CampaignSharedSetStatus.ENABLED
-    )
+    # CampaignSharedSet.status is Output-only; wrapper no longer writes it.
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
@@ -189,10 +186,7 @@ async def test_attach_shared_sets_to_campaigns(
             operation.create.shared_set
             == f"customers/{customer_id}/sharedSets/{attachment['shared_set_id']}"
         )
-        expected_status = attachment.get("status", "ENABLED")
-        assert operation.create.status == getattr(
-            CampaignSharedSetStatusEnum.CampaignSharedSetStatus, expected_status
-        )
+        # CampaignSharedSet.status is Output-only; wrapper no longer writes it.
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore

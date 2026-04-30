@@ -93,9 +93,6 @@ class CustomerNegativeCriterionService:
                 placement_info = PlacementInfo()
                 placement_info.url = url
                 customer_negative_criterion.placement = placement_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.PLACEMENT
-                )
 
                 # Create operation
                 operation = CustomerNegativeCriterionOperation()
@@ -184,9 +181,6 @@ class CustomerNegativeCriterionService:
                     ContentLabelTypeEnum.ContentLabelType, label
                 )
                 customer_negative_criterion.content_label = content_label_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.CONTENT_LABEL
-                )
 
                 # Create operation
                 operation = CustomerNegativeCriterionOperation()
@@ -269,9 +263,6 @@ class CustomerNegativeCriterionService:
                 mobile_app_info = MobileApplicationInfo()
                 mobile_app_info.app_id = app_id
                 customer_negative_criterion.mobile_application = mobile_app_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.MOBILE_APPLICATION
-                )
 
                 operation = CustomerNegativeCriterionOperation()
                 operation.create = customer_negative_criterion
@@ -350,9 +341,6 @@ class CustomerNegativeCriterionService:
                 category_info = MobileAppCategoryInfo()
                 category_info.mobile_app_category_constant = constant
                 customer_negative_criterion.mobile_app_category = category_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.MOBILE_APP_CATEGORY
-                )
 
                 operation = CustomerNegativeCriterionOperation()
                 operation.create = customer_negative_criterion
@@ -431,9 +419,6 @@ class CustomerNegativeCriterionService:
                 video_info = YouTubeVideoInfo()
                 video_info.video_id = video_id
                 customer_negative_criterion.youtube_video = video_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.YOUTUBE_VIDEO
-                )
 
                 operation = CustomerNegativeCriterionOperation()
                 operation.create = customer_negative_criterion
@@ -512,9 +497,6 @@ class CustomerNegativeCriterionService:
                 channel_info = YouTubeChannelInfo()
                 channel_info.channel_id = channel_id
                 customer_negative_criterion.youtube_channel = channel_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.YOUTUBE_CHANNEL
-                )
 
                 operation = CustomerNegativeCriterionOperation()
                 operation.create = customer_negative_criterion
@@ -593,9 +575,6 @@ class CustomerNegativeCriterionService:
                 ip_block_info = IpBlockInfo()
                 ip_block_info.ip_address = ip_address
                 customer_negative_criterion.ip_block = ip_block_info
-                customer_negative_criterion.type_ = (
-                    CriterionTypeEnum.CriterionType.IP_BLOCK
-                )
 
                 operation = CustomerNegativeCriterionOperation()
                 operation.create = customer_negative_criterion
@@ -672,9 +651,6 @@ class CustomerNegativeCriterionService:
             nkl_info = NegativeKeywordListInfo()
             nkl_info.shared_set = shared_set_resource_name
             customer_negative_criterion.negative_keyword_list = nkl_info
-            customer_negative_criterion.type_ = (
-                CriterionTypeEnum.CriterionType.NEGATIVE_KEYWORD_LIST
-            )
 
             operation = CustomerNegativeCriterionOperation()
             operation.create = customer_negative_criterion
@@ -746,9 +722,6 @@ class CustomerNegativeCriterionService:
             placement_list_info = PlacementListInfo()
             placement_list_info.shared_set = shared_set_resource_name
             customer_negative_criterion.placement_list = placement_list_info
-            customer_negative_criterion.type_ = (
-                CriterionTypeEnum.CriterionType.PLACEMENT_LIST
-            )
 
             operation = CustomerNegativeCriterionOperation()
             operation.create = customer_negative_criterion

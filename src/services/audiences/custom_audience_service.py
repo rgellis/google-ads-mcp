@@ -99,9 +99,6 @@ class CustomAudienceService:
             custom_audience.type_ = getattr(
                 CustomAudienceTypeEnum.CustomAudienceType, type_
             )
-            custom_audience.status = getattr(
-                CustomAudienceStatusEnum.CustomAudienceStatus, status
-            )
 
             # Add members
             for member_data in members:

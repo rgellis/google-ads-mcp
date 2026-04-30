@@ -90,12 +90,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_CPA
-            )
 
             # Configure Target CPA
             target_cpa = TargetCpa()
@@ -167,12 +161,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_ROAS
-            )
 
             # Configure Target ROAS
             target_roas_strategy = TargetRoas()
@@ -244,12 +232,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.MAXIMIZE_CONVERSIONS
-            )
 
             # Configure Maximize Conversions
             maximize_conversions = MaximizeConversions()
@@ -320,12 +302,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.ENHANCED_CPC
-            )
 
             # Configure Enhanced CPC
             bidding_strategy.enhanced_cpc = EnhancedCpc()
@@ -395,12 +371,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.MAXIMIZE_CONVERSION_VALUE
-            )
 
             # Configure Maximize Conversion Value
             mcv = MaximizeConversionValue()
@@ -473,12 +443,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_SPEND
-            )
 
             # Configure Target Spend
             ts = TargetSpend()
@@ -555,12 +519,6 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
-            bidding_strategy.status = getattr(
-                BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-            )
-            bidding_strategy.type_ = (
-                BiddingStrategyTypeEnum.BiddingStrategyType.TARGET_IMPRESSION_SHARE
-            )
 
             # Configure Target Impression Share
             target_impression_share = TargetImpressionShare()
@@ -619,7 +577,6 @@ class BiddingStrategyService:
         customer_id: str,
         bidding_strategy_id: str,
         name: Optional[str] = None,
-        status: Optional[str] = None,
         target_cpa_micros: Optional[int] = None,
         target_roas: Optional[float] = None,
         maximize_conversions_target_cpa_micros: Optional[int] = None,
@@ -632,12 +589,15 @@ class BiddingStrategyService:
     ) -> Dict[str, Any]:
         """Update an existing bidding strategy.
 
+        Note: BiddingStrategy.status is Output-only — it cannot be changed
+        via update. Pause/enable a strategy by detaching it from its
+        campaigns instead.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             bidding_strategy_id: The bidding strategy ID to update
             name: New strategy name
-            status: New status (ENABLED, PAUSED, REMOVED)
             target_cpa_micros: New target CPA in micros (for TARGET_CPA strategies)
             target_roas: New target ROAS (for TARGET_ROAS strategies)
             maximize_conversions_target_cpa_micros: New target CPA constraint for MAXIMIZE_CONVERSIONS
@@ -662,12 +622,6 @@ class BiddingStrategyService:
             if name is not None:
                 bidding_strategy.name = name
                 update_mask_fields.append("name")
-
-            if status is not None:
-                bidding_strategy.status = getattr(
-                    BiddingStrategyStatusEnum.BiddingStrategyStatus, status
-                )
-                update_mask_fields.append("status")
 
             if target_cpa_micros is not None:
                 target_cpa = TargetCpa()
@@ -1093,7 +1047,6 @@ def create_bidding_strategy_tools(
         customer_id: str,
         bidding_strategy_id: str,
         name: Optional[str] = None,
-        status: Optional[str] = None,
         target_cpa_micros: Optional[int] = None,
         target_roas: Optional[float] = None,
         maximize_conversions_target_cpa_micros: Optional[int] = None,
@@ -1106,9 +1059,11 @@ def create_bidding_strategy_tools(
     ) -> Dict[str, Any]:
         """Update an existing bidding strategy using partial update with field mask.
 
+        BiddingStrategy.status is Output-only and cannot be changed via
+        update; pause/enable a strategy by detaching it from its campaigns.
+
         Updatable fields:
             - name (str): Strategy name
-            - status (str): Strategy status - ENABLED, PAUSED, REMOVED
             - target_cpa_micros (int): Target CPA in micros for TARGET_CPA strategies (1000000 = $1)
             - target_roas (float): Target ROAS for TARGET_ROAS strategies (e.g., 4.0 for 400%)
             - maximize_conversions_target_cpa_micros (int): Target CPA constraint for MAXIMIZE_CONVERSIONS
@@ -1130,7 +1085,6 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             bidding_strategy_id=bidding_strategy_id,
             name=name,
-            status=status,
             target_cpa_micros=target_cpa_micros,
             target_roas=target_roas,
             maximize_conversions_target_cpa_micros=maximize_conversions_target_cpa_micros,

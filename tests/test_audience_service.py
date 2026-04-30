@@ -95,7 +95,7 @@ async def test_create_combined_audience_with_age(
     operation = request.operations[0]
     assert operation.create.name == name
     assert operation.create.description == description
-    assert operation.create.status == AudienceStatusEnum.AudienceStatus.ENABLED
+    # Audience.status is Output-only; wrapper no longer writes it.
     assert len(operation.create.dimensions) == 1
     assert operation.create.dimensions[0].age is not None
     assert len(operation.create.dimensions[0].age.age_ranges) == 2

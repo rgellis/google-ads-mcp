@@ -89,11 +89,10 @@ class AccountLinkService:
             third_party_analytics.app_id = app_id
             third_party_analytics.app_vendor = app_vendor
 
-            # Create account link
+            # Create account link. type_ is Output-only on AccountLink —
+            # the API derives it from whichever linked-account oneof
+            # member the caller sets (here, third_party_app_analytics).
             account_link = AccountLink()
-            account_link.type_ = (
-                LinkedAccountTypeEnum.LinkedAccountType.THIRD_PARTY_APP_ANALYTICS
-            )
             account_link.third_party_app_analytics = third_party_analytics
             account_link.status = status
 

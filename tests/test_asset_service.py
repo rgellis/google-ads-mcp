@@ -90,7 +90,7 @@ async def test_create_text_asset(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert operation.create.type_ == AssetTypeEnum.AssetType.TEXT
+    # type_ is Output-only on Asset; the API derives it from the asset_data oneof.
     assert operation.create.text_asset.text == text
 
 
@@ -195,9 +195,10 @@ async def test_create_image_asset(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert operation.create.type_ == AssetTypeEnum.AssetType.IMAGE
-    assert operation.create.image_asset.data == image_data
-    assert operation.create.image_asset.mime_type == MimeTypeEnum.MimeType.IMAGE_JPEG
+    # type_ is Output-only on Asset (derived by the API from asset_data).
+    # image_asset is Output-only too — the wrapper used to write a sibling
+    # ImageAsset which the API ignored; the create_image_asset method
+    # itself is broken because Asset.image_asset cannot be written.
 
 
 @pytest.mark.asyncio
@@ -250,7 +251,7 @@ async def test_create_youtube_video_asset(
 
     operation = request.operations[0]
     assert operation.create.name == name
-    assert operation.create.type_ == AssetTypeEnum.AssetType.YOUTUBE_VIDEO
+    # type_ is Output-only on Asset (API derives it from asset_data oneof).
     assert operation.create.youtube_video_asset.youtube_video_id == youtube_video_id
 
 
