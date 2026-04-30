@@ -1130,19 +1130,21 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         urls: List[str],
-        negative: bool = False,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add placement (website/app) targeting criteria to a campaign.
+        """Add negative placement (website/app) exclusion criteria to a campaign.
+
+        Placements are negative-only at the campaign level — positive
+        placement targeting must be added at the ad group level. The
+        ``negative`` parameter is hardcoded to True.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            urls: List of placement URLs
-            negative: Whether these are negative criteria
+            urls: List of placement URLs to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1155,7 +1157,7 @@ class CampaignCriterionService:
             for url in urls:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                campaign_criterion.negative = True
 
                 placement_info = PlacementInfo()
                 placement_info.url = url
@@ -1201,19 +1203,21 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         channel_ids: List[str],
-        negative: bool = False,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add YouTube channel targeting criteria to a campaign.
+        """Add negative YouTube channel exclusion criteria to a campaign.
+
+        YouTube channel targeting is negative-only at the campaign level —
+        positive targeting must be added at the ad group level on Video
+        campaigns. The ``negative`` parameter is hardcoded to True.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            channel_ids: List of YouTube channel IDs
-            negative: Whether these are negative criteria
+            channel_ids: List of YouTube channel IDs to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1226,7 +1230,7 @@ class CampaignCriterionService:
             for channel_id in channel_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                campaign_criterion.negative = True
 
                 youtube_channel_info = YouTubeChannelInfo()
                 youtube_channel_info.channel_id = channel_id
@@ -1272,19 +1276,21 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         video_ids: List[str],
-        negative: bool = False,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add YouTube video targeting criteria to a campaign.
+        """Add negative YouTube video exclusion criteria to a campaign.
+
+        YouTube video targeting is negative-only at the campaign level —
+        positive targeting must be added at the ad group level on Video
+        campaigns. The ``negative`` parameter is hardcoded to True.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            video_ids: List of YouTube video IDs
-            negative: Whether these are negative criteria
+            video_ids: List of YouTube video IDs to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1297,7 +1303,7 @@ class CampaignCriterionService:
             for video_id in video_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                campaign_criterion.negative = True
 
                 youtube_video_info = YouTubeVideoInfo()
                 youtube_video_info.video_id = video_id
@@ -1343,19 +1349,20 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         content_label_types: List[ContentLabelTypeEnum.ContentLabelType],
-        negative: bool = True,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add content label exclusion criteria to a campaign.
 
+        Content labels are negative-only — there's no positive content
+        label targeting. The ``negative`` parameter is hardcoded to True.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            content_label_types: List of content label type enum values
-            negative: Whether these are negative criteria (default True)
+            content_label_types: List of content label type enum values to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1368,7 +1375,7 @@ class CampaignCriterionService:
             for content_label_type in content_label_types:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                campaign_criterion.negative = True
 
                 content_label_info = ContentLabelInfo()
                 content_label_info.type_ = content_label_type
@@ -1414,21 +1421,24 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         custom_audience_resource_names: List[str],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add custom audience targeting criteria to a campaign.
+        """Add negative custom audience exclusion criteria to a campaign.
+
+        Custom audiences are negative-only at the campaign level — positive
+        targeting must be added at the ad group level (Display, Demand
+        Gen, and Video campaigns only). The ``negative`` parameter is
+        hardcoded to True; ``bid_modifier`` is dropped (it's not valid for
+        negative criteria).
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            custom_audience_resource_names: List of custom audience resource names
-            negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            custom_audience_resource_names: List of custom audience resource
+                names to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1441,10 +1451,7 @@ class CampaignCriterionService:
             for resource_name in custom_audience_resource_names:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
-
-                if bid_modifier is not None and not negative:
-                    campaign_criterion.bid_modifier = bid_modifier
+                campaign_criterion.negative = True
 
                 custom_audience_info = CustomAudienceInfo()
                 custom_audience_info.custom_audience = resource_name
@@ -1490,21 +1497,24 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         custom_affinity_resource_names: List[str],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add custom affinity audience targeting criteria to a campaign.
+        """Add negative custom affinity exclusion criteria to a campaign.
+
+        Custom affinity audiences are negative-only at the campaign level
+        — positive targeting must be added at the ad group level (Display,
+        Demand Gen, and Video campaigns only). The ``negative`` parameter
+        is hardcoded to True; ``bid_modifier`` is dropped (it's not valid
+        for negative criteria).
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            custom_affinity_resource_names: List of custom affinity resource names
-            negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            custom_affinity_resource_names: List of custom affinity resource
+                names to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1517,10 +1527,7 @@ class CampaignCriterionService:
             for resource_name in custom_affinity_resource_names:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
-
-                if bid_modifier is not None and not negative:
-                    campaign_criterion.bid_modifier = bid_modifier
+                campaign_criterion.negative = True
 
                 custom_affinity_info = CustomAffinityInfo()
                 custom_affinity_info.custom_affinity = resource_name
@@ -1566,21 +1573,23 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         combined_audience_resource_names: List[str],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add combined audience targeting criteria to a campaign.
+        """Add negative combined audience exclusion criteria to a campaign.
+
+        Combined audiences are negative-only at the campaign level —
+        positive targeting must be added at the ad group level. The
+        ``negative`` parameter is hardcoded to True; ``bid_modifier`` is
+        dropped (it's not valid for negative criteria).
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            combined_audience_resource_names: List of combined audience resource names
-            negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            combined_audience_resource_names: List of combined audience
+                resource names to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -1593,10 +1602,7 @@ class CampaignCriterionService:
             for resource_name in combined_audience_resource_names:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
-
-                if bid_modifier is not None and not negative:
-                    campaign_criterion.bid_modifier = bid_modifier
+                campaign_criterion.negative = True
 
                 combined_audience_info = CombinedAudienceInfo()
                 combined_audience_info.combined_audience = resource_name
@@ -1642,23 +1648,24 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         life_event_ids: List[int],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add life event targeting criteria to a campaign.
+        """Add negative life event exclusion criteria to a campaign.
+
+        Life events are negative-only at the campaign level — positive
+        targeting must be added at the ad group level (Display and Video
+        campaigns). The ``negative`` parameter is hardcoded to True;
+        ``bid_modifier`` is dropped (it's not valid for negative criteria).
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            life_event_ids: List of life event taxonomy IDs (int64). Per the
-                v23 proto, LifeEventInfo.life_event_id is INT64, not a
-                resource name.
-            negative: Whether these are negative criteria
-            bid_modifier: Optional bid modifier
+            life_event_ids: List of life event taxonomy IDs (int64) to
+                exclude. Per the v23 proto, LifeEventInfo.life_event_id is
+                INT64, not a resource name.
 
         Returns:
             Mutation response with created campaign criteria
@@ -1671,10 +1678,7 @@ class CampaignCriterionService:
             for life_event_id in life_event_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
-
-                if bid_modifier is not None and not negative:
-                    campaign_criterion.bid_modifier = bid_modifier
+                campaign_criterion.negative = True
 
                 life_event_info = LifeEventInfo()
                 life_event_info.life_event_id = life_event_id
@@ -2630,17 +2634,17 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         shared_set_resource_name: str,
-        negative: bool = True,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add a webpage-list criterion to a campaign by referencing a SharedSet.
+        """Add a negative webpage-list exclusion criterion to a campaign by referencing a SharedSet.
 
         WebpageListInfo references a pre-built SharedSet of webpages (a
-        webpage list). To define ad-hoc URL conditions inline, use
-        add_webpage_criteria instead. This method only takes a SharedSet
-        resource name — that's the only field WebpageListInfo exposes.
+        webpage list). Webpage lists are negative-only at the campaign
+        level — used to exclude pages. The ``negative`` parameter is
+        hardcoded to True. To define ad-hoc URL conditions inline, use
+        add_webpage_criteria instead.
 
         Args:
             ctx: FastMCP context
@@ -2648,9 +2652,7 @@ class CampaignCriterionService:
             campaign_id: The campaign ID
             shared_set_resource_name: Resource name of the SharedSet that
                 contains the webpage list (e.g.,
-                "customers/{customer_id}/sharedSets/{shared_set_id}")
-            negative: Whether this is a negative criterion. Defaults to True;
-                webpage lists are typically used to exclude pages.
+                "customers/{customer_id}/sharedSets/{shared_set_id}") to exclude
 
         Returns:
             Mutation response with created campaign criterion
@@ -2661,7 +2663,7 @@ class CampaignCriterionService:
 
             campaign_criterion = CampaignCriterion()
             campaign_criterion.campaign = campaign_resource
-            campaign_criterion.negative = negative
+            campaign_criterion.negative = True
 
             webpage_list_info = WebpageListInfo()
             webpage_list_info.shared_set = shared_set_resource_name
@@ -3513,18 +3515,20 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         urls: List[str],
-        negative: bool = False,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Negative (exclusion) only at campaign level. Add placement (website/app) targeting criteria to a campaign.
+        """Add negative placement (website/app) exclusion criteria to a campaign.
+
+        Placements are negative-only at the campaign level — for positive
+        targeting, use the ad group level. The criterion is always created
+        as a negative exclusion.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            urls: List of placement URLs (e.g., ["example.com", "youtube.com"])
-            negative: Whether these are negative criteria (exclude placements)
+            urls: List of placement URLs to exclude (e.g., ["example.com", "youtube.com"])
 
         Returns:
             Mutation response with created campaign criteria
@@ -3534,7 +3538,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             urls=urls,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3545,18 +3548,20 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         channel_ids: List[str],
-        negative: bool = False,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add YouTube channel targeting criteria to a campaign.
+        """Add negative YouTube channel exclusion criteria to a campaign.
+
+        YouTube channel targeting is negative-only at the campaign level —
+        for positive targeting on Video campaigns, use the ad group level.
+        The criterion is always created as a negative exclusion.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            channel_ids: List of YouTube channel IDs (e.g., ["UCxxxxxx"])
-            negative: Whether these are negative criteria (exclude channels)
+            channel_ids: List of YouTube channel IDs to exclude (e.g., ["UCxxxxxx"])
 
         Returns:
             Mutation response with created campaign criteria
@@ -3566,7 +3571,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             channel_ids=channel_ids,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3577,18 +3581,20 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         video_ids: List[str],
-        negative: bool = False,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add YouTube video targeting criteria to a campaign.
+        """Add negative YouTube video exclusion criteria to a campaign.
+
+        YouTube video targeting is negative-only at the campaign level —
+        for positive targeting on Video campaigns, use the ad group level.
+        The criterion is always created as a negative exclusion.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            video_ids: List of YouTube video IDs (e.g., ["dQw4w9WgXcQ"])
-            negative: Whether these are negative criteria (exclude videos)
+            video_ids: List of YouTube video IDs to exclude (e.g., ["dQw4w9WgXcQ"])
 
         Returns:
             Mutation response with created campaign criteria
@@ -3598,7 +3604,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             video_ids=video_ids,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3609,22 +3614,25 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         content_label_types: List[str],
-        negative: bool = True,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Negative (exclusion) only. Used to exclude content categories. Add content label exclusion criteria to a campaign.
+        """Add content label exclusion criteria to a campaign.
+
+        Content labels are negative-only — there's no positive content
+        label targeting. The criterion is always created as a negative
+        exclusion.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            content_label_types: List of content label types. Valid values:
-                SEXUALLY_SUGGESTIVE, BELOW_THE_FOLD, PARKED_DOMAIN, JUVENILE,
-                PROFANITY, TRAGEDY, VIDEO, VIDEO_RATING_DV_G, VIDEO_RATING_DV_PG,
-                VIDEO_RATING_DV_T, VIDEO_RATING_DV_MA, VIDEO_NOT_YET_RATED,
-                EMBEDDED_VIDEO, LIVE_STREAMING_VIDEO, SOCIAL_ISSUES
-            negative: Whether these are negative criteria (default True for exclusions)
+            content_label_types: List of content label types to exclude.
+                Valid values: SEXUALLY_SUGGESTIVE, BELOW_THE_FOLD,
+                PARKED_DOMAIN, JUVENILE, PROFANITY, TRAGEDY, VIDEO,
+                VIDEO_RATING_DV_G, VIDEO_RATING_DV_PG, VIDEO_RATING_DV_T,
+                VIDEO_RATING_DV_MA, VIDEO_NOT_YET_RATED, EMBEDDED_VIDEO,
+                LIVE_STREAMING_VIDEO, SOCIAL_ISSUES
 
         Returns:
             Mutation response with created campaign criteria
@@ -3639,7 +3647,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             content_label_types=content_label_enums,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3650,26 +3657,23 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         custom_audience_resource_names: List[str],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Positive targeting only. Add custom audience targeting criteria to a campaign.
+        """Add negative custom audience exclusion criteria to a campaign.
 
-        Only supported on Display, Demand Gen, and Video campaigns. Not available
-        on Search campaigns -- use add_user_interest_criteria or
-        add_audience_criteria instead.
+        Custom audiences are negative-only at the campaign level — for
+        positive targeting use the ad group level (Display, Demand Gen,
+        and Video campaigns only). The criterion is always created as a
+        negative exclusion; bid_modifier is not exposed because it's not
+        valid on negative criteria.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            custom_audience_resource_names: List of custom audience resource names
-                (e.g., ["customers/123/customAudiences/456"])
-            negative: Whether these are negative criteria (exclude audiences)
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
-                0.5 = -50%. Must be > 0.
+            custom_audience_resource_names: List of custom audience resource
+                names to exclude (e.g., ["customers/123/customAudiences/456"])
 
         Returns:
             Mutation response with created campaign criteria
@@ -3679,8 +3683,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             custom_audience_resource_names=custom_audience_resource_names,
-            negative=negative,
-            bid_modifier=bid_modifier,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3691,26 +3693,23 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         custom_affinity_resource_names: List[str],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Positive targeting only. Add custom affinity audience targeting criteria to a campaign.
+        """Add negative custom affinity exclusion criteria to a campaign.
 
-        Only supported on Display, Demand Gen, and Video campaigns. Not available
-        on Search campaigns -- use add_user_interest_criteria or
-        add_audience_criteria instead.
+        Custom affinities are negative-only at the campaign level — for
+        positive targeting use the ad group level (Display, Demand Gen,
+        and Video campaigns only). The criterion is always created as a
+        negative exclusion; bid_modifier is not exposed because it's not
+        valid on negative criteria.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            custom_affinity_resource_names: List of custom affinity resource names
-                (e.g., ["customers/123/customAffinities/456"])
-            negative: Whether these are negative criteria (exclude affinities)
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
-                0.5 = -50%. Must be > 0.
+            custom_affinity_resource_names: List of custom affinity resource
+                names to exclude (e.g., ["customers/123/customAffinities/456"])
 
         Returns:
             Mutation response with created campaign criteria
@@ -3720,8 +3719,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             custom_affinity_resource_names=custom_affinity_resource_names,
-            negative=negative,
-            bid_modifier=bid_modifier,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3732,22 +3729,23 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         combined_audience_resource_names: List[str],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Positive targeting only. Add combined audience targeting criteria to a campaign.
+        """Add negative combined audience exclusion criteria to a campaign.
+
+        Combined audiences are negative-only at the campaign level — for
+        positive targeting use the ad group level. The criterion is always
+        created as a negative exclusion; bid_modifier is not exposed
+        because it's not valid on negative criteria.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            combined_audience_resource_names: List of combined audience resource names
+            combined_audience_resource_names: List of combined audience
+                resource names to exclude
                 (e.g., ["customers/123/combinedAudiences/456"])
-            negative: Whether these are negative criteria (exclude audiences)
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
-                0.5 = -50%. Must be > 0.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3757,8 +3755,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             combined_audience_resource_names=combined_audience_resource_names,
-            negative=negative,
-            bid_modifier=bid_modifier,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3769,23 +3765,25 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         life_event_ids: List[int],
-        negative: bool = False,
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Campaign-level only. Add life event targeting criteria to a campaign.
+        """Add negative life event exclusion criteria to a campaign.
+
+        Life events are negative-only at the campaign level — for positive
+        targeting use the ad group level (Display and Video campaigns).
+        The criterion is always created as a negative exclusion;
+        bid_modifier is not exposed because it's not valid on negative
+        criteria.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            life_event_ids: List of life event taxonomy IDs (int64). Per the
-                v23 proto, LifeEventInfo.life_event_id is INT64, not a resource
-                name. Look up taxonomy IDs from Google Ads life event reference.
-            negative: Whether these are negative criteria (exclude life events)
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
-                0.5 = -50%. Must be > 0.
+            life_event_ids: List of life event taxonomy IDs (int64) to
+                exclude. Per the v23 proto, LifeEventInfo.life_event_id is
+                INT64, not a resource name. Look up taxonomy IDs from Google
+                Ads life event reference.
 
         Returns:
             Mutation response with created campaign criteria
@@ -3795,8 +3793,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             life_event_ids=life_event_ids,
-            negative=negative,
-            bid_modifier=bid_modifier,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -4216,23 +4212,23 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         shared_set_resource_name: str,
-        negative: bool = True,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add a webpage-list criterion to a campaign by referencing a SharedSet.
+        """Add a negative webpage-list exclusion criterion to a campaign by referencing a SharedSet.
 
-        WebpageListInfo references a pre-built SharedSet of webpages. To
-        define ad-hoc URL conditions inline, use add_webpage_criteria instead.
+        WebpageListInfo references a pre-built SharedSet of webpages.
+        Webpage lists are negative-only at the campaign level — used to
+        exclude pages. To define ad-hoc URL conditions inline, use
+        add_webpage_criteria instead.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             shared_set_resource_name: Resource name of the SharedSet that
                 contains the webpage list (e.g.,
-                "customers/{customer_id}/sharedSets/{shared_set_id}")
-            negative: Whether this is a negative criterion (default True)
+                "customers/{customer_id}/sharedSets/{shared_set_id}") to exclude
 
         Returns:
             Mutation response with created campaign criterion
@@ -4242,7 +4238,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             shared_set_resource_name=shared_set_resource_name,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
