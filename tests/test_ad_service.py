@@ -204,6 +204,11 @@ async def test_create_responsive_search_ad_minimal(
     assert not hasattr(responsive_ad, "path1") or responsive_ad.path1 == ""
     assert not hasattr(responsive_ad, "path2") or responsive_ad.path2 == ""
 
+    # Phase 11: omitting `status` leaves the field unset on the wire
+    # (proto-default rule). Reads back as UNSPECIFIED (0) so that
+    # callers expecting an ENABLED ad don't silently get a PAUSED one.
+    assert operation.create.status == AdGroupAdStatusEnum.AdGroupAdStatus.UNSPECIFIED
+
 
 @pytest.mark.asyncio
 async def test_create_expanded_text_ad(

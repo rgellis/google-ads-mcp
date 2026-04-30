@@ -117,7 +117,7 @@ class AdService:
         final_urls: List[str],
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -173,7 +173,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             # Create operation
             operation = AdGroupAdOperation()
@@ -224,7 +225,7 @@ class AdService:
         final_urls: List[str],
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -279,7 +280,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             # Create operation
             operation = AdGroupAdOperation()
@@ -347,7 +349,8 @@ class AdService:
             # Create ad group ad with resource name
             ad_group_ad = AdGroupAd()
             ad_group_ad.resource_name = resource_name
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             # Create the operation
             operation = AdGroupAdOperation()
@@ -527,7 +530,7 @@ class AdService:
         final_urls: List[str],
         square_marketing_images: Optional[List[str]] = None,
         logo_images: Optional[List[str]] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -597,7 +600,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -646,7 +650,7 @@ class AdService:
         in_feed_headline: Optional[str] = None,
         in_feed_description1: Optional[str] = None,
         in_feed_description2: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -739,7 +743,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -788,7 +793,7 @@ class AdService:
         portrait_marketing_images: Optional[List[str]] = None,
         logo_images: Optional[List[str]] = None,
         call_to_action_text: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -864,7 +869,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -907,7 +913,7 @@ class AdService:
         headlines: List[str],
         descriptions: List[str],
         final_urls: List[str],
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -950,7 +956,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -995,7 +1002,7 @@ class AdService:
         final_urls: List[str],
         images: Optional[List[str]] = None,
         videos: Optional[List[str]] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1052,7 +1059,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1092,7 +1100,7 @@ class AdService:
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1120,7 +1128,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1160,7 +1169,7 @@ class AdService:
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1188,7 +1197,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1239,7 +1249,7 @@ class AdService:
         companion_banners: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1328,7 +1338,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1377,7 +1388,7 @@ class AdService:
         videos: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1454,7 +1465,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1494,7 +1506,7 @@ class AdService:
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1522,7 +1534,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1569,7 +1582,7 @@ class AdService:
         final_urls: List[str],
         logo_image: Optional[str] = None,
         call_to_action_text: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1628,7 +1641,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1671,7 +1685,7 @@ class AdService:
         media_bundle: str,
         display_upload_product_type: str,
         final_urls: List[str],
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1714,7 +1728,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1763,7 +1778,7 @@ class AdService:
         call_to_action_asset_resource_names: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1797,7 +1812,10 @@ class AdService:
 
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource
-            ad_group_ad.status = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None:
+                ad_group_ad.status = getattr(
+                    AdGroupAdStatusEnum.AdGroupAdStatus, status
+                )
 
             ad_info = DemandGenVideoResponsiveAdInfo()
             for h in headlines:
@@ -1865,7 +1883,7 @@ class AdService:
         ad_group_id: str,
         description: str,
         description2: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1902,7 +1920,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -1943,7 +1962,7 @@ class AdService:
         customer_id: str,
         ad_group_id: str,
         headline: str,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1976,7 +1995,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -2020,7 +2040,7 @@ class AdService:
         descriptions: List[str],
         images: Optional[List[str]] = None,
         videos: Optional[List[str]] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2078,7 +2098,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -2122,7 +2143,7 @@ class AdService:
         descriptions: List[str],
         images: Optional[List[str]] = None,
         youtube_videos: Optional[List[str]] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2179,7 +2200,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -2227,7 +2249,7 @@ class AdService:
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
         call_to_action: Optional[str] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2294,7 +2316,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -2338,7 +2361,7 @@ class AdService:
         image_asset: Optional[str] = None,
         data: Optional[bytes] = None,
         final_urls: Optional[List[str]] = None,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.PAUSED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2392,7 +2415,8 @@ class AdService:
             ad_group_ad = AdGroupAd()
             ad_group_ad.ad_group = ad_group_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -2445,7 +2469,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: List[str],
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2466,7 +2490,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             Created ad details
         """
         # Convert string enum to proper enum type
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_responsive_search_ad(
             ctx=ctx,
@@ -2495,7 +2523,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: List[str],
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2519,7 +2547,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             Created ad details
         """
         # Convert string enum to proper enum type
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_expanded_text_ad(
             ctx=ctx,
@@ -2561,7 +2593,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             Updated ad details
         """
         # Convert string enum to proper enum type
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.update_ad_status(
             ctx=ctx,
@@ -2630,7 +2666,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: List[str],
         square_marketing_images: Optional[List[str]] = None,
         logo_images: Optional[List[str]] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2653,7 +2689,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_responsive_display_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2685,7 +2725,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         in_feed_headline: Optional[str] = None,
         in_feed_description1: Optional[str] = None,
         in_feed_description2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2711,7 +2751,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_video_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2744,7 +2788,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         portrait_marketing_images: Optional[List[str]] = None,
         logo_images: Optional[List[str]] = None,
         call_to_action_text: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2768,7 +2812,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_demand_gen_multi_asset_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2795,7 +2843,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         headlines: List[str],
         descriptions: List[str],
         final_urls: List[str],
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2813,7 +2861,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_smart_campaign_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2836,7 +2888,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: List[str],
         images: Optional[List[str]] = None,
         videos: Optional[List[str]] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2856,7 +2908,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_app_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2876,7 +2932,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2893,7 +2949,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_shopping_product_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2908,7 +2968,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2925,7 +2985,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_hotel_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -2951,7 +3015,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         companion_banners: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2977,7 +3041,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_video_responsive_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3012,7 +3080,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         videos: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3036,7 +3104,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_local_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3060,7 +3132,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3077,7 +3149,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_travel_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3099,7 +3175,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: List[str],
         logo_image: Optional[str] = None,
         call_to_action_text: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3121,7 +3197,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_demand_gen_carousel_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3146,7 +3226,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         media_bundle: str,
         display_upload_product_type: str,
         final_urls: List[str],
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3165,7 +3245,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_display_upload_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3192,7 +3276,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         call_to_action_asset_resource_names: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3243,7 +3327,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         ad_group_id: str,
         description: str,
         description2: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3263,7 +3347,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_expanded_dynamic_search_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3281,7 +3369,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         customer_id: str,
         ad_group_id: str,
         headline: str,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3299,7 +3387,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_shopping_comparison_listing_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3319,7 +3411,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         descriptions: List[str],
         images: Optional[List[str]] = None,
         videos: Optional[List[str]] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3338,7 +3430,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_app_engagement_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3361,7 +3457,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         descriptions: List[str],
         images: Optional[List[str]] = None,
         youtube_videos: Optional[List[str]] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3380,7 +3476,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_app_pre_registration_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3407,7 +3507,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
         call_to_action: Optional[str] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3430,7 +3530,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_demand_gen_product_ad(
             ctx=ctx,
             customer_id=customer_id,
@@ -3457,7 +3561,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         image_asset: Optional[str] = None,
         data: Optional[bytes] = None,
         final_urls: Optional[List[str]] = None,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3478,7 +3582,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Created ad details
         """
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
         return await service.create_image_ad(
             ctx=ctx,
             customer_id=customer_id,
