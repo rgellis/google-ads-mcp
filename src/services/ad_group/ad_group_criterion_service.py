@@ -261,6 +261,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         user_list_ids: List[str],
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -273,7 +274,12 @@ class AdGroupCriterionService:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             user_list_ids: List of user list IDs
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to create exclusions (the audience will NOT
+                see ads). Distinct from bid_modifier — even bid_modifier=0.1
+                still serves at -90%, not an exclusion. Omit to leave unset
+                (proto-default rule).
+            bid_modifier: Multiplier on base bid. Range 0.1–10.0 per proto
+                (so -90% to +900%). Not valid on negative criteria.
 
         Returns:
             List of created ad group criteria
@@ -291,6 +297,9 @@ class AdGroupCriterionService:
                 ad_group_criterion.status = (
                     AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
                 )
+
+                if negative is not None:
+                    ad_group_criterion.negative = negative
 
                 if bid_modifier is not None:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -372,7 +381,15 @@ class AdGroupCriterionService:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
-            demographics: List of demographic dicts with 'type' and 'value'
+            demographics: List of demographic dicts. Each dict must have
+                'type' (AGE_RANGE, GENDER, PARENTAL_STATUS, INCOME_RANGE)
+                and 'value' (the enum-name string for that type). Optional
+                per-row keys:
+                - 'negative': True to create an exclusion (the demographic
+                  segment will NOT see ads). Distinct from bid_modifier;
+                  bid_modifier=0.1 still serves at -90%, not an exclusion.
+                - 'bid_modifier': float multiplier on base bid, range 0.1–10.0.
+                  Not valid on negative criteria.
 
         Returns:
             List of created ad group criteria
@@ -390,6 +407,11 @@ class AdGroupCriterionService:
                 ad_group_criterion.status = (
                     AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
                 )
+
+                # Set negative flag if provided (proto-default rule: don't
+                # write False — let it stay unset on the wire).
+                if "negative" in demo:
+                    ad_group_criterion.negative = demo["negative"]
 
                 # Set bid modifier if provided
                 if "bid_modifier" in demo:
@@ -1700,6 +1722,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         shared_set_resource_name: str,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1712,6 +1735,9 @@ class AdGroupCriterionService:
             ad_group_id: The ad group ID
             shared_set_resource_name: Resource name of the shared set containing
                 the brand list (e.g., "customers/123/sharedSets/456")
+            negative: Pass True to create an exclusion (the brand list is
+                NOT eligible to match). Omit to leave unset
+                (proto-default rule).
 
         Returns:
             Mutation response with created ad group criteria
@@ -1722,6 +1748,9 @@ class AdGroupCriterionService:
 
             ad_group_criterion = AdGroupCriterion()
             ad_group_criterion.ad_group = ad_group_resource
+
+            if negative is not None:
+                ad_group_criterion.negative = negative
 
             brand_list_info = BrandListInfo()
             brand_list_info.shared_set = shared_set_resource_name
@@ -2176,6 +2205,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         user_list_ids: List[str],
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2183,13 +2213,18 @@ def create_ad_group_criterion_tools(
     ) -> List[Dict[str, Any]]:
         """Add audience (user list) targeting criteria to an ad group.
 
-        Ad group-level. Supports both targeting and observation (bid-only) modes.
+        Ad group-level. Supports targeting, observation (bid-only), and
+        exclusion modes.
 
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             user_list_ids: List of user list IDs for remarketing
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to exclude this audience (they will NOT see
+                ads). Distinct from a low bid_modifier; bid_modifier=0.1
+                still serves at -90%, not an exclusion. Omit to leave unset.
+            bid_modifier: Multiplier on base bid, range 0.1–10.0 per proto
+                (so -90% to +900%). Not valid on negative criteria.
 
         Returns:
             List of created ad group criteria with resource names and IDs
@@ -2199,6 +2234,7 @@ def create_ad_group_criterion_tools(
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             user_list_ids=user_list_ids,
+            negative=negative,
             bid_modifier=bid_modifier,
             partial_failure=partial_failure,
             validate_only=validate_only,
@@ -2224,7 +2260,12 @@ def create_ad_group_criterion_tools(
             demographics: List of demographic dicts with:
                 - type: AGE_RANGE, GENDER, PARENTAL_STATUS, or INCOME_RANGE
                 - value: Specific value for the type (e.g., AGE_RANGE_18_24, MALE, PARENT)
-                - bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+                - negative: Optional. True to exclude this segment (the
+                  segment will NOT see ads). Distinct from bid_modifier;
+                  bid_modifier=0.1 still serves at -90%, not an exclusion.
+                - bid_modifier: Optional. Multiplier on base bid, range
+                  0.1–10.0 per proto (so -90% to +900%). Not valid on
+                  negative criteria.
 
         Returns:
             List of created ad group criteria with resource names and IDs
@@ -2811,6 +2852,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         shared_set_resource_name: str,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2822,6 +2864,8 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             shared_set_resource_name: Resource name of the shared set containing
                 the brand list (e.g., "customers/123/sharedSets/456")
+            negative: Pass True to exclude this brand list (the brand list
+                is NOT eligible to match). Omit to leave unset.
 
         Returns:
             Response with created ad group brand list criteria
@@ -2831,6 +2875,7 @@ def create_ad_group_criterion_tools(
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             shared_set_resource_name=shared_set_resource_name,
+            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
