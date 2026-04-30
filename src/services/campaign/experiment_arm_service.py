@@ -97,8 +97,8 @@ class ExperimentArmService:
         self,
         experiment: str,
         name: str,
-        control: bool,
-        traffic_split: int,
+        control: Optional[bool] = None,
+        traffic_split: Optional[int] = None,
         campaigns: Optional[List[str]] = None,
     ) -> ExperimentArmOperation:
         """Create an experiment arm operation for creation.
@@ -106,20 +106,24 @@ class ExperimentArmService:
         Args:
             experiment: The experiment resource name
             name: The name of the experiment arm
-            control: Whether this is a control arm
-            traffic_split: Traffic split percentage (1-100)
-            campaigns: List of campaign resource names
+            control: Whether this is a control arm. Omit to leave unset
+                (CLAUDE.md proto-default rule: setting False explicitly
+                marks the field on the wire).
+            traffic_split: Traffic split percentage (1-100). Omit to leave
+                unset.
+            campaigns: List of campaign resource names. Omit (or empty)
+                to leave the field unset.
 
         Returns:
             ExperimentArmOperation: The operation to create the experiment arm
         """
-        experiment_arm = ExperimentArm(
-            experiment=experiment,
-            name=name,
-            control=control,
-            traffic_split=traffic_split,
-            campaigns=campaigns or [],
-        )
+        experiment_arm = ExperimentArm(experiment=experiment, name=name)
+        if control is not None:
+            experiment_arm.control = control
+        if traffic_split is not None:
+            experiment_arm.traffic_split = traffic_split
+        if campaigns:
+            experiment_arm.campaigns = campaigns
 
         return ExperimentArmOperation(create=experiment_arm)
 
@@ -255,9 +259,9 @@ def create_experiment_arm_tools(
         customer_id: str,
         experiment: str,
         name: str,
-        control: bool,
-        traffic_split: int,
-        campaigns: list[str] = [],
+        control: Optional[bool] = None,
+        traffic_split: Optional[int] = None,
+        campaigns: Optional[list[str]] = None,
     ) -> Dict[str, Any]:
         """Create a new experiment arm (variant in an A/B test).
 
@@ -265,9 +269,11 @@ def create_experiment_arm_tools(
             customer_id: The customer ID
             experiment: The experiment resource name (e.g. customers/123/experiments/456)
             name: Name of the arm (e.g. "Control" or "Treatment")
-            control: true if this is the control arm (baseline), false for treatment (test variant)
-            traffic_split: Percentage of traffic routed to this arm (1-100, all arms must sum to 100)
-            campaigns: List of campaign resource names to include in this arm
+            control: true if this is the control arm (baseline), false for
+                treatment. Omit to leave unset.
+            traffic_split: Percentage of traffic routed to this arm
+                (1-100, all arms must sum to 100). Omit to leave unset.
+            campaigns: List of campaign resource names to include in this arm.
 
         Returns:
             Created experiment arm details with resource name

@@ -95,7 +95,7 @@ class KeywordPlanAdGroupKeywordService:
         text: str,
         match_type: KeywordMatchTypeEnum.KeywordMatchType,
         cpc_bid_micros: Optional[int] = None,
-        negative: bool = False,
+        negative: Optional[bool] = None,
     ) -> KeywordPlanAdGroupKeywordOperation:
         """Create a keyword plan ad group keyword operation for creation.
 
@@ -104,7 +104,9 @@ class KeywordPlanAdGroupKeywordService:
             text: The keyword text
             match_type: The keyword match type
             cpc_bid_micros: CPC bid in micros
-            negative: Whether this is a negative keyword
+            negative: Whether this is a negative keyword. Omit (or pass None)
+                to leave the proto field unset (CLAUDE.md proto-default
+                rule: setting False explicitly marks the field set).
 
         Returns:
             KeywordPlanAdGroupKeywordOperation: The operation to create the keyword plan ad group keyword
@@ -113,8 +115,9 @@ class KeywordPlanAdGroupKeywordService:
             keyword_plan_ad_group=keyword_plan_ad_group,
             text=text,
             match_type=match_type,
-            negative=negative,
         )
+        if negative is not None:
+            keyword_plan_ad_group_keyword.negative = negative
 
         if cpc_bid_micros is not None:
             keyword_plan_ad_group_keyword.cpc_bid_micros = cpc_bid_micros

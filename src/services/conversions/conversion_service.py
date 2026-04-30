@@ -69,7 +69,7 @@ class ConversionService:
         status: str = "ENABLED",
         value_settings: Optional[Dict[str, Any]] = None,
         counting_type: str = "ONE_PER_CLICK",
-        attribution_model: str = "GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN",
+        attribution_model: Optional[str] = None,
         click_through_lookback_window_days: Optional[int] = None,
         view_through_lookback_window_days: Optional[int] = None,
         partial_failure: bool = False,
@@ -87,7 +87,8 @@ class ConversionService:
             status: Status (ENABLED, REMOVED, HIDDEN)
             value_settings: Optional dict with default_value and always_use_default_value
             counting_type: ONE_PER_CLICK or MANY_PER_CLICK
-            attribution_model: Attribution model (DATA_DRIVEN, LAST_CLICK, etc.)
+            attribution_model: Optional attribution model (DATA_DRIVEN,
+                LAST_CLICK, etc.). Omit to let the API default apply.
             click_through_lookback_window_days: Click lookback window (1-90).
                 Omit (None) to let the API apply its default. Must be unset for
                 AD_CALL and WEBSITE_CALL types.
@@ -134,12 +135,16 @@ class ConversionService:
                 conversion_action.value_settings = value_settings_obj
             # If no value_settings provided, let the API use its defaults
 
-            # Set attribution model
-            attribution_settings = ConversionAction.AttributionModelSettings()
-            attribution_settings.attribution_model = getattr(
-                AttributionModelEnum.AttributionModel, attribution_model
-            )
-            conversion_action.attribution_model_settings = attribution_settings
+            # Build attribution_model_settings only when caller supplied
+            # an attribution_model. An empty AttributionModelSettings()
+            # would still mark the field on the wire (CLAUDE.md proto-default
+            # rule) and overwrite the API default.
+            if attribution_model is not None:
+                attribution_settings = ConversionAction.AttributionModelSettings()
+                attribution_settings.attribution_model = getattr(
+                    AttributionModelEnum.AttributionModel, attribution_model
+                )
+                conversion_action.attribution_model_settings = attribution_settings
 
             # Set lookback windows only when explicitly provided. AD_CALL and
             # WEBSITE_CALL conversion types require view_through_lookback_window_days
@@ -373,7 +378,7 @@ def create_conversion_tools(
         status: str = "ENABLED",
         value_settings: Optional[Dict[str, Any]] = None,
         counting_type: str = "ONE_PER_CLICK",
-        attribution_model: str = "GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN",
+        attribution_model: Optional[str] = None,
         click_through_lookback_window_days: Optional[int] = None,
         view_through_lookback_window_days: Optional[int] = None,
         partial_failure: bool = False,
@@ -392,7 +397,10 @@ def create_conversion_tools(
                 - default_value: Default conversion value
                 - always_use_default_value: Whether to always use default value
             counting_type: ONE_PER_CLICK or MANY_PER_CLICK
-            attribution_model: Attribution model - GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN, GOOGLE_ADS_LAST_CLICK, GOOGLE_SEARCH_ATTRIBUTION_FIRST_CLICK, GOOGLE_SEARCH_ATTRIBUTION_LINEAR, GOOGLE_SEARCH_ATTRIBUTION_TIME_DECAY, GOOGLE_SEARCH_ATTRIBUTION_POSITION_BASED
+            attribution_model: Optional attribution model — GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN,
+                GOOGLE_ADS_LAST_CLICK, GOOGLE_SEARCH_ATTRIBUTION_FIRST_CLICK,
+                GOOGLE_SEARCH_ATTRIBUTION_LINEAR, GOOGLE_SEARCH_ATTRIBUTION_TIME_DECAY,
+                GOOGLE_SEARCH_ATTRIBUTION_POSITION_BASED. Omit to use API default.
             click_through_lookback_window_days: Click lookback window (1-90 days).
                 Omit to use API default. Must be omitted for AD_CALL and WEBSITE_CALL.
             view_through_lookback_window_days: View lookback window (1-30 days).

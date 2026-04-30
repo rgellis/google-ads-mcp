@@ -63,8 +63,8 @@ class UserListService:
         name: str,
         actions: List[Dict[str, str]],
         description: Optional[str] = None,
-        membership_life_span: int = 30,
-        membership_status: str = "OPEN",
+        membership_life_span: Optional[int] = None,
+        membership_status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -81,8 +81,11 @@ class UserListService:
                   - "remarketing_action": resource name of a RemarketingAction
                 A BasicUserList without actions is unusable, so this is required.
             description: Optional description
-            membership_life_span: How long users remain in the list (days)
-            membership_status: OPEN or CLOSED
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use the API default.
+            membership_status: OPEN or CLOSED. Omit to use the API default
+                (OPEN). Proto-default rule: setting OPEN explicitly still
+                marks the field on the wire.
 
         Returns:
             Created user list details
@@ -102,10 +105,13 @@ class UserListService:
             if description:
                 user_list.description = description
 
-            user_list.membership_status = getattr(
-                UserListMembershipStatusEnum.UserListMembershipStatus, membership_status
-            )
-            user_list.membership_life_span = membership_life_span
+            if membership_status is not None:
+                user_list.membership_status = getattr(
+                    UserListMembershipStatusEnum.UserListMembershipStatus,
+                    membership_status,
+                )
+            if membership_life_span is not None:
+                user_list.membership_life_span = membership_life_span
 
             # Create basic user list info with the caller-supplied actions.
             basic_user_list = BasicUserListInfo()
@@ -150,7 +156,7 @@ class UserListService:
 
             await ctx.log(
                 level="info",
-                message=f"Created basic user list '{name}' with {membership_life_span} day membership",
+                message=f"Created basic user list '{name}'",
             )
 
             # Return serialized response
@@ -171,7 +177,7 @@ class UserListService:
         customer_id: str,
         name: str,
         description: Optional[str] = None,
-        membership_life_span: int = 30,
+        membership_life_span: Optional[int] = None,
         upload_key_type: str = "CONTACT_INFO",
         data_source_type: Optional[str] = None,
         partial_failure: bool = False,
@@ -185,7 +191,8 @@ class UserListService:
             customer_id: The customer ID
             name: User list name
             description: Optional description
-            membership_life_span: How long users remain in the list (days)
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use the API default.
             upload_key_type: CONTACT_INFO, CRM_ID, or MOBILE_ADVERTISING_ID
             data_source_type: Optional source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
@@ -197,16 +204,16 @@ class UserListService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Create user list
+            # Create user list. membership_status was hardcoded to OPEN —
+            # OPEN is the proto default, so explicitly setting it just marks
+            # the field on the wire (CLAUDE.md proto-default rule). Drop it.
             user_list = UserList()
             user_list.name = name
             if description:
                 user_list.description = description
 
-            user_list.membership_status = (
-                UserListMembershipStatusEnum.UserListMembershipStatus.OPEN
-            )
-            user_list.membership_life_span = membership_life_span
+            if membership_life_span is not None:
+                user_list.membership_life_span = membership_life_span
 
             # Create CRM-based user list info
             crm_user_list = CrmBasedUserListInfo()
@@ -276,7 +283,7 @@ class UserListService:
         name: str,
         rules: List[Dict[str, Any]],
         description: Optional[str] = None,
-        membership_life_span: int = 30,
+        membership_life_span: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -292,7 +299,8 @@ class UserListService:
                 - operator: ALL, ANY, or NONE (per-rule; the proto has no
                   top-level operator)
             description: Optional description
-            membership_life_span: How long users remain in the list (days)
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use the API default.
 
         Returns:
             Created user list details
@@ -300,16 +308,16 @@ class UserListService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Create user list
+            # Create user list. membership_status hardcoded to OPEN was
+            # redundant — OPEN is the proto default; setting it explicitly
+            # marks the field on the wire (CLAUDE.md proto-default rule).
             user_list = UserList()
             user_list.name = name
             if description:
                 user_list.description = description
 
-            user_list.membership_status = (
-                UserListMembershipStatusEnum.UserListMembershipStatus.OPEN
-            )
-            user_list.membership_life_span = membership_life_span
+            if membership_life_span is not None:
+                user_list.membership_life_span = membership_life_span
 
             # Create logical user list info
             logical_user_list = LogicalUserListInfo()
@@ -544,8 +552,8 @@ def create_user_list_tools(
         name: str,
         actions: List[Dict[str, str]],
         description: Optional[str] = None,
-        membership_life_span: int = 30,
-        membership_status: str = "OPEN",
+        membership_life_span: Optional[int] = None,
+        membership_status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -560,8 +568,10 @@ def create_user_list_tools(
                 "remarketing_action" (resource name). Required — a list with
                 no actions is unusable.
             description: Optional description
-            membership_life_span: How long users remain in the list (days, 0-540)
-            membership_status: OPEN (can add users) or CLOSED
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use API default.
+            membership_status: OPEN (can add users) or CLOSED. Omit to use
+                API default (OPEN).
 
         Returns:
             Created user list details including resource_name and user_list_id
@@ -584,7 +594,7 @@ def create_user_list_tools(
         customer_id: str,
         name: str,
         description: Optional[str] = None,
-        membership_life_span: int = 30,
+        membership_life_span: Optional[int] = None,
         upload_key_type: str = "CONTACT_INFO",
         data_source_type: Optional[str] = None,
         partial_failure: bool = False,
@@ -597,7 +607,8 @@ def create_user_list_tools(
             customer_id: The customer ID
             name: User list name
             description: Optional description
-            membership_life_span: How long users remain in the list (days, 0-540)
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use API default.
             upload_key_type: Type of data - CONTACT_INFO, CRM_ID, or MOBILE_ADVERTISING_ID
             data_source_type: Optional CRM data source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
@@ -625,7 +636,7 @@ def create_user_list_tools(
         name: str,
         rules: List[Dict[str, Any]],
         description: Optional[str] = None,
-        membership_life_span: int = 30,
+        membership_life_span: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -640,7 +651,8 @@ def create_user_list_tools(
                 - operator: ALL, ANY, or NONE (per-rule; the proto has no
                   top-level operator field)
             description: Optional description
-            membership_life_span: How long users remain in the list (days, 0-540)
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use API default.
 
         Example:
             rules=[

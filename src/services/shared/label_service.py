@@ -82,14 +82,16 @@ class LabelService:
             label = Label()
             label.name = name
 
-            # Create text label
-            text_label = TextLabel()
-            if description:
-                text_label.description = description
-            if background_color:
-                text_label.background_color = background_color
-
-            label.text_label = text_label
+            # Build text_label only when at least one sub-field is set —
+            # assigning an empty TextLabel() still marks the field on the
+            # wire (CLAUDE.md proto-default rule).
+            if description or background_color:
+                text_label = TextLabel()
+                if description:
+                    text_label.description = description
+                if background_color:
+                    text_label.background_color = background_color
+                label.text_label = text_label
 
             # Create operation
             operation = LabelOperation()

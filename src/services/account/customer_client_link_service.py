@@ -55,7 +55,7 @@ class CustomerClientLinkService:
         customer_id: str,
         client_customer: str,
         status: ManagerLinkStatusEnum.ManagerLinkStatus = ManagerLinkStatusEnum.ManagerLinkStatus.PENDING,
-        hidden: bool = False,
+        hidden: Optional[bool] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a customer client link between manager and client accounts.
@@ -69,7 +69,9 @@ class CustomerClientLinkService:
             customer_id: The manager customer ID
             client_customer: Resource name of the client customer
             status: Link status enum value
-            hidden: Whether the link is hidden from the client
+            hidden: Whether the link is hidden from the client. Omit to
+                leave unset (proto-default rule: False is marked-set
+                on the wire).
             validate_only: If true, validate the request without executing it
 
         Returns:
@@ -82,7 +84,8 @@ class CustomerClientLinkService:
             link = CustomerClientLink()
             link.client_customer = client_customer
             link.status = status
-            link.hidden = hidden
+            if hidden is not None:
+                link.hidden = hidden
 
             # Create operation
             operation = CustomerClientLinkOperation()
@@ -285,7 +288,7 @@ def create_customer_client_link_tools(
         customer_id: str,
         client_customer: str,
         status: str = "PENDING",
-        hidden: bool = False,
+        hidden: Optional[bool] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a customer client link between manager and client accounts.
@@ -294,7 +297,7 @@ def create_customer_client_link_tools(
             customer_id: The manager customer ID
             client_customer: Resource name of the client customer (e.g., customers/123456789)
             status: Link status (PENDING, ACTIVE, CANCELED, REJECTED)
-            hidden: Whether the link is hidden from the client in their account list
+            hidden: Whether the link is hidden from the client. Omit to leave unset.
             validate_only: If true, validate the request without executing it
 
         Returns:

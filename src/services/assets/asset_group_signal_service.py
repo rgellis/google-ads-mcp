@@ -20,7 +20,12 @@ from google.ads.googleads.v23.common.types.criteria import AudienceInfo, SearchT
 from google.ads.googleads.v23.common.types.policy import PolicyViolationKey
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -70,14 +75,15 @@ class AssetGroupSignalService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            request = MutateAssetGroupSignalsRequest(
-                customer_id=customer_id,
-                operations=operations,
+            request = MutateAssetGroupSignalsRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
+                response_content_type=response_content_type,
             )
-            if response_content_type is not None:
-                request.response_content_type = response_content_type
             response = self.client.mutate_asset_group_signals(request=request)
             await ctx.log(
                 level="info",

@@ -18,7 +18,12 @@ from google.ads.googleads.v23.services.types.campaign_asset_set_service import (
 from google.ads.googleads.v23.resources.types.campaign_asset_set import CampaignAssetSet
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -68,14 +73,15 @@ class CampaignAssetSetService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            request = MutateCampaignAssetSetsRequest(
-                customer_id=customer_id,
-                operations=operations,
+            request = MutateCampaignAssetSetsRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
+                response_content_type=response_content_type,
             )
-            if response_content_type is not None:
-                request.response_content_type = response_content_type
             response = self.client.mutate_campaign_asset_sets(request=request)
             await ctx.log(
                 level="info",

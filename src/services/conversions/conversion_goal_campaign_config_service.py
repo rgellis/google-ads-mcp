@@ -24,7 +24,12 @@ from google.ads.googleads.v23.services.types.conversion_goal_campaign_config_ser
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -71,14 +76,14 @@ class ConversionGoalCampaignConfigService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            request = MutateConversionGoalCampaignConfigsRequest(
-                customer_id=customer_id,
-                operations=operations,
+            request = MutateConversionGoalCampaignConfigsRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
                 validate_only=validate_only,
+                response_content_type=response_content_type,
             )
-
-            if response_content_type is not None:
-                request.response_content_type = response_content_type
 
             response = self.client.mutate_conversion_goal_campaign_configs(
                 request=request

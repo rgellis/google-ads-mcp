@@ -52,7 +52,7 @@ class BudgetService:
         name: str,
         amount_micros: int,
         delivery_method: str = "STANDARD",
-        explicitly_shared: bool = False,
+        explicitly_shared: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -65,7 +65,9 @@ class BudgetService:
             name: Budget name
             amount_micros: Budget amount in micros (1 million micros = 1 unit)
             delivery_method: STANDARD or ACCELERATED (default: STANDARD)
-            explicitly_shared: Whether the budget can be shared across campaigns
+            explicitly_shared: Whether the budget can be shared across
+                campaigns. Omit to leave unset (proto-default rule:
+                False is marked-set on the wire).
 
         Returns:
             Created budget details
@@ -77,7 +79,8 @@ class BudgetService:
             campaign_budget = CampaignBudget()
             campaign_budget.name = name
             campaign_budget.amount_micros = amount_micros
-            campaign_budget.explicitly_shared = explicitly_shared
+            if explicitly_shared is not None:
+                campaign_budget.explicitly_shared = explicitly_shared
 
             # Set delivery method
             campaign_budget.delivery_method = getattr(
@@ -273,7 +276,7 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
         name: str,
         amount_micros: int,
         delivery_method: str = "STANDARD",
-        explicitly_shared: bool = False,
+        explicitly_shared: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -285,7 +288,8 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             name: Budget name
             amount_micros: Budget amount in micros (1 million micros = 1 unit)
             delivery_method: STANDARD or ACCELERATED (default: STANDARD)
-            explicitly_shared: Whether the budget can be shared across campaigns
+            explicitly_shared: Whether the budget can be shared across
+                campaigns. Omit to leave unset.
 
         Returns:
             Created budget details including resource_name and budget_id

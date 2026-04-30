@@ -20,7 +20,12 @@ from google.ads.googleads.v23.services.types.ad_group_criterion_label_service im
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -68,9 +73,11 @@ class AdGroupCriterionLabelService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            request = MutateAdGroupCriterionLabelsRequest(
-                customer_id=customer_id,
-                operations=operations,
+            request = MutateAdGroupCriterionLabelsRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
             )

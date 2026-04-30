@@ -112,7 +112,7 @@ async def test_create_basic_user_list(
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
         level="info",
-        message=f"Created basic user list '{name}' with {membership_life_span} day membership",
+        message=f"Created basic user list '{name}'",
     )
 
 

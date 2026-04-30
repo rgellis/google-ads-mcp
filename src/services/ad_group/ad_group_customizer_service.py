@@ -24,7 +24,12 @@ from google.ads.googleads.v23.enums.types.customizer_attribute_type import (
 from google.ads.googleads.v23.common.types.customizer_value import CustomizerValue
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+    set_request_options,
+)
 
 logger = get_logger(__name__)
 
@@ -74,14 +79,15 @@ class AdGroupCustomizerService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            request = MutateAdGroupCustomizersRequest(
-                customer_id=customer_id,
-                operations=operations,
+            request = MutateAdGroupCustomizersRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
+                response_content_type=response_content_type,
             )
-            if response_content_type is not None:
-                request.response_content_type = response_content_type
             response = self.client.mutate_ad_group_customizers(request=request)
             await ctx.log(
                 level="info",

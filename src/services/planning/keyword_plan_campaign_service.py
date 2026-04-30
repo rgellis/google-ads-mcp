@@ -110,21 +110,19 @@ class KeywordPlanCampaignService:
         Returns:
             KeywordPlanCampaignOperation: The operation to create the keyword plan campaign
         """
-        geo_targets = []
-        if geo_target_constants:
-            geo_targets = [
-                KeywordPlanGeoTarget(geo_target_constant=geo_target)
-                for geo_target in geo_target_constants
-            ]
-
         keyword_plan_campaign = KeywordPlanCampaign(
             keyword_plan=keyword_plan,
             name=name,
             keyword_plan_network=keyword_plan_network,
             cpc_bid_micros=cpc_bid_micros,
-            language_constants=language_constants or [],
-            geo_targets=geo_targets,
         )
+        if language_constants:
+            keyword_plan_campaign.language_constants = language_constants
+        if geo_target_constants:
+            keyword_plan_campaign.geo_targets = [
+                KeywordPlanGeoTarget(geo_target_constant=geo_target)
+                for geo_target in geo_target_constants
+            ]
 
         return KeywordPlanCampaignOperation(create=keyword_plan_campaign)
 
@@ -284,8 +282,8 @@ def create_keyword_plan_campaign_tools(
         name: str,
         keyword_plan_network: str,
         cpc_bid_micros: int,
-        language_constants: list[str] = [],
-        geo_target_constants: list[str] = [],
+        language_constants: Optional[list[str]] = None,
+        geo_target_constants: Optional[list[str]] = None,
     ) -> Dict[str, Any]:
         """Create a new keyword plan campaign.
 
@@ -296,8 +294,10 @@ def create_keyword_plan_campaign_tools(
             name: Name of the keyword plan campaign
             keyword_plan_network: Targeting network (GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS)
             cpc_bid_micros: Default CPC bid in micros
-            language_constants: List of language constant resource names
-            geo_target_constants: List of geo target constant resource names
+            language_constants: List of language constant resource names.
+                Omit to leave the field unset (treated as "all").
+            geo_target_constants: List of geo target constant resource names.
+                Omit to leave the field unset (treated as "all").
 
         Returns:
             Serialized response with created keyword plan campaign details

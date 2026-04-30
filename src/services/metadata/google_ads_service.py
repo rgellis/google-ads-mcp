@@ -151,11 +151,17 @@ class GoogleAdsService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Create the request
+            # Create the request. Gate the summary_row_setting assignment
+            # the same way the sibling `search()` method does — proto-default
+            # NO_SUMMARY_ROW would still mark the field set on the wire.
             request = SearchGoogleAdsStreamRequest()
             request.customer_id = customer_id
             request.query = query
-            request.summary_row_setting = summary_row_setting
+            if (
+                summary_row_setting
+                != SummaryRowSettingEnum.SummaryRowSetting.NO_SUMMARY_ROW
+            ):
+                request.summary_row_setting = summary_row_setting
 
             # Execute streaming search
             stream = self.client.search_stream(request=request)
