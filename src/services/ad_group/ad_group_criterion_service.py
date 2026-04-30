@@ -174,7 +174,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         keywords: List[Dict[str, Any]],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -204,7 +204,8 @@ class AdGroupCriterionService:
                 ad_group_criterion.status = (
                     AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
                 )
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 # Set bid if provided and not negative
                 if not negative and "cpc_bid_micros" in keyword:
@@ -298,8 +299,8 @@ class AdGroupCriterionService:
                     AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
                 )
 
-                if negative is not None:
-                    ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -408,10 +409,11 @@ class AdGroupCriterionService:
                     AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
                 )
 
-                # Set negative flag if provided (proto-default rule: don't
-                # write False — let it stay unset on the wire).
-                if "negative" in demo:
-                    ad_group_criterion.negative = demo["negative"]
+                # Set negative flag only when truthy (proto-default rule:
+                # don't write False — it's the default and writing it
+                # would still mark the field as set on the wire).
+                if demo.get("negative"):
+                    ad_group_criterion.negative = True
 
                 # Set bid modifier if provided
                 if "bid_modifier" in demo:
@@ -492,7 +494,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         urls: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -519,7 +521,8 @@ class AdGroupCriterionService:
             for url in urls:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -568,7 +571,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         mobile_app_category_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -596,7 +599,8 @@ class AdGroupCriterionService:
             for resource_name in mobile_app_category_constants:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -645,7 +649,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         app_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -673,7 +677,8 @@ class AdGroupCriterionService:
             for app_id in app_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -722,7 +727,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         video_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -749,7 +754,8 @@ class AdGroupCriterionService:
             for video_id in video_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -798,7 +804,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         channel_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -825,7 +831,8 @@ class AdGroupCriterionService:
             for channel_id in channel_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -874,7 +881,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         topic_constant_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -902,7 +909,8 @@ class AdGroupCriterionService:
             for resource_name in topic_constant_resource_names:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -951,7 +959,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         user_interest_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -978,7 +986,8 @@ class AdGroupCriterionService:
             for resource_name in user_interest_resource_names:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1028,7 +1037,7 @@ class AdGroupCriterionService:
         ad_group_id: str,
         criterion_name: str,
         conditions: List[Dict[str, str]],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1059,7 +1068,8 @@ class AdGroupCriterionService:
 
             ad_group_criterion = AdGroupCriterion()
             ad_group_criterion.ad_group = ad_group_resource
-            ad_group_criterion.negative = negative
+            if negative:
+                ad_group_criterion.negative = True
 
             if bid_modifier is not None and not negative:
                 ad_group_criterion.bid_modifier = bid_modifier
@@ -1122,7 +1132,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         custom_affinity_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1149,7 +1159,8 @@ class AdGroupCriterionService:
             for resource_name in custom_affinity_resource_names:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1198,7 +1209,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         custom_audience_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1225,7 +1236,8 @@ class AdGroupCriterionService:
             for resource_name in custom_audience_resource_names:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1274,7 +1286,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         combined_audience_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1301,7 +1313,8 @@ class AdGroupCriterionService:
             for resource_name in combined_audience_resource_names:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1350,7 +1363,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         location_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1377,7 +1390,8 @@ class AdGroupCriterionService:
             for location_id in location_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1494,7 +1508,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         life_event_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1521,7 +1535,8 @@ class AdGroupCriterionService:
             for life_event_id in life_event_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1570,7 +1585,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         video_lineup_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1597,7 +1612,8 @@ class AdGroupCriterionService:
             for lineup_id in video_lineup_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1646,7 +1662,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         extended_demographic_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1673,7 +1689,8 @@ class AdGroupCriterionService:
             for demographic_id in extended_demographic_ids:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.negative = negative
+                if negative:
+                    ad_group_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     ad_group_criterion.bid_modifier = bid_modifier
@@ -1749,8 +1766,8 @@ class AdGroupCriterionService:
             ad_group_criterion = AdGroupCriterion()
             ad_group_criterion.ad_group = ad_group_resource
 
-            if negative is not None:
-                ad_group_criterion.negative = negative
+            if negative:
+                ad_group_criterion.negative = True
 
             brand_list_info = BrandListInfo()
             brand_list_info.shared_set = shared_set_resource_name
@@ -1950,7 +1967,7 @@ class AdGroupCriterionService:
         customer_id: str,
         ad_group_id: str,
         shared_set_resource_name: str,
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1974,7 +1991,8 @@ class AdGroupCriterionService:
 
             ad_group_criterion = AdGroupCriterion()
             ad_group_criterion.ad_group = ad_group_resource
-            ad_group_criterion.negative = negative
+            if negative:
+                ad_group_criterion.negative = True
 
             rule_list_info = VerticalAdsItemGroupRuleListInfo()
             rule_list_info.shared_set = shared_set_resource_name
@@ -2168,7 +2186,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         keywords: List[Dict[str, Any]],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2285,7 +2303,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         urls: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2320,7 +2338,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         mobile_app_category_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2356,7 +2374,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         app_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2392,7 +2410,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         video_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2427,7 +2445,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         channel_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2462,7 +2480,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         topic_constant_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2498,7 +2516,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         user_interest_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2535,7 +2553,7 @@ def create_ad_group_criterion_tools(
         ad_group_id: str,
         criterion_name: str,
         conditions: List[Dict[str, str]],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2575,7 +2593,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         custom_affinity_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2611,7 +2629,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         custom_audience_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2647,7 +2665,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         combined_audience_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2683,7 +2701,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         location_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2747,7 +2765,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         life_event_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2782,7 +2800,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         video_lineup_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2817,7 +2835,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         extended_demographic_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2963,7 +2981,7 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         ad_group_id: str,
         shared_set_resource_name: str,
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,

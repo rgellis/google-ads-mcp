@@ -116,7 +116,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         location_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -145,7 +145,8 @@ class CampaignCriterionService:
                 # Create campaign criterion
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -521,7 +522,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         user_list_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -548,7 +549,8 @@ class CampaignCriterionService:
             for user_list_resource_name in user_list_resource_names:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -977,7 +979,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         user_interest_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1004,7 +1006,8 @@ class CampaignCriterionService:
             for resource_name in user_interest_resource_names:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -1053,7 +1056,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         topic_constant_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1081,7 +1084,8 @@ class CampaignCriterionService:
             for resource_name in topic_constant_resource_names:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -1860,7 +1864,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         carrier_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1888,7 +1892,8 @@ class CampaignCriterionService:
             for resource_name in carrier_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -1937,7 +1942,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         mobile_app_category_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -1963,7 +1968,8 @@ class CampaignCriterionService:
             for resource_name in mobile_app_category_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 mobile_app_category_info = MobileAppCategoryInfo()
                 mobile_app_category_info.mobile_app_category_constant = resource_name
@@ -2009,7 +2015,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         app_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2035,7 +2041,8 @@ class CampaignCriterionService:
             for app_id in app_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 mobile_application_info = MobileApplicationInfo()
                 mobile_application_info.app_id = app_id
@@ -2081,7 +2088,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         mobile_device_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2107,7 +2114,8 @@ class CampaignCriterionService:
             for resource_name in mobile_device_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 mobile_device_info = MobileDeviceInfo()
                 mobile_device_info.mobile_device_constant = resource_name
@@ -2153,7 +2161,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         os_version_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2179,7 +2187,8 @@ class CampaignCriterionService:
             for resource_name in os_version_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 os_version_info = OperatingSystemVersionInfo()
                 os_version_info.operating_system_version_constant = resource_name
@@ -2230,7 +2239,7 @@ class CampaignCriterionService:
         feed_item_sets: Optional[List[str]] = None,
         location_group_asset_sets: Optional[List[str]] = None,
         enable_customer_level_location_asset_set: Optional[bool] = None,
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2259,7 +2268,8 @@ class CampaignCriterionService:
 
             campaign_criterion = CampaignCriterion()
             campaign_criterion.campaign = campaign_resource
-            campaign_criterion.negative = negative
+            if negative:
+                campaign_criterion.negative = True
 
             location_group_info = LocationGroupInfo()
 
@@ -2414,7 +2424,7 @@ class CampaignCriterionService:
         campaign_id: str,
         criterion_name: str,
         conditions: List[Dict[str, str]],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2443,7 +2453,8 @@ class CampaignCriterionService:
 
             campaign_criterion = CampaignCriterion()
             campaign_criterion.campaign = campaign_resource
-            campaign_criterion.negative = negative
+            if negative:
+                campaign_criterion.negative = True
 
             webpage_info = WebpageInfo()
             webpage_info.criterion_name = criterion_name
@@ -2708,7 +2719,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         video_lineup_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2733,7 +2744,8 @@ class CampaignCriterionService:
             for lineup_id in video_lineup_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 video_lineup_info = VideoLineupInfo()
                 video_lineup_info.video_lineup_id = lineup_id
@@ -2779,7 +2791,7 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         extended_demographic_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -2806,7 +2818,8 @@ class CampaignCriterionService:
             for demographic_id in extended_demographic_ids:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                campaign_criterion.negative = negative
+                if negative:
+                    campaign_criterion.negative = True
 
                 if bid_modifier is not None and not negative:
                     campaign_criterion.bid_modifier = bid_modifier
@@ -3003,7 +3016,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         location_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -3181,7 +3194,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         user_list_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -3441,7 +3454,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         user_interest_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -3478,7 +3491,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         topic_constant_resource_names: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -3864,7 +3877,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         carrier_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -3901,7 +3914,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         mobile_app_category_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3934,7 +3947,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         app_ids: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3966,7 +3979,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         mobile_device_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3999,7 +4012,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         os_version_constants: List[str],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -4037,7 +4050,7 @@ def create_campaign_criterion_tools(
         feed_item_sets: Optional[List[str]] = None,
         location_group_asset_sets: Optional[List[str]] = None,
         enable_customer_level_location_asset_set: Optional[bool] = None,
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -4116,7 +4129,7 @@ def create_campaign_criterion_tools(
         campaign_id: str,
         criterion_name: str,
         conditions: List[Dict[str, str]],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -4248,7 +4261,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         video_lineup_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -4280,7 +4293,7 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         extended_demographic_ids: List[int],
-        negative: bool = False,
+        negative: Optional[bool] = None,
         bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
