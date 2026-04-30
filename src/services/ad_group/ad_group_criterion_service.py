@@ -657,14 +657,20 @@ class AdGroupCriterionService:
     ) -> Dict[str, Any]:
         """Add specific mobile application targeting criteria to an ad group.
 
+        Both positive (placement targeting) and negative (placement
+        exclusion) are supported on Display, Demand Gen, and Video
+        campaigns where mobile-app placements are valid inventory.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
             app_ids: List of mobile application IDs (e.g., "1-123456789" for
                 Android or "1-com.example.app" format)
-            negative: Whether these are negative criteria
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to exclude. Omit to leave unset (positive
+                targeting). Distinct from a low bid_modifier.
+            bid_modifier: Multiplier on base bid, range 0.1–10.0.
+                Not valid on negative criteria.
 
         Returns:
             Mutation response with created ad group criteria
@@ -735,13 +741,19 @@ class AdGroupCriterionService:
     ) -> Dict[str, Any]:
         """Add YouTube video targeting criteria to an ad group.
 
+        Ad-group level supports both positive (placement targeting) and
+        negative (placement exclusion) on Video campaigns. Use the
+        campaign-level wrapper for Video-campaign-wide exclusions.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
             video_ids: List of YouTube video IDs
-            negative: Whether these are negative criteria
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to exclude. Omit to leave unset (positive
+                targeting). Distinct from a low bid_modifier.
+            bid_modifier: Multiplier on base bid, range 0.1–10.0.
+                Not valid on negative criteria.
 
         Returns:
             Mutation response with created ad group criteria
@@ -812,13 +824,19 @@ class AdGroupCriterionService:
     ) -> Dict[str, Any]:
         """Add YouTube channel targeting criteria to an ad group.
 
+        Ad-group level supports both positive (channel targeting) and
+        negative (channel exclusion) on Video campaigns. Use the
+        campaign-level wrapper for Video-campaign-wide exclusions.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
             channel_ids: List of YouTube channel IDs
-            negative: Whether these are negative criteria
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to exclude. Omit to leave unset (positive
+                targeting). Distinct from a low bid_modifier.
+            bid_modifier: Multiplier on base bid, range 0.1–10.0.
+                Not valid on negative criteria.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1371,13 +1389,21 @@ class AdGroupCriterionService:
     ) -> Dict[str, Any]:
         """Add location targeting criteria to an ad group.
 
+        Ad-group location targeting is supported by the API on Display
+        and Video campaigns for narrowing geography within a broader
+        campaign-level geo. For Search / Shopping / PMax, set location at
+        the campaign level instead — ad-group location may be silently
+        ignored or rejected.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
             location_ids: List of geo target constant IDs
-            negative: Whether these are negative criteria
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to exclude. Omit to leave unset (positive
+                targeting). Distinct from a low bid_modifier.
+            bid_modifier: Multiplier on base bid, range 0.1–10.0.
+                Not valid on negative criteria.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1516,13 +1542,23 @@ class AdGroupCriterionService:
     ) -> Dict[str, Any]:
         """Add life event targeting criteria to an ad group.
 
+        Caveat: the v23 proto carries `AdGroupCriterion.life_event`, but
+        the public Google Ads API criteria reference lists life_event as
+        a campaign-level criterion only. The Google Ads UI surfaces life
+        events at the ad group level on Video, so this path may work in
+        practice — but the API may reject ad-group submission depending
+        on the channel. Prefer the campaign-level wrapper unless you
+        explicitly need ad-group scoping.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
             life_event_ids: List of life event taxonomy IDs
-            negative: Whether these are negative criteria
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            negative: Pass True to exclude. Omit to leave unset (positive
+                targeting). Distinct from a low bid_modifier.
+            bid_modifier: Multiplier on base bid, range 0.1–10.0.
+                Not valid on negative criteria.
 
         Returns:
             Mutation response with created ad group criteria
@@ -1974,13 +2010,20 @@ class AdGroupCriterionService:
     ) -> Dict[str, Any]:
         """Add vertical ads item group rules from a shared set for product-level targeting.
 
+        Restricted to AI-Max-enabled Search campaigns linked to a vertical
+        feed (e.g. hotels). The rules themselves carry per-rule
+        inclusion/exclusion flags; the `negative` field on this criterion
+        wraps the entire rule-list link as a positive or negative
+        association. Will be rejected on any non-Search-AI-Max campaign.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
-            shared_set_resource_name: Resource name of the shared set containing
-                the vertical ads item group rules
-            negative: Whether this is a negative criterion
+            shared_set_resource_name: Resource name of the shared set
+                containing the vertical ads item group rules
+            negative: Pass True to wrap the rule-list link as a negative
+                association. Omit to leave unset (positive).
 
         Returns:
             Mutation response with created ad group criteria

@@ -907,19 +907,23 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         parental_statuses: List[ParentalStatusTypeEnum.ParentalStatusType],
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Add parental status demographic targeting criteria to a campaign.
+        """Add parental status exclusion criteria to a campaign.
+
+        Per the Google Ads API criteria reference, parental_status at the
+        campaign level is exclusion-only on every channel — positive bid
+        adjustment for parental status must be done at the ad group level.
+        The ``negative`` field is hardcoded to True; ``bid_modifier`` is
+        not exposed because it's not valid on negative criteria.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
-            parental_statuses: List of parental status enum values
-            bid_modifier: Optional bid modifier
+            parental_statuses: List of parental status enum values to exclude
 
         Returns:
             Mutation response with created campaign criteria
@@ -932,8 +936,7 @@ class CampaignCriterionService:
             for parental_status in parental_statuses:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                if bid_modifier is not None:
-                    campaign_criterion.bid_modifier = bid_modifier
+                campaign_criterion.negative = True
 
                 parental_status_info = ParentalStatusInfo()
                 parental_status_info.type_ = parental_status
@@ -2022,6 +2025,10 @@ class CampaignCriterionService:
     ) -> Dict[str, Any]:
         """Add specific mobile application targeting criteria to a campaign.
 
+        Both positive and negative are supported on channels that allow
+        mobile-app placements (Display, Demand Gen, Video). The criterion
+        is exclusion-only at the customer level (CustomerNegativeCriterion).
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
@@ -2088,12 +2095,16 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         mobile_device_constants: List[str],
-        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add mobile device model targeting criteria to a campaign.
+
+        Per the Google Ads API criteria reference, mobile_device is a
+        positive-only bid-adjustment criterion at the campaign level —
+        the API forbids ``negative=true`` here. The wrapper does not
+        expose a ``negative`` parameter for that reason.
 
         Args:
             ctx: FastMCP context
@@ -2101,7 +2112,6 @@ class CampaignCriterionService:
             campaign_id: The campaign ID
             mobile_device_constants: List of mobile device constant resource names
                 (e.g., "mobileDeviceConstants/123")
-            negative: Whether these are negative criteria
 
         Returns:
             Mutation response with created campaign criteria
@@ -2114,8 +2124,6 @@ class CampaignCriterionService:
             for resource_name in mobile_device_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                if negative:
-                    campaign_criterion.negative = True
 
                 mobile_device_info = MobileDeviceInfo()
                 mobile_device_info.mobile_device_constant = resource_name
@@ -2161,12 +2169,16 @@ class CampaignCriterionService:
         customer_id: str,
         campaign_id: str,
         os_version_constants: List[str],
-        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Add operating system version targeting criteria to a campaign.
+
+        Per the Google Ads API criteria reference, operating_system_version
+        is a positive-only bid-adjustment criterion at the campaign level —
+        the API forbids ``negative=true`` here. The wrapper does not expose
+        a ``negative`` parameter for that reason.
 
         Args:
             ctx: FastMCP context
@@ -2174,7 +2186,6 @@ class CampaignCriterionService:
             campaign_id: The campaign ID
             os_version_constants: List of operating system version constant
                 resource names (e.g., "operatingSystemVersionConstants/123")
-            negative: Whether these are negative criteria
 
         Returns:
             Mutation response with created campaign criteria
@@ -2187,8 +2198,6 @@ class CampaignCriterionService:
             for resource_name in os_version_constants:
                 campaign_criterion = CampaignCriterion()
                 campaign_criterion.campaign = campaign_resource
-                if negative:
-                    campaign_criterion.negative = True
 
                 os_version_info = OperatingSystemVersionInfo()
                 os_version_info.operating_system_version_constant = resource_name
@@ -3411,24 +3420,24 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         parental_statuses: List[str],
-        bid_modifier: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Add parental status demographic targeting criteria to a campaign.
+        """Add parental status exclusion criteria to a campaign.
 
-        Note: On Search campaigns, campaign-level demographics are negative
-        (exclusion) only and do not support bid modifiers. For demographic bid
-        adjustments on Search campaigns, use the ad group criterion tools instead.
+        Per the Google Ads API criteria reference, parental_status at the
+        campaign level is exclusion-only on every channel — for positive
+        bid adjustments by parental status, use the ad-group criterion
+        tools. The criterion is always created as a negative exclusion;
+        bid_modifier is not exposed because it's not valid on negative
+        criteria.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
-            parental_statuses: List of parental status values. Valid values:
-                PARENT, NOT_A_PARENT, UNDETERMINED
-            bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
-                0.5 = -50%. Must be > 0.
+            parental_statuses: List of parental status values to exclude.
+                Valid values: PARENT, NOT_A_PARENT, UNDETERMINED
 
         Returns:
             Mutation response with created campaign criteria
@@ -3443,7 +3452,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             parental_statuses=parental_status_enums,
-            bid_modifier=bid_modifier,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3979,19 +3987,21 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         mobile_device_constants: List[str],
-        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Campaign-level only. Positive targeting only. Add mobile device model targeting criteria to a campaign.
+        """Campaign-level only. Positive bid-adjustment only. Add mobile device model criteria to a campaign.
+
+        The Google Ads API criteria reference lists mobile_device as
+        positive-only at the campaign level; ``negative=true`` is forbidden,
+        so the wrapper does not expose a ``negative`` parameter.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             mobile_device_constants: List of mobile device constant resource names
                 (e.g., "mobileDeviceConstants/123")
-            negative: Whether these are negative criteria
 
         Returns:
             Mutation response with created campaign criteria
@@ -4001,7 +4011,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             mobile_device_constants=mobile_device_constants,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -4012,19 +4021,21 @@ def create_campaign_criterion_tools(
         customer_id: str,
         campaign_id: str,
         os_version_constants: List[str],
-        negative: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Campaign-level only. Positive targeting only. Add operating system version targeting criteria to a campaign.
+        """Campaign-level only. Positive bid-adjustment only. Add OS version criteria to a campaign.
+
+        The Google Ads API criteria reference lists operating_system_version
+        as positive-only at the campaign level; ``negative=true`` is
+        forbidden, so the wrapper does not expose a ``negative`` parameter.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             os_version_constants: List of OS version constant resource names
                 (e.g., "operatingSystemVersionConstants/123")
-            negative: Whether these are negative criteria
 
         Returns:
             Mutation response with created campaign criteria
@@ -4034,7 +4045,6 @@ def create_campaign_criterion_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             os_version_constants=os_version_constants,
-            negative=negative,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
