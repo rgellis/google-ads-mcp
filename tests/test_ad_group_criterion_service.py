@@ -318,6 +318,61 @@ async def test_add_audience_criteria_no_bid_modifier(
 
 
 @pytest.mark.asyncio
+async def test_add_audience_criteria_negative(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Adding an audience exclusion writes negative=True on the wire (Phase 9.2)."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    user_list_ids = ["123456"]
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 350)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    await ad_group_criterion_service.add_audience_criteria(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        ad_group_id=ad_group_id,
+        user_list_ids=user_list_ids,
+        negative=True,
+    )
+
+    request = mock_client.mutate_ad_group_criteria.call_args[1]["request"]  # type: ignore
+    criterion = request.operations[0].create
+    assert criterion.negative is True
+
+
+@pytest.mark.asyncio
+async def test_add_audience_criteria_omit_negative_unset(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Omitting `negative` leaves the field unset on the wire (proto-default rule)."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 360)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    await ad_group_criterion_service.add_audience_criteria(
+        ctx=mock_ctx,
+        customer_id=customer_id,
+        ad_group_id=ad_group_id,
+        user_list_ids=["123456"],
+    )
+
+    request = mock_client.mutate_ad_group_criteria.call_args[1]["request"]  # type: ignore
+    criterion = request.operations[0].create
+    # proto reads back default False when unset; the gating means the field
+    # was never assigned, so this is the expected readback.
+    assert criterion.negative is False
+
+
+@pytest.mark.asyncio
 async def test_add_demographic_criteria(
     ad_group_criterion_service: AdGroupCriterionService,
     mock_sdk_client: Any,
@@ -430,6 +485,47 @@ async def test_add_demographic_criteria(
         level="info",
         message=f"Added {len(demographics)} demographic criteria to ad group {ad_group_id}",
     )
+
+
+@pytest.mark.asyncio
+async def test_add_demographic_criteria_per_row_negative(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Per-row 'negative' key on a demographic dict creates an exclusion (Phase 9.2)."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    demographics = [
+        # First: positive bid adjustment (no negative key)
+        {"type": "AGE_RANGE", "value": "AGE_RANGE_25_34", "bid_modifier": 1.1},
+        # Second: explicit exclusion
+        {"type": "GENDER", "value": "MALE", "negative": True},
+        # Third: explicit positive (negative=False is treated as omitted)
+        {"type": "INCOME_RANGE", "value": "INCOME_RANGE_50_60", "negative": False},
+    ]
+    mock_response = _make_mock_response(
+        customer_id, ad_group_id, len(demographics), 450
+    )
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result: Dict[str, Any] = {"results": [{"resource_name": "x"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        await ad_group_criterion_service.add_demographic_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            demographics=demographics,
+        )
+
+    request = mock_client.mutate_ad_group_criteria.call_args[1]["request"]  # type: ignore
+    assert request.operations[0].create.negative is False  # no negative key
+    assert request.operations[1].create.negative is True  # explicit True
+    assert request.operations[2].create.negative is False  # negative=False → unset
 
 
 @pytest.mark.asyncio
@@ -1081,6 +1177,40 @@ async def test_add_brand_list_criteria(
     call_args = mock_client.mutate_ad_group_criteria.call_args  # type: ignore
     request = call_args[1]["request"]
     assert request.operations[0].create.brand_list.shared_set == shared_set
+    # Default (no negative passed): field unset, reads back as False.
+    assert request.operations[0].create.negative is False
+
+
+@pytest.mark.asyncio
+async def test_add_brand_list_criteria_negative(
+    ad_group_criterion_service: AdGroupCriterionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Brand list at ad-group level supports negative exclusion (Phase 9.2)."""
+    customer_id = "1234567890"
+    ad_group_id = "9876543210"
+    shared_set = "customers/1234567890/sharedSets/456"
+
+    mock_response = _make_mock_response(customer_id, ad_group_id, 1, 2150)
+    mock_client = ad_group_criterion_service.client  # type: ignore
+    mock_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
+
+    expected_result = {"results": [{"resource_name": "test"}]}
+    with patch(
+        "src.services.ad_group.ad_group_criterion_service.serialize_proto_message",
+        return_value=expected_result,
+    ):
+        await ad_group_criterion_service.add_brand_list_criteria(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            shared_set_resource_name=shared_set,
+            negative=True,
+        )
+
+    request = mock_client.mutate_ad_group_criteria.call_args[1]["request"]  # type: ignore
+    assert request.operations[0].create.negative is True
 
 
 @pytest.mark.asyncio

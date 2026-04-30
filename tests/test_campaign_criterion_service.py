@@ -12,6 +12,9 @@ from google.ads.googleads.v23.enums.types.gender_type import GenderTypeEnum
 from google.ads.googleads.v23.enums.types.income_range_type import IncomeRangeTypeEnum
 from google.ads.googleads.v23.enums.types.keyword_match_type import KeywordMatchTypeEnum
 from google.ads.googleads.v23.enums.types.minute_of_hour import MinuteOfHourEnum
+from google.ads.googleads.v23.enums.types.parental_status_type import (
+    ParentalStatusTypeEnum,
+)
 from google.ads.googleads.v23.enums.types.proximity_radius_units import (
     ProximityRadiusUnitsEnum,
 )
@@ -1155,7 +1158,7 @@ async def test_add_parental_status_criteria(
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test adding parental status criteria."""
+    """Campaign-level parental_status is hardcoded as a negative exclusion."""
     customer_id = "1234567890"
     campaign_id = "12345"
 
@@ -1181,6 +1184,18 @@ async def test_add_parental_status_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+
+    # Verify the wire payload: negative is hardcoded True, no bid_modifier
+    # is set, and the parental_status oneof is populated.
+    call_args = mock_client.mutate_campaign_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.negative is True
+    assert criterion.bid_modifier == 0  # unset reads back as proto default
+    assert (
+        criterion.parental_status.type_
+        == ParentalStatusTypeEnum.ParentalStatusType.PARENT
+    )
 
 
 @pytest.mark.asyncio
@@ -1283,6 +1298,14 @@ async def test_add_placement_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
+    assert criterion.placement.url == "example.com"
 
 
 @pytest.mark.asyncio
@@ -1317,6 +1340,13 @@ async def test_add_youtube_channel_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1351,6 +1381,13 @@ async def test_add_youtube_video_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1385,6 +1422,13 @@ async def test_add_content_label_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1419,6 +1463,13 @@ async def test_add_custom_audience_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1453,6 +1504,13 @@ async def test_add_custom_affinity_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1487,6 +1545,13 @@ async def test_add_combined_audience_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1521,6 +1586,13 @@ async def test_add_life_event_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
 
 
 @pytest.mark.asyncio
@@ -1699,7 +1771,7 @@ async def test_add_mobile_device_criteria(
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test adding mobile device criteria."""
+    """Mobile device is positive-only at campaign level — negative param dropped."""
     customer_id = "1234567890"
     campaign_id = "12345"
 
@@ -1726,6 +1798,19 @@ async def test_add_mobile_device_criteria(
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
 
+    # Wrapper does not expose `negative`; it must never be set on the wire.
+    call_args = mock_client.mutate_campaign_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.negative is False  # proto default readback (unset)
+    assert criterion.mobile_device.mobile_device_constant == "mobileDeviceConstants/123"
+
+    # And confirm the param is gone from the API surface.
+    import inspect
+
+    sig = inspect.signature(campaign_criterion_service.add_mobile_device_criteria)
+    assert "negative" not in sig.parameters
+
 
 @pytest.mark.asyncio
 async def test_add_operating_system_criteria(
@@ -1733,7 +1818,7 @@ async def test_add_operating_system_criteria(
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test adding operating system criteria."""
+    """OS version is positive-only at campaign level — negative param dropped."""
     customer_id = "1234567890"
     campaign_id = "12345"
 
@@ -1759,6 +1844,17 @@ async def test_add_operating_system_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+
+    # Wrapper does not expose `negative`; it must never be set on the wire.
+    call_args = mock_client.mutate_campaign_criteria.call_args  # type: ignore
+    request = call_args[1]["request"]
+    criterion = request.operations[0].create
+    assert criterion.negative is False  # proto default readback (unset)
+
+    import inspect
+
+    sig = inspect.signature(campaign_criterion_service.add_operating_system_criteria)
+    assert "negative" not in sig.parameters
 
 
 @pytest.mark.asyncio
@@ -1966,6 +2062,16 @@ async def test_add_webpage_list_criteria(
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
+    # Negative-only at campaign level: negative is hardcoded True.
+    criterion = (
+        mock_client.mutate_campaign_criteria.call_args[1]["request"]
+        .operations[0]
+        .create
+    )  # type: ignore
+    assert criterion.negative is True
+    assert (
+        criterion.webpage_list.shared_set == f"customers/{customer_id}/sharedSets/789"
+    )
 
 
 @pytest.mark.asyncio
