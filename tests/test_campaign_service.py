@@ -410,6 +410,7 @@ async def test_error_handling_create_campaign(
             customer_id=customer_id,
             name=name,
             budget_resource_name=budget_resource_name,
+            advertising_channel_type=AdvertisingChannelTypeEnum.AdvertisingChannelType.SEARCH,
             bidding_strategy="MANUAL_CPC",
         )
 

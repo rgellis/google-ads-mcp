@@ -111,6 +111,8 @@ async def test_create_customer_client_with_email_and_role(
             ctx=mock_ctx,
             manager_customer_id="1234567890",
             descriptive_name="New Client",
+            currency_code="USD",
+            time_zone="America/New_York",
             email_address="client@example.com",
             access_role="ADMIN",
         )

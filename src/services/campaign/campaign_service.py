@@ -75,12 +75,12 @@ class CampaignService:
         customer_id: str,
         name: str,
         budget_resource_name: str,
-        advertising_channel_type: AdvertisingChannelTypeEnum.AdvertisingChannelType = AdvertisingChannelTypeEnum.AdvertisingChannelType.SEARCH,
+        advertising_channel_type: AdvertisingChannelTypeEnum.AdvertisingChannelType,
         status: CampaignStatusEnum.CampaignStatus = CampaignStatusEnum.CampaignStatus.PAUSED,
-        target_google_search: bool = True,
-        target_search_network: bool = False,
-        target_content_network: bool = False,
-        target_partner_search_network: bool = False,
+        target_google_search: Optional[bool] = None,
+        target_search_network: Optional[bool] = None,
+        target_content_network: Optional[bool] = None,
+        target_partner_search_network: Optional[bool] = None,
         bidding_strategy: Optional[str] = None,
         bidding_strategy_resource_name: Optional[str] = None,
         target_cpa_micros: Optional[int] = None,
@@ -94,17 +94,34 @@ class CampaignService:
     ) -> Dict[str, Any]:
         """Create a new campaign.
 
+        ``advertising_channel_type`` is **Required and Immutable** per the
+        Campaign proto — picking SEARCH for a caller who meant Display,
+        Shopping, PMax, Demand Gen, or Video silently misclassifies the
+        campaign forever. The wrapper requires it explicitly.
+
+        The four ``target_*`` network booleans are each ``optional=True``
+        in the proto: even default ``False`` is marked-set on the wire
+        (see CLAUDE.md proto-default rule). They're now ``Optional[bool]``
+        and only assigned when the caller passes a value.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             name: Campaign name
             budget_resource_name: Resource name of the campaign budget
-            advertising_channel_type: Type of advertising channel (SEARCH, DISPLAY, etc.)
+            advertising_channel_type: Required. SEARCH, DISPLAY, SHOPPING,
+                HOTEL, VIDEO, MULTI_CHANNEL, LOCAL, SMART, PERFORMANCE_MAX,
+                LOCAL_SERVICES, TRAVEL, DEMAND_GEN. Cannot be changed after
+                the campaign is created.
             status: Campaign status (ENABLED, PAUSED, REMOVED)
-            target_google_search: Show ads on Google Search (default: True)
-            target_search_network: Show ads on Google search partner sites (default: False)
-            target_content_network: Show ads on Google Display Network (default: False)
-            target_partner_search_network: Show ads on partner search network (default: False)
+            target_google_search: Show ads on Google Search. Omit to leave
+                the network setting unset (server-side default applies).
+            target_search_network: Show ads on Google search partner sites.
+                Omit to leave the network setting unset.
+            target_content_network: Show ads on the Google Display Network.
+                Omit to leave the network setting unset.
+            target_partner_search_network: Show ads on the partner search
+                network. Omit to leave the network setting unset.
             bidding_strategy: Bidding strategy type - MANUAL_CPC, MAXIMIZE_CONVERSIONS,
                 MAXIMIZE_CONVERSION_VALUE, TARGET_CPA, TARGET_ROAS, TARGET_SPEND,
                 TARGET_IMPRESSION_SHARE. If not set, defaults to MANUAL_CPC.
@@ -131,15 +148,23 @@ class CampaignService:
             campaign.name = name
             campaign.campaign_budget = budget_resource_name
 
-            # Set network settings
-            campaign.network_settings.target_google_search = target_google_search
-            campaign.network_settings.target_search_network = target_search_network
-            campaign.network_settings.target_content_network = target_content_network
-            campaign.network_settings.target_partner_search_network = (
-                target_partner_search_network
-            )
+            # Set network settings only when caller supplies a value (each
+            # field is optional=True in the proto; default False is still
+            # marked-set on the wire — CLAUDE.md proto-default rule).
+            if target_google_search is not None:
+                campaign.network_settings.target_google_search = target_google_search
+            if target_search_network is not None:
+                campaign.network_settings.target_search_network = target_search_network
+            if target_content_network is not None:
+                campaign.network_settings.target_content_network = (
+                    target_content_network
+                )
+            if target_partner_search_network is not None:
+                campaign.network_settings.target_partner_search_network = (
+                    target_partner_search_network
+                )
 
-            # Set advertising channel type
+            # Set advertising channel type (Required, Immutable per proto)
             campaign.advertising_channel_type = advertising_channel_type
 
             # Set status
@@ -494,12 +519,12 @@ def create_campaign_tools(
         customer_id: str,
         name: str,
         budget_resource_name: str,
-        advertising_channel_type: str = "SEARCH",
+        advertising_channel_type: str,
         status: str = "PAUSED",
-        target_google_search: bool = True,
-        target_search_network: bool = False,
-        target_content_network: bool = False,
-        target_partner_search_network: bool = False,
+        target_google_search: Optional[bool] = None,
+        target_search_network: Optional[bool] = None,
+        target_content_network: Optional[bool] = None,
+        target_partner_search_network: Optional[bool] = None,
         bidding_strategy: Optional[str] = None,
         bidding_strategy_resource_name: Optional[str] = None,
         target_cpa_micros: Optional[int] = None,
@@ -513,17 +538,33 @@ def create_campaign_tools(
     ) -> Dict[str, Any]:
         """Create a new campaign.
 
+        ``advertising_channel_type`` is Required and Immutable per the
+        Campaign proto — defaulting to SEARCH for a caller who meant
+        Display, Shopping, PMax, Demand Gen, or Video would silently
+        misclassify the campaign forever.
+
+        The four ``target_*`` booleans are now Optional. Each is
+        ``optional=True`` in the proto, so passing a hardcoded default
+        (even False) marks the field as set on the wire (CLAUDE.md
+        proto-default rule). Omit them to leave network settings unset.
+
         Args:
             customer_id: The customer ID
             name: Campaign name
             budget_resource_name: Resource name of the campaign budget (e.g. customers/123/campaignBudgets/456)
-            advertising_channel_type: Channel type - SEARCH, DISPLAY, SHOPPING, VIDEO,
-                MULTI_CHANNEL, LOCAL, SMART, PERFORMANCE_MAX, DEMAND_GEN, TRAVEL
+            advertising_channel_type: Required. Channel type - SEARCH, DISPLAY,
+                SHOPPING, HOTEL, VIDEO, MULTI_CHANNEL, LOCAL, SMART,
+                PERFORMANCE_MAX, LOCAL_SERVICES, TRAVEL, DEMAND_GEN. Cannot
+                be changed after the campaign is created.
             status: Campaign status - ENABLED or PAUSED
-            target_google_search: Show ads on Google Search results (default: true)
-            target_search_network: Show ads on Google search partner sites (default: false)
-            target_content_network: Show ads on Google Display Network (default: false)
-            target_partner_search_network: Show ads on partner search network (default: false)
+            target_google_search: Show ads on Google Search results
+                (omit to leave unset)
+            target_search_network: Show ads on Google search partner sites
+                (omit to leave unset)
+            target_content_network: Show ads on Google Display Network
+                (omit to leave unset)
+            target_partner_search_network: Show ads on partner search
+                network (omit to leave unset)
             bidding_strategy: Bidding strategy type - MANUAL_CPC (default), MAXIMIZE_CONVERSIONS,
                 MAXIMIZE_CONVERSION_VALUE, TARGET_CPA, TARGET_ROAS, TARGET_SPEND,
                 TARGET_IMPRESSION_SHARE

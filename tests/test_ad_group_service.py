@@ -258,6 +258,7 @@ async def test_error_handling(
             customer_id=customer_id,
             campaign_id=campaign_id,
             name="Test Ad Group",
+            type=AdGroupTypeEnum.AdGroupType.SEARCH_STANDARD,
         )
 
     assert "Failed to create ad group" in str(exc_info.value)

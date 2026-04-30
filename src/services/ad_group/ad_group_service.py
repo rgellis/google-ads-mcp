@@ -50,8 +50,8 @@ class AdGroupService:
         customer_id: str,
         campaign_id: str,
         name: str,
+        type: AdGroupTypeEnum.AdGroupType,
         status: AdGroupStatusEnum.AdGroupStatus = AdGroupStatusEnum.AdGroupStatus.ENABLED,
-        type: AdGroupTypeEnum.AdGroupType = AdGroupTypeEnum.AdGroupType.SEARCH_STANDARD,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
         partial_failure: bool = False,
@@ -60,13 +60,23 @@ class AdGroupService:
     ) -> Dict[str, Any]:
         """Create a new ad group.
 
+        ``type`` is required and must match the parent campaign's
+        advertising_channel_type. Defaulting to SEARCH_STANDARD breaks
+        creation under non-Search campaigns and silently misclassifies
+        ad groups that should have been Display, Shopping, Video, or
+        PMax types.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
             name: Ad group name
+            type: Required. Ad group type. Must match the parent campaign's
+                channel type — e.g. SEARCH_STANDARD for SEARCH campaigns,
+                DISPLAY_STANDARD for DISPLAY, SHOPPING_PRODUCT_ADS for
+                SHOPPING, VIDEO_BUMPER / VIDEO_TRUE_VIEW_IN_STREAM /
+                VIDEO_NON_SKIPPABLE_IN_STREAM for VIDEO, etc.
             status: Ad group status enum value
-            type: Ad group type enum value
             cpc_bid_micros: Cost per click bid in micros (1 million micros = 1 unit)
             cpm_bid_micros: Cost per thousand impressions bid in micros
 
@@ -296,8 +306,8 @@ def create_ad_group_tools(
         customer_id: str,
         campaign_id: str,
         name: str,
+        type: str,
         status: str = "ENABLED",
-        type: str = "SEARCH_STANDARD",
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
         partial_failure: bool = False,
@@ -306,12 +316,21 @@ def create_ad_group_tools(
     ) -> Dict[str, Any]:
         """Create a new ad group.
 
+        ``type`` is required because it must match the parent campaign's
+        channel type. The previous SEARCH_STANDARD default broke creation
+        under non-Search campaigns and silently misclassified ad groups
+        on Display, Shopping, Video, and PMax campaigns.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             name: Ad group name
+            type: Required. Ad group type matching the parent campaign's
+                channel: SEARCH_STANDARD for SEARCH campaigns,
+                DISPLAY_STANDARD for DISPLAY, SHOPPING_PRODUCT_ADS for
+                SHOPPING, VIDEO_BUMPER / VIDEO_TRUE_VIEW_IN_STREAM /
+                VIDEO_NON_SKIPPABLE_IN_STREAM for VIDEO, etc.
             status: Ad group status (ENABLED, PAUSED, REMOVED)
-            type: Ad group type (SEARCH_STANDARD, DISPLAY_STANDARD, SHOPPING_PRODUCT_ADS, etc.)
             cpc_bid_micros: Cost per click bid in micros (1 million micros = 1 unit)
             cpm_bid_micros: Cost per thousand impressions bid in micros
 
@@ -327,8 +346,8 @@ def create_ad_group_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             name=name,
-            status=status_enum,
             type=type_enum,
+            status=status_enum,
             cpc_bid_micros=cpc_bid_micros,
             cpm_bid_micros=cpm_bid_micros,
             partial_failure=partial_failure,

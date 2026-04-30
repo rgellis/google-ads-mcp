@@ -51,19 +51,26 @@ class CustomerService:
         ctx: Context,
         manager_customer_id: str,
         descriptive_name: str,
-        currency_code: str = "USD",
-        time_zone: str = "America/New_York",
+        currency_code: str,
+        time_zone: str,
         email_address: Optional[str] = None,
         access_role: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new client customer under a manager account.
 
+        ``currency_code`` and ``time_zone`` are **immutable after creation**
+        per the Customer proto. The wrapper has no safe default — picking
+        USD / America/New_York for a non-US caller silently locks the
+        account to that locale forever. Both are required.
+
         Args:
             ctx: FastMCP context
             manager_customer_id: The manager customer ID
             descriptive_name: Name of the new client
-            currency_code: Currency code (e.g. USD, EUR)
-            time_zone: Time zone ID
+            currency_code: Required. ISO 4217 currency code (e.g. USD, EUR,
+                GBP). Cannot be changed after the account is created.
+            time_zone: Required. IANA time zone ID (e.g. America/New_York,
+                Europe/London). Cannot be changed after the account is created.
             email_address: Email address for the new customer account
             access_role: Access role for the manager-client link (ADMIN, STANDARD, READ_ONLY, EMAIL_ONLY)
 
@@ -251,18 +258,24 @@ def create_customer_tools(
         ctx: Context,
         manager_customer_id: str,
         descriptive_name: str,
-        currency_code: str = "USD",
-        time_zone: str = "America/New_York",
+        currency_code: str,
+        time_zone: str,
         email_address: Optional[str] = None,
         access_role: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new client customer under a manager account.
 
+        ``currency_code`` and ``time_zone`` are immutable once the account
+        is created — both are required so callers explicitly pick the
+        locale instead of getting a US default that can't be undone.
+
         Args:
             manager_customer_id: The manager customer ID
             descriptive_name: Name of the new client
-            currency_code: Currency code (e.g. USD, EUR)
-            time_zone: Time zone ID (e.g. America/New_York)
+            currency_code: Required. ISO 4217 currency code (e.g. USD, EUR, GBP).
+                Cannot be changed after the account is created.
+            time_zone: Required. IANA time zone ID (e.g. America/New_York,
+                Europe/London). Cannot be changed after the account is created.
             email_address: Email address for the new customer account
             access_role: Access role - ADMIN, STANDARD, READ_ONLY, or EMAIL_ONLY
 
