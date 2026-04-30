@@ -43,6 +43,29 @@ def register_foo_tools(mcp):
 - **Campaign-level demographics on Search are exclusion-only** — bid adjustments must be done at ad group level.
 - **custom_audience/custom_affinity** only work on Display, Demand Gen, and Video campaigns.
 
+## Output-only proto annotations are not always trustworthy
+
+The v23 protos sometimes annotate `Output only` fields that the API genuinely needs on create or update. Don't blindly delete a write because the docstring says "Output only" — verify it's actually output-only first. Use this checklist before flagging an Output-only write as a bug:
+
+**Output-only is legitimate when ANY of these is true:**
+1. The field is **derived from a sibling oneof**. Setting type_/status manually is redundant because the API computes it from which oneof member is set. Examples: `Asset.type_` (derived from asset_data oneof), `BiddingStrategy.type_` (from scheme oneof), `CustomerNegativeCriterion.type_` (from criterion oneof), `AccountLink.type_` (from linked_account oneof).
+2. The field is a **status enum with only ENABLED/REMOVED**, and REMOVED is achieved via a separate `remove` operation, not by setting `status=REMOVED`. ENABLED is the implicit default. Examples: `Audience.status`, `CustomAudience.status`, `AssetSet.status`, `CampaignSharedSet.status`, `BiddingStrategy.status`, etc. (All have just ENABLED/REMOVED — no PAUSED transition for users to drive.)
+3. The field is **truly server-controlled** — IDs, approval statuses, computed timestamps, policy review outputs, etc.
+
+**Output-only is a proto-annotation BUG when ANY of these is true:**
+1. The field is the **only oneof member carrying user payload** for that resource type. Sibling oneof members on the same resource are Immutable or unannotated (settable). Examples: `Asset.image_asset`, `Asset.location_asset` (every other asset_data oneof member is settable), `ProductLinkInvitation.merchant_center` / `.hotel_center` (compare `ProductLink` where the same identifier types are Immutable).
+2. The field is the **only way to convey identity/association on create**, and there's no alternative path (no temp-ID resource_name, no implicit context). Example: `CampaignBidModifier.campaign` — without it, the API has no way to know which campaign owns the modifier; the official Google SDK examples set it directly despite the annotation.
+3. The **operation proto's docstring contradicts the field annotations**. Example: `CustomerSkAdNetworkConversionValueSchemaOperation` says "Update operation: The schema is expected to have a valid resource name" but every schema field is annotated Output-only — impossible if literal.
+
+**When in doubt, do this verification before deleting:**
+1. Look at sibling oneof members on the same resource — are they all flagged the same way, or is the field uniquely Output-only? Uniquely-flagged is suspicious.
+2. Look for a sister proto in the same domain — is the analogous field annotated Immutable there? (e.g., `ProductLink` vs `ProductLinkInvitation`)
+3. Check the resource's status enum values — is ENABLED/REMOVED the full set, or are there user-driven transitions?
+4. Read the operation/request proto docstrings — do they imply the field must be settable?
+5. Search for the field in `examples/` under `google-ads-python` for the official usage pattern.
+
+If you keep an Output-only write because the annotation is a bug, add a short inline comment explaining the proto-annotation-bug reasoning so future readers (and audits) don't re-flag it.
+
 ## Resources
 
 - `./refs/googleads.llms.txt` — Google Ads API resource links

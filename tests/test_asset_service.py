@@ -196,9 +196,10 @@ async def test_create_image_asset(
     operation = request.operations[0]
     assert operation.create.name == name
     # type_ is Output-only on Asset (derived by the API from asset_data).
-    # image_asset is Output-only too — the wrapper used to write a sibling
-    # ImageAsset which the API ignored; the create_image_asset method
-    # itself is broken because Asset.image_asset cannot be written.
+    # image_asset is annotated Output-only too but the wrapper still sets
+    # it — the annotation is a proto bug; the API accepts the payload.
+    assert operation.create.image_asset.data == image_data
+    assert operation.create.image_asset.mime_type == MimeTypeEnum.MimeType.IMAGE_JPEG
 
 
 @pytest.mark.asyncio

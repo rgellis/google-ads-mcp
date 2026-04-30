@@ -86,11 +86,15 @@ class CampaignBidModifierService:
             campaign_resource = f"customers/{customer_id}/campaigns/{campaign_id}"
 
             # Create interaction type bid modifier. CampaignBidModifier.campaign
-            # is Output-only — the API derives it from the resource_name on
-            # update, but for create we don't set it directly. The campaign
-            # association comes via the resource_name on update or via
-            # CustomerService context on create.
+            # is annotated Output-only in the v23 proto, but the annotation is
+            # a bug for create operations — without setting it, the API has
+            # no way to know which campaign the modifier belongs to. The
+            # Google Ads SDK examples set this field directly on create, and
+            # the API accepts it. (resource_name format does include the
+            # campaign id, but resource_name is auto-assigned on create so
+            # we can't use that path either.)
             bid_modifier_obj = CampaignBidModifier()
+            bid_modifier_obj.campaign = campaign_resource
             bid_modifier_obj.bid_modifier = bid_modifier
 
             # Set interaction type criterion

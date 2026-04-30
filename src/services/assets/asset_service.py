@@ -205,10 +205,17 @@ class AssetService:
             asset = Asset()
             asset.name = name
 
-            # Create image asset
+            # Create image asset. asset.image_asset is annotated Output-only
+            # in the v23 proto, but the annotation appears to be a bug — it's
+            # the only oneof member that conveys the actual image bytes, so
+            # without it create has no payload. Every other asset_data oneof
+            # member (youtube_video_asset, text_asset, etc.) is Immutable or
+            # unannotated; image_asset/location_asset are uniquely flagged
+            # Output-only. The API does accept this on create.
             image_asset = ImageAsset()
             image_asset.data = image_data
             image_asset.mime_type = self.get_mime_type_enum(mime_type)
+            asset.image_asset = image_asset
 
             # Create operation
             operation = AssetOperation()
@@ -1285,8 +1292,13 @@ class AssetService:
             asset = Asset()
             asset.name = name if name else f"Location: {place_id}"
 
+            # asset.location_asset is annotated Output-only in the v23
+            # proto, but like image_asset the annotation is a bug — it's
+            # the only oneof member that conveys the location identifier,
+            # so without it create has no payload.
             location_asset = LocationAsset()
             location_asset.place_id = place_id
+            asset.location_asset = location_asset
 
             operation = AssetOperation()
             operation.create = asset
