@@ -639,7 +639,7 @@ class AdService:
         ad_group_id: str,
         video_asset: str,
         final_urls: List[str],
-        video_format: str = "in_stream",
+        video_format: str,
         action_button_label: Optional[str] = None,
         action_headline: Optional[str] = None,
         companion_banner: Optional[str] = None,
@@ -659,7 +659,9 @@ class AdService:
             ad_group_id: The ad group ID
             video_asset: Video asset resource name
             final_urls: List of landing page URLs
-            video_format: Video ad format - 'in_stream', 'bumper', 'non_skippable', or 'in_feed'
+            video_format: Required. Video ad format — 'in_stream', 'bumper',
+                'non_skippable', or 'in_feed'. No safe default; format
+                drives which oneof of VideoAdInfo gets populated.
             action_button_label: CTA button label (for in_stream/bumper/non_skippable)
             action_headline: CTA headline (for in_stream/bumper/non_skippable)
             companion_banner: Companion banner image asset resource name
@@ -2676,7 +2678,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         ad_group_id: str,
         video_asset: str,
         final_urls: List[str],
-        video_format: str = "in_stream",
+        video_format: str,
         action_button_label: Optional[str] = None,
         action_headline: Optional[str] = None,
         companion_banner: Optional[str] = None,
@@ -2695,7 +2697,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             ad_group_id: The ad group ID
             video_asset: Video asset resource name
             final_urls: List of landing page URLs
-            video_format: Format - 'in_stream', 'bumper', 'non_skippable', or 'in_feed'
+            video_format: Required. 'in_stream', 'bumper', 'non_skippable',
+                or 'in_feed'. No safe default — format drives which oneof
+                of VideoAdInfo gets populated.
             action_button_label: CTA button label (for in_stream/bumper/non_skippable)
             action_headline: CTA headline (for in_stream/bumper/non_skippable)
             companion_banner: Companion banner image asset resource name

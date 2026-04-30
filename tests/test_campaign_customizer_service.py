@@ -84,9 +84,11 @@ class TestCampaignCustomizerService:
         assert len(request.operations) == 1
         assert request.partial_failure is False
         assert request.validate_only is False
+        # response_content_type left unset on the wire (proto-default rule);
+        # proto reads back UNSPECIFIED (0) when omitted.
         assert (
             request.response_content_type
-            == ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE
+            == ResponseContentTypeEnum.ResponseContentType.UNSPECIFIED
         )
 
         operation = request.operations[0]

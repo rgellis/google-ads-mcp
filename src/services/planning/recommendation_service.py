@@ -462,21 +462,26 @@ class RecommendationService:
                         )
                     if "keywords" in ag:
                         for kw in ag["keywords"]:
+                            # match_type is required — no safe default; match
+                            # type fundamentally changes which queries match.
                             if isinstance(kw, str):
-                                ki = KeywordInfo()
-                                ki.text = kw
-                                ki.match_type = (
-                                    KeywordMatchTypeEnum.KeywordMatchType.BROAD
+                                raise ValueError(
+                                    "Each keyword must be a dict with 'text' and "
+                                    "'match_type' (EXACT, PHRASE, or BROAD). "
+                                    "Bare strings would silently default to BROAD."
                                 )
-                                agi.keywords.append(ki)
-                            elif isinstance(kw, dict):
-                                ki = KeywordInfo()
-                                ki.text = kw["text"]
-                                ki.match_type = getattr(
-                                    KeywordMatchTypeEnum.KeywordMatchType,
-                                    kw.get("match_type", "BROAD"),
+                            if "match_type" not in kw:
+                                raise ValueError(
+                                    "Each keyword dict must include a 'match_type' "
+                                    "(EXACT, PHRASE, or BROAD)."
                                 )
-                                agi.keywords.append(ki)
+                            ki = KeywordInfo()
+                            ki.text = kw["text"]
+                            ki.match_type = getattr(
+                                KeywordMatchTypeEnum.KeywordMatchType,
+                                kw["match_type"],
+                            )
+                            agi.keywords.append(ki)
                     request.ad_group_info.append(agi)
 
             if asset_group_info is not None:

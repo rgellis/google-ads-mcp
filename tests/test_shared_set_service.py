@@ -525,6 +525,7 @@ async def test_error_handling_create_shared_set(
             ctx=mock_ctx,
             customer_id=customer_id,
             name=name,
+            type=SharedSetTypeEnum.SharedSetType.NEGATIVE_KEYWORDS,
         )
 
     assert "Failed to create shared set" in str(exc_info.value)

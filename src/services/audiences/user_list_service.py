@@ -178,7 +178,7 @@ class UserListService:
         name: str,
         description: Optional[str] = None,
         membership_life_span: Optional[int] = None,
-        upload_key_type: str = "CONTACT_INFO",
+        upload_key_type: Optional[str] = None,
         data_source_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -193,7 +193,8 @@ class UserListService:
             description: Optional description
             membership_life_span: How long users remain in the list (days,
                 0-540). Omit to use the API default.
-            upload_key_type: CONTACT_INFO, CRM_ID, or MOBILE_ADVERTISING_ID
+            upload_key_type: Optional CONTACT_INFO, CRM_ID, or
+                MOBILE_ADVERTISING_ID. Omit to let the API default apply.
             data_source_type: Optional source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
                 THIRD_PARTY_PARTNER_DATA. Omit to let the API default apply.
@@ -217,15 +218,17 @@ class UserListService:
 
             # Create CRM-based user list info
             crm_user_list = CrmBasedUserListInfo()
-            # Set upload key type using enum
-            from google.ads.googleads.v23.enums.types.customer_match_upload_key_type import (
-                CustomerMatchUploadKeyTypeEnum,
-            )
+            # Set upload key type only when supplied; otherwise let the
+            # API default apply.
+            if upload_key_type is not None:
+                from google.ads.googleads.v23.enums.types.customer_match_upload_key_type import (
+                    CustomerMatchUploadKeyTypeEnum,
+                )
 
-            crm_user_list.upload_key_type = getattr(
-                CustomerMatchUploadKeyTypeEnum.CustomerMatchUploadKeyType,
-                upload_key_type,
-            )
+                crm_user_list.upload_key_type = getattr(
+                    CustomerMatchUploadKeyTypeEnum.CustomerMatchUploadKeyType,
+                    upload_key_type,
+                )
 
             if data_source_type is not None:
                 from google.ads.googleads.v23.enums.types.user_list_crm_data_source_type import (
@@ -595,7 +598,7 @@ def create_user_list_tools(
         name: str,
         description: Optional[str] = None,
         membership_life_span: Optional[int] = None,
-        upload_key_type: str = "CONTACT_INFO",
+        upload_key_type: Optional[str] = None,
         data_source_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -609,7 +612,8 @@ def create_user_list_tools(
             description: Optional description
             membership_life_span: How long users remain in the list (days,
                 0-540). Omit to use API default.
-            upload_key_type: Type of data - CONTACT_INFO, CRM_ID, or MOBILE_ADVERTISING_ID
+            upload_key_type: Optional - CONTACT_INFO, CRM_ID, or
+                MOBILE_ADVERTISING_ID. Omit to use API default.
             data_source_type: Optional CRM data source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
                 THIRD_PARTY_PARTNER_DATA. Omit to use API default.

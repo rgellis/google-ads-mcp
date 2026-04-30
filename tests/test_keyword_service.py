@@ -360,12 +360,12 @@ async def test_add_keywords_without_bids(
 
 
 @pytest.mark.asyncio
-async def test_add_keywords_with_default_match_type(
+async def test_add_keywords_missing_match_type_raises(
     keyword_service: KeywordService,
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test adding keywords with default match type when not specified."""
+    """Match type is required — wrapper must raise instead of silently defaulting to BROAD."""
     # Arrange
     customer_id = "1234567890"
     ad_group_id = "9876543210"
@@ -373,53 +373,16 @@ async def test_add_keywords_with_default_match_type(
         {"text": "running shoes"},  # No match_type specified
     ]
 
-    # Create mock response
-    mock_response = Mock(spec=MutateAdGroupCriteriaResponse)
-    mock_result = Mock()
-    mock_result.resource_name = (
-        f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~1000"
-    )
-    mock_response.results = [mock_result]
-
-    # Get the mocked criterion service client
-    mock_criterion_service_client = keyword_service.client  # type: ignore
-    mock_criterion_service_client.mutate_ad_group_criteria.return_value = mock_response  # type: ignore
-
-    # Mock serialize_proto_message
-    expected_result = {
-        "results": [
-            {
-                "resource_name": f"customers/{customer_id}/adGroupCriteria/{ad_group_id}~1000"
-            }
-        ]
-    }
-
-    with patch(
-        "src.services.ad_group.keyword_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        # Act
-        result = await keyword_service.add_keywords(
+    # Act & Assert
+    with pytest.raises(Exception) as exc_info:
+        await keyword_service.add_keywords(
             ctx=mock_ctx,
             customer_id=customer_id,
             ad_group_id=ad_group_id,
             keywords=keywords,
         )
 
-    # Assert
-    assert result == expected_result
-
-    # Verify the API call
-    mock_criterion_service_client.mutate_ad_group_criteria.assert_called_once()  # type: ignore
-    call_args = mock_criterion_service_client.mutate_ad_group_criteria.call_args  # type: ignore
-    request = call_args[1]["request"]
-    operation = request.operations[0]
-
-    # Should default to BROAD match type
-    assert (
-        operation.create.keyword.match_type
-        == KeywordMatchTypeEnum.KeywordMatchType.BROAD
-    )
+    assert "match_type" in str(exc_info.value)
 
 
 @pytest.mark.asyncio

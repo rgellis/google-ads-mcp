@@ -64,7 +64,9 @@ class CampaignCustomizerService:
         attribute_type: CustomizerAttributeTypeEnum.CustomizerAttributeType,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE,
+        response_content_type: Optional[
+            ResponseContentTypeEnum.ResponseContentType
+        ] = None,
     ) -> Dict[str, Any]:
         """Create a new campaign customizer.
 
@@ -109,9 +111,12 @@ class CampaignCustomizerService:
             request = MutateCampaignCustomizersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
-            request.response_content_type = response_content_type
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Execute the mutation
             response: MutateCampaignCustomizersResponse = (
@@ -176,8 +181,11 @@ class CampaignCustomizerService:
             request = MutateCampaignCustomizersRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
 
             # Execute the mutation
             response = self.client.mutate_campaign_customizers(request=request)

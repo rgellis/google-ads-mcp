@@ -51,7 +51,6 @@ async def test_create_customer_client_link(
     # Arrange
     customer_id = "1234567890"
     client_customer = "customers/987654321"
-    status = ManagerLinkStatusEnum.ManagerLinkStatus.PENDING
     hidden = False
 
     # Create mock response
@@ -83,7 +82,6 @@ async def test_create_customer_client_link(
             ctx=mock_ctx,
             customer_id=customer_id,
             client_customer=client_customer,
-            status=status,
             hidden=hidden,
         )
 
@@ -99,7 +97,6 @@ async def test_create_customer_client_link(
     operation = request.operation
     link = operation.create
     assert link.client_customer == client_customer
-    assert link.status == status
     assert link.hidden == hidden
 
 
@@ -113,7 +110,6 @@ async def test_create_customer_client_link_with_hidden(
     # Arrange
     customer_id = "1234567890"
     client_customer = "customers/987654321"
-    status = ManagerLinkStatusEnum.ManagerLinkStatus.ACTIVE
     hidden = True
 
     # Create mock response
@@ -145,7 +141,6 @@ async def test_create_customer_client_link_with_hidden(
             ctx=mock_ctx,
             customer_id=customer_id,
             client_customer=client_customer,
-            status=status,
             hidden=hidden,
         )
 

@@ -83,14 +83,20 @@ class KeywordPlanService:
             keyword_plan = KeywordPlan()
             keyword_plan.name = name
 
-            # Set forecast period
+            # Set forecast period. The proto exposes only NEXT_WEEK / NEXT_MONTH /
+            # NEXT_QUARTER as named intervals, so values >90 cannot be honored
+            # without a custom date range — raise rather than silently snap to
+            # NEXT_MONTH (which is the bug this branch used to hide).
             if forecast_period_days <= 30:
                 keyword_plan.forecast_period.date_interval = KeywordPlanForecastIntervalEnum.KeywordPlanForecastInterval.NEXT_MONTH
             elif forecast_period_days <= 90:
                 keyword_plan.forecast_period.date_interval = KeywordPlanForecastIntervalEnum.KeywordPlanForecastInterval.NEXT_QUARTER
             else:
-                # For custom periods, use date range (would need start/end dates)
-                keyword_plan.forecast_period.date_interval = KeywordPlanForecastIntervalEnum.KeywordPlanForecastInterval.NEXT_MONTH
+                raise ValueError(
+                    f"forecast_period_days={forecast_period_days} exceeds the "
+                    "90-day limit of the named forecast intervals. Use a custom "
+                    "date range (not yet exposed) or pick a value <= 90."
+                )
 
             # Create operation
             operation = KeywordPlanOperation()

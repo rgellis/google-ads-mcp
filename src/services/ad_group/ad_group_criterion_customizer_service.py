@@ -179,7 +179,7 @@ def create_ad_group_criterion_customizer_tools(
         operations: List[Dict[str, Any]],
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: str = "RESOURCE_NAME_ONLY",
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create or remove ad group criterion customizers for dynamic ad customization.
 
@@ -190,7 +190,8 @@ def create_ad_group_criterion_customizer_tools(
                 - remove: Resource name to remove
             partial_failure: Whether to allow partial failures
             validate_only: Whether to only validate the request
-            response_content_type: Response content type (RESOURCE_NAME_ONLY, MUTABLE_RESOURCE)
+            response_content_type: Optional - RESOURCE_NAME_ONLY or
+                MUTABLE_RESOURCE. Omit to use API default.
 
         Returns:
             Mutation results with resource names and any errors

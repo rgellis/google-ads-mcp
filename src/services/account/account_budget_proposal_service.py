@@ -60,7 +60,9 @@ class AccountBudgetProposalService:
         billing_setup: str,
         proposed_name: str,
         proposed_start_time_type: TimeTypeEnum.TimeType,
-        proposed_spending_limit_type: SpendingLimitTypeEnum.SpendingLimitType = SpendingLimitTypeEnum.SpendingLimitType.INFINITE,
+        proposed_spending_limit_type: Optional[
+            SpendingLimitTypeEnum.SpendingLimitType
+        ] = None,
         proposed_spending_limit_micros: Optional[int] = None,
         proposed_start_date_time: Optional[str] = None,
         proposed_end_date_time: Optional[str] = None,
@@ -80,7 +82,10 @@ class AccountBudgetProposalService:
             billing_setup: Resource name of the billing setup
             proposed_name: Proposed name for the account budget
             proposed_start_time_type: Start time type enum value
-            proposed_spending_limit_type: Spending limit type enum value
+            proposed_spending_limit_type: Optional spending limit type
+                (INFINITE or FINITE). Mutually exclusive with
+                proposed_spending_limit_micros (proto oneof). Omit both to
+                let the API default apply.
             proposed_spending_limit_micros: Spending limit in micros (required if FINITE)
             proposed_start_date_time: Start date/time (YYYY-MM-DD HH:MM:SS)
             proposed_end_date_time: End date/time (YYYY-MM-DD HH:MM:SS)
@@ -105,10 +110,11 @@ class AccountBudgetProposalService:
             if proposed_start_date_time:
                 proposal.proposed_start_date_time = proposed_start_date_time
 
-            # Set spending limit (these are mutually exclusive oneof fields)
+            # Set spending limit (these are mutually exclusive oneof fields).
+            # Leave both unset when neither is supplied so the API default applies.
             if proposed_spending_limit_micros is not None:
                 proposal.proposed_spending_limit_micros = proposed_spending_limit_micros
-            else:
+            elif proposed_spending_limit_type is not None:
                 proposal.proposed_spending_limit_type = proposed_spending_limit_type
 
             # Set end time if provided (these are mutually exclusive oneof fields)
@@ -377,7 +383,7 @@ def create_account_budget_proposal_tools(
         billing_setup: str,
         proposed_name: str,
         proposed_start_time_type: str,
-        proposed_spending_limit_type: str = "INFINITE",
+        proposed_spending_limit_type: Optional[str] = None,
         proposed_spending_limit_micros: Optional[int] = None,
         proposed_start_date_time: Optional[str] = None,
         proposed_end_date_time: Optional[str] = None,
@@ -392,7 +398,9 @@ def create_account_budget_proposal_tools(
             billing_setup: Resource name of the billing setup
             proposed_name: Proposed name for the account budget
             proposed_start_time_type: Start time type (IMMEDIATELY, NOW, FOREVER)
-            proposed_spending_limit_type: Spending limit type (INFINITE, FINITE)
+            proposed_spending_limit_type: Optional spending limit type
+                (INFINITE or FINITE). Mutually exclusive with
+                proposed_spending_limit_micros. Omit both to use API default.
             proposed_spending_limit_micros: Spending limit in micros (for FINITE limit)
             proposed_start_date_time: Start date/time (YYYY-MM-DD HH:MM:SS format)
             proposed_end_date_time: End date/time (YYYY-MM-DD HH:MM:SS format)
@@ -407,8 +415,12 @@ def create_account_budget_proposal_tools(
             AccountBudgetProposalTypeEnum.AccountBudgetProposalType, proposal_type
         )
         start_time_enum = getattr(TimeTypeEnum.TimeType, proposed_start_time_type)
-        spending_limit_enum = getattr(
-            SpendingLimitTypeEnum.SpendingLimitType, proposed_spending_limit_type
+        spending_limit_enum = (
+            getattr(
+                SpendingLimitTypeEnum.SpendingLimitType, proposed_spending_limit_type
+            )
+            if proposed_spending_limit_type is not None
+            else None
         )
         end_time_enum = (
             getattr(TimeTypeEnum.TimeType, proposed_end_time_type)

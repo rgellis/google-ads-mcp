@@ -62,9 +62,11 @@ class KeywordPlanIdeaService:
         keywords: List[str],
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[
+            KeywordPlanNetworkEnum.KeywordPlanNetwork
+        ] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -91,10 +93,12 @@ class KeywordPlanIdeaService:
             request.customer_id = customer_id
             request.language = language
             request.geo_target_constants.extend(geo_target_constants)
-            request.include_adult_keywords = include_adult_keywords
-            request.page_size = page_size
-            # Set keyword plan network using enum
-            request.keyword_plan_network = keyword_plan_network
+            if include_adult_keywords is not None:
+                request.include_adult_keywords = include_adult_keywords
+            if page_size is not None:
+                request.page_size = page_size
+            if keyword_plan_network is not None:
+                request.keyword_plan_network = keyword_plan_network
 
             # Create keyword seed
             keyword_seed = KeywordSeed()
@@ -136,9 +140,11 @@ class KeywordPlanIdeaService:
         page_url: str,
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[
+            KeywordPlanNetworkEnum.KeywordPlanNetwork
+        ] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -165,10 +171,12 @@ class KeywordPlanIdeaService:
             request.customer_id = customer_id
             request.language = language
             request.geo_target_constants.extend(geo_target_constants)
-            request.include_adult_keywords = include_adult_keywords
-            request.page_size = page_size
-            # Set keyword plan network using enum
-            request.keyword_plan_network = keyword_plan_network
+            if include_adult_keywords is not None:
+                request.include_adult_keywords = include_adult_keywords
+            if page_size is not None:
+                request.page_size = page_size
+            if keyword_plan_network is not None:
+                request.keyword_plan_network = keyword_plan_network
 
             # Create URL seed
             url_seed = UrlSeed()
@@ -210,9 +218,11 @@ class KeywordPlanIdeaService:
         site_url: str,
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[
+            KeywordPlanNetworkEnum.KeywordPlanNetwork
+        ] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -239,10 +249,12 @@ class KeywordPlanIdeaService:
             request.customer_id = customer_id
             request.language = language
             request.geo_target_constants.extend(geo_target_constants)
-            request.include_adult_keywords = include_adult_keywords
-            request.page_size = page_size
-            # Set keyword plan network using enum
-            request.keyword_plan_network = keyword_plan_network
+            if include_adult_keywords is not None:
+                request.include_adult_keywords = include_adult_keywords
+            if page_size is not None:
+                request.page_size = page_size
+            if keyword_plan_network is not None:
+                request.keyword_plan_network = keyword_plan_network
 
             # Create site seed
             site_seed = SiteSeed()
@@ -285,9 +297,11 @@ class KeywordPlanIdeaService:
         page_url: str,
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[
+            KeywordPlanNetworkEnum.KeywordPlanNetwork
+        ] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -315,10 +329,12 @@ class KeywordPlanIdeaService:
             request.customer_id = customer_id
             request.language = language
             request.geo_target_constants.extend(geo_target_constants)
-            request.include_adult_keywords = include_adult_keywords
-            request.page_size = page_size
-            # Set keyword plan network using enum
-            request.keyword_plan_network = keyword_plan_network
+            if include_adult_keywords is not None:
+                request.include_adult_keywords = include_adult_keywords
+            if page_size is not None:
+                request.page_size = page_size
+            if keyword_plan_network is not None:
+                request.keyword_plan_network = keyword_plan_network
 
             # Create keyword and URL seed
             keyword_and_url_seed = KeywordAndUrlSeed()
@@ -361,8 +377,10 @@ class KeywordPlanIdeaService:
         keywords: List[str],
         language: Optional[str] = None,
         geo_target_constants: Optional[List[str]] = None,
-        keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
-        include_adult_keywords: bool = False,
+        keyword_plan_network: Optional[
+            KeywordPlanNetworkEnum.KeywordPlanNetwork
+        ] = None,
+        include_adult_keywords: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Generate historical metrics for a list of keywords.
 
@@ -372,8 +390,8 @@ class KeywordPlanIdeaService:
             keywords: List of keywords (up to 10,000; duplicates de-duped)
             language: Language constant resource name (optional)
             geo_target_constants: Geo target constant resource names (max 10, optional)
-            keyword_plan_network: Network type
-            include_adult_keywords: Whether to include adult keywords
+            keyword_plan_network: Optional network type. Omit to use API default.
+            include_adult_keywords: Optional. Omit to use API default.
 
         Returns:
             Historical metrics per keyword
@@ -386,8 +404,10 @@ class KeywordPlanIdeaService:
             request = GenerateKeywordHistoricalMetricsRequest()
             request.customer_id = customer_id
             request.keywords = keywords
-            request.keyword_plan_network = keyword_plan_network
-            request.include_adult_keywords = include_adult_keywords
+            if keyword_plan_network is not None:
+                request.keyword_plan_network = keyword_plan_network
+            if include_adult_keywords is not None:
+                request.include_adult_keywords = include_adult_keywords
 
             if language:
                 request.language = language
@@ -675,9 +695,9 @@ def create_keyword_plan_idea_tools(
         keywords: List[str],
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[str] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -699,9 +719,11 @@ def create_keyword_plan_idea_tools(
             - keyword_idea_metrics: Metrics including avg_monthly_searches, competition, bid estimates
             - keyword_annotations: Conceptual categories for the keyword
         """
-        # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        # Convert string enum to proper enum type only when caller supplied one.
+        keyword_plan_network_enum = (
+            getattr(KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network)
+            if keyword_plan_network is not None
+            else None
         )
 
         return await service.generate_keyword_ideas_from_keywords(
@@ -724,9 +746,9 @@ def create_keyword_plan_idea_tools(
         page_url: str,
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[str] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -745,9 +767,11 @@ def create_keyword_plan_idea_tools(
         Returns:
             List of keyword ideas with metrics and annotations
         """
-        # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        # Convert string enum to proper enum type only when caller supplied one.
+        keyword_plan_network_enum = (
+            getattr(KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network)
+            if keyword_plan_network is not None
+            else None
         )
 
         return await service.generate_keyword_ideas_from_url(
@@ -770,9 +794,9 @@ def create_keyword_plan_idea_tools(
         site_url: str,
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[str] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -791,9 +815,11 @@ def create_keyword_plan_idea_tools(
         Returns:
             List of keyword ideas with metrics and annotations
         """
-        # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        # Convert string enum to proper enum type only when caller supplied one.
+        keyword_plan_network_enum = (
+            getattr(KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network)
+            if keyword_plan_network is not None
+            else None
         )
 
         return await service.generate_keyword_ideas_from_site(
@@ -817,9 +843,9 @@ def create_keyword_plan_idea_tools(
         page_url: str,
         language: str,
         geo_target_constants: List[str],
-        keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
-        include_adult_keywords: bool = False,
-        page_size: int = 100,
+        keyword_plan_network: Optional[str] = None,
+        include_adult_keywords: Optional[bool] = None,
+        page_size: Optional[int] = None,
         page_token: Optional[str] = None,
         aggregate_metrics: Optional[List[str]] = None,
         historical_metrics_options: Optional[Dict[str, Any]] = None,
@@ -839,9 +865,11 @@ def create_keyword_plan_idea_tools(
         Returns:
             List of keyword ideas with metrics and annotations
         """
-        # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        # Convert string enum to proper enum type only when caller supplied one.
+        keyword_plan_network_enum = (
+            getattr(KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network)
+            if keyword_plan_network is not None
+            else None
         )
 
         return await service.generate_keyword_ideas_from_keywords_and_url(
@@ -865,8 +893,8 @@ def create_keyword_plan_idea_tools(
         keywords: List[str],
         language: Optional[str] = None,
         geo_target_constants: Optional[List[str]] = None,
-        keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
-        include_adult_keywords: bool = False,
+        keyword_plan_network: Optional[str] = None,
+        include_adult_keywords: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Generate historical metrics for a list of keywords.
 
@@ -875,14 +903,17 @@ def create_keyword_plan_idea_tools(
             keywords: List of keywords to get metrics for (up to 10,000)
             language: Language constant resource name (optional)
             geo_target_constants: Geo target constant resource names (max 10, optional)
-            keyword_plan_network: Network type - GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS
-            include_adult_keywords: Whether to include adult keywords
+            keyword_plan_network: Optional - GOOGLE_SEARCH or
+                GOOGLE_SEARCH_AND_PARTNERS. Omit to use API default.
+            include_adult_keywords: Optional. Omit to use API default.
 
         Returns:
             Historical metrics per keyword including search volume, competition, bids
         """
-        kw_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        kw_network_enum = (
+            getattr(KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network)
+            if keyword_plan_network is not None
+            else None
         )
         return await service.generate_keyword_historical_metrics(
             ctx=ctx,

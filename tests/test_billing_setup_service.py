@@ -113,7 +113,6 @@ async def test_create_billing_setup_with_specific_start_date(
     customer_id = "1234567890"
     payments_account_id = "987654321"
     start_date = "2024-03-01"
-    start_time_type = TimeTypeEnum.TimeType.FOREVER  # Not NOW — use start_date
 
     # Create mock response
     mock_response = Mock(spec=MutateBillingSetupResponse)
@@ -133,13 +132,13 @@ async def test_create_billing_setup_with_specific_start_date(
         "src.services.account.billing_setup_service.serialize_proto_message",
         return_value=expected_result,
     ):
-        # Act
+        # Act — omit start_time_type so the start_date branch of the
+        # start_time oneof is taken.
         result = await billing_setup_service.create_billing_setup(
             ctx=mock_ctx,
             customer_id=customer_id,
             payments_account_id=payments_account_id,
             start_date=start_date,
-            start_time_type=start_time_type,
         )
 
     # Assert

@@ -64,11 +64,11 @@ class ConversionService:
         ctx: Context,
         customer_id: str,
         name: str,
-        category: str = "PURCHASE",
-        type: str = "WEBPAGE",
+        category: str,
+        type: str,
         status: str = "ENABLED",
         value_settings: Optional[Dict[str, Any]] = None,
-        counting_type: str = "ONE_PER_CLICK",
+        counting_type: Optional[str] = None,
         attribution_model: Optional[str] = None,
         click_through_lookback_window_days: Optional[int] = None,
         view_through_lookback_window_days: Optional[int] = None,
@@ -82,11 +82,16 @@ class ConversionService:
             ctx: FastMCP context
             customer_id: The customer ID
             name: Conversion action name
-            category: Category (PURCHASE, LEAD, SIGNUP, PAGE_VIEW, etc.)
-            type: Type (WEBPAGE, APP, PHONE_CALLS, IMPORT)
+            category: Required category (PURCHASE, LEAD, SIGNUP, PAGE_VIEW, etc.).
+                No safe default — picking one silently misclassifies the conversion.
+            type: Required type (WEBPAGE, AD_CALL, WEBSITE_CALL, UPLOAD_CALLS,
+                UPLOAD_CLICKS, GOOGLE_PLAY_DOWNLOAD, GOOGLE_PLAY_IN_APP_PURCHASE,
+                etc.). No safe default — type drives which other fields are valid
+                (e.g. AD_CALL/WEBSITE_CALL forbid lookback windows).
             status: Status (ENABLED, REMOVED, HIDDEN)
             value_settings: Optional dict with default_value and always_use_default_value
-            counting_type: ONE_PER_CLICK or MANY_PER_CLICK
+            counting_type: Optional counting type (ONE_PER_CLICK or MANY_PER_CLICK).
+                Omit to let the API default apply.
             attribution_model: Optional attribution model (DATA_DRIVEN,
                 LAST_CLICK, etc.). Omit to let the API default apply.
             click_through_lookback_window_days: Click lookback window (1-90).
@@ -117,11 +122,12 @@ class ConversionService:
                 ConversionActionCategoryEnum.ConversionActionCategory, category
             )
 
-            # Set counting type
-            conversion_action.counting_type = getattr(
-                ConversionActionCountingTypeEnum.ConversionActionCountingType,
-                counting_type,
-            )
+            # Set counting type only when supplied; otherwise let the API default apply.
+            if counting_type is not None:
+                conversion_action.counting_type = getattr(
+                    ConversionActionCountingTypeEnum.ConversionActionCountingType,
+                    counting_type,
+                )
 
             # Set value settings
             if value_settings:
@@ -373,11 +379,11 @@ def create_conversion_tools(
         ctx: Context,
         customer_id: str,
         name: str,
-        category: str = "PURCHASE",
-        type: str = "WEBPAGE",
+        category: str,
+        type: str,
         status: str = "ENABLED",
         value_settings: Optional[Dict[str, Any]] = None,
-        counting_type: str = "ONE_PER_CLICK",
+        counting_type: Optional[str] = None,
         attribution_model: Optional[str] = None,
         click_through_lookback_window_days: Optional[int] = None,
         view_through_lookback_window_days: Optional[int] = None,
@@ -390,13 +396,18 @@ def create_conversion_tools(
         Args:
             customer_id: The customer ID
             name: Conversion action name
-            category: Category - PURCHASE, LEAD, SIGNUP, PAGE_VIEW, DOWNLOAD, etc.
-            type: Type - WEBPAGE, APP, PHONE_CALLS, IMPORT
+            category: Required category - PURCHASE, LEAD, SIGNUP, PAGE_VIEW, DOWNLOAD,
+                ADD_TO_CART, BEGIN_CHECKOUT, SUBSCRIBE_PAID, PHONE_CALL_LEAD, etc.
+                No safe default — picking one silently misclassifies the conversion.
+            type: Required type - WEBPAGE, AD_CALL, WEBSITE_CALL, UPLOAD_CALLS,
+                UPLOAD_CLICKS, GOOGLE_PLAY_DOWNLOAD, GOOGLE_PLAY_IN_APP_PURCHASE,
+                FIREBASE_*, etc. No safe default — type drives which other fields
+                are valid (AD_CALL/WEBSITE_CALL forbid lookback windows).
             status: Status - ENABLED, REMOVED, HIDDEN
             value_settings: Optional dict with:
                 - default_value: Default conversion value
                 - always_use_default_value: Whether to always use default value
-            counting_type: ONE_PER_CLICK or MANY_PER_CLICK
+            counting_type: Optional - ONE_PER_CLICK or MANY_PER_CLICK. Omit to use API default.
             attribution_model: Optional attribution model — GOOGLE_SEARCH_ATTRIBUTION_DATA_DRIVEN,
                 GOOGLE_ADS_LAST_CLICK, GOOGLE_SEARCH_ATTRIBUTION_FIRST_CLICK,
                 GOOGLE_SEARCH_ATTRIBUTION_LINEAR, GOOGLE_SEARCH_ATTRIBUTION_TIME_DECAY,

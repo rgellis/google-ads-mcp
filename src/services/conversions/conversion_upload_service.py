@@ -66,7 +66,7 @@ class ConversionUploadService:
         ctx: Context,
         customer_id: str,
         conversions: List[Dict[str, Any]],
-        partial_failure: bool = True,
+        partial_failure: Optional[bool] = None,
         validate_only: bool = False,
         job_id: Optional[int] = None,
     ) -> Dict[str, Any]:
@@ -84,7 +84,8 @@ class ConversionUploadService:
                 - order_id: Order ID for deduplication (optional)
                 - user_identifiers: User identifiers for enhanced conversions (optional)
                     Can include: email, phone_number, address info
-            partial_failure: Whether to process valid conversions if some fail
+            partial_failure: Whether to process valid conversions if some
+                fail. Omit to leave unset (proto-default rule).
             validate_only: If true, validate without uploading
             job_id: Optional job ID for deduplication across multiple upload calls
 
@@ -151,8 +152,10 @@ class ConversionUploadService:
             request = UploadClickConversionsRequest()
             request.customer_id = customer_id
             request.conversions = click_conversions
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            if partial_failure is not None:
+                request.partial_failure = partial_failure
+            if validate_only:
+                request.validate_only = validate_only
             if job_id is not None:
                 request.job_id = job_id
 
@@ -182,7 +185,7 @@ class ConversionUploadService:
         ctx: Context,
         customer_id: str,
         conversions: List[Dict[str, Any]],
-        partial_failure: bool = True,
+        partial_failure: Optional[bool] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Upload call conversions from offline sources.
@@ -197,7 +200,8 @@ class ConversionUploadService:
                 - conversion_date_time: ISO format datetime string (required)
                 - conversion_value: Conversion value (optional)
                 - currency_code: Currency code (optional)
-            partial_failure: Whether to process valid conversions if some fail
+            partial_failure: Whether to process valid conversions if some
+                fail. Omit to leave unset (proto-default rule).
 
         Returns:
             Upload results including successful and failed conversions
@@ -226,8 +230,10 @@ class ConversionUploadService:
             request = UploadCallConversionsRequest()
             request.customer_id = customer_id
             request.conversions = call_conversions
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            if partial_failure is not None:
+                request.partial_failure = partial_failure
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response: UploadCallConversionsResponse = (
@@ -265,7 +271,7 @@ def create_conversion_upload_tools(
         ctx: Context,
         customer_id: str,
         conversions: List[Dict[str, Any]],
-        partial_failure: bool = True,
+        partial_failure: Optional[bool] = None,
         validate_only: bool = False,
         job_id: Optional[int] = None,
     ) -> Dict[str, Any]:
@@ -305,7 +311,7 @@ def create_conversion_upload_tools(
         ctx: Context,
         customer_id: str,
         conversions: List[Dict[str, Any]],
-        partial_failure: bool = True,
+        partial_failure: Optional[bool] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Upload call conversions from offline sources.

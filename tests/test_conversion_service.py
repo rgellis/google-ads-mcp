@@ -187,6 +187,8 @@ async def test_create_conversion_action_with_defaults(
             ctx=mock_ctx,
             customer_id=customer_id,
             name=name,
+            category="PURCHASE",
+            type="WEBPAGE",
         )
 
     # Assert
@@ -450,6 +452,8 @@ async def test_error_handling(
             ctx=mock_ctx,
             customer_id=customer_id,
             name="Test Conversion",
+            category="PURCHASE",
+            type="WEBPAGE",
         )
 
     assert "Failed to create conversion action" in str(exc_info.value)

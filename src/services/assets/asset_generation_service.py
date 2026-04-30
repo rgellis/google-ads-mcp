@@ -150,7 +150,7 @@ class AssetGenerationService:
         freeform_prompt: Optional[str] = None,
         product_recontext_prompt: Optional[str] = None,
         product_recontext_source_images: Optional[List[bytes]] = None,
-        advertising_channel_type: str = "PERFORMANCE_MAX",
+        advertising_channel_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate image assets using AI.
 
@@ -165,7 +165,7 @@ class AssetGenerationService:
             freeform_prompt: Free-text prompt for image generation
             product_recontext_prompt: Prompt for product recontextualization
             product_recontext_source_images: Source product images as bytes (for recontext)
-            advertising_channel_type: Channel type
+            advertising_channel_type: Optional channel type. Omit to use API default.
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -181,10 +181,11 @@ class AssetGenerationService:
             request.asset_field_types = [
                 getattr(AssetFieldTypeEnum.AssetFieldType, t) for t in asset_field_types
             ]
-            request.advertising_channel_type = getattr(
-                AdvertisingChannelTypeEnum.AdvertisingChannelType,
-                advertising_channel_type,
-            )
+            if advertising_channel_type is not None:
+                request.advertising_channel_type = getattr(
+                    AdvertisingChannelTypeEnum.AdvertisingChannelType,
+                    advertising_channel_type,
+                )
 
             if final_url:
                 final_url_input = FinalUrlImageGenerationInput()
@@ -282,7 +283,7 @@ def create_asset_generation_tools(
         freeform_prompt: Optional[str] = None,
         product_recontext_prompt: Optional[str] = None,
         product_recontext_source_images: Optional[List[bytes]] = None,
-        advertising_channel_type: str = "PERFORMANCE_MAX",
+        advertising_channel_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate image assets using AI.
 
@@ -295,7 +296,8 @@ def create_asset_generation_tools(
             freeform_prompt: Free-text prompt for image generation
             product_recontext_prompt: Prompt for product recontextualization
             product_recontext_source_images: Source product images as bytes
-            advertising_channel_type: PERFORMANCE_MAX or SEARCH
+            advertising_channel_type: Optional - PERFORMANCE_MAX or SEARCH.
+                Omit to use API default.
         """
         return await service.generate_images(
             ctx=ctx,

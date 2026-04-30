@@ -64,7 +64,7 @@ class CustomInterestService:
         name: str,
         description: str,
         members: List[Dict[str, str]],
-        type_: str = "CUSTOM_AFFINITY",
+        type_: Optional[str] = None,
         status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -82,7 +82,8 @@ class CustomInterestService:
                     {"type": "KEYWORD", "value": "running shoes"},
                     {"type": "URL", "value": "example.com/shoes"}
                 ]
-            type_: Type - CUSTOM_AFFINITY or CUSTOM_INTENT
+            type_: Optional type - CUSTOM_AFFINITY or CUSTOM_INTENT. Omit to
+                let the API default apply.
             status: Status - ENABLED or REMOVED
 
         Returns:
@@ -95,9 +96,10 @@ class CustomInterestService:
             custom_interest = CustomInterest()
             custom_interest.name = name
             custom_interest.description = description
-            custom_interest.type_ = getattr(
-                CustomInterestTypeEnum.CustomInterestType, type_
-            )
+            if type_ is not None:
+                custom_interest.type_ = getattr(
+                    CustomInterestTypeEnum.CustomInterestType, type_
+                )
             custom_interest.status = getattr(
                 CustomInterestStatusEnum.CustomInterestStatus, status
             )
@@ -452,7 +454,7 @@ def create_custom_interest_tools(
         name: str,
         description: str,
         members: List[Dict[str, str]],
-        type_: str = "CUSTOM_AFFINITY",
+        type_: Optional[str] = None,
         status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -469,7 +471,7 @@ def create_custom_interest_tools(
                     {"type": "KEYWORD", "value": "running shoes"},
                     {"type": "URL", "value": "example.com/shoes"}
                 ]
-            type_: Type of custom interest:
+            type_: Optional type of custom interest. Omit to use API default.
                 - CUSTOM_AFFINITY: For reaching users with specific interests
                 - CUSTOM_INTENT: For reaching users actively researching
             status: Status - ENABLED or REMOVED

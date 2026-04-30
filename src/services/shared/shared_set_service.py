@@ -54,7 +54,7 @@ class SharedSetService:
         ctx: Context,
         customer_id: str,
         name: str,
-        type: SharedSetTypeEnum.SharedSetType = SharedSetTypeEnum.SharedSetType.NEGATIVE_KEYWORDS,
+        type: SharedSetTypeEnum.SharedSetType,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -65,7 +65,9 @@ class SharedSetService:
             ctx: FastMCP context
             customer_id: The customer ID
             name: The name of the shared set
-            type: Type of shared set (NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS)
+            type: Required. Type of shared set (NEGATIVE_KEYWORDS or
+                NEGATIVE_PLACEMENTS). Required + Immutable per the v23
+                proto — no safe default.
 
         Returns:
             Created shared set details
@@ -426,7 +428,7 @@ def create_shared_set_tools(
         ctx: Context,
         customer_id: str,
         name: str,
-        type: str = "NEGATIVE_KEYWORDS",
+        type: str,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -436,7 +438,8 @@ def create_shared_set_tools(
         Args:
             customer_id: The customer ID
             name: The name of the shared set
-            type: Type of shared set - NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS
+            type: Required. NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS.
+                Required + Immutable per the v23 proto — no safe default.
 
         Returns:
             Created shared set details with resource_name and shared_set_id

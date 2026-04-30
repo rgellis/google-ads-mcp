@@ -53,7 +53,7 @@ class YouTubeVideoUploadService:
         video_title: str,
         video_file_path: str,
         video_description: Optional[str] = None,
-        video_privacy: str = "UNLISTED",
+        video_privacy: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -67,7 +67,8 @@ class YouTubeVideoUploadService:
             video_title: Title for the video
             video_file_path: Path to the video file
             video_description: Optional description
-            video_privacy: Privacy setting (PUBLIC, UNLISTED)
+            video_privacy: Optional privacy setting (PUBLIC, PRIVATE, UNLISTED).
+                Omit to let the API default apply.
 
         Returns:
             Created video upload details
@@ -82,9 +83,10 @@ class YouTubeVideoUploadService:
             upload = YouTubeVideoUpload()
             upload.channel_id = channel_id
             upload.video_title = video_title
-            upload.video_privacy = getattr(
-                YouTubeVideoPrivacyEnum.YouTubeVideoPrivacy, video_privacy
-            )
+            if video_privacy is not None:
+                upload.video_privacy = getattr(
+                    YouTubeVideoPrivacyEnum.YouTubeVideoPrivacy, video_privacy
+                )
             if video_description:
                 upload.video_description = video_description
 
@@ -260,7 +262,7 @@ def create_youtube_video_upload_tools(
         video_title: str,
         video_file_path: str,
         video_description: Optional[str] = None,
-        video_privacy: str = "UNLISTED",
+        video_privacy: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -273,7 +275,7 @@ def create_youtube_video_upload_tools(
             video_title: Title for the video
             video_file_path: Path to the video file
             video_description: Optional description
-            video_privacy: PUBLIC, UNLISTED
+            video_privacy: Optional - PUBLIC, PRIVATE, or UNLISTED. Omit to use API default.
         """
         return await service.create_youtube_video_upload(
             ctx=ctx,

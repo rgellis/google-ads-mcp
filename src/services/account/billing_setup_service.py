@@ -50,7 +50,7 @@ class BillingSetupService:
         customer_id: str,
         payments_account_id: str,
         start_date: Optional[str] = None,
-        start_time_type: TimeTypeEnum.TimeType = TimeTypeEnum.TimeType.NOW,
+        start_time_type: Optional[TimeTypeEnum.TimeType] = None,
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
@@ -63,7 +63,10 @@ class BillingSetupService:
             customer_id: The customer ID
             payments_account_id: The payments account ID to link
             start_date: Start date in YYYY-MM-DD format (used when start_time_type is not NOW)
-            start_time_type: Start time type enum value (NOW or use start_date)
+            start_time_type: Optional start time type enum (NOW or
+                FUTURE). The proto's start_time oneof requires exactly one
+                of start_date_time or start_time_type — supply start_date OR
+                start_time_type, not both. Omit both to let the API handle defaults.
 
         Returns:
             Created billing setup details
@@ -78,7 +81,7 @@ class BillingSetupService:
             )
 
             # Set start date/time (mutually exclusive oneof fields)
-            if start_time_type == TimeTypeEnum.TimeType.NOW:
+            if start_time_type is not None:
                 billing_setup.start_time_type = start_time_type
             elif start_date:
                 billing_setup.start_date_time = start_date
@@ -373,20 +376,27 @@ def create_billing_setup_tools(
         customer_id: str,
         payments_account_id: str,
         start_date: Optional[str] = None,
-        start_time_type: str = "NOW",
+        start_time_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
         Args:
             customer_id: The customer ID
             payments_account_id: The payments account ID to link
-            start_date: Start date in YYYY-MM-DD format (used when start_time_type is not NOW)
-            start_time_type: Start time type - NOW (default) or provide start_date
+            start_date: Start date in YYYY-MM-DD format. Mutually exclusive
+                with start_time_type (proto oneof). Omit both to let the API
+                handle defaults.
+            start_time_type: Optional - NOW or FUTURE. Mutually exclusive
+                with start_date.
 
         Returns:
             Created billing setup details
         """
-        start_enum = getattr(TimeTypeEnum.TimeType, start_time_type)
+        start_enum = (
+            getattr(TimeTypeEnum.TimeType, start_time_type)
+            if start_time_type is not None
+            else None
+        )
 
         return await service.create_billing_setup(
             ctx=ctx,

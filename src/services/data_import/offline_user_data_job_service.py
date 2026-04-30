@@ -189,7 +189,7 @@ class OfflineUserDataJobService:
         customer_id: str,
         job_resource_name: str,
         user_data_list: List[Dict[str, Any]],
-        enable_partial_failure: bool = True,
+        enable_partial_failure: Optional[bool] = None,
         validate_only: bool = False,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
@@ -200,7 +200,8 @@ class OfflineUserDataJobService:
             customer_id: The customer ID
             job_resource_name: The offline user data job resource name
             user_data_list: List of user data to upload
-            enable_partial_failure: Whether to enable partial failure
+            enable_partial_failure: Whether to enable partial failure.
+                Omit to leave unset (proto-default rule).
 
         Returns:
             Result of adding operations
@@ -287,7 +288,8 @@ class OfflineUserDataJobService:
             # Create request
             request = AddOfflineUserDataJobOperationsRequest()
             request.resource_name = job_resource_name
-            request.enable_partial_failure = enable_partial_failure
+            if enable_partial_failure is not None:
+                request.enable_partial_failure = enable_partial_failure
             request.operations = operations
             if validate_only:
                 request.validate_only = validate_only
@@ -530,7 +532,7 @@ class OfflineUserDataJobService:
         customer_id: str,
         job_resource_name: str,
         user_data_list: List[Dict[str, Any]],
-        enable_partial_failure: bool = True,
+        enable_partial_failure: Optional[bool] = None,
         validate_only: bool = False,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
@@ -544,7 +546,8 @@ class OfflineUserDataJobService:
             customer_id: The customer ID
             job_resource_name: The offline user data job resource name
             user_data_list: List of user data to remove (same format as add)
-            enable_partial_failure: Whether to enable partial failure
+            enable_partial_failure: Whether to enable partial failure.
+                Omit to leave unset (proto-default rule).
 
         Returns:
             Result of removing operations
@@ -608,7 +611,8 @@ class OfflineUserDataJobService:
             # Create request
             request = AddOfflineUserDataJobOperationsRequest()
             request.resource_name = job_resource_name
-            request.enable_partial_failure = enable_partial_failure
+            if enable_partial_failure is not None:
+                request.enable_partial_failure = enable_partial_failure
             request.operations = operations
             if validate_only:
                 request.validate_only = validate_only
@@ -778,7 +782,7 @@ def create_offline_user_data_job_tools(
         customer_id: str,
         job_resource_name: str,
         user_data_list: List[Dict[str, Any]],
-        enable_partial_failure: bool = True,
+        enable_partial_failure: Optional[bool] = None,
         validate_only: bool = False,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
@@ -795,7 +799,8 @@ def create_offline_user_data_job_tools(
                     - third_party_user_id: Third-party user ID
                     - address_info: Address information with hashed fields
                 - transaction_attribute: Optional transaction data for enhanced conversions
-            enable_partial_failure: Whether to enable partial failure
+            enable_partial_failure: Whether to enable partial failure. Omit
+                to leave unset (proto-default rule).
             validate_only: Whether to only validate the request
             enable_warnings: Whether to enable warnings
 
@@ -880,7 +885,7 @@ def create_offline_user_data_job_tools(
         customer_id: str,
         job_resource_name: str,
         user_data_list: List[Dict[str, Any]],
-        enable_partial_failure: bool = True,
+        enable_partial_failure: Optional[bool] = None,
         validate_only: bool = False,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
@@ -899,7 +904,8 @@ def create_offline_user_data_job_tools(
                     - mobile_id: Mobile advertising ID
                     - third_party_user_id: Third-party user ID
                     - address_info: Address information with hashed fields
-            enable_partial_failure: Whether to enable partial failure
+            enable_partial_failure: Whether to enable partial failure. Omit
+                to leave unset (proto-default rule).
             validate_only: Whether to only validate the request
             enable_warnings: Whether to enable warnings
 

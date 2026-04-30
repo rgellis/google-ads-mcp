@@ -64,7 +64,7 @@ class CustomAudienceService:
         name: str,
         description: str,
         members: List[Dict[str, Any]],
-        type_: str = "AUTO",
+        type_: Optional[str] = None,
         status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -83,7 +83,8 @@ class CustomAudienceService:
                     {"type": "URL", "url": "example.com/shoes"},
                     {"type": "APP", "app": "com.example.app"}
                 ]
-            type_: Type - AUTO, INTEREST, PURCHASE_INTENT, or SEARCH
+            type_: Optional type - AUTO, INTEREST, PURCHASE_INTENT, or SEARCH.
+                Omit to let the API default apply.
             status: Status - ENABLED or REMOVED
 
         Returns:
@@ -96,9 +97,10 @@ class CustomAudienceService:
             custom_audience = CustomAudience()
             custom_audience.name = name
             custom_audience.description = description
-            custom_audience.type_ = getattr(
-                CustomAudienceTypeEnum.CustomAudienceType, type_
-            )
+            if type_ is not None:
+                custom_audience.type_ = getattr(
+                    CustomAudienceTypeEnum.CustomAudienceType, type_
+                )
 
             # Add members
             for member_data in members:
@@ -504,7 +506,7 @@ def create_custom_audience_tools(
         name: str,
         description: str,
         members: List[Dict[str, Any]],
-        type_: str = "AUTO",
+        type_: Optional[str] = None,
         status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -522,7 +524,7 @@ def create_custom_audience_tools(
                 - {"type": "URL", "url": "example.com/shoes"}
                 - {"type": "PLACE_CATEGORY", "place_category": 1234}
                 - {"type": "APP", "app": "com.example.app"}
-            type_: Type of custom audience:
+            type_: Optional type of custom audience. Omit to use API default.
                 - AUTO: Google Ads will auto-select the best interpretation
                 - INTEREST: Interest-based segment
                 - PURCHASE_INTENT: Purchase intent segment

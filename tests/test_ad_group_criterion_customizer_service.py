@@ -320,5 +320,5 @@ class TestAdGroupCriterionCustomizerTools:
             operations=[],
             partial_failure=False,
             validate_only=False,
-            response_content_type="RESOURCE_NAME_ONLY",
+            response_content_type=None,
         )

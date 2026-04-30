@@ -51,7 +51,7 @@ class BudgetService:
         customer_id: str,
         name: str,
         amount_micros: int,
-        delivery_method: str = "STANDARD",
+        delivery_method: Optional[str] = None,
         explicitly_shared: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -64,7 +64,8 @@ class BudgetService:
             customer_id: The customer ID
             name: Budget name
             amount_micros: Budget amount in micros (1 million micros = 1 unit)
-            delivery_method: STANDARD or ACCELERATED (default: STANDARD)
+            delivery_method: Optional STANDARD or ACCELERATED. Omit to let the
+                API default apply.
             explicitly_shared: Whether the budget can be shared across
                 campaigns. Omit to leave unset (proto-default rule:
                 False is marked-set on the wire).
@@ -82,10 +83,11 @@ class BudgetService:
             if explicitly_shared is not None:
                 campaign_budget.explicitly_shared = explicitly_shared
 
-            # Set delivery method
-            campaign_budget.delivery_method = getattr(
-                BudgetDeliveryMethodEnum.BudgetDeliveryMethod, delivery_method
-            )
+            # Set delivery method only when supplied; otherwise let the API default apply.
+            if delivery_method is not None:
+                campaign_budget.delivery_method = getattr(
+                    BudgetDeliveryMethodEnum.BudgetDeliveryMethod, delivery_method
+                )
 
             # Create the operation
             operation = CampaignBudgetOperation()
@@ -275,7 +277,7 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
         customer_id: str,
         name: str,
         amount_micros: int,
-        delivery_method: str = "STANDARD",
+        delivery_method: Optional[str] = None,
         explicitly_shared: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -287,7 +289,7 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             customer_id: The customer ID
             name: Budget name
             amount_micros: Budget amount in micros (1 million micros = 1 unit)
-            delivery_method: STANDARD or ACCELERATED (default: STANDARD)
+            delivery_method: Optional STANDARD or ACCELERATED. Omit to use API default.
             explicitly_shared: Whether the budget can be shared across
                 campaigns. Omit to leave unset.
 

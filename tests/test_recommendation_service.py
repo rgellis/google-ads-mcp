@@ -559,7 +559,10 @@ async def test_generate_recommendations_with_ad_group_info(
             ad_group_info=[
                 {
                     "ad_group_type": "SEARCH_STANDARD",
-                    "keywords": ["running shoes", "athletic footwear"],
+                    "keywords": [
+                        {"text": "running shoes", "match_type": "BROAD"},
+                        {"text": "athletic footwear", "match_type": "BROAD"},
+                    ],
                 },
             ],
         )

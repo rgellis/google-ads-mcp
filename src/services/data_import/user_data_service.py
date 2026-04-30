@@ -52,7 +52,7 @@ class UserDataService:
         ctx: Context,
         customer_id: str,
         conversion_adjustments: List[Dict[str, Any]],
-        user_identifier_source: str = "FIRST_PARTY",
+        user_identifier_source: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -63,14 +63,25 @@ class UserDataService:
             ctx: FastMCP context
             customer_id: The customer ID
             conversion_adjustments: List of conversion adjustments with user data
-            user_identifier_source: Source of user identifiers - FIRST_PARTY or THIRD_PARTY
-                (default: FIRST_PARTY)
+            user_identifier_source: Optional source of user identifiers -
+                FIRST_PARTY or THIRD_PARTY. Omit to let the API default apply.
 
         Returns:
             Upload result with success/failure details
         """
         try:
             customer_id = format_customer_id(customer_id)
+
+            # Compute the source enum once if supplied; otherwise leave each
+            # identifier's source field unset so the API default applies.
+            source_enum = (
+                getattr(
+                    UserIdentifierSourceEnum.UserIdentifierSource,
+                    user_identifier_source,
+                )
+                if user_identifier_source is not None
+                else None
+            )
 
             # Create user data operations
             operations = []
@@ -85,20 +96,16 @@ class UserDataService:
                     for identifier_dict in adjustment["user_identifiers"]:
                         identifier = UserIdentifier()
 
-                        # Set identifier based on type
-                        source_enum = getattr(
-                            UserIdentifierSourceEnum.UserIdentifierSource,
-                            user_identifier_source,
-                        )
-
                         if "hashed_email" in identifier_dict:
                             identifier.hashed_email = identifier_dict["hashed_email"]
-                            identifier.user_identifier_source = source_enum
+                            if source_enum is not None:
+                                identifier.user_identifier_source = source_enum
                         elif "hashed_phone_number" in identifier_dict:
                             identifier.hashed_phone_number = identifier_dict[
                                 "hashed_phone_number"
                             ]
-                            identifier.user_identifier_source = source_enum
+                            if source_enum is not None:
+                                identifier.user_identifier_source = source_enum
                         elif "address_info" in identifier_dict:
                             address_info = OfflineUserAddressInfo()
                             addr = identifier_dict["address_info"]
@@ -119,7 +126,8 @@ class UserDataService:
                                 ]
 
                             identifier.address_info = address_info
-                            identifier.user_identifier_source = source_enum
+                            if source_enum is not None:
+                                identifier.user_identifier_source = source_enum
 
                         user_data.user_identifiers.append(identifier)
 
@@ -354,7 +362,7 @@ def create_user_data_tools(
         ctx: Context,
         customer_id: str,
         conversion_adjustments: List[Dict[str, Any]],
-        user_identifier_source: str = "FIRST_PARTY",
+        user_identifier_source: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -367,8 +375,9 @@ def create_user_data_tools(
                 - user_identifiers: List of identifiers (hashed_email, hashed_phone_number, address_info)
                 - transaction_attribute: Transaction details with conversion_action, currency_code,
                   transaction_amount_micros, transaction_date_time, order_id
-            user_identifier_source: Source of user data - FIRST_PARTY (your own data) or
-                THIRD_PARTY (data from a partner)
+            user_identifier_source: Optional source of user data - FIRST_PARTY
+                (your own data) or THIRD_PARTY (data from a partner). Omit to
+                use API default.
 
         Returns:
             Upload result with received operations count and any failure details

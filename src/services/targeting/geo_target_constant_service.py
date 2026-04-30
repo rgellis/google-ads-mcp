@@ -38,7 +38,7 @@ class GeoTargetConstantService:
         self,
         ctx: Context,
         location_names: List[str],
-        locale: str = "en",
+        locale: Optional[str] = None,
         country_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Suggest geo target constants by location names.
@@ -53,9 +53,11 @@ class GeoTargetConstantService:
             List of suggested geo target constants
         """
         try:
-            # Create request
+            # Create request. Set locale only when caller supplied one;
+            # otherwise let the API default apply.
             request = SuggestGeoTargetConstantsRequest()
-            request.locale = locale
+            if locale is not None:
+                request.locale = locale
 
             # Set location names
             location_names_obj = SuggestGeoTargetConstantsRequest.LocationNames()
@@ -111,7 +113,7 @@ class GeoTargetConstantService:
         self,
         ctx: Context,
         address_text: str,
-        locale: str = "en",
+        locale: Optional[str] = None,
         country_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Suggest geo target constants by address.
@@ -126,9 +128,11 @@ class GeoTargetConstantService:
             List of suggested geo target constants
         """
         try:
-            # Create request
+            # Create request. Set locale only when caller supplied one;
+            # otherwise let the API default apply.
             request = SuggestGeoTargetConstantsRequest()
-            request.locale = locale
+            if locale is not None:
+                request.locale = locale
 
             # Use LocationNames with the address text as the search term
             location_names_obj = SuggestGeoTargetConstantsRequest.LocationNames()
@@ -184,7 +188,7 @@ class GeoTargetConstantService:
         self,
         ctx: Context,
         query: str,
-        locale: str = "en",
+        locale: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """Search for geo target constants using a query.
@@ -238,7 +242,7 @@ def create_geo_target_constant_tools(
     async def suggest_geo_targets_by_location(
         ctx: Context,
         location_names: List[str],
-        locale: str = "en",
+        locale: Optional[str] = None,
         country_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Suggest geo target constants by location names.
@@ -261,7 +265,7 @@ def create_geo_target_constant_tools(
     async def suggest_geo_targets_by_address(
         ctx: Context,
         address_text: str,
-        locale: str = "en",
+        locale: Optional[str] = None,
         country_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Suggest geo target constants by address.
@@ -284,7 +288,7 @@ def create_geo_target_constant_tools(
     async def search_geo_targets(
         ctx: Context,
         query: str,
-        locale: str = "en",
+        locale: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """Search for geo target constants using a query.

@@ -54,7 +54,6 @@ class CustomerClientLinkService:
         ctx: Context,
         customer_id: str,
         client_customer: str,
-        status: ManagerLinkStatusEnum.ManagerLinkStatus = ManagerLinkStatusEnum.ManagerLinkStatus.PENDING,
         hidden: Optional[bool] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
@@ -64,11 +63,16 @@ class CustomerClientLinkService:
         or response_content_type — those parameters were removed because
         passing them was a silent no-op.
 
+        The status field was removed from this wrapper because PENDING is
+        the only legal value on create — the link must be ACCEPTED by the
+        client via the customer_user_access_invitation flow. Letting the
+        API apply its own default keeps the wrapper aligned with the
+        proto's intent.
+
         Args:
             ctx: FastMCP context
             customer_id: The manager customer ID
             client_customer: Resource name of the client customer
-            status: Link status enum value
             hidden: Whether the link is hidden from the client. Omit to
                 leave unset (proto-default rule: False is marked-set
                 on the wire).
@@ -83,7 +87,6 @@ class CustomerClientLinkService:
             # Create customer client link
             link = CustomerClientLink()
             link.client_customer = client_customer
-            link.status = status
             if hidden is not None:
                 link.hidden = hidden
 
@@ -287,30 +290,29 @@ def create_customer_client_link_tools(
         ctx: Context,
         customer_id: str,
         client_customer: str,
-        status: str = "PENDING",
         hidden: Optional[bool] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a customer client link between manager and client accounts.
 
+        The status parameter is intentionally not exposed: PENDING is the
+        only legal value on create — the link transitions to ACTIVE only
+        after the client accepts the manager's invitation via the
+        customer_user_access_invitation flow.
+
         Args:
             customer_id: The manager customer ID
             client_customer: Resource name of the client customer (e.g., customers/123456789)
-            status: Link status (PENDING, ACTIVE, CANCELED, REJECTED)
             hidden: Whether the link is hidden from the client. Omit to leave unset.
             validate_only: If true, validate the request without executing it
 
         Returns:
             Created customer client link details with resource_name and status
         """
-        # Convert string enum to proper enum type
-        status_enum = getattr(ManagerLinkStatusEnum.ManagerLinkStatus, status)
-
         return await service.create_customer_client_link(
             ctx=ctx,
             customer_id=customer_id,
             client_customer=client_customer,
-            status=status_enum,
             hidden=hidden,
             validate_only=validate_only,
         )

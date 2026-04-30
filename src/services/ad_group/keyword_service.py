@@ -69,7 +69,9 @@ class KeywordService:
             ctx: FastMCP context
             customer_id: The customer ID
             ad_group_id: The ad group ID
-            keywords: List of keyword dictionaries with 'text' and 'match_type' fields
+            keywords: List of keyword dictionaries with 'text' and 'match_type'.
+                'match_type' is required (EXACT, PHRASE, or BROAD) — no safe
+                default; match type fundamentally changes which queries match.
             default_cpc_bid_micros: Default CPC bid for keywords in micros
             status: Keyword status - ENABLED or PAUSED (default: ENABLED)
 
@@ -83,12 +85,18 @@ class KeywordService:
             operations = []
 
             for keyword_data in keywords:
+                if "match_type" not in keyword_data:
+                    raise ValueError(
+                        "Each keyword dict must include a 'match_type' "
+                        "(EXACT, PHRASE, or BROAD). No safe default — match "
+                        "type fundamentally changes which queries match."
+                    )
                 # Create keyword info
                 keyword_info = KeywordInfo()
                 keyword_info.text = keyword_data["text"]
                 keyword_info.match_type = getattr(
                     KeywordMatchTypeEnum.KeywordMatchType,
-                    keyword_data.get("match_type", "BROAD"),
+                    keyword_data["match_type"],
                 )
 
                 # Create ad group criterion
@@ -306,7 +314,8 @@ def create_keyword_tools(
             ad_group_id: The ad group ID
             keywords: List of keyword dictionaries, each with:
                 - text: The keyword text
-                - match_type: EXACT, PHRASE, or BROAD (default: BROAD)
+                - match_type: REQUIRED — EXACT, PHRASE, or BROAD. No safe
+                  default; match type fundamentally changes which queries match.
                 - cpc_bid_micros: Optional CPC bid for this keyword
             default_cpc_bid_micros: Default CPC bid for keywords without individual bids
             status: Keyword status - ENABLED or PAUSED (default: ENABLED)
