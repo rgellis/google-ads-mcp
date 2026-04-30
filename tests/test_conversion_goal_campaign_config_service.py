@@ -2,10 +2,13 @@
 
 import pytest
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from fastmcp import Context
 from google.ads.googleads.v23.enums.types.goal_config_level import GoalConfigLevelEnum
+from google.ads.googleads.v23.enums.types.response_content_type import (
+    ResponseContentTypeEnum,
+)
 from google.ads.googleads.v23.services.types.conversion_goal_campaign_config_service import (
     ConversionGoalCampaignConfigOperation,
     MutateConversionGoalCampaignConfigsResponse,
@@ -14,6 +17,7 @@ from google.ads.googleads.v23.services.types.conversion_goal_campaign_config_ser
 
 from src.services.conversions.conversion_goal_campaign_config_service import (
     ConversionGoalCampaignConfigService,
+    create_conversion_goal_campaign_config_tools,
 )
 
 
@@ -119,3 +123,71 @@ def test_update_conversion_goal_campaign_config_operation_partial(
     assert operation.update.resource_name == resource_name
     assert operation.update.goal_config_level == goal_config_level
     assert operation.update_mask.paths == ["goal_config_level"]
+
+
+@pytest.mark.asyncio
+async def test_mutate_tool_routes_response_content_type(
+    conversion_goal_campaign_config_service: ConversionGoalCampaignConfigService,
+    mock_ctx: Context,
+) -> None:
+    """Phase 10 coverage gap: tool wrapper now exposes response_content_type
+    (the request proto supports it; the wrapper had been hiding it)."""
+    tools = create_conversion_goal_campaign_config_tools(
+        conversion_goal_campaign_config_service
+    )
+    mutate_tool = tools[0]  # mutate_conversion_goal_campaign_configs
+
+    with patch.object(
+        conversion_goal_campaign_config_service,
+        "mutate_conversion_goal_campaign_configs",
+        new=AsyncMock(return_value={"results": []}),
+    ) as mock_call:
+        await mutate_tool(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            operations=[
+                {
+                    "operation_type": "update",
+                    "resource_name": "customers/1234567890/conversionGoalCampaignConfigs/123",
+                    "goal_config_level": "CAMPAIGN",
+                }
+            ],
+            response_content_type="MUTABLE_RESOURCE",
+        )
+
+        kwargs = mock_call.call_args.kwargs
+        assert (
+            kwargs["response_content_type"]
+            == ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE
+        )
+
+
+@pytest.mark.asyncio
+async def test_update_tool_routes_response_content_type(
+    conversion_goal_campaign_config_service: ConversionGoalCampaignConfigService,
+    mock_ctx: Context,
+) -> None:
+    """Same coverage gap on the single-resource update tool wrapper."""
+    tools = create_conversion_goal_campaign_config_tools(
+        conversion_goal_campaign_config_service
+    )
+    update_tool = tools[1]  # update_conversion_goal_campaign_config
+
+    with patch.object(
+        conversion_goal_campaign_config_service,
+        "mutate_conversion_goal_campaign_configs",
+        new=AsyncMock(return_value={"results": []}),
+    ) as mock_call:
+        await update_tool(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            resource_name="customers/1234567890/conversionGoalCampaignConfigs/123",
+            goal_config_level="CAMPAIGN",
+            response_content_type="MUTABLE_RESOURCE",
+        )
+
+        kwargs = mock_call.call_args.kwargs
+        assert (
+            kwargs["response_content_type"]
+            == ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE
+        )

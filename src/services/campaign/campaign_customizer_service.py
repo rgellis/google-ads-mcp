@@ -142,6 +142,72 @@ class CampaignCustomizerService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def mutate_campaign_customizers(
+        self,
+        ctx: Context,
+        customer_id: str,
+        operations: List[CampaignCustomizerOperation],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[
+            ResponseContentTypeEnum.ResponseContentType
+        ] = None,
+    ) -> Dict[str, Any]:
+        """Batch-mutate campaign customizers in a single request.
+
+        The proto's MutateCampaignCustomizers RPC accepts a repeated
+        operations list, supporting create + remove in one round trip.
+        Use this when you need to apply many changes atomically; the
+        per-resource ``create_campaign_customizer`` /
+        ``remove_campaign_customizer`` helpers wrap a single op each.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            operations: List of pre-built CampaignCustomizerOperation
+                messages (each carrying either a `create` payload or a
+                `remove` resource_name)
+            partial_failure: If true, valid operations succeed even if others fail
+            validate_only: If true, only validates without executing
+            response_content_type: Optional - RESOURCE_NAME_ONLY or
+                MUTABLE_RESOURCE. Omit to use API default.
+
+        Returns:
+            Serialized mutation response with results for each operation
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            request = MutateCampaignCustomizersRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateCampaignCustomizersResponse = (
+                self.client.mutate_campaign_customizers(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Mutated {len(operations)} campaign customizer(s) for customer {customer_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to mutate campaign customizers: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def remove_campaign_customizer(
         self,
         ctx: Context,
@@ -317,7 +383,90 @@ def create_campaign_customizer_tools(
             validate_only=validate_only,
         )
 
-    tools.extend([create_campaign_customizer, remove_campaign_customizer])
+    async def mutate_campaign_customizers(
+        ctx: Context,
+        customer_id: str,
+        operations: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Batch-mutate campaign customizers — apply many create/remove operations atomically.
+
+        Args:
+            customer_id: The customer ID
+            operations: List of operation dicts. Each dict must have:
+                - operation_type: "create" or "remove"
+                For create:
+                    - campaign_id: The campaign ID
+                    - customizer_attribute_id: The customizer attribute ID
+                    - value: The customizer value (string)
+                    - attribute_type: TEXT, NUMBER, PRICE, or PERCENT
+                For remove:
+                    - campaign_id: The campaign ID
+                    - customizer_attribute_id: The customizer attribute ID
+            partial_failure: If true, valid operations succeed even if others fail
+            validate_only: If true, only validates without executing
+            response_content_type: Optional - RESOURCE_NAME_ONLY or
+                MUTABLE_RESOURCE. Omit to use API default.
+
+        Returns:
+            Serialized mutation response with results for each operation
+        """
+        formatted_customer_id = format_customer_id(customer_id)
+        ops: List[CampaignCustomizerOperation] = []
+        for op_data in operations:
+            op_type = op_data["operation_type"]
+            operation = CampaignCustomizerOperation()
+
+            if op_type == "create":
+                attribute_type_enum = getattr(
+                    CustomizerAttributeTypeEnum.CustomizerAttributeType,
+                    op_data["attribute_type"],
+                )
+                customizer_value = CustomizerValue()
+                customizer_value.type_ = attribute_type_enum
+                customizer_value.string_value = op_data["value"]
+
+                campaign_customizer = CampaignCustomizer()
+                campaign_customizer.campaign = f"customers/{formatted_customer_id}/campaigns/{op_data['campaign_id']}"
+                campaign_customizer.customizer_attribute = (
+                    f"customers/{formatted_customer_id}/customizerAttributes/"
+                    f"{op_data['customizer_attribute_id']}"
+                )
+                campaign_customizer.value = customizer_value
+                operation.create = campaign_customizer
+            elif op_type == "remove":
+                operation.remove = (
+                    f"customers/{formatted_customer_id}/campaignCustomizers/"
+                    f"{op_data['campaign_id']}~{op_data['customizer_attribute_id']}"
+                )
+            else:
+                raise ValueError(f"Invalid operation_type: {op_type!r}")
+
+            ops.append(operation)
+
+        rct_enum = (
+            getattr(ResponseContentTypeEnum.ResponseContentType, response_content_type)
+            if response_content_type is not None
+            else None
+        )
+        return await service.mutate_campaign_customizers(
+            ctx=ctx,
+            customer_id=customer_id,
+            operations=ops,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=rct_enum,
+        )
+
+    tools.extend(
+        [
+            create_campaign_customizer,
+            remove_campaign_customizer,
+            mutate_campaign_customizers,
+        ]
+    )
     return tools
 
 

@@ -27,6 +27,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -170,7 +171,7 @@ class CustomerManagerLinkService:
             request.customer_id = customer_id
             request.previous_customer_manager_link = previous_link
             request.new_manager = new_manager
-            request.validate_only = validate_only
+            set_request_options(request, validate_only=validate_only)
 
             # Execute the move
             response: MoveManagerLinkResponse = self.client.move_manager_link(

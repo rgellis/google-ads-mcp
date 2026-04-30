@@ -86,7 +86,7 @@ class GoogleAdsService:
             request.page_size = min(page_size, 10000)  # Max allowed by API
             if page_token:
                 request.page_token = page_token
-            request.validate_only = validate_only
+            set_request_options(request, validate_only=validate_only)
 
             # Set search settings for summary row
             if (
@@ -231,9 +231,12 @@ class GoogleAdsService:
             request = MutateGoogleAdsRequest()
             request.customer_id = customer_id
             request.mutate_operations.extend(operations)
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
-            request.response_content_type = response_content_type
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Execute mutations
             response: MutateGoogleAdsResponse = self.client.mutate(request=request)

@@ -140,8 +140,11 @@ class ConversionAdjustmentUploadService:
             request = UploadConversionAdjustmentsRequest()
             request.customer_id = customer_id
             request.conversion_adjustments = conversion_adjustments
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
 
             # Upload adjustments
             response: UploadConversionAdjustmentsResponse = (

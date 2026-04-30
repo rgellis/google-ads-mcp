@@ -160,6 +160,7 @@ def create_conversion_goal_campaign_config_tools(
         customer_id: str,
         operations: list[dict[str, Any]],
         validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update conversion goal configurations at the campaign level.
 
@@ -173,6 +174,8 @@ def create_conversion_goal_campaign_config_tools(
                 - goal_config_level: CUSTOMER (use account goals) or CAMPAIGN (use campaign-specific goals)
                 - custom_conversion_goal: Custom conversion goal resource name (optional)
             validate_only: Only validate the request
+            response_content_type: Optional - RESOURCE_NAME_ONLY or
+                MUTABLE_RESOURCE. Omit to use API default.
 
         Returns:
             Mutation results with updated resource names
@@ -198,11 +201,17 @@ def create_conversion_goal_campaign_config_tools(
 
             ops.append(operation)
 
+        rct_enum = (
+            getattr(ResponseContentTypeEnum.ResponseContentType, response_content_type)
+            if response_content_type is not None
+            else None
+        )
         return await service.mutate_conversion_goal_campaign_configs(
             ctx=ctx,
             customer_id=customer_id,
             operations=ops,
             validate_only=validate_only,
+            response_content_type=rct_enum,
         )
 
     tools.append(mutate_conversion_goal_campaign_configs)
@@ -213,6 +222,8 @@ def create_conversion_goal_campaign_config_tools(
         resource_name: str,
         goal_config_level: Optional[str] = None,
         custom_conversion_goal: Optional[str] = None,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a conversion goal campaign configuration.
 
@@ -222,6 +233,9 @@ def create_conversion_goal_campaign_config_tools(
             resource_name: The conversion goal campaign config resource name
             goal_config_level: The level of goal config (CUSTOMER or CAMPAIGN)
             custom_conversion_goal: The custom conversion goal resource name
+            validate_only: Only validate the request
+            response_content_type: Optional - RESOURCE_NAME_ONLY or
+                MUTABLE_RESOURCE. Omit to use API default.
 
         Returns:
             Serialized response with updated conversion goal campaign config details
@@ -236,8 +250,17 @@ def create_conversion_goal_campaign_config_tools(
             custom_conversion_goal=custom_conversion_goal,
         )
 
+        rct_enum = (
+            getattr(ResponseContentTypeEnum.ResponseContentType, response_content_type)
+            if response_content_type is not None
+            else None
+        )
         return await service.mutate_conversion_goal_campaign_configs(
-            ctx=ctx, customer_id=customer_id, operations=[operation]
+            ctx=ctx,
+            customer_id=customer_id,
+            operations=[operation],
+            validate_only=validate_only,
+            response_content_type=rct_enum,
         )
 
     tools.append(update_conversion_goal_campaign_config)

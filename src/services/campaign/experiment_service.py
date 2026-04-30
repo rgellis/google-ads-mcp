@@ -256,7 +256,7 @@ class ExperimentService:
             # Create request
             request = ScheduleExperimentRequest()
             request.resource_name = resource_name
-            request.validate_only = validate_only
+            set_request_options(request, validate_only=validate_only)
 
             # Make the API call
             response = self.client.schedule_experiment(request=request)
@@ -302,7 +302,7 @@ class ExperimentService:
             # Create request
             request = EndExperimentRequest()
             request.experiment = resource_name
-            request.validate_only = validate_only
+            set_request_options(request, validate_only=validate_only)
 
             # Make the API call
             response = self.client.end_experiment(request=request)
@@ -349,7 +349,7 @@ class ExperimentService:
             # Create request
             request = PromoteExperimentRequest()
             request.resource_name = resource_name
-            request.validate_only = validate_only
+            set_request_options(request, validate_only=validate_only)
 
             # Make the API call
             response = self.client.promote_experiment(request=request)
@@ -484,7 +484,7 @@ class ExperimentService:
             request = GraduateExperimentRequest()
             request.experiment = resource_name
             request.campaign_budget_mappings = [mapping]
-            request.validate_only = validate_only
+            set_request_options(request, validate_only=validate_only)
 
             self.client.graduate_experiment(request=request)
 

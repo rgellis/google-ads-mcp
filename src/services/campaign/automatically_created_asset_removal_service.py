@@ -79,7 +79,11 @@ class AutomaticallyCreatedAssetRemovalService:
             request = RemoveCampaignAutomaticallyCreatedAssetRequest()
             request.customer_id = customer_id
             request.operations = removal_ops
-            request.partial_failure = False
+            # Only partial_failure is on this request proto; validate_only
+            # and response_content_type are silently dropped by
+            # set_request_options' hasattr guard. The previous hardcoded
+            # `request.partial_failure = False` violated the proto-default
+            # rule (writing the default still marks the field as set).
             set_request_options(
                 request,
                 partial_failure=partial_failure,

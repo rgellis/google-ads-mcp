@@ -93,9 +93,11 @@ class TestConversionCustomVariableService:
         assert len(request.operations) == 1
         assert request.partial_failure is False
         assert request.validate_only is False
+        # response_content_type is now Optional[None]; left unset on the wire
+        # (proto-default rule). Reads back as UNSPECIFIED (0).
         assert (
             request.response_content_type
-            == ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE
+            == ResponseContentTypeEnum.ResponseContentType.UNSPECIFIED
         )
 
         operation = request.operations[0]

@@ -65,7 +65,9 @@ class ConversionCustomVariableService:
         status: ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus = ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus.ENABLED,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE,
+        response_content_type: Optional[
+            ResponseContentTypeEnum.ResponseContentType
+        ] = None,
     ) -> Dict[str, Any]:
         """Create a new conversion custom variable.
 
@@ -99,9 +101,12 @@ class ConversionCustomVariableService:
             request = MutateConversionCustomVariablesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
-            request.response_content_type = response_content_type
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Execute the mutation
             response: MutateConversionCustomVariablesResponse = (
@@ -135,7 +140,9 @@ class ConversionCustomVariableService:
         ] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: ResponseContentTypeEnum.ResponseContentType = ResponseContentTypeEnum.ResponseContentType.MUTABLE_RESOURCE,
+        response_content_type: Optional[
+            ResponseContentTypeEnum.ResponseContentType
+        ] = None,
     ) -> Dict[str, Any]:
         """Update an existing conversion custom variable.
 
@@ -187,9 +194,12 @@ class ConversionCustomVariableService:
             request = MutateConversionCustomVariablesRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
-            request.response_content_type = response_content_type
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
 
             # Execute the mutation
             response = self.client.mutate_conversion_custom_variables(request=request)

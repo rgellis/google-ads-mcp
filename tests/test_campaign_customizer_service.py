@@ -375,3 +375,75 @@ class TestCampaignCustomizerTools:
                 partial_failure=False,
                 validate_only=True,
             )
+
+    async def test_mutate_campaign_customizers_batch_tool(self, mock_context: Any):
+        """Phase 10 coverage gap: batch mutate_campaign_customizers tool routes
+        a mixed create/remove operations list to the service layer."""
+        service = CampaignCustomizerService()
+        tools = create_campaign_customizer_tools(service)
+        # Third tool is the new batch wrapper.
+        batch_tool = tools[2]
+
+        with patch.object(service, "mutate_campaign_customizers") as mock_batch:
+            mock_batch.return_value = {  # type: ignore
+                "results": [
+                    {
+                        "resource_name": "customers/1234567890/campaignCustomizers/9876543210~1111111111"
+                    },
+                    {
+                        "resource_name": "customers/1234567890/campaignCustomizers/9876543210~2222222222"
+                    },
+                ]
+            }
+
+            await batch_tool(
+                ctx=mock_context,
+                customer_id="123-456-7890",
+                operations=[
+                    {
+                        "operation_type": "create",
+                        "campaign_id": "9876543210",
+                        "customizer_attribute_id": "1111111111",
+                        "value": "25",
+                        "attribute_type": "PERCENT",
+                    },
+                    {
+                        "operation_type": "remove",
+                        "campaign_id": "9876543210",
+                        "customizer_attribute_id": "2222222222",
+                    },
+                ],
+            )
+
+            mock_batch.assert_called_once()  # type: ignore
+            kwargs = mock_batch.call_args.kwargs  # type: ignore
+            assert kwargs["customer_id"] == "123-456-7890"
+            ops = kwargs["operations"]
+            assert len(ops) == 2
+            # First op is a create; verify the campaign and value land on the proto.
+            assert ops[0].create.campaign == "customers/1234567890/campaigns/9876543210"
+            assert ops[0].create.value.string_value == "25"
+            assert (
+                ops[0].create.value.type_
+                == CustomizerAttributeTypeEnum.CustomizerAttributeType.PERCENT
+            )
+            # Second op is a remove with the ~-delimited resource name.
+            assert (
+                ops[1].remove
+                == "customers/1234567890/campaignCustomizers/9876543210~2222222222"
+            )
+
+    async def test_mutate_campaign_customizers_batch_invalid_op_type(
+        self, mock_context: Any
+    ):
+        """Unknown operation_type raises before hitting the API."""
+        service = CampaignCustomizerService()
+        tools = create_campaign_customizer_tools(service)
+        batch_tool = tools[2]
+
+        with pytest.raises(ValueError, match="Invalid operation_type"):
+            await batch_tool(
+                ctx=mock_context,
+                customer_id="1234567890",
+                operations=[{"operation_type": "update"}],
+            )

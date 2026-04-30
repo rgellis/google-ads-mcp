@@ -97,8 +97,11 @@ class AssetGroupAssetService:
             request = MutateAssetGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
 
             # Execute the mutation
             response: MutateAssetGroupAssetsResponse = (
@@ -171,8 +174,11 @@ class AssetGroupAssetService:
             request = MutateAssetGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
 
             # Execute the mutation
             response = self.client.mutate_asset_group_assets(request=request)
@@ -235,8 +241,11 @@ class AssetGroupAssetService:
             request = MutateAssetGroupAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+            )
 
             # Execute the mutation
             response = self.client.mutate_asset_group_assets(request=request)

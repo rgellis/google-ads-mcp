@@ -135,13 +135,20 @@ class AdParameterService:
             request = MutateAdParametersRequest()
             request.customer_id = customer_id
             request.operations = mutate_operations
-            request.partial_failure = partial_failure
-            request.validate_only = validate_only
-            if response_content_type is not None:
-                request.response_content_type = getattr(
+            rct_enum = (
+                getattr(
                     ResponseContentTypeEnum.ResponseContentType,
                     response_content_type,
                 )
+                if response_content_type is not None
+                else None
+            )
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=rct_enum,
+            )
 
             # Make the API call
             response: MutateAdParametersResponse = self.client.mutate_ad_parameters(

@@ -113,7 +113,6 @@ class CampaignConversionGoalService:
             request = MutateCampaignConversionGoalsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
-            request.validate_only = validate_only
             set_request_options(
                 request,
                 partial_failure=partial_failure,
