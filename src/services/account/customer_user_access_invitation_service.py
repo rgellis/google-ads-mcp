@@ -29,7 +29,6 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
-    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -59,11 +58,12 @@ class CustomerUserAccessInvitationService:
         customer_id: str,
         email_address: str,
         access_role: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a customer user access invitation to invite a new user.
+
+        Note: MutateCustomerUserAccessInvitationRequest does not support
+        partial_failure, validate_only, or response_content_type — those
+        parameters were removed because passing them was a silent no-op.
 
         Args:
             ctx: FastMCP context
@@ -90,12 +90,6 @@ class CustomerUserAccessInvitationService:
             request = MutateCustomerUserAccessInvitationRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
 
             # Make the API call
             response: MutateCustomerUserAccessInvitationResponse = (
@@ -205,11 +199,11 @@ class CustomerUserAccessInvitationService:
         ctx: Context,
         customer_id: str,
         invitation_resource_name: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove (revoke) a customer user access invitation.
+
+        Note: MutateCustomerUserAccessInvitationRequest does not support
+        partial_failure, validate_only, or response_content_type.
 
         Args:
             ctx: FastMCP context
@@ -230,12 +224,6 @@ class CustomerUserAccessInvitationService:
             request = MutateCustomerUserAccessInvitationRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
 
             # Make the API call
             response = self.client.mutate_customer_user_access_invitation(
@@ -275,9 +263,6 @@ def create_customer_user_access_invitation_tools(
         customer_id: str,
         email_address: str,
         access_role: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a customer user access invitation to invite a new user to the account.
 
@@ -294,9 +279,6 @@ def create_customer_user_access_invitation_tools(
             customer_id=customer_id,
             email_address=email_address,
             access_role=access_role,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def list_customer_user_access_invitations(
@@ -323,9 +305,6 @@ def create_customer_user_access_invitation_tools(
         ctx: Context,
         customer_id: str,
         invitation_resource_name: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove (revoke) a customer user access invitation.
 
@@ -340,9 +319,6 @@ def create_customer_user_access_invitation_tools(
             ctx=ctx,
             customer_id=customer_id,
             invitation_resource_name=invitation_resource_name,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     tools.extend(

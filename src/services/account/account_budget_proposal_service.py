@@ -31,7 +31,6 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
-    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -66,11 +65,13 @@ class AccountBudgetProposalService:
         proposed_start_date_time: Optional[str] = None,
         proposed_end_date_time: Optional[str] = None,
         proposed_end_time_type: Optional[TimeTypeEnum.TimeType] = None,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an account budget proposal.
+
+        Note: MutateAccountBudgetProposalRequest does not support
+        partial_failure or response_content_type — those parameters were
+        removed because passing them was a silent no-op.
 
         Args:
             ctx: FastMCP context
@@ -84,6 +85,7 @@ class AccountBudgetProposalService:
             proposed_start_date_time: Start date/time (YYYY-MM-DD HH:MM:SS)
             proposed_end_date_time: End date/time (YYYY-MM-DD HH:MM:SS)
             proposed_end_time_type: End time type enum value
+            validate_only: If true, only validates without executing
 
         Returns:
             Mutation result dictionary
@@ -123,12 +125,8 @@ class AccountBudgetProposalService:
             request = MutateAccountBudgetProposalRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response: MutateAccountBudgetProposalResponse = (
@@ -161,14 +159,16 @@ class AccountBudgetProposalService:
         proposed_spending_limit_micros: Optional[int] = None,
         proposed_end_date_time: Optional[str] = None,
         proposed_start_date_time: Optional[str] = None,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create an UPDATE proposal for an existing account budget.
 
         Note: Account budget proposals work by creating new proposals with UPDATE type,
         not by directly updating existing proposals.
+
+        MutateAccountBudgetProposalRequest does not support partial_failure
+        or response_content_type — those parameters were removed because
+        passing them was a silent no-op.
 
         Args:
             ctx: FastMCP context
@@ -179,6 +179,7 @@ class AccountBudgetProposalService:
             proposed_spending_limit_micros: Optional new spending limit in micros
             proposed_end_date_time: Optional new end date/time
             proposed_start_date_time: Optional new start date/time
+            validate_only: If true, only validates without executing
 
         Returns:
             Mutation result dictionary
@@ -214,12 +215,8 @@ class AccountBudgetProposalService:
             request = MutateAccountBudgetProposalRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response = self.client.mutate_account_budget_proposal(request=request)
@@ -313,16 +310,18 @@ class AccountBudgetProposalService:
         ctx: Context,
         customer_id: str,
         proposal_resource_name: str,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an account budget proposal.
+
+        Note: MutateAccountBudgetProposalRequest does not support
+        partial_failure or response_content_type.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             proposal_resource_name: Resource name of the proposal to remove
+            validate_only: If true, only validates without executing
 
         Returns:
             Mutation result dictionary
@@ -338,12 +337,8 @@ class AccountBudgetProposalService:
             request = MutateAccountBudgetProposalRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response = self.client.mutate_account_budget_proposal(request=request)
@@ -387,9 +382,7 @@ def create_account_budget_proposal_tools(
         proposed_start_date_time: Optional[str] = None,
         proposed_end_date_time: Optional[str] = None,
         proposed_end_time_type: Optional[str] = None,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an account budget proposal for account-level budget management.
 
@@ -404,6 +397,7 @@ def create_account_budget_proposal_tools(
             proposed_start_date_time: Start date/time (YYYY-MM-DD HH:MM:SS format)
             proposed_end_date_time: End date/time (YYYY-MM-DD HH:MM:SS format)
             proposed_end_time_type: End time type (NEVER, FOREVER)
+            validate_only: If true, only validates without executing
 
         Returns:
             Created account budget proposal details with resource_name
@@ -434,9 +428,7 @@ def create_account_budget_proposal_tools(
             proposed_start_date_time=proposed_start_date_time,
             proposed_end_date_time=proposed_end_date_time,
             proposed_end_time_type=end_time_enum,
-            partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def update_account_budget_proposal(
@@ -448,9 +440,7 @@ def create_account_budget_proposal_tools(
         proposed_spending_limit_micros: Optional[int] = None,
         proposed_end_date_time: Optional[str] = None,
         proposed_start_date_time: Optional[str] = None,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an UPDATE proposal for an existing account budget.
 
@@ -462,6 +452,7 @@ def create_account_budget_proposal_tools(
             proposed_spending_limit_micros: Optional new spending limit in micros
             proposed_end_date_time: Optional new end date/time (YYYY-MM-DD HH:MM:SS)
             proposed_start_date_time: Optional new start date/time (YYYY-MM-DD HH:MM:SS)
+            validate_only: If true, only validates without executing
 
         Returns:
             Created update proposal details with resource_name
@@ -475,9 +466,7 @@ def create_account_budget_proposal_tools(
             proposed_spending_limit_micros=proposed_spending_limit_micros,
             proposed_end_date_time=proposed_end_date_time,
             proposed_start_date_time=proposed_start_date_time,
-            partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def list_account_budget_proposals(
@@ -501,15 +490,14 @@ def create_account_budget_proposal_tools(
         ctx: Context,
         customer_id: str,
         proposal_resource_name: str,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an account budget proposal.
 
         Args:
             customer_id: The customer ID
             proposal_resource_name: Resource name of the proposal to remove
+            validate_only: If true, only validates without executing
 
         Returns:
             Removal result with status
@@ -518,9 +506,7 @@ def create_account_budget_proposal_tools(
             ctx=ctx,
             customer_id=customer_id,
             proposal_resource_name=proposal_resource_name,
-            partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     tools.extend(

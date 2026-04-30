@@ -24,7 +24,6 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
-    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -146,21 +145,18 @@ class ProductLinkInvitationService:
         ctx: Context,
         customer_id: str,
         resource_name: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
+        """Remove a product link invitation.
+
+        Note: RemoveProductLinkInvitationRequest does not support
+        partial_failure, validate_only, or response_content_type — those
+        parameters were removed because passing them was a silent no-op.
+        """
         try:
             customer_id = format_customer_id(customer_id)
             request = RemoveProductLinkInvitationRequest()
             request.customer_id = customer_id
             request.resource_name = resource_name
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
             response: RemoveProductLinkInvitationResponse = (
                 self.client.remove_product_link_invitation(request=request)
             )
@@ -227,9 +223,6 @@ def create_product_link_invitation_tools(
         ctx: Context,
         customer_id: str,
         resource_name: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a product link invitation.
 
@@ -241,9 +234,6 @@ def create_product_link_invitation_tools(
             ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     tools.extend(

@@ -258,8 +258,6 @@ class TestCustomerManagerLinkTools:
                 manager_link_id=123,
                 status=ManagerLinkStatusEnum.ManagerLinkStatus.ACTIVE,
                 validate_only=False,
-                partial_failure=False,
-                response_content_type=None,
             )
 
     async def test_decline_manager_invitation_tool(self, mock_context: Any):
@@ -286,8 +284,6 @@ class TestCustomerManagerLinkTools:
                 manager_link_id=123,
                 status=ManagerLinkStatusEnum.ManagerLinkStatus.REFUSED,
                 validate_only=True,
-                partial_failure=False,
-                response_content_type=None,
             )
 
     async def test_terminate_manager_link_tool(self, mock_context: Any):
@@ -313,8 +309,6 @@ class TestCustomerManagerLinkTools:
                 manager_link_id=123,
                 status=ManagerLinkStatusEnum.ManagerLinkStatus.INACTIVE,
                 validate_only=False,
-                partial_failure=False,
-                response_content_type=None,
             )
 
     async def test_move_client_to_new_manager_tool(self, mock_context: Any):

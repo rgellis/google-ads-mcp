@@ -28,7 +28,6 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
-    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -57,11 +56,13 @@ class CustomerClientLinkService:
         client_customer: str,
         status: ManagerLinkStatusEnum.ManagerLinkStatus = ManagerLinkStatusEnum.ManagerLinkStatus.PENDING,
         hidden: bool = False,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a customer client link between manager and client accounts.
+
+        Note: MutateCustomerClientLinkRequest does not support partial_failure
+        or response_content_type — those parameters were removed because
+        passing them was a silent no-op.
 
         Args:
             ctx: FastMCP context
@@ -69,6 +70,7 @@ class CustomerClientLinkService:
             client_customer: Resource name of the client customer
             status: Link status enum value
             hidden: Whether the link is hidden from the client
+            validate_only: If true, validate the request without executing it
 
         Returns:
             Created customer client link details
@@ -90,12 +92,8 @@ class CustomerClientLinkService:
             request = MutateCustomerClientLinkRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response: MutateCustomerClientLinkResponse = (
@@ -125,11 +123,12 @@ class CustomerClientLinkService:
         link_resource_name: str,
         status: Optional[ManagerLinkStatusEnum.ManagerLinkStatus] = None,
         hidden: Optional[bool] = None,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a customer client link.
+
+        Note: MutateCustomerClientLinkRequest does not support partial_failure
+        or response_content_type.
 
         Args:
             ctx: FastMCP context
@@ -137,6 +136,7 @@ class CustomerClientLinkService:
             link_resource_name: Resource name of the link to update
             status: Optional new status enum value
             hidden: Optional new hidden status
+            validate_only: If true, validate the request without executing it
 
         Returns:
             Updated customer client link details
@@ -170,12 +170,8 @@ class CustomerClientLinkService:
             request = MutateCustomerClientLinkRequest()
             request.customer_id = customer_id
             request.operation = operation
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response = self.client.mutate_customer_client_link(request=request)
@@ -290,9 +286,7 @@ def create_customer_client_link_tools(
         client_customer: str,
         status: str = "PENDING",
         hidden: bool = False,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a customer client link between manager and client accounts.
 
@@ -301,6 +295,7 @@ def create_customer_client_link_tools(
             client_customer: Resource name of the client customer (e.g., customers/123456789)
             status: Link status (PENDING, ACTIVE, CANCELED, REJECTED)
             hidden: Whether the link is hidden from the client in their account list
+            validate_only: If true, validate the request without executing it
 
         Returns:
             Created customer client link details with resource_name and status
@@ -314,9 +309,7 @@ def create_customer_client_link_tools(
             client_customer=client_customer,
             status=status_enum,
             hidden=hidden,
-            partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def update_customer_client_link(
@@ -325,9 +318,7 @@ def create_customer_client_link_tools(
         link_resource_name: str,
         status: Optional[str] = None,
         hidden: Optional[bool] = None,
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a customer client link.
 
@@ -336,6 +327,7 @@ def create_customer_client_link_tools(
             link_resource_name: Resource name of the link to update
             status: Optional new status (PENDING, ACTIVE, CANCELED, REJECTED)
             hidden: Optional new hidden status
+            validate_only: If true, validate the request without executing it
 
         Returns:
             Updated customer client link details with list of updated fields
@@ -351,9 +343,7 @@ def create_customer_client_link_tools(
             link_resource_name=link_resource_name,
             status=status_enum,
             hidden=hidden,
-            partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def list_customer_client_links(

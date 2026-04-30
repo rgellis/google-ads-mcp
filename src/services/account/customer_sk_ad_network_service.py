@@ -21,7 +21,6 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
-    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -49,9 +48,7 @@ class CustomerSkAdNetworkService:
         customer_id: str,
         resource_name: str,
         schema: Dict[str, Any],
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
         """Update the SKAdNetwork conversion value schema.
@@ -60,6 +57,10 @@ class CustomerSkAdNetworkService:
         to target the existing schema; the wrapper now requires the
         caller to supply it.
 
+        Note: MutateCustomerSkAdNetworkConversionValueSchemaRequest does
+        not support partial_failure or response_content_type — those
+        parameters were removed because passing them was a silent no-op.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
@@ -67,6 +68,8 @@ class CustomerSkAdNetworkService:
                 resource name (e.g.
                 customers/{customer_id}/customerSkAdNetworkConversionValueSchemas/{account_link_id}).
             schema: Schema data to update
+            validate_only: If true, the request is validated but not executed
+            enable_warnings: Whether to return warnings about schema issues
         """
         try:
             customer_id = format_customer_id(customer_id)
@@ -83,12 +86,8 @@ class CustomerSkAdNetworkService:
             request.operation = operation
             if enable_warnings:
                 request.enable_warnings = enable_warnings
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
+            if validate_only:
+                request.validate_only = validate_only
             response: MutateCustomerSkAdNetworkConversionValueSchemaResponse = (
                 self.client.mutate_customer_sk_ad_network_conversion_value_schema(
                     request=request
@@ -118,9 +117,7 @@ def create_customer_sk_ad_network_tools(
         customer_id: str,
         resource_name: str,
         schema: Dict[str, Any],
-        partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
         enable_warnings: bool = False,
     ) -> Dict[str, Any]:
         """Update the iOS SKAdNetwork conversion value schema for iOS app campaign measurement.
@@ -135,6 +132,7 @@ def create_customer_sk_ad_network_tools(
             schema: Schema configuration dict with:
                 - app_id: The iOS app ID
                 - measurement_window_hours: Hours after install to measure conversions
+            validate_only: If true, validate the request without executing it
             enable_warnings: Whether to return warnings about schema issues
 
         Returns:
@@ -145,9 +143,7 @@ def create_customer_sk_ad_network_tools(
             customer_id=customer_id,
             resource_name=resource_name,
             schema=schema,
-            partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
             enable_warnings=enable_warnings,
         )
 

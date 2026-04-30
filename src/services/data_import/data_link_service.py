@@ -26,7 +26,6 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
-    set_request_options,
 )
 
 logger = get_logger(__name__)
@@ -114,11 +113,12 @@ class DataLinkService:
         ctx: Context,
         customer_id: str,
         resource_name: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove a data link.
+
+        Note: RemoveDataLinkRequest does not support partial_failure,
+        validate_only, or response_content_type — those parameters were
+        removed because passing them was a silent no-op.
 
         Args:
             ctx: FastMCP context
@@ -134,12 +134,6 @@ class DataLinkService:
             request = RemoveDataLinkRequest()
             request.customer_id = customer_id
             request.resource_name = resource_name
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
 
             response: RemoveDataLinkResponse = self.client.remove_data_link(
                 request=request
@@ -298,9 +292,6 @@ def create_data_link_tools(
         ctx: Context,
         customer_id: str,
         resource_name: str,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove a data link.
 
@@ -315,9 +306,6 @@ def create_data_link_tools(
             ctx=ctx,
             customer_id=customer_id,
             resource_name=resource_name,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def update_data_link(

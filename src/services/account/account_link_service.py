@@ -132,15 +132,19 @@ class AccountLinkService:
         status: Optional[AccountLinkStatusEnum.AccountLinkStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an account link.
+
+        Note: MutateAccountLinkRequest does not support response_content_type
+        — that parameter was removed because passing it was a silent no-op.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             account_link_resource_name: Resource name of the account link to update
             status: Optional new status enum value
+            partial_failure: If true, valid mutations succeed even if some fail
+            validate_only: If true, only validates without executing
 
         Returns:
             Updated account link details
@@ -174,7 +178,6 @@ class AccountLinkService:
                 request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
 
             # Make the API call
@@ -271,14 +274,17 @@ class AccountLinkService:
         account_link_resource_name: str,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Remove an account link.
+
+        Note: MutateAccountLinkRequest does not support response_content_type.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             account_link_resource_name: Resource name of the account link to remove
+            partial_failure: If true, valid mutations succeed even if some fail
+            validate_only: If true, only validates without executing
 
         Returns:
             Removal result
@@ -298,7 +304,6 @@ class AccountLinkService:
                 request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
 
             # Make the API call
@@ -371,7 +376,6 @@ def create_account_link_tools(
         status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an account link.
 
@@ -379,6 +383,8 @@ def create_account_link_tools(
             customer_id: The customer ID
             account_link_resource_name: Resource name of the account link to update
             status: Optional new status (ENABLED, REMOVED)
+            partial_failure: If true, valid mutations succeed even if some fail
+            validate_only: If true, only validates without executing
 
         Returns:
             Updated account link details with list of updated fields
@@ -395,7 +401,6 @@ def create_account_link_tools(
             status=status_enum,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     async def list_account_links(
@@ -424,13 +429,14 @@ def create_account_link_tools(
         account_link_resource_name: str,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Remove an account link.
 
         Args:
             customer_id: The customer ID
             account_link_resource_name: Resource name of the account link to remove
+            partial_failure: If true, valid mutations succeed even if some fail
+            validate_only: If true, only validates without executing
 
         Returns:
             Removal result with status
@@ -441,7 +447,6 @@ def create_account_link_tools(
             account_link_resource_name=account_link_resource_name,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     tools.extend(

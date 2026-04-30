@@ -69,7 +69,6 @@ class GoalService:
         retention_additional_high_lifetime_value: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create or update an account-level retention Goal.
 
@@ -77,6 +76,9 @@ class GoalService:
         ``retention_goal_settings`` (a oneof). Identity (``resource_name``,
         ``goal_id``, ``goal_type``, ``owner_customer``,
         ``optimization_eligibility``) is Output-only or Immutable.
+
+        Note: MutateGoalsRequest does not support response_content_type —
+        that parameter was removed because passing it was a silent no-op.
 
         Args:
             ctx: FastMCP context
@@ -88,9 +90,8 @@ class GoalService:
             retention_additional_high_lifetime_value: Incremental conversion
                 value for lapsed customers who ARE of high value. Should be
                 greater than ``retention_additional_value`` if both are set.
-            partial_failure: passthrough
-            validate_only: passthrough
-            response_content_type: passthrough
+            partial_failure: If true, valid mutations succeed even if some fail
+            validate_only: If true, only validates without executing
 
         Returns:
             Mutation result
@@ -163,7 +164,6 @@ class GoalService:
                 request,
                 partial_failure=partial_failure,
                 validate_only=validate_only,
-                response_content_type=response_content_type,
             )
 
             response: MutateGoalsResponse = self.client.mutate_goals(request=request)
@@ -200,7 +200,6 @@ def create_goal_tools(
         retention_additional_high_lifetime_value: Optional[float] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
-        response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create or update an account-level retention Goal.
 
@@ -216,6 +215,8 @@ def create_goal_tools(
             retention_additional_high_lifetime_value: Incremental conversion
                 value for lapsed high-value customers. Should be greater than
                 retention_additional_value if both are set.
+            partial_failure: If true, valid mutations succeed even if some fail
+            validate_only: If true, only validates without executing
 
         Returns:
             Mutation result with resource name
@@ -229,7 +230,6 @@ def create_goal_tools(
             retention_additional_high_lifetime_value=retention_additional_high_lifetime_value,
             partial_failure=partial_failure,
             validate_only=validate_only,
-            response_content_type=response_content_type,
         )
 
     tools.append(mutate_goal)
