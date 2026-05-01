@@ -33,7 +33,7 @@ async def test_mutate_schema(
     mock_ctx: Context,
 ) -> None:
     """Test mutating the SKAdNetwork conversion value schema."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_sk_ad_network_conversion_value_schema.return_value = (
         Mock()
     )  # type: ignore
@@ -65,7 +65,7 @@ async def test_mutate_schema_minimal(
     mock_ctx: Context,
 ) -> None:
     """Test mutating schema with minimal data."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_sk_ad_network_conversion_value_schema.return_value = (
         Mock()
     )  # type: ignore
@@ -94,7 +94,7 @@ async def test_mutate_schema_error(
     google_ads_exception: Any,
 ) -> None:
     """Test error handling when mutating schema fails."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_sk_ad_network_conversion_value_schema.side_effect = (
         google_ads_exception  # type: ignore
     )
@@ -116,7 +116,7 @@ async def test_mutate_schema_enable_warnings(
     mock_ctx: Context,
 ) -> None:
     """Test enable_warnings parameter reaches the request."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_sk_ad_network_conversion_value_schema.return_value = (
         Mock()
     )  # type: ignore

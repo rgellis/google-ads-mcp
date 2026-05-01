@@ -349,8 +349,7 @@ class AdService:
             # Create ad group ad with resource name
             ad_group_ad = AdGroupAd()
             ad_group_ad.resource_name = resource_name
-            if status is not None:
-                ad_group_ad.status = status
+            ad_group_ad.status = status
 
             # Create the operation
             operation = AdGroupAdOperation()
@@ -2598,12 +2597,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Returns:
             Updated ad details
         """
-        # Convert string enum to proper enum type
-        status_enum = (
-            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
-            if status is not None
-            else None
-        )
+        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
 
         return await service.update_ad_status(
             ctx=ctx,

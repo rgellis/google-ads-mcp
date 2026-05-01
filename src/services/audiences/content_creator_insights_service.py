@@ -24,17 +24,6 @@ from src.utils import format_customer_id, get_logger, serialize_proto_message
 logger = get_logger(__name__)
 
 
-def _make_attr_youtube_channel(channel_id: str) -> AudienceInsightsAttribute:
-    """Wrap a YouTube channel ID into an AudienceInsightsAttribute."""
-    from google.ads.googleads.v23.common.types.criteria import YouTubeChannelInfo
-
-    attr = AudienceInsightsAttribute()
-    channel_info = YouTubeChannelInfo()
-    channel_info.channel_id = channel_id
-    attr.youtube_channel = channel_info
-    return attr
-
-
 def _make_attr_knowledge_graph(entity_id: str) -> AudienceInsightsAttribute:
     """Wrap a knowledge graph machine ID into an AudienceInsightsAttribute."""
     from google.ads.googleads.v23.common.types.audience_insights_attribute import (

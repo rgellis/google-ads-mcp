@@ -21,8 +21,6 @@ from google.ads.googleads.v23.services.types.customizer_attribute_service import
     MutateCustomizerAttributesRequest,
     MutateCustomizerAttributesResponse,
 )
-from google.protobuf import field_mask_pb2
-
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,

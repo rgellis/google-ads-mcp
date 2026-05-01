@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> IdentityVerificationService:
 async def test_start_identity_verification(
     service: IdentityVerificationService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.start_identity_verification.return_value = None
     result = await service.start_identity_verification(
         ctx=mock_ctx,
@@ -41,7 +41,7 @@ async def test_start_identity_verification(
 async def test_get_identity_verification(
     service: IdentityVerificationService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_response = Mock()
     mock_response.identity_verification = []
     mock_client.get_identity_verification.return_value = mock_response

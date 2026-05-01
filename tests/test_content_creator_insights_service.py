@@ -71,7 +71,7 @@ async def test_generate_creator_insights_with_all_options(
         "src.services.audiences.content_creator_insights_service.serialize_proto_message",
         return_value={"creator_insights": []},
     ):
-        result = await service.generate_creator_insights(
+        await service.generate_creator_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
             customer_insights_group="my_analysis",
@@ -148,7 +148,7 @@ async def test_generate_trending_insights_with_all_options(
         "src.services.audiences.content_creator_insights_service.serialize_proto_message",
         return_value={"trending_insights": []},
     ):
-        result = await service.generate_trending_insights(
+        await service.generate_trending_insights(
             ctx=mock_ctx,
             customer_id="1234567890",
             customer_insights_group="trend_check",

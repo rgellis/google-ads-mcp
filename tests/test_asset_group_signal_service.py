@@ -20,7 +20,6 @@ from google.ads.googleads.v23.common.types.criteria import AudienceInfo, SearchT
 
 from src.services.assets.asset_group_signal_service import (
     AssetGroupSignalService,
-    create_asset_group_signal_tools,
     register_asset_group_signal_tools,
 )
 

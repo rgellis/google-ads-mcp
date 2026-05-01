@@ -16,7 +16,6 @@ from google.ads.googleads.v23.common.types.criteria import (
     YouTubeVideoInfo,
 )
 from google.ads.googleads.v23.enums.types.content_label_type import ContentLabelTypeEnum
-from google.ads.googleads.v23.enums.types.criterion_type import CriterionTypeEnum
 from google.ads.googleads.v23.resources.types.customer_negative_criterion import (
     CustomerNegativeCriterion,
 )

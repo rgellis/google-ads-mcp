@@ -685,7 +685,7 @@ async def test_upload_call_conversions_validate_only(
         "src.services.conversions.conversion_upload_service.serialize_proto_message",
         return_value=expected_result,
     ):
-        result = await conversion_upload_service.upload_call_conversions(
+        await conversion_upload_service.upload_call_conversions(
             ctx=mock_ctx,
             customer_id=customer_id,
             conversions=conversions,

@@ -1162,7 +1162,7 @@ async def test_add_parental_status_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1180,7 +1180,7 @@ async def test_add_parental_status_criteria(
             ctx=mock_ctx,
             customer_id=customer_id,
             campaign_id=campaign_id,
-            parental_statuses=["PARENT"],
+            parental_statuses=["PARENT"],  # type: ignore[list-item]
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
@@ -1208,7 +1208,7 @@ async def test_add_user_interest_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1242,7 +1242,7 @@ async def test_add_topic_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1276,7 +1276,7 @@ async def test_add_placement_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1318,7 +1318,7 @@ async def test_add_youtube_channel_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1359,7 +1359,7 @@ async def test_add_youtube_video_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1400,7 +1400,7 @@ async def test_add_content_label_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1418,7 +1418,7 @@ async def test_add_content_label_criteria(
             ctx=mock_ctx,
             customer_id=customer_id,
             campaign_id=campaign_id,
-            content_label_types=["PROFANITY"],
+            content_label_types=["PROFANITY"],  # type: ignore[list-item]
         )
     assert result == expected
     mock_client.mutate_campaign_criteria.assert_called_once()  # type: ignore
@@ -1441,7 +1441,7 @@ async def test_add_custom_audience_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1482,7 +1482,7 @@ async def test_add_custom_affinity_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1523,7 +1523,7 @@ async def test_add_combined_audience_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1564,7 +1564,7 @@ async def test_add_life_event_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1605,7 +1605,7 @@ async def test_add_keyword_theme_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1639,7 +1639,7 @@ async def test_add_ip_block_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1673,7 +1673,7 @@ async def test_add_carrier_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1707,7 +1707,7 @@ async def test_add_mobile_app_category_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1741,7 +1741,7 @@ async def test_add_mobile_application_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1775,7 +1775,7 @@ async def test_add_mobile_device_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1822,7 +1822,7 @@ async def test_add_operating_system_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1867,7 +1867,7 @@ async def test_add_location_group_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1903,7 +1903,7 @@ async def test_add_listing_scope_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1937,7 +1937,7 @@ async def test_add_webpage_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -1972,7 +1972,7 @@ async def test_add_brand_list_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -2006,7 +2006,7 @@ async def test_add_local_service_id_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -2040,7 +2040,7 @@ async def test_add_webpage_list_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -2084,7 +2084,7 @@ async def test_add_video_lineup_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {
@@ -2118,7 +2118,7 @@ async def test_add_extended_demographic_criteria(
     customer_id = "1234567890"
     campaign_id = "12345"
 
-    mock_client = campaign_criterion_service.client
+    mock_client: Any = campaign_criterion_service.client
     mock_client.mutate_campaign_criteria.return_value = Mock()  # type: ignore
 
     expected = {

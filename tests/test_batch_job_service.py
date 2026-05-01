@@ -11,7 +11,6 @@ from google.ads.googleads.v23.services.services.batch_job_service import (
 )
 from google.ads.googleads.v23.services.types.batch_job_service import (
     AddBatchJobOperationsResponse,
-    ListBatchJobResultsResponse,
     MutateBatchJobResponse,
 )
 

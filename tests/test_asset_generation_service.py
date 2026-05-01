@@ -201,7 +201,7 @@ async def test_generate_text_with_existing_context(
         "src.services.assets.asset_generation_service.serialize_proto_message",
         return_value={"assets": []},
     ):
-        result = await service.generate_text(
+        await service.generate_text(
             ctx=mock_ctx,
             customer_id="1234567890",
             asset_field_types=["DESCRIPTION"],
@@ -230,7 +230,7 @@ async def test_generate_images_with_freeform_prompt(
         "src.services.assets.asset_generation_service.serialize_proto_message",
         return_value={"assets": []},
     ):
-        result = await service.generate_images(
+        await service.generate_images(
             ctx=mock_ctx,
             customer_id="1234567890",
             asset_field_types=["MARKETING_IMAGE"],
@@ -258,7 +258,7 @@ async def test_generate_images_with_product_recontext(
         "src.services.assets.asset_generation_service.serialize_proto_message",
         return_value={"assets": []},
     ):
-        result = await service.generate_images(
+        await service.generate_images(
             ctx=mock_ctx,
             customer_id="1234567890",
             asset_field_types=["MARKETING_IMAGE"],

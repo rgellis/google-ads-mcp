@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> AdGroupAssetSetService:
 async def test_create_ad_group_asset_set(
     service: AdGroupAssetSetService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_ad_group_asset_sets.return_value = Mock()
     with patch(
         "src.services.ad_group.ad_group_asset_set_service.serialize_proto_message",
@@ -47,7 +47,7 @@ async def test_create_ad_group_asset_set(
 async def test_remove_ad_group_asset_set(
     service: AdGroupAssetSetService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_ad_group_asset_sets.return_value = Mock()
     with patch(
         "src.services.ad_group.ad_group_asset_set_service.serialize_proto_message",

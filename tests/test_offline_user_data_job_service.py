@@ -28,7 +28,7 @@ async def test_create_offline_user_data_job_customer_match(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     """Customer match path requires user_list and sets the matching metadata."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.create_offline_user_data_job.return_value = Mock()
     with patch(
         "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
@@ -55,7 +55,7 @@ async def test_create_offline_user_data_job_store_sales(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     """Store sales path requires fractions and sets store_sales_metadata."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.create_offline_user_data_job.return_value = Mock()
     with patch(
         "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
@@ -93,7 +93,7 @@ async def test_create_offline_user_data_job_rejects_mismatched_params(
 async def test_run_offline_user_data_job(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_lro = Mock()
     mock_lro.operation.name = "operations/abc"
     mock_client.run_offline_user_data_job.return_value = mock_lro
@@ -113,7 +113,7 @@ async def test_create_offline_user_data_job_validate_only(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     """Test validate_only and enable_match_rate_range_preview reach the request."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.create_offline_user_data_job.return_value = Mock()
     with patch(
         "src.services.data_import.offline_user_data_job_service.serialize_proto_message",
@@ -138,7 +138,7 @@ async def test_run_offline_user_data_job_validate_only(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     """Test validate_only reaches the RunOfflineUserDataJob request."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.run_offline_user_data_job.return_value = Mock()
     await service.run_offline_user_data_job(
         ctx=mock_ctx,
@@ -156,7 +156,7 @@ async def test_remove_user_data_operations(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
     """Test removing user data operations from a job."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_response = Mock()
     mock_response.partial_failure_error = None
     mock_client.add_offline_user_data_job_operations.return_value = mock_response
@@ -186,7 +186,7 @@ async def test_remove_user_data_operations(
 async def test_add_user_data_operations(
     service: OfflineUserDataJobService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_response = Mock()
     mock_response.partial_failure_error = None
     mock_client.add_offline_user_data_job_operations.return_value = mock_response
@@ -297,7 +297,7 @@ async def test_remove_all_user_data_operations(
 ) -> None:
     """remove_all sends a single OfflineUserDataJobOperation with
     remove_all=True to wipe every staged entry on the job."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_response = Mock()
     mock_response.partial_failure_error = None
     mock_client.add_offline_user_data_job_operations.return_value = mock_response

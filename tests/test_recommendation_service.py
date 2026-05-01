@@ -389,7 +389,7 @@ async def test_generate_recommendations_with_asset_group_info(
         "src.services.planning.recommendation_service.serialize_proto_message",
         return_value={"recommendations": []},
     ):
-        result = await recommendation_service.generate_recommendations(
+        await recommendation_service.generate_recommendations(
             ctx=mock_ctx,
             customer_id="1234567890",
             recommendation_types=["KEYWORD"],

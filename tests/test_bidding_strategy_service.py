@@ -5,12 +5,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v23.enums.types.bidding_strategy_status import (
-    BiddingStrategyStatusEnum,
-)
-from google.ads.googleads.v23.enums.types.bidding_strategy_type import (
-    BiddingStrategyTypeEnum,
-)
 from google.ads.googleads.v23.enums.types.target_impression_share_location import (
     TargetImpressionShareLocationEnum,
 )

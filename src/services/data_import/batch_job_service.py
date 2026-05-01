@@ -222,12 +222,12 @@ class BatchJobService:
 
             operations = []
             for idx, op_data in enumerate(operations_data):
-                if not isinstance(op_data, dict) or len(op_data) != 1:
+                if not isinstance(op_data, dict) or len(op_data) != 1:  # pyright: ignore[reportUnnecessaryIsInstance]
                     raise ValueError(
                         f"operations_data[{idx}] must be a dict with exactly "
                         "one key naming the operation field "
                         "(e.g. 'campaign_operation'). Got "
-                        f"{list(op_data.keys()) if isinstance(op_data, dict) else type(op_data).__name__}"
+                        f"{list(op_data.keys()) if isinstance(op_data, dict) else type(op_data).__name__}"  # pyright: ignore[reportUnnecessaryIsInstance]
                     )
                 operation = MutateOperation()
                 key, value = next(iter(op_data.items()))

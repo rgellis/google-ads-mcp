@@ -22,7 +22,6 @@ from google.ads.googleads.v23.enums.types.customizer_attribute_type import (
 
 from src.services.ad_group.ad_group_customizer_service import (
     AdGroupCustomizerService,
-    create_ad_group_customizer_tools,
     register_ad_group_customizer_tools,
 )
 

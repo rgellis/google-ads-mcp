@@ -411,11 +411,11 @@ def create_google_ads_tools(
         """
         mutate_ops = []
         for idx, op_data in enumerate(operations):
-            if not isinstance(op_data, dict) or len(op_data) != 1:
+            if not isinstance(op_data, dict) or len(op_data) != 1:  # pyright: ignore[reportUnnecessaryIsInstance]
                 raise ValueError(
                     f"operations[{idx}] must be a dict with exactly one key "
                     "naming the operation field (e.g. 'campaign_operation'). "
-                    f"Got {list(op_data.keys()) if isinstance(op_data, dict) else type(op_data).__name__}"
+                    f"Got {list(op_data.keys()) if isinstance(op_data, dict) else type(op_data).__name__}"  # pyright: ignore[reportUnnecessaryIsInstance]
                 )
             mutate_op = MutateOperation()
             key, value = next(iter(op_data.items()))

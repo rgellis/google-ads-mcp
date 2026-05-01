@@ -1,7 +1,7 @@
 """Tests for ReachPlanService."""
 
 from typing import Any
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context

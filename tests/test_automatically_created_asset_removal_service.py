@@ -108,9 +108,9 @@ async def test_remove_campaign_automatically_created_assets_error(
     google_ads_exception: Any,
 ) -> None:
     """Test error handling in remove_campaign_automatically_created_assets."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.remove_campaign_automatically_created_asset.side_effect = (
-        google_ads_exception  # type: ignore
+        google_ads_exception
     )
 
     with pytest.raises(Exception) as exc_info:

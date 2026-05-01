@@ -266,7 +266,7 @@ class TestConversionCustomVariableService:
         conversion_custom_variable_service._client = mock_client
 
         # Mock API error
-        error = GoogleAdsException(None, None, None, None)
+        error = GoogleAdsException(None, None, None, None)  # type: ignore[arg-type]
         error.failure = Mock()  # type: ignore
         error.failure.__str__ = Mock(return_value="Tag already exists")  # type: ignore
         mock_client.mutate_conversion_custom_variables.side_effect = error  # type: ignore

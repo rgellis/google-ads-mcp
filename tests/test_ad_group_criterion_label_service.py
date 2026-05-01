@@ -16,7 +16,6 @@ from google.ads.googleads.v23.services.types.ad_group_criterion_label_service im
 
 from src.services.ad_group.ad_group_criterion_label_service import (
     AdGroupCriterionLabelService,
-    create_ad_group_criterion_label_tools,
     register_ad_group_criterion_label_tools,
 )
 

@@ -223,64 +223,6 @@ async def test_update_shared_set_name_only(
 
 
 @pytest.mark.asyncio
-async def test_update_shared_set_name_only(
-    shared_set_service: SharedSetService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test updating shared set name only (status is output-only)."""
-    # Arrange
-    customer_id = "1234567890"
-    shared_set_id = "123456"
-    new_name = "Updated List"
-
-    # Create mock response
-    mock_response = Mock(spec=MutateSharedSetsResponse)
-    mock_response.results = []
-    result = Mock()
-    result.resource_name = f"customers/{customer_id}/sharedSets/{shared_set_id}"
-    mock_response.results.append(result)  # type: ignore
-
-    # Get the mocked shared set service client
-    mock_shared_set_client = shared_set_service.client  # type: ignore
-    mock_shared_set_client.mutate_shared_sets.return_value = mock_response  # type: ignore
-
-    # Mock serialize_proto_message
-    expected_result = {
-        "results": [
-            {"resource_name": f"customers/{customer_id}/sharedSets/{shared_set_id}"}
-        ]
-    }
-
-    with patch(
-        "src.services.shared.shared_set_service.serialize_proto_message",
-        return_value=expected_result,
-    ):
-        # Act
-        result = await shared_set_service.update_shared_set(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            shared_set_id=shared_set_id,
-            name=new_name,
-        )
-
-    # Assert
-    assert result == expected_result
-
-    # Verify the API call
-    call_args = mock_shared_set_client.mutate_shared_sets.call_args  # type: ignore
-    request = call_args[1]["request"]
-    operation = request.operations[0]
-    shared_set = operation.update
-    assert (
-        shared_set.resource_name
-        == f"customers/{customer_id}/sharedSets/{shared_set_id}"
-    )
-    assert shared_set.name == new_name
-    assert "name" in operation.update_mask.paths
-
-
-@pytest.mark.asyncio
 async def test_list_shared_sets_no_filters(
     shared_set_service: SharedSetService,
     mock_sdk_client: Any,

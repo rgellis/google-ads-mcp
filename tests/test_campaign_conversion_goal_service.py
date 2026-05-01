@@ -158,7 +158,7 @@ class TestCampaignConversionGoalService:
         campaign_conversion_goal_service._client = mock_client
 
         # Mock API error
-        error = GoogleAdsException(None, None, None, None)
+        error = GoogleAdsException(None, None, None, None)  # type: ignore[arg-type]
         error.failure = Mock()  # type: ignore
         error.failure.__str__ = Mock(return_value="Invalid campaign ID")  # type: ignore
         mock_client.mutate_campaign_conversion_goals.side_effect = error  # type: ignore

@@ -8,9 +8,6 @@ from fastmcp import Context
 from google.ads.googleads.v23.enums.types.account_link_status import (
     AccountLinkStatusEnum,
 )
-from google.ads.googleads.v23.enums.types.linked_account_type import (
-    LinkedAccountTypeEnum,
-)
 from google.ads.googleads.v23.enums.types.mobile_app_vendor import (
     MobileAppVendorEnum,
 )

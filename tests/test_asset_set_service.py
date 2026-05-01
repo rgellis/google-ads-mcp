@@ -51,7 +51,6 @@ async def test_create_asset_set(
     customer_id = "1234567890"
     name = "Test Asset Set"
     asset_set_type = AssetSetTypeEnum.AssetSetType.MERCHANT_CENTER_FEED
-    status = AssetSetStatusEnum.AssetSetStatus.ENABLED
 
     # Create mock response
     mock_response = Mock(spec=MutateAssetSetsResponse)

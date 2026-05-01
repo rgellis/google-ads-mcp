@@ -58,7 +58,7 @@ async def test_create_text_asset(
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
 
     # Get the mocked asset service client
-    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client: Any = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
 
     # Mock serialize_proto_message
@@ -111,7 +111,7 @@ async def test_create_text_asset_without_name(
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/124"
 
     # Get the mocked asset service client
-    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client: Any = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
 
     # Mock serialize_proto_message
@@ -162,7 +162,7 @@ async def test_create_image_asset(
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/125"
 
     # Get the mocked asset service client
-    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client: Any = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
 
     # Mock serialize_proto_message
@@ -220,7 +220,7 @@ async def test_create_youtube_video_asset(
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/126"
 
     # Get the mocked asset service client
-    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client: Any = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
 
     # Mock serialize_proto_message
@@ -358,7 +358,7 @@ async def test_error_handling(
     customer_id = "1234567890"
 
     # Get the mocked asset service client and make it raise exception
-    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client: Any = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.side_effect = google_ads_exception  # type: ignore
 
     # Act & Assert
@@ -414,7 +414,7 @@ async def test_update_asset(
     ].resource_name = f"customers/{customer_id}/assets/{asset_id}"
 
     # Get the mocked asset service client
-    mock_asset_service_client = asset_service.client  # type: ignore
+    mock_asset_service_client: Any = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
 
     # Mock serialize_proto_message
@@ -459,7 +459,7 @@ async def test_create_sitelink_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -487,7 +487,7 @@ async def test_create_callout_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -514,7 +514,7 @@ async def test_create_structured_snippet_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -542,7 +542,7 @@ async def test_create_call_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -570,7 +570,7 @@ async def test_create_price_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -608,7 +608,7 @@ async def test_create_promotion_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -637,7 +637,7 @@ async def test_create_lead_form_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -670,7 +670,7 @@ async def test_create_page_feed_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -697,7 +697,7 @@ async def test_create_mobile_app_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -726,7 +726,7 @@ async def test_create_hotel_callout_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -754,7 +754,7 @@ async def test_create_call_to_action_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -781,7 +781,7 @@ async def test_create_location_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -808,7 +808,7 @@ async def test_create_hotel_property_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -836,7 +836,7 @@ async def test_create_app_deep_link_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -863,7 +863,7 @@ async def test_create_book_on_google_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -889,7 +889,7 @@ async def test_create_media_bundle_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -917,7 +917,7 @@ async def test_create_demand_gen_carousel_card_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -946,7 +946,7 @@ async def test_create_business_message_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -975,7 +975,7 @@ async def test_create_dynamic_education_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1004,7 +1004,7 @@ async def test_create_dynamic_real_estate_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1032,7 +1032,7 @@ async def test_create_dynamic_custom_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1060,7 +1060,7 @@ async def test_create_dynamic_hotels_and_rentals_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1088,7 +1088,7 @@ async def test_create_dynamic_flights_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1116,7 +1116,7 @@ async def test_create_dynamic_travel_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1145,7 +1145,7 @@ async def test_create_dynamic_local_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1173,7 +1173,7 @@ async def test_create_dynamic_jobs_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
     with patch(
@@ -1201,7 +1201,7 @@ async def test_create_youtube_video_list_asset(
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/123"
-    mock_asset_service_client = asset_service.client
+    mock_asset_service_client: Any = asset_service.client
     mock_asset_service_client.mutate_assets.return_value = mock_response
     expected = {"results": [{"resource_name": f"customers/{customer_id}/assets/123"}]}
 

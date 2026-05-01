@@ -2,7 +2,7 @@
 
 import pytest
 from typing import Any
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 from fastmcp import Context
 from google.ads.googleads.v23.services.types.experiment_arm_service import (

@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> AdGroupAdLabelService:
 async def test_create_ad_group_ad_label(
     service: AdGroupAdLabelService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_ad_group_ad_labels.return_value = Mock()
     with patch(
         "src.services.ad_group.ad_group_ad_label_service.serialize_proto_message",
@@ -47,7 +47,7 @@ async def test_create_ad_group_ad_label(
 async def test_remove_ad_group_ad_label(
     service: AdGroupAdLabelService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_ad_group_ad_labels.return_value = Mock()
     with patch(
         "src.services.ad_group.ad_group_ad_label_service.serialize_proto_message",

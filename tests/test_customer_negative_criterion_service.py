@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> CustomerNegativeCriterionService:
 async def test_add_placement_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/1"
     mock_response = Mock()
@@ -46,7 +46,7 @@ async def test_add_placement_exclusions(
 async def test_remove_negative_criterion(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_negative_criteria.return_value = Mock()
     with patch(
         "src.services.targeting.customer_negative_criterion_service.serialize_proto_message",
@@ -64,7 +64,7 @@ async def test_remove_negative_criterion(
 async def test_add_content_label_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/1"
     mock_response = Mock()
@@ -127,7 +127,7 @@ async def test_list_negative_criteria(
 async def test_add_mobile_application_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/2"
     mock_response = Mock()
@@ -149,7 +149,7 @@ async def test_add_mobile_application_exclusions(
 async def test_add_mobile_app_category_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/3"
     mock_response = Mock()
@@ -173,7 +173,7 @@ async def test_add_mobile_app_category_exclusions(
 async def test_add_youtube_video_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/4"
     mock_response = Mock()
@@ -195,7 +195,7 @@ async def test_add_youtube_video_exclusions(
 async def test_add_youtube_channel_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/5"
     mock_response = Mock()
@@ -217,7 +217,7 @@ async def test_add_youtube_channel_exclusions(
 async def test_add_ip_block_exclusions(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/6"
     mock_response = Mock()
@@ -239,7 +239,7 @@ async def test_add_ip_block_exclusions(
 async def test_add_negative_keyword_list_exclusion(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/7"
     mock_response = Mock()
@@ -260,7 +260,7 @@ async def test_add_negative_keyword_list_exclusion(
 async def test_add_placement_list_exclusion(
     service: CustomerNegativeCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/customerNegativeCriteria/8"
     mock_response = Mock()

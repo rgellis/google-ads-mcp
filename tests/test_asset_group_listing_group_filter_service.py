@@ -134,9 +134,9 @@ async def test_create_listing_group_filter_error(
     google_ads_exception: Any,
 ) -> None:
     """Test error handling in create_listing_group_filter."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_asset_group_listing_group_filters.side_effect = (
-        google_ads_exception  # type: ignore
+        google_ads_exception
     )
 
     with pytest.raises(Exception) as exc_info:
@@ -157,9 +157,9 @@ async def test_remove_listing_group_filter_error(
     google_ads_exception: Any,
 ) -> None:
     """Test error handling in remove_listing_group_filter."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_asset_group_listing_group_filters.side_effect = (
-        google_ads_exception  # type: ignore
+        google_ads_exception
     )
 
     with pytest.raises(Exception) as exc_info:

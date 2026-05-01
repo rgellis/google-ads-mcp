@@ -269,7 +269,7 @@ async def test_generate_benchmarks_with_optional_fields(
         "src.services.planning.benchmarks_service.serialize_proto_message",
         return_value={"metrics": {}},
     ):
-        result = await service.generate_benchmarks_metrics(
+        await service.generate_benchmarks_metrics(
             ctx=mock_ctx,
             customer_id="1234567890",
             industry_vertical_id=12345,
@@ -301,7 +301,7 @@ async def test_list_benchmarks_sources_with_filter(
         "src.services.planning.benchmarks_service.serialize_proto_message",
         return_value={"sources": []},
     ):
-        result = await service.list_benchmarks_sources(
+        await service.list_benchmarks_sources(
             ctx=mock_ctx,
             benchmarks_source_types=["INDUSTRY_VERTICAL"],
         )

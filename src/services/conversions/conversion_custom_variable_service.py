@@ -264,9 +264,13 @@ def create_conversion_custom_variable_tools(
                 status="ENABLED"
             )
         """
-        # Convert string enum to proper enum type
-        status_enum = getattr(
-            ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus, status
+        status_enum = (
+            getattr(
+                ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus,
+                status,
+            )
+            if status is not None
+            else None
         )
 
         return await service.create_conversion_custom_variable(

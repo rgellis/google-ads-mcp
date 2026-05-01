@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> CustomizerAttributeService:
 async def test_create_customizer_attribute(
     service: CustomizerAttributeService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customizer_attributes.return_value = Mock()
     with patch(
         "src.services.shared.customizer_attribute_service.serialize_proto_message",
@@ -47,7 +47,7 @@ async def test_create_customizer_attribute(
 async def test_remove_customizer_attribute(
     service: CustomizerAttributeService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customizer_attributes.return_value = Mock()
     with patch(
         "src.services.shared.customizer_attribute_service.serialize_proto_message",

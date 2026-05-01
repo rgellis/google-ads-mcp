@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> SharedCriterionService:
 async def test_add_keywords_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~1"
     mock_response = Mock()
@@ -47,7 +47,7 @@ async def test_add_keywords_to_shared_set(
 async def test_remove_shared_criterion(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_shared_criteria.return_value = Mock()
     with patch(
         "src.services.shared.shared_criterion_service.serialize_proto_message",
@@ -65,7 +65,7 @@ async def test_remove_shared_criterion(
 async def test_add_placements_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~1"
     mock_response = Mock()
@@ -129,7 +129,7 @@ async def test_list_shared_criteria(
 async def test_add_youtube_videos_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~2"
     mock_response = Mock()
@@ -152,7 +152,7 @@ async def test_add_youtube_videos_to_shared_set(
 async def test_add_youtube_channels_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~3"
     mock_response = Mock()
@@ -175,7 +175,7 @@ async def test_add_youtube_channels_to_shared_set(
 async def test_add_mobile_app_categories_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~4"
     mock_response = Mock()
@@ -200,7 +200,7 @@ async def test_add_mobile_app_categories_to_shared_set(
 async def test_add_mobile_applications_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~5"
     mock_response = Mock()
@@ -223,7 +223,7 @@ async def test_add_mobile_applications_to_shared_set(
 async def test_add_brands_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~6"
     mock_response = Mock()
@@ -247,7 +247,7 @@ async def test_add_brands_to_shared_set(
 async def test_add_webpages_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~7"
     mock_response = Mock()
@@ -270,7 +270,7 @@ async def test_add_webpages_to_shared_set(
 async def test_add_vertical_ads_item_group_rules_to_shared_set(
     service: SharedCriterionService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_result = Mock()
     mock_result.resource_name = "customers/1234567890/sharedCriteria/111~8"
     mock_response = Mock()

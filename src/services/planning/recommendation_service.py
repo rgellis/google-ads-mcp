@@ -490,9 +490,9 @@ class RecommendationService:
                     if "final_url" in ag:
                         agi.final_url = ag["final_url"]
                     if "headline" in ag:
-                        agi.headline = ag["headline"]
+                        agi.headline = ag["headline"]  # type: ignore[assignment]
                     if "description" in ag:
-                        agi.description = ag["description"]
+                        agi.description = ag["description"]  # type: ignore[assignment]
                     request.asset_group_info.append(agi)
 
             response: GenerateRecommendationsResponse = (

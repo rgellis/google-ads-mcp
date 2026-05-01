@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> PaymentsAccountService:
 async def test_list_payments_accounts(
     service: PaymentsAccountService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_response = Mock()
     mock_response.payments_accounts = []
     mock_client.list_payments_accounts.return_value = mock_response

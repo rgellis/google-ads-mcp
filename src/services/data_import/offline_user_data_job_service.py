@@ -144,8 +144,8 @@ class OfflineUserDataJobService:
                 job.customer_match_user_list_metadata.user_list = user_list  # type: ignore[assignment]
             else:
                 # STORE_SALES_* — populate the store_sales_metadata oneof member.
-                job.store_sales_metadata.loyalty_fraction = store_sales_loyalty_fraction
-                job.store_sales_metadata.transaction_upload_fraction = (
+                job.store_sales_metadata.loyalty_fraction = store_sales_loyalty_fraction  # type: ignore[assignment]
+                job.store_sales_metadata.transaction_upload_fraction = (  # type: ignore[assignment]
                     store_sales_transaction_upload_fraction
                 )
                 if store_sales_custom_key is not None:

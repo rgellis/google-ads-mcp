@@ -19,7 +19,6 @@ from google.ads.googleads.v23.enums.types.response_content_type import (
 
 from src.services.campaign.campaign_asset_set_service import (
     CampaignAssetSetService,
-    create_campaign_asset_set_tools,
     register_campaign_asset_set_tools,
 )
 

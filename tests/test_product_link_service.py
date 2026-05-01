@@ -14,7 +14,6 @@ from google.ads.googleads.v23.services.types.product_link_service import (
 
 from src.services.product_integration.product_link_service import (
     ProductLinkService,
-    create_product_link_tools,
     register_product_link_tools,
 )
 

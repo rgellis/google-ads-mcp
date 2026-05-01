@@ -1487,9 +1487,9 @@ async def test_create_demand_gen_video_responsive_ad(
         patch(
             "src.services.ad_group.ad_service.DemandGenVideoResponsiveAdInfo"
         ) as MockAdInfo,
-        patch("src.services.ad_group.ad_service.AdGroupAd") as MockAdGroupAd,
-        patch("src.services.ad_group.ad_service.AdGroupAdOperation") as MockOp,
-        patch("src.services.ad_group.ad_service.MutateAdGroupAdsRequest") as MockReq,
+        patch("src.services.ad_group.ad_service.AdGroupAd"),
+        patch("src.services.ad_group.ad_service.AdGroupAdOperation"),
+        patch("src.services.ad_group.ad_service.MutateAdGroupAdsRequest"),
         patch(
             "src.services.ad_group.ad_service.serialize_proto_message",
             return_value={"results": []},

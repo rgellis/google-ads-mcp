@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> ConversionAdjustmentUploadService:
 async def test_upload_conversion_adjustments(
     service: ConversionAdjustmentUploadService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.upload_conversion_adjustments.return_value = Mock()
     with patch(
         "src.services.conversions.conversion_adjustment_upload_service.serialize_proto_message",
@@ -59,7 +59,7 @@ async def test_upload_conversion_adjustments(
 async def test_create_restatement_adjustment(
     service: ConversionAdjustmentUploadService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.upload_conversion_adjustments.return_value = Mock()
     with patch(
         "src.services.conversions.conversion_adjustment_upload_service.serialize_proto_message",
@@ -83,7 +83,7 @@ async def test_create_restatement_adjustment(
 async def test_create_retraction_adjustment(
     service: ConversionAdjustmentUploadService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.upload_conversion_adjustments.return_value = Mock()
     with patch(
         "src.services.conversions.conversion_adjustment_upload_service.serialize_proto_message",

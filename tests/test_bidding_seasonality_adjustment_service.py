@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> BiddingSeasonalityAdjustmentService:
 async def test_create_seasonality_adjustment(
     service: BiddingSeasonalityAdjustmentService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_bidding_seasonality_adjustments.return_value = Mock()
     with patch(
         "src.services.bidding.bidding_seasonality_adjustment_service.serialize_proto_message",
@@ -50,7 +50,7 @@ async def test_create_seasonality_adjustment(
 async def test_remove_seasonality_adjustment(
     service: BiddingSeasonalityAdjustmentService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_bidding_seasonality_adjustments.return_value = Mock()
     with patch(
         "src.services.bidding.bidding_seasonality_adjustment_service.serialize_proto_message",
@@ -71,7 +71,7 @@ async def test_create_bidding_seasonality_adjustment(
     mock_ctx: Context,
 ) -> None:
     """Test creating a bidding seasonality adjustment."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_bidding_seasonality_adjustments.return_value = Mock()
     expected = {
         "results": [
@@ -160,7 +160,7 @@ async def test_remove_bidding_seasonality_adjustment(
     mock_ctx: Context,
 ) -> None:
     """Test removing a bidding seasonality adjustment."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_bidding_seasonality_adjustments.return_value = Mock()
     expected = {"results": []}
     with patch(
@@ -183,7 +183,7 @@ async def test_update_bidding_seasonality_adjustment(
     mock_ctx: Context,
 ) -> None:
     """Test updating a bidding seasonality adjustment."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_bidding_seasonality_adjustments.return_value = Mock()
     expected = {
         "results": [

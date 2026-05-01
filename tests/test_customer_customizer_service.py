@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from src.services.account.customer_customizer_service import (
     CustomerCustomizerService,
-    create_customer_customizer_tools,
     register_customer_customizer_tools,
 )
 from google.ads.googleads.v23.enums.types.customizer_attribute_type import (

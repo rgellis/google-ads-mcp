@@ -13,9 +13,6 @@ from google.ads.googleads.v23.common.types.bidding import (
     TargetRoas,
     TargetSpend,
 )
-from google.ads.googleads.v23.enums.types.bidding_strategy_type import (
-    BiddingStrategyTypeEnum,
-)
 from google.ads.googleads.v23.enums.types.target_impression_share_location import (
     TargetImpressionShareLocationEnum,
 )

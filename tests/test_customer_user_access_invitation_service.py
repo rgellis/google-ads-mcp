@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> CustomerUserAccessInvitationService:
 async def test_create_invitation(
     service: CustomerUserAccessInvitationService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_user_access_invitation.return_value = Mock()
     with patch(
         "src.services.account.customer_user_access_invitation_service.serialize_proto_message",
@@ -50,7 +50,7 @@ async def test_create_customer_user_access_invitation(
     mock_ctx: Context,
 ) -> None:
     """Test creating a customer user access invitation."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_user_access_invitation.return_value = Mock()
     expected = {
         "result": {
@@ -130,7 +130,7 @@ async def test_remove_customer_user_access_invitation(
     mock_ctx: Context,
 ) -> None:
     """Test removing a customer user access invitation."""
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_user_access_invitation.return_value = Mock()
     expected = {
         "result": {
@@ -154,7 +154,7 @@ async def test_remove_customer_user_access_invitation(
 async def test_remove_invitation(
     service: CustomerUserAccessInvitationService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_customer_user_access_invitation.return_value = Mock()
     with patch(
         "src.services.account.customer_user_access_invitation_service.serialize_proto_message",

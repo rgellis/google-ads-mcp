@@ -25,7 +25,7 @@ def service(mock_sdk_client: Any) -> DataLinkService:
 
 @pytest.mark.asyncio
 async def test_create_data_link(service: DataLinkService, mock_ctx: Context) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.create_data_link.return_value = Mock()
     with patch(
         "src.services.data_import.data_link_service.serialize_proto_message",
@@ -40,7 +40,7 @@ async def test_create_data_link(service: DataLinkService, mock_ctx: Context) -> 
 
 @pytest.mark.asyncio
 async def test_remove_data_link(service: DataLinkService, mock_ctx: Context) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.remove_data_link.return_value = Mock()
     with patch(
         "src.services.data_import.data_link_service.serialize_proto_message",
@@ -56,7 +56,7 @@ async def test_remove_data_link(service: DataLinkService, mock_ctx: Context) -> 
 
 @pytest.mark.asyncio
 async def test_update_data_link(service: DataLinkService, mock_ctx: Context) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.update_data_link.return_value = Mock()
     from google.ads.googleads.v23.enums.types.data_link_status import DataLinkStatusEnum
 

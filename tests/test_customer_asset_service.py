@@ -26,7 +26,6 @@ from google.protobuf import field_mask_pb2
 
 from src.services.assets.customer_asset_service import (
     CustomerAssetService,
-    create_customer_asset_tools,
     register_customer_asset_tools,
 )
 

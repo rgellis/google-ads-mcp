@@ -602,7 +602,7 @@ class KeywordPlanIdeaService:
         if page_token:
             request.page_token = page_token
         if aggregate_metrics:
-            request.aggregate_metrics = [
+            request.aggregate_metrics = [  # type: ignore[assignment]
                 getattr(
                     KeywordPlanKeywordAnnotationEnum.KeywordPlanKeywordAnnotation, m
                 )
@@ -612,7 +612,7 @@ class KeywordPlanIdeaService:
             if "year_month_range" in historical_metrics_options:
                 ymr = historical_metrics_options["year_month_range"]
                 from google.ads.googleads.v23.common.types.dates import YearMonth
-                from google.ads.googleads.v23.services.types.keyword_plan_idea_service import (
+                from google.ads.googleads.v23.common.types.keyword_plan_common import (
                     HistoricalMetricsOptions,
                 )
 

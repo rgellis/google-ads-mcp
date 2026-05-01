@@ -27,7 +27,7 @@ def service(mock_sdk_client: Any) -> ConversionValueRuleService:
 async def test_create_conversion_value_rule(
     service: ConversionValueRuleService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_conversion_value_rules.return_value = Mock()
     with patch(
         "src.services.conversions.conversion_value_rule_service.serialize_proto_message",
@@ -47,7 +47,7 @@ async def test_create_conversion_value_rule(
 async def test_update_conversion_value_rule(
     service: ConversionValueRuleService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_conversion_value_rules.return_value = Mock()
     with patch(
         "src.services.conversions.conversion_value_rule_service.serialize_proto_message",
@@ -66,7 +66,7 @@ async def test_update_conversion_value_rule(
 async def test_remove_conversion_value_rule(
     service: ConversionValueRuleService, mock_ctx: Context
 ) -> None:
-    mock_client = service.client
+    mock_client: Any = service.client
     mock_client.mutate_conversion_value_rules.return_value = Mock()
     with patch(
         "src.services.conversions.conversion_value_rule_service.serialize_proto_message",
