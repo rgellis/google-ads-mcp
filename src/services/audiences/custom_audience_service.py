@@ -30,6 +30,8 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -331,9 +333,13 @@ class CustomAudienceService:
 
             conditions = []
             if type_filter:
-                conditions.append(f"custom_audience.type = '{type_filter}'")
+                conditions.append(
+                    f"custom_audience.type = '{gaql_enum_name(type_filter, 'type_filter')}'"
+                )
             if status_filter:
-                conditions.append(f"custom_audience.status = '{status_filter}'")
+                conditions.append(
+                    f"custom_audience.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
@@ -400,7 +406,7 @@ class CustomAudienceService:
                     custom_audience.members,
                     custom_audience.resource_name
                 FROM custom_audience
-                WHERE custom_audience.id = {custom_audience_id}
+                WHERE custom_audience.id = {gaql_int(custom_audience_id, "custom_audience_id")}
             """
 
             # Execute search

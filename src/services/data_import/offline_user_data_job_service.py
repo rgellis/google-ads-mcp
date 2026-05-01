@@ -31,7 +31,13 @@ from google.ads.googleads.v23.services.types.offline_user_data_job_service impor
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    gaql_enum_name,
+    gaql_int,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -414,7 +420,7 @@ class OfflineUserDataJobService:
                     offline_user_data_job.failure_reason,
                     offline_user_data_job.operation_metadata.match_rate_range
                 FROM offline_user_data_job
-                WHERE offline_user_data_job.id = {job_id}
+                WHERE offline_user_data_job.id = {gaql_int(job_id, "job_id")}
             """
 
             response = google_ads_service.search(customer_id=customer_id, query=query)
@@ -482,7 +488,7 @@ class OfflineUserDataJobService:
             """
 
             if job_type_filter:
-                query += f" WHERE offline_user_data_job.type = '{job_type_filter}'"
+                query += f" WHERE offline_user_data_job.type = '{gaql_enum_name(job_type_filter, 'job_type_filter')}'"
 
             query += " ORDER BY offline_user_data_job.id DESC"
 

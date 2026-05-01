@@ -33,6 +33,8 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -310,9 +312,13 @@ class CustomInterestService:
 
             conditions = []
             if type_filter:
-                conditions.append(f"custom_interest.type = '{type_filter}'")
+                conditions.append(
+                    f"custom_interest.type = '{gaql_enum_name(type_filter, 'type_filter')}'"
+                )
             if status_filter:
-                conditions.append(f"custom_interest.status = '{status_filter}'")
+                conditions.append(
+                    f"custom_interest.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
@@ -379,7 +385,7 @@ class CustomInterestService:
                     custom_interest.members,
                     custom_interest.resource_name
                 FROM custom_interest
-                WHERE custom_interest.id = {custom_interest_id}
+                WHERE custom_interest.id = {gaql_int(custom_interest_id, "custom_interest_id")}
             """
 
             # Execute search

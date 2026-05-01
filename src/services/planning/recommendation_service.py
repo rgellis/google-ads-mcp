@@ -27,7 +27,12 @@ from google.ads.googleads.v23.services.types.recommendation_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    gaql_int,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -116,7 +121,7 @@ class RecommendationService:
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            query += f" ORDER BY recommendation.impact.base_metrics.clicks DESC LIMIT {limit}"
+            query += f" ORDER BY recommendation.impact.base_metrics.clicks DESC LIMIT {gaql_int(limit, 'limit')}"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)

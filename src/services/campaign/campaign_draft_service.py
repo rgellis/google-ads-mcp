@@ -1,5 +1,6 @@
 """Campaign draft service implementation using Google Ads SDK."""
 
+import re
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
 from fastmcp import Context, FastMCP
@@ -232,6 +233,14 @@ class CampaignDraftService:
             """
 
             if base_campaign_filter:
+                # Resource names (e.g. customers/123/campaigns/456) contain '/',
+                # so the gaql_resource_field helper can't validate them. Apply a
+                # narrow inline regex instead — letters, digits, underscores, slashes.
+                if not re.fullmatch(r"[A-Za-z0-9_/]+", base_campaign_filter):
+                    raise ValueError(
+                        f"base_campaign_filter must be a campaign resource name; "
+                        f"got {base_campaign_filter!r}"
+                    )
                 query += (
                     f" WHERE campaign_draft.base_campaign = '{base_campaign_filter}'"
                 )

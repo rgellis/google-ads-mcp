@@ -24,6 +24,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -267,7 +268,9 @@ class CampaignAssetService:
 
             conditions = []
             if campaign_id:
-                conditions.append(f"campaign.id = {campaign_id}")
+                conditions.append(
+                    f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
+                )
             if field_type:
                 conditions.append(f"campaign_asset.field_type = '{field_type.name}'")
             if not include_system_managed:

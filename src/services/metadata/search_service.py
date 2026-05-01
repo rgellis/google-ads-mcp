@@ -13,7 +13,12 @@ from google.ads.googleads.v23.services.types.google_ads_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_customer_id,
+    gaql_int,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -72,7 +77,7 @@ class SearchService:
             if not include_removed:
                 query += " WHERE campaign.status != 'REMOVED'"
 
-            query += f" ORDER BY campaign.id LIMIT {limit}"
+            query += f" ORDER BY campaign.id LIMIT {gaql_int(limit, 'limit')}"
 
             # Create request
             request = SearchGoogleAdsRequest()
@@ -147,12 +152,14 @@ class SearchService:
                 conditions.append("ad_group.status != 'REMOVED'")
 
             if campaign_id:
-                conditions.append(f"campaign.id = {campaign_id}")
+                conditions.append(
+                    f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            query += f" ORDER BY ad_group.id LIMIT {limit}"
+            query += f" ORDER BY ad_group.id LIMIT {gaql_int(limit, 'limit')}"
 
             # Create request
             request = SearchGoogleAdsRequest()
@@ -228,9 +235,9 @@ class SearchService:
                 query += " AND ad_group_criterion.negative = false"
 
             if ad_group_id:
-                query += f" AND ad_group.id = {ad_group_id}"
+                query += f" AND ad_group.id = {gaql_int(ad_group_id, 'ad_group_id')}"
 
-            query += f" ORDER BY ad_group_criterion.criterion_id LIMIT {limit}"
+            query += f" ORDER BY ad_group_criterion.criterion_id LIMIT {gaql_int(limit, 'limit')}"
 
             # Create request
             request = SearchGoogleAdsRequest()

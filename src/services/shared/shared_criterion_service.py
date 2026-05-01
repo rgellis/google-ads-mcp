@@ -32,6 +32,8 @@ from google.ads.googleads.v23.services.types.shared_criterion_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -867,7 +869,10 @@ class SharedCriterionService:
         """
         try:
             customer_id = format_customer_id(customer_id)
-            shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
+            shared_set_resource = (
+                f"customers/{customer_id}/sharedSets/"
+                f"{gaql_int(shared_set_id, 'shared_set_id')}"
+            )
 
             # Use GoogleAdsService for search
             sdk_client = get_sdk_client()
@@ -889,7 +894,7 @@ class SharedCriterionService:
             """
 
             if criterion_type:
-                query += f" AND shared_criterion.type = '{criterion_type}'"
+                query += f" AND shared_criterion.type = '{gaql_enum_name(criterion_type, 'criterion_type')}'"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)

@@ -27,6 +27,7 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     get_logger,
     serialize_proto_message,
 )
@@ -151,7 +152,7 @@ class CustomerUserAccessInvitationService:
             """
 
             if status_filter:
-                query += f" WHERE customer_user_access_invitation.invitation_status = '{status_filter}'"
+                query += f" WHERE customer_user_access_invitation.invitation_status = '{gaql_enum_name(status_filter, 'status_filter')}'"
 
             query += " ORDER BY customer_user_access_invitation.creation_date_time DESC"
 

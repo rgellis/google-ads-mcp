@@ -21,6 +21,8 @@ from google.ads.googleads.v23.services.types.billing_setup_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
 )
@@ -156,7 +158,7 @@ class BillingSetupService:
             """
 
             if status_filter:
-                query += f" WHERE billing_setup.status = '{status_filter}'"
+                query += f" WHERE billing_setup.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
 
             query += " ORDER BY billing_setup.id"
 
@@ -222,7 +224,7 @@ class BillingSetupService:
                     billing_setup.end_date_time,
                     billing_setup.end_time_type
                 FROM billing_setup
-                WHERE billing_setup.id = {billing_setup_id}
+                WHERE billing_setup.id = {gaql_int(billing_setup_id, "billing_setup_id")}
             """
 
             # Execute search

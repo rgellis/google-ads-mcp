@@ -1,8 +1,58 @@
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict
 from google.protobuf.json_format import MessageToDict
+
+
+_GAQL_ENUM_NAME_RE = re.compile(r"[A-Z][A-Z0-9_]*")
+_GAQL_RESOURCE_FIELD_RE = re.compile(r"[a-z][a-z0-9_]*")
+
+
+def gaql_int(value: Any, field_name: str) -> str:
+    """Coerce ``value`` to an int and return its string form for GAQL interpolation.
+
+    Use for any numeric ID or LIMIT clause. Raises ``ValueError`` on input
+    that isn't a clean integer — the LLM caller will see a clear error
+    rather than producing a syntactically broken GAQL query.
+    """
+    try:
+        return str(int(value))
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be an integer; got {value!r}") from exc
+
+
+def gaql_enum_name(value: Any, field_name: str) -> str:
+    """Validate ``value`` looks like a GAQL enum name (e.g. ENABLED, NEGATIVE_KEYWORDS).
+
+    Permits only uppercase letters, digits, and underscores starting with a
+    letter. Catches typos with quotes/escapes/spaces before they are
+    interpolated into a GAQL string literal. Google's API will still reject
+    enum names that aren't members of the target field's enum, but the
+    pre-check ensures malformed input fails locally with a useful error.
+    """
+    if not isinstance(value, str) or not _GAQL_ENUM_NAME_RE.fullmatch(value):
+        raise ValueError(
+            f"{field_name} must be an uppercase enum name "
+            f"(letters, digits, underscores); got {value!r}"
+        )
+    return value
+
+
+def gaql_resource_field(value: Any, field_name: str) -> str:
+    """Validate ``value`` looks like a GAQL resource or field name.
+
+    Permits only lowercase letters, digits, and underscores starting with
+    a letter — the shape of every resource/field name in the v23 GAQL
+    schema (e.g. ``campaign``, ``ad_group_criterion``, ``customer_match_user_list``).
+    """
+    if not isinstance(value, str) or not _GAQL_RESOURCE_FIELD_RE.fullmatch(value):
+        raise ValueError(
+            f"{field_name} must be a lowercase GAQL resource/field name "
+            f"(letters, digits, underscores); got {value!r}"
+        )
+    return value
 
 
 def get_logger(name: str) -> logging.Logger:

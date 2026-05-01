@@ -21,6 +21,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -255,7 +256,7 @@ class CampaignGroupService:
                     campaign_group.name,
                     campaign_group.status
                 FROM campaign_group
-                LIMIT {limit}
+                LIMIT {gaql_int(limit, "limit")}
             """
 
             response = google_ads_service.search(customer_id=customer_id, query=query)

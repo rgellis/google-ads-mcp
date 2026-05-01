@@ -23,6 +23,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -140,7 +141,7 @@ class RemarketingActionService:
                     remarketing_action.tag_snippets,
                     remarketing_action.resource_name
                 FROM remarketing_action
-                WHERE remarketing_action.id = {remarketing_action_id}
+                WHERE remarketing_action.id = {gaql_int(remarketing_action_id, "remarketing_action_id")}
             """
 
             # Execute search

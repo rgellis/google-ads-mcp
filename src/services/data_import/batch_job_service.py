@@ -25,6 +25,8 @@ from google.ads.googleads.v23.services.types.google_ads_service import MutateOpe
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -149,7 +151,7 @@ class BatchJobService:
                     batch_job.metadata.operation_count,
                     batch_job.metadata.executed_operation_count
                 FROM batch_job
-                WHERE batch_job.id = {batch_job_id}
+                WHERE batch_job.id = {gaql_int(batch_job_id, "batch_job_id")}
             """
 
             response = google_ads_service.search(customer_id=customer_id, query=query)
@@ -418,7 +420,7 @@ class BatchJobService:
             """
 
             if status_filter:
-                query += f" WHERE batch_job.status = '{status_filter}'"
+                query += f" WHERE batch_job.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
 
             query += " ORDER BY batch_job.metadata.creation_date_time DESC"
 

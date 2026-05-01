@@ -26,6 +26,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -242,9 +243,9 @@ class AdGroupAdService:
             """
 
             if ad_group_id:
-                query += f" AND ad_group.id = {ad_group_id}"
+                query += f" AND ad_group.id = {gaql_int(ad_group_id, 'ad_group_id')}"
 
-            query += f" ORDER BY ad_group.id LIMIT {limit}"
+            query += f" ORDER BY ad_group.id LIMIT {gaql_int(limit, 'limit')}"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)

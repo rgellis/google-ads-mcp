@@ -25,6 +25,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -236,9 +237,13 @@ class SharedSetService:
             # Add filters
             conditions = []
             if type_filter:
-                conditions.append(f"shared_set.type = '{type_filter}'")
+                conditions.append(
+                    f"shared_set.type = '{gaql_enum_name(type_filter, 'type_filter')}'"
+                )
             if status_filter:
-                conditions.append(f"shared_set.status = '{status_filter}'")
+                conditions.append(
+                    f"shared_set.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)

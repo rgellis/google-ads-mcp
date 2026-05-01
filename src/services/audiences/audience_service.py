@@ -35,6 +35,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -456,7 +457,7 @@ class AudienceService:
             if not include_removed:
                 query += " WHERE audience.status != 'REMOVED'"
 
-            query += f" ORDER BY audience.id DESC LIMIT {limit}"
+            query += f" ORDER BY audience.id DESC LIMIT {gaql_int(limit, 'limit')}"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)

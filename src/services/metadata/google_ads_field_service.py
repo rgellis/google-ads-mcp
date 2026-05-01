@@ -17,7 +17,7 @@ from google.ads.googleads.v23.enums.types.google_ads_field_category import (
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
-from src.utils import get_logger, serialize_proto_message
+from src.utils import gaql_int, gaql_resource_field, get_logger, serialize_proto_message
 
 logger = get_logger(__name__)
 
@@ -92,7 +92,9 @@ class GoogleAdsFieldService:
 
         Args:
             ctx: FastMCP context
-            query: Optional search query (e.g., "name LIKE '%campaign%'")
+            query: Optional search query (e.g., "name LIKE '%campaign%'").
+                Caller is responsible for the GAQL syntax of ``query``; quotes
+                and special chars are not escaped — pass it pre-formed.
             category_filter: Optional category filter (RESOURCE, ATTRIBUTE, SEGMENT, METRIC)
             selectable_only: Only return selectable fields
             limit: Maximum number of results
@@ -115,7 +117,7 @@ class GoogleAdsFieldService:
 
             # Construct final query
             search_query = " AND ".join(conditions) if conditions else "name != ''"
-            search_query += f" LIMIT {limit}"
+            search_query += f" LIMIT {gaql_int(limit, 'limit')}"
 
             # Create request
             request = SearchGoogleAdsFieldsRequest()
@@ -168,7 +170,10 @@ class GoogleAdsFieldService:
         """
         try:
             # Get resource fields
-            resource_query = f"name LIKE '{resource_name}.%' AND category = 'ATTRIBUTE'"
+            resource_query = (
+                f"name LIKE '{gaql_resource_field(resource_name, 'resource_name')}.%' "
+                "AND category = 'ATTRIBUTE'"
+            )
             resource_fields = await self.search_fields(
                 ctx=ctx, query=resource_query, limit=500
             )
@@ -322,10 +327,12 @@ def create_google_ads_field_tools(
         """Search for Google Ads fields based on criteria.
 
         Args:
-            query: Optional search query using field query syntax
+            query: Optional search query using field query syntax.
                 Examples:
                 - "name LIKE '%campaign%'"
                 - "category = 'METRIC' AND selectable = true"
+                Caller is responsible for the GAQL syntax of ``query``; quotes
+                and special chars are not escaped — pass it pre-formed.
             category_filter: Filter by category - RESOURCE, ATTRIBUTE, SEGMENT, or METRIC
             selectable_only: Only return fields that can be selected in queries
             limit: Maximum number of results

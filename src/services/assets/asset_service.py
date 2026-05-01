@@ -85,6 +85,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -366,7 +367,7 @@ class AssetService:
                 type_conditions = [f"asset.type = '{t}'" for t in asset_types]
                 query += " WHERE " + " OR ".join(type_conditions)
 
-            query += f" ORDER BY asset.id DESC LIMIT {limit}"
+            query += f" ORDER BY asset.id DESC LIMIT {gaql_int(limit, 'limit')}"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)

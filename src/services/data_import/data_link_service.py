@@ -24,6 +24,7 @@ from google.ads.googleads.v23.services.types.data_link_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
 )
@@ -233,7 +234,7 @@ class DataLinkService:
                     data_link.type,
                     data_link.status
                 FROM data_link
-                LIMIT {limit}
+                LIMIT {gaql_int(limit, "limit")}
             """
 
             response = google_ads_service.search(customer_id=customer_id, query=query)

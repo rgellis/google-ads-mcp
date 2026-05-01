@@ -26,6 +26,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     get_logger,
     serialize_proto_message,
 )
@@ -242,7 +243,7 @@ class CustomerClientLinkService:
             """
 
             if status_filter:
-                query += f" WHERE customer_client_link.status = '{status_filter}'"
+                query += f" WHERE customer_client_link.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
 
             query += " ORDER BY customer_client_link.manager_link_id DESC"
 

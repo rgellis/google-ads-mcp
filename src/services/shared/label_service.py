@@ -28,6 +28,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -253,7 +254,7 @@ class LabelService:
             """
 
             if status_filter:
-                query += f" WHERE label.status = '{status_filter}'"
+                query += f" WHERE label.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
 
             query += " ORDER BY label.name"
 

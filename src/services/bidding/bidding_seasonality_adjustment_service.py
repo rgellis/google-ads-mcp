@@ -31,6 +31,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -307,9 +308,7 @@ class BiddingSeasonalityAdjustmentService:
             """
 
             if scope_filter:
-                query += (
-                    f" WHERE bidding_seasonality_adjustment.scope = '{scope_filter}'"
-                )
+                query += f" WHERE bidding_seasonality_adjustment.scope = '{gaql_enum_name(scope_filter, 'scope_filter')}'"
 
             query += " ORDER BY bidding_seasonality_adjustment.seasonality_adjustment_id DESC"
 

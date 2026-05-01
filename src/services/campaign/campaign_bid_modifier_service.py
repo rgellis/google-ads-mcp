@@ -30,6 +30,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -244,7 +245,7 @@ class CampaignBidModifierService:
             """
 
             if campaign_id:
-                query += f" WHERE campaign.id = {campaign_id}"
+                query += f" WHERE campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
 
             query += " ORDER BY campaign.id, campaign_bid_modifier.resource_name"
 

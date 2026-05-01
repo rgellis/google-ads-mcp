@@ -23,6 +23,7 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -160,7 +161,7 @@ class AdGroupAdLabelService:
                     f"ad_group_ad.ad_group = 'customers/{customer_id}/adGroups/{ad_group_id}'"
                 )
             if label_id:
-                conditions.append(f"label.id = {label_id}")
+                conditions.append(f"label.id = {gaql_int(label_id, 'label_id')}")
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)

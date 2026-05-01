@@ -22,6 +22,8 @@ from google.ads.googleads.v23.services.types.campaign_shared_set_service import 
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -332,11 +334,17 @@ class CampaignSharedSetService:
 
             conditions = []
             if campaign_id:
-                conditions.append(f"campaign.id = {campaign_id}")
+                conditions.append(
+                    f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
+                )
             if shared_set_id:
-                conditions.append(f"shared_set.id = {shared_set_id}")
+                conditions.append(
+                    f"shared_set.id = {gaql_int(shared_set_id, 'shared_set_id')}"
+                )
             if shared_set_type:
-                conditions.append(f"shared_set.type = '{shared_set_type}'")
+                conditions.append(
+                    f"shared_set.type = '{gaql_enum_name(shared_set_type, 'shared_set_type')}'"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
@@ -462,7 +470,7 @@ class CampaignSharedSetService:
                     campaign.status,
                     campaign.advertising_channel_type
                 FROM campaign_shared_set
-                WHERE shared_set.id = {shared_set_id}
+                WHERE shared_set.id = {gaql_int(shared_set_id, "shared_set_id")}
                 ORDER BY campaign.name
             """
 

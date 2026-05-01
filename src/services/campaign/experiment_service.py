@@ -30,6 +30,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -426,7 +427,9 @@ class ExperimentService:
                     f"experiment.campaigns CONTAINS 'customers/{customer_id}/campaigns/{campaign_id}'"
                 )
             if status_filter:
-                conditions.append(f"experiment.status = '{status_filter}'")
+                conditions.append(
+                    f"experiment.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)

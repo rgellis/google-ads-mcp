@@ -23,6 +23,7 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -157,9 +158,13 @@ class AdGroupAssetSetService:
 
             conditions = []
             if ad_group_id:
-                conditions.append(f"ad_group.id = {ad_group_id}")
+                conditions.append(
+                    f"ad_group.id = {gaql_int(ad_group_id, 'ad_group_id')}"
+                )
             if asset_set_id:
-                conditions.append(f"asset_set.id = {asset_set_id}")
+                conditions.append(
+                    f"asset_set.id = {gaql_int(asset_set_id, 'asset_set_id')}"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)

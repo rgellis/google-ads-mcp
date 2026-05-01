@@ -22,6 +22,7 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -293,12 +294,14 @@ class AssetGroupService:
             if not include_removed:
                 conditions.append("asset_group.status != 'REMOVED'")
             if campaign_id:
-                conditions.append(f"campaign.id = {campaign_id}")
+                conditions.append(
+                    f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
+                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            query += f" ORDER BY asset_group.id DESC LIMIT {limit}"
+            query += f" ORDER BY asset_group.id DESC LIMIT {gaql_int(limit, 'limit')}"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)

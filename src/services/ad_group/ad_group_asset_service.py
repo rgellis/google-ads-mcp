@@ -23,6 +23,8 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
+    gaql_int,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -363,11 +365,17 @@ class AdGroupAssetService:
 
             conditions = []
             if ad_group_id:
-                conditions.append(f"ad_group.id = {ad_group_id}")
+                conditions.append(
+                    f"ad_group.id = {gaql_int(ad_group_id, 'ad_group_id')}"
+                )
             if field_type:
-                conditions.append(f"ad_group_asset.field_type = '{field_type}'")
+                conditions.append(
+                    f"ad_group_asset.field_type = '{gaql_enum_name(field_type, 'field_type')}'"
+                )
             if campaign_id:
-                conditions.append(f"campaign.id = {campaign_id}")
+                conditions.append(
+                    f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
+                )
             if not include_system_managed:
                 conditions.append("ad_group_asset.source = 'ADVERTISER'")
 
