@@ -4,7 +4,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v23.enums.types.asset_set_status import AssetSetStatusEnum
 from google.ads.googleads.v23.enums.types.asset_set_type import AssetSetTypeEnum
 from google.ads.googleads.v23.resources.types.asset_set import AssetSet
 from google.ads.googleads.v23.services.services.asset_set_service import (
@@ -53,7 +52,6 @@ class AssetSetService:
         customer_id: str,
         name: str,
         asset_set_type: AssetSetTypeEnum.AssetSetType,
-        status: AssetSetStatusEnum.AssetSetStatus = AssetSetStatusEnum.AssetSetStatus.ENABLED,
         merchant_id: Optional[int] = None,
         feed_label: Optional[str] = None,
         partial_failure: bool = False,
@@ -61,6 +59,9 @@ class AssetSetService:
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new asset set.
+
+        Note: ``AssetSet.status`` is Output-only per the v23 ref. The
+        wrapper does not expose it on create.
 
         Args:
             ctx: FastMCP context
@@ -74,7 +75,6 @@ class AssetSetService:
                 STATIC_LOCATION_GROUP). Location-sync, business-profile, and
                 chain-location types need their own submessages and are not
                 supported by this wrapper yet.
-            status: Asset set status (ENABLED, REMOVED)
             merchant_id: Merchant Center merchant ID. Required when
                 asset_set_type is MERCHANT_CENTER_FEED.
             feed_label: Optional Merchant Center feed label
@@ -397,7 +397,6 @@ def create_asset_set_tools(
         customer_id: str,
         name: str,
         asset_set_type: str,
-        status: str = "ENABLED",
         merchant_id: Optional[int] = None,
         feed_label: Optional[str] = None,
         partial_failure: bool = False,
@@ -424,7 +423,6 @@ def create_asset_set_tools(
                 static-location-group types require source submessages this
                 wrapper does not yet expose; pass them and the wrapper
                 raises NotImplementedError.
-            status: Asset set status - ENABLED or REMOVED
             merchant_id: Required when asset_set_type=MERCHANT_CENTER_FEED.
                 Merchant Center merchant ID.
             feed_label: Optional Merchant Center feed label (only valid for
@@ -435,14 +433,12 @@ def create_asset_set_tools(
         """
         # Convert string enums to proper enum types
         asset_set_type_enum = getattr(AssetSetTypeEnum.AssetSetType, asset_set_type)
-        status_enum = getattr(AssetSetStatusEnum.AssetSetStatus, status)
 
         return await service.create_asset_set(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
             asset_set_type=asset_set_type_enum,
-            status=status_enum,
             merchant_id=merchant_id,
             feed_label=feed_label,
             partial_failure=partial_failure,

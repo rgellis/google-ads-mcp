@@ -102,7 +102,7 @@ class CustomerAssetService:
         self,
         asset: str,
         field_type: AssetFieldTypeEnum.AssetFieldType,
-        status: AssetLinkStatusEnum.AssetLinkStatus = AssetLinkStatusEnum.AssetLinkStatus.ENABLED,
+        status: Optional[AssetLinkStatusEnum.AssetLinkStatus] = None,
     ) -> CustomerAssetOperation:
         """Create a customer asset operation for creation.
 
@@ -175,7 +175,7 @@ class CustomerAssetService:
         customer_id: str,
         asset: str,
         field_type: AssetFieldTypeEnum.AssetFieldType,
-        status: AssetLinkStatusEnum.AssetLinkStatus = AssetLinkStatusEnum.AssetLinkStatus.ENABLED,
+        status: Optional[AssetLinkStatusEnum.AssetLinkStatus] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a single customer asset.
@@ -352,7 +352,7 @@ def create_customer_asset_tools(
         customer_id: str,
         asset: str,
         field_type: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a customer asset.
@@ -368,7 +368,12 @@ def create_customer_asset_tools(
             Created customer asset details
         """
         field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
-        status_enum = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
+        # status is Optional on create; only convert when caller supplied one.
+        status_enum = (
+            getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_customer_asset(
             ctx=ctx,

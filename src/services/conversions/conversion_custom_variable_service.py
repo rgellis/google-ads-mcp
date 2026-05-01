@@ -62,7 +62,9 @@ class ConversionCustomVariableService:
         customer_id: str,
         name: str,
         tag: str,
-        status: ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus = ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus.ENABLED,
+        status: Optional[
+            ConversionCustomVariableStatusEnum.ConversionCustomVariableStatus
+        ] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[
@@ -91,7 +93,8 @@ class ConversionCustomVariableService:
             custom_variable = ConversionCustomVariable()
             custom_variable.name = name.strip()
             custom_variable.tag = tag.strip().lower()
-            custom_variable.status = status
+            if status is not None:
+                custom_variable.status = status
 
             # Create the operation
             operation = ConversionCustomVariableOperation()
@@ -232,7 +235,7 @@ def create_conversion_custom_variable_tools(
         customer_id: str,
         name: str,
         tag: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
     ) -> Dict[str, Any]:

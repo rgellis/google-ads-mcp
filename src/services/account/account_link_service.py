@@ -65,7 +65,7 @@ class AccountLinkService:
         app_analytics_provider_id: int,
         app_id: str,
         app_vendor: MobileAppVendorEnum.MobileAppVendor,
-        status: AccountLinkStatusEnum.AccountLinkStatus = AccountLinkStatusEnum.AccountLinkStatus.ENABLED,
+        status: Optional[AccountLinkStatusEnum.AccountLinkStatus] = None,
     ) -> Dict[str, Any]:
         """Create an account link for third party app analytics.
 
@@ -94,7 +94,8 @@ class AccountLinkService:
             # member the caller sets (here, third_party_app_analytics).
             account_link = AccountLink()
             account_link.third_party_app_analytics = third_party_analytics
-            account_link.status = status
+            if status is not None:
+                account_link.status = status
 
             # Create request
             request = CreateAccountLinkRequest()
@@ -341,7 +342,7 @@ def create_account_link_tools(
         app_analytics_provider_id: int,
         app_id: str,
         app_vendor: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create an account link for third party app analytics.
 
@@ -355,9 +356,14 @@ def create_account_link_tools(
         Returns:
             Created account link details with resource_name
         """
-        # Convert string enums to proper enum types
+        # Convert string enums to proper enum types. status is Optional;
+        # only convert when caller supplied a value.
         vendor_enum = getattr(MobileAppVendorEnum.MobileAppVendor, app_vendor)
-        status_enum = getattr(AccountLinkStatusEnum.AccountLinkStatus, status)
+        status_enum = (
+            getattr(AccountLinkStatusEnum.AccountLinkStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_account_link(
             ctx=ctx,

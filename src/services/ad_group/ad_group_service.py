@@ -51,7 +51,7 @@ class AdGroupService:
         campaign_id: str,
         name: str,
         type: AdGroupTypeEnum.AdGroupType,
-        status: AdGroupStatusEnum.AdGroupStatus = AdGroupStatusEnum.AdGroupStatus.ENABLED,
+        status: Optional[AdGroupStatusEnum.AdGroupStatus] = None,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
         partial_failure: bool = False,
@@ -92,8 +92,12 @@ class AdGroupService:
             ad_group.name = name
             ad_group.campaign = campaign_resource_name
 
-            # Set status
-            ad_group.status = status
+            # AdGroup.status is mutable and optional per the v23 RPC ref
+            # (no Required/Output-only annotation; only `name` is required).
+            # Gate the write so omitting status leaves the field unset on
+            # the wire and the API applies its server-side default.
+            if status is not None:
+                ad_group.status = status
 
             # Set type
             ad_group.type_ = type
@@ -307,7 +311,7 @@ def create_ad_group_tools(
         campaign_id: str,
         name: str,
         type: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
         partial_failure: bool = False,
@@ -337,8 +341,13 @@ def create_ad_group_tools(
         Returns:
             Created ad group details
         """
-        # Convert string enums to proper enum types
-        status_enum = getattr(AdGroupStatusEnum.AdGroupStatus, status)
+        # Convert string enums to proper enum types. status is Optional;
+        # only convert when caller supplied a value.
+        status_enum = (
+            getattr(AdGroupStatusEnum.AdGroupStatus, status)
+            if status is not None
+            else None
+        )
         type_enum = getattr(AdGroupTypeEnum.AdGroupType, type)
 
         return await service.create_ad_group(

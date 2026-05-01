@@ -17,10 +17,6 @@ from google.ads.googleads.v23.resources.types.bidding_seasonality_adjustment imp
 from google.ads.googleads.v23.enums.types.seasonality_event_scope import (
     SeasonalityEventScopeEnum,
 )
-from google.ads.googleads.v23.enums.types.seasonality_event_status import (
-    SeasonalityEventStatusEnum,
-)
-
 from google.ads.googleads.v23.enums.types.device import DeviceEnum
 from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
@@ -70,7 +66,6 @@ class BiddingSeasonalityAdjustmentService:
         start_date_time: str,
         end_date_time: str,
         conversion_rate_modifier: float,
-        status: str = "ENABLED",
         campaigns: Optional[List[str]] = None,
         advertising_channel_types: Optional[List[str]] = None,
         devices: Optional[List[str]] = None,
@@ -89,7 +84,6 @@ class BiddingSeasonalityAdjustmentService:
             start_date_time: Start date and time (YYYY-MM-DD HH:MM:SS)
             end_date_time: End date and time (YYYY-MM-DD HH:MM:SS)
             conversion_rate_modifier: Expected conversion rate change (0.1 to 10.0)
-            status: Status of the adjustment (ENABLED, PAUSED, REMOVED)
             campaigns: List of campaign resource names (required if scope is CAMPAIGN)
             advertising_channel_types: List of advertising channel types (required if scope is CHANNEL)
             devices: List of device types to apply to (DESKTOP, MOBILE, TABLET)
@@ -445,7 +439,6 @@ def create_bidding_seasonality_adjustment_tools(
         start_date_time: str,
         end_date_time: str,
         conversion_rate_modifier: float,
-        status: str = "ENABLED",
         campaigns: Optional[List[str]] = None,
         advertising_channel_types: Optional[List[str]] = None,
         devices: Optional[List[str]] = None,
@@ -456,6 +449,10 @@ def create_bidding_seasonality_adjustment_tools(
     ) -> Dict[str, Any]:
         """Create a bidding seasonality adjustment for seasonal conversion rate changes.
 
+        Note: ``BiddingSeasonalityAdjustment.status`` is Output-only per
+        the v23 ref. Use ``remove_bidding_seasonality_adjustment`` to
+        retire one.
+
         Args:
             customer_id: The customer ID
             name: Name for the seasonality adjustment
@@ -463,7 +460,6 @@ def create_bidding_seasonality_adjustment_tools(
             start_date_time: Start date and time in YYYY-MM-DD HH:MM:SS format
             end_date_time: End date and time in YYYY-MM-DD HH:MM:SS format (max 14 days from start)
             conversion_rate_modifier: Expected conversion rate change (0.1 to 10.0, 1.0 = no change)
-            status: Status (ENABLED, PAUSED, REMOVED)
             campaigns: List of campaign resource names (required if scope is CAMPAIGN)
             advertising_channel_types: List of channel types (SEARCH, DISPLAY, SHOPPING - required if scope is CHANNEL)
             devices: List of device types (DESKTOP, MOBILE, TABLET)
@@ -480,7 +476,6 @@ def create_bidding_seasonality_adjustment_tools(
             start_date_time=start_date_time,
             end_date_time=end_date_time,
             conversion_rate_modifier=conversion_rate_modifier,
-            status=status,
             campaigns=campaigns,
             advertising_channel_types=advertising_channel_types,
             devices=devices,

@@ -104,7 +104,9 @@ class CustomConversionGoalService:
         self,
         name: str,
         conversion_actions: List[str],
-        status: CustomConversionGoalStatusEnum.CustomConversionGoalStatus = CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED,
+        status: Optional[
+            CustomConversionGoalStatusEnum.CustomConversionGoalStatus
+        ] = None,
     ) -> CustomConversionGoalOperation:
         """Create a custom conversion goal operation for creation.
 
@@ -269,7 +271,7 @@ def create_custom_conversion_goal_tools(
         customer_id: str,
         name: str,
         conversion_actions: list[str],
-        status: str = "ENABLED",
+        status: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new custom conversion goal.
 

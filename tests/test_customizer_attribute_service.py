@@ -98,34 +98,12 @@ async def test_list_customizer_attributes(
     mock_google_ads_service.search.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_update_customizer_attribute(
-    service: CustomizerAttributeService, mock_ctx: Context
-) -> None:
-    mock_client = service.client
-    mock_client.mutate_customizer_attributes.return_value = Mock()
-    with (
-        patch(
-            "src.services.shared.customizer_attribute_service.CustomizerAttributeOperation",
-            return_value=Mock(),
-        ),
-        patch(
-            "src.services.shared.customizer_attribute_service.MutateCustomizerAttributesRequest",
-            return_value=Mock(),
-        ),
-        patch(
-            "src.services.shared.customizer_attribute_service.serialize_proto_message",
-            return_value={"results": []},
-        ),
-    ):
-        result = await service.update_customizer_attribute(
-            ctx=mock_ctx,
-            customer_id="1234567890",
-            attribute_resource_name="customers/1234567890/customizerAttributes/1",
-            status="REMOVED",
-        )
-    assert result == {"results": []}
-    mock_client.mutate_customizer_attributes.assert_called_once()
+def test_update_customizer_attribute_method_removed() -> None:
+    """The update method was removed in Phase 11. CustomizerAttribute has
+    no mutable fields per the v23 ref (name + type are Immutable, status
+    is Output-only), so any update was a no-op or error."""
+    service = CustomizerAttributeService()
+    assert not hasattr(service, "update_customizer_attribute")
 
 
 def test_register_tools() -> None:

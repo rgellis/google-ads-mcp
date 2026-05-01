@@ -13,9 +13,6 @@ from google.ads.googleads.v23.common.types.bidding import (
     TargetRoas,
     TargetSpend,
 )
-from google.ads.googleads.v23.enums.types.bidding_strategy_status import (
-    BiddingStrategyStatusEnum,
-)
 from google.ads.googleads.v23.enums.types.bidding_strategy_type import (
     BiddingStrategyTypeEnum,
 )
@@ -67,7 +64,6 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_cpa_micros: int,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -79,7 +75,6 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Target cost per acquisition in micros
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -138,7 +133,6 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_roas: float,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -150,7 +144,6 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_roas: Target return on ad spend (e.g., 4.0 for 400% ROAS)
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -209,7 +202,6 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_cpa_micros: Optional[int] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -221,7 +213,6 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Optional target CPA constraint
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -280,7 +271,6 @@ class BiddingStrategyService:
         ctx: Context,
         customer_id: str,
         name: str,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -291,7 +281,6 @@ class BiddingStrategyService:
             ctx: FastMCP context
             customer_id: The customer ID
             name: Strategy name
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -348,7 +337,6 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_roas: Optional[float] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -360,7 +348,6 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_roas: Optional target return on ad spend
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -420,7 +407,6 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_spend_micros: Optional[int] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -432,7 +418,6 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_spend_micros: Optional spending target in micros
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -494,7 +479,6 @@ class BiddingStrategyService:
         location: str,
         location_fraction_micros: int,
         max_cpc_bid_ceiling_micros: Optional[int] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -508,7 +492,6 @@ class BiddingStrategyService:
             location: Where to show ads (ABSOLUTE_TOP_OF_PAGE, TOP_OF_PAGE, ANYWHERE_ON_PAGE)
             location_fraction_micros: Target impression share (e.g., 650000 for 65%)
             max_cpc_bid_ceiling_micros: Optional max CPC bid limit
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -794,7 +777,6 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_cpa_micros: int,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -805,7 +787,6 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Target cost per acquisition in micros (1 million micros = 1 unit)
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -815,7 +796,6 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=target_cpa_micros,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -826,7 +806,6 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_roas: float,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -837,7 +816,6 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_roas: Target return on ad spend (e.g., 4.0 for 400% ROAS)
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -847,7 +825,6 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_roas=target_roas,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -858,7 +835,6 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_cpa_micros: Optional[int] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -869,7 +845,6 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Optional target CPA constraint in micros
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -879,7 +854,6 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=target_cpa_micros,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -892,7 +866,6 @@ def create_bidding_strategy_tools(
         location: str,
         location_fraction_micros: int,
         max_cpc_bid_ceiling_micros: Optional[int] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -905,7 +878,6 @@ def create_bidding_strategy_tools(
             location: Where to show ads - ABSOLUTE_TOP_OF_PAGE, TOP_OF_PAGE, ANYWHERE_ON_PAGE
             location_fraction_micros: Target impression share in micros (e.g., 650000 for 65%)
             max_cpc_bid_ceiling_micros: Optional max CPC bid limit in micros
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -917,7 +889,6 @@ def create_bidding_strategy_tools(
             location=location,
             location_fraction_micros=location_fraction_micros,
             max_cpc_bid_ceiling_micros=max_cpc_bid_ceiling_micros,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -927,7 +898,6 @@ def create_bidding_strategy_tools(
         ctx: Context,
         customer_id: str,
         name: str,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -937,7 +907,6 @@ def create_bidding_strategy_tools(
         Args:
             customer_id: The customer ID
             name: Strategy name
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -946,7 +915,6 @@ def create_bidding_strategy_tools(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -957,7 +925,6 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_roas: Optional[float] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -968,7 +935,6 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_roas: Optional target return on ad spend (e.g., 2.0 for 200% return)
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -978,7 +944,6 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_roas=target_roas,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -989,7 +954,6 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_spend_micros: Optional[int] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -1000,7 +964,6 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_spend_micros: Optional spending target in micros
-            status: Strategy status (ENABLED, PAUSED, REMOVED)
 
         Returns:
             Created bidding strategy details
@@ -1010,7 +973,6 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_spend_micros=target_spend_micros,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

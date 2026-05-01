@@ -66,7 +66,7 @@ class AdGroupAssetService:
         ad_group_id: str,
         asset_id: str,
         field_type: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -96,7 +96,12 @@ class AdGroupAssetService:
             ad_group_asset.field_type = getattr(
                 AssetFieldTypeEnum.AssetFieldType, field_type
             )
-            ad_group_asset.status = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
+            # AdGroupAsset.status is mutable + optional per the v23 ref;
+            # the bundled examples/misc/add_ad_group_image_asset.py omits it.
+            if status is not None:
+                ad_group_asset.status = getattr(
+                    AssetLinkStatusEnum.AssetLinkStatus, status
+                )
 
             # Create operation
             operation = AdGroupAssetOperation()
@@ -495,7 +500,7 @@ def create_ad_group_asset_tools(
         ad_group_id: str,
         asset_id: str,
         field_type: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,

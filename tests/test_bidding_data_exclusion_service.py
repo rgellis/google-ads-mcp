@@ -61,7 +61,6 @@ async def test_create_bidding_data_exclusion_customer_scope(
     scope = "CUSTOMER"
     start_date_time = "2024-12-24 00:00:00"
     end_date_time = "2024-12-26 23:59:59"
-    status = "ENABLED"
     description = "Exclude holiday period from bidding data"
     advertising_channel_types = ["SEARCH", "DISPLAY"]
     devices = ["MOBILE", "DESKTOP"]
@@ -95,7 +94,6 @@ async def test_create_bidding_data_exclusion_customer_scope(
             scope=scope,
             start_date_time=start_date_time,
             end_date_time=end_date_time,
-            status=status,
             description=description,
             advertising_channel_types=advertising_channel_types,
             devices=devices,
@@ -219,7 +217,6 @@ async def test_update_bidding_data_exclusion(
     customer_id = "1234567890"
     exclusion_resource_name = f"customers/{customer_id}/biddingDataExclusions/123"
     new_name = "Updated Exclusion"
-    new_status = "REMOVED"
     new_description = "Updated description"
 
     # Create mock response
@@ -245,7 +242,6 @@ async def test_update_bidding_data_exclusion(
             customer_id=customer_id,
             exclusion_resource_name=exclusion_resource_name,
             name=new_name,
-            status=new_status,
             description=new_description,
         )
 
@@ -264,7 +260,8 @@ async def test_update_bidding_data_exclusion(
     assert exclusion.resource_name == exclusion_resource_name
     assert exclusion.name == new_name
     assert exclusion.description == new_description
-    assert set(operation.update_mask.paths) == {"name", "status", "description"}
+    # Phase 11: status was removed (Output-only per v23 ref).
+    assert set(operation.update_mask.paths) == {"name", "description"}
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore

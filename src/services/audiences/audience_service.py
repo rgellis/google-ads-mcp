@@ -68,12 +68,14 @@ class AudienceService:
         description: str,
         dimensions: List[Dict[str, Any]],
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a combined audience with multiple targeting dimensions.
+
+        Note: ``Audience.status`` is Output-only per the v23 ref — the API
+        does not accept it on create. Status is server-managed.
 
         Args:
             ctx: FastMCP context
@@ -82,7 +84,6 @@ class AudienceService:
             description: Audience description
             dimensions: List of audience dimensions to include
             exclusion_dimensions: Optional list of dimensions to exclude
-            status: Audience status (ENABLED, REMOVED)
 
         Returns:
             Created audience details
@@ -510,12 +511,14 @@ def create_audience_tools(
         description: str,
         dimensions: List[Dict[str, Any]],
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a combined audience with multiple targeting dimensions.
+
+        Note: ``Audience.status`` is Output-only per the v23 ref. Status
+        is server-managed; callers cannot set it on create.
 
         Args:
             customer_id: The customer ID
@@ -535,7 +538,6 @@ def create_audience_tools(
                     - LIFE_EVENT: life_event_resource (resource name)
                     - DETAILED_DEMOGRAPHIC: demographic_resource (resource name)
             exclusion_dimensions: Optional list of dimensions to exclude (same format as dimensions)
-            status: Audience status - ENABLED or REMOVED
 
         Returns:
             Created audience details including resource_name and audience_id
@@ -547,7 +549,6 @@ def create_audience_tools(
             description=description,
             dimensions=dimensions,
             exclusion_dimensions=exclusion_dimensions,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -56,7 +56,7 @@ class AssetGroupService:
         final_mobile_urls: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: AssetGroupStatusEnum.AssetGroupStatus = AssetGroupStatusEnum.AssetGroupStatus.ENABLED,
+        status: Optional[AssetGroupStatusEnum.AssetGroupStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -95,7 +95,9 @@ class AssetGroupService:
             if path2:
                 asset_group.path2 = path2
 
-            asset_group.status = status
+            # AssetGroup.status is mutable + optional per the v23 ref.
+            if status is not None:
+                asset_group.status = status
 
             # Create operation
             operation = AssetGroupOperation()
@@ -418,7 +420,7 @@ def create_asset_group_tools(
         final_mobile_urls: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -438,8 +440,12 @@ def create_asset_group_tools(
         Returns:
             Created asset group details including resource_name and asset_group_id
         """
-        # Convert string enum to proper enum type
-        status_enum = getattr(AssetGroupStatusEnum.AssetGroupStatus, status)
+        # Convert string enum to proper enum type only when caller supplied one.
+        status_enum = (
+            getattr(AssetGroupStatusEnum.AssetGroupStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_asset_group(
             ctx=ctx,

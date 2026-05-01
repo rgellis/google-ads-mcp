@@ -53,7 +53,6 @@ async def test_attach_shared_set_to_campaign(
     customer_id = "1234567890"
     campaign_id = "111222333"
     shared_set_id = "444555666"
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateCampaignSharedSetsResponse)
@@ -86,7 +85,6 @@ async def test_attach_shared_set_to_campaign(
             customer_id=customer_id,
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
-            status=status,
         )
 
     # Assert
@@ -206,7 +204,6 @@ async def test_update_campaign_shared_set_status(
     customer_id = "1234567890"
     campaign_id = "111222333"
     shared_set_id = "444555666"
-    status = "REMOVED"
 
     # Create mock response
     mock_response = Mock(spec=MutateCampaignSharedSetsResponse)
@@ -239,7 +236,7 @@ async def test_update_campaign_shared_set_status(
             customer_id=customer_id,
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
-            status=status,
+            status="REMOVED",
         )
 
     # Assert
@@ -542,7 +539,6 @@ async def test_error_handling_attach_shared_set(
     customer_id = "1234567890"
     campaign_id = "111222333"
     shared_set_id = "444555666"
-    status = "ENABLED"
 
     # Get the mocked shared set service client and make it raise exception
     mock_shared_set_client = campaign_shared_set_service.client  # type: ignore
@@ -557,7 +553,6 @@ async def test_error_handling_attach_shared_set(
             customer_id=customer_id,
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
-            status=status,
         )
 
     assert "Failed to attach shared set to campaign" in str(exc_info.value)

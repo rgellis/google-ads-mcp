@@ -58,7 +58,7 @@ class KeywordService:
         ad_group_id: str,
         keywords: List[Dict[str, str]],
         default_cpc_bid_micros: Optional[int] = None,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -103,9 +103,13 @@ class KeywordService:
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource_name
                 ad_group_criterion.keyword = keyword_info
-                ad_group_criterion.status = getattr(
-                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus, status
-                )
+                # AdGroupCriterion.status is mutable + optional per the v23
+                # ref (no Required/Output-only annotation; only the
+                # criterion oneof and ad_group are required).
+                if status is not None:
+                    ad_group_criterion.status = getattr(
+                        AdGroupCriterionStatusEnum.AdGroupCriterionStatus, status
+                    )
 
                 # Set CPC bid if provided
                 if (
@@ -302,7 +306,7 @@ def create_keyword_tools(
         ad_group_id: str,
         keywords: List[Dict[str, str]],
         default_cpc_bid_micros: Optional[int] = None,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,

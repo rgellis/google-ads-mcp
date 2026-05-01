@@ -4,9 +4,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v23.enums.types.campaign_shared_set_status import (
-    CampaignSharedSetStatusEnum,
-)
 from google.ads.googleads.v23.resources.types.campaign_shared_set import (
     CampaignSharedSet,
 )
@@ -55,19 +52,21 @@ class CampaignSharedSetService:
         customer_id: str,
         campaign_id: str,
         shared_set_id: str,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Attach a shared set to a campaign.
 
+        Note: ``CampaignSharedSet.status`` is Output-only per the v23 ref.
+        To toggle the attachment, use ``detach_shared_set_from_campaign``
+        and re-attach.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             campaign_id: The campaign ID
             shared_set_id: The shared set ID
-            status: Status of the attachment (ENABLED, REMOVED)
 
         Returns:
             Created campaign shared set details
@@ -132,7 +131,9 @@ class CampaignSharedSetService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            attachments: List of dicts with 'campaign_id', 'shared_set_id', and optional 'status'
+            attachments: List of dicts with 'campaign_id' and 'shared_set_id'.
+                CampaignSharedSet.status is Output-only — use detach +
+                re-attach to toggle.
 
         Returns:
             List of created campaign shared set attachments
@@ -145,7 +146,6 @@ class CampaignSharedSetService:
             for attachment in attachments:
                 campaign_id = attachment["campaign_id"]
                 shared_set_id = attachment["shared_set_id"]
-                status = attachment.get("status", "ENABLED")
 
                 campaign_resource = f"customers/{customer_id}/campaigns/{campaign_id}"
                 shared_set_resource = (
@@ -506,18 +506,19 @@ def create_campaign_shared_set_tools(
         customer_id: str,
         campaign_id: str,
         shared_set_id: str,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Attach a shared set to a campaign.
 
+        Note: ``CampaignSharedSet.status`` is Output-only per the v23 ref.
+        To toggle the attachment, detach + re-attach.
+
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             shared_set_id: The shared set ID to attach
-            status: Status of the attachment - ENABLED or REMOVED
 
         Returns:
             Created campaign shared set attachment details
@@ -527,7 +528,6 @@ def create_campaign_shared_set_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             shared_set_id=shared_set_id,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -59,19 +59,21 @@ class CustomizerAttributeService:
         customer_id: str,
         name: str,
         attribute_type: str,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a customizer attribute.
 
+        Note: ``CustomizerAttribute.status`` is Output-only per the v23
+        ref. ``name`` and ``type`` are both Immutable, so once created
+        the attribute has no mutable fields.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             name: Name of the customizer attribute
             attribute_type: Type of attribute (TEXT, NUMBER, PRICE, PERCENT)
-            status: Attribute status (ENABLED, REMOVED)
 
         Returns:
             Created customizer attribute details
@@ -121,77 +123,13 @@ class CustomizerAttributeService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def update_customizer_attribute(
-        self,
-        ctx: Context,
-        customer_id: str,
-        attribute_resource_name: str,
-        status: Optional[str] = None,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Any = None,
-    ) -> Dict[str, Any]:
-        """Update a customizer attribute.
-
-        Args:
-            ctx: FastMCP context
-            customer_id: The customer ID
-            attribute_resource_name: Resource name of the attribute to update
-            status: Optional new status (ENABLED, REMOVED)
-
-        Returns:
-            Updated customizer attribute details
-        """
-        try:
-            customer_id = format_customer_id(customer_id)
-
-            # Create customizer attribute with resource name
-            attribute = CustomizerAttribute()
-            attribute.resource_name = attribute_resource_name
-
-            # Build update mask
-            update_mask_paths = []
-
-            if status is not None:
-                update_mask_paths.append("status")
-
-            # Create operation
-            operation = CustomizerAttributeOperation()
-            operation.update = attribute
-            operation.update_mask.CopyFrom(
-                field_mask_pb2.FieldMask(paths=update_mask_paths)
-            )
-
-            # Create request
-            request = MutateCustomizerAttributesRequest()
-            request.customer_id = customer_id
-            request.operations = [operation]
-            set_request_options(
-                request,
-                partial_failure=partial_failure,
-                validate_only=validate_only,
-                response_content_type=response_content_type,
-            )
-
-            # Make the API call
-            response = self.client.mutate_customizer_attributes(request=request)
-
-            await ctx.log(
-                level="info",
-                message="Updated customizer attribute",
-            )
-
-            # Return serialized response
-            return serialize_proto_message(response)
-
-        except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-        except Exception as e:
-            error_msg = f"Failed to update customizer attribute: {str(e)}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
+    # update_customizer_attribute was removed — CustomizerAttribute has
+    # no mutable fields per the v23 ref: ``name`` and ``type`` are
+    # Immutable, ``status`` is Output-only, ``id``/``resource_name`` are
+    # server-managed. The previous wrapper accepted ``status``, added
+    # "status" to the update_mask without ever assigning a value, and
+    # would either fail or no-op. Use ``remove_customizer_attribute`` to
+    # delete an attribute; create a new one to change anything.
 
     async def list_customizer_attributes(
         self,
@@ -340,18 +278,20 @@ def create_customizer_attribute_tools(
         customer_id: str,
         name: str,
         attribute_type: str,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a customizer attribute for ad customization.
 
+        Note: ``CustomizerAttribute.status`` is Output-only per the v23
+        ref. There is no update tool — name and type are Immutable, so
+        once created the attribute has no mutable fields.
+
         Args:
             customer_id: The customer ID
             name: Name of the customizer attribute (will be used in ad text placeholders)
             attribute_type: Type of attribute - TEXT, NUMBER, PRICE, or PERCENT
-            status: Attribute status - ENABLED or REMOVED
 
         Returns:
             Created customizer attribute details with resource_name and attribute_id
@@ -361,36 +301,6 @@ def create_customizer_attribute_tools(
             customer_id=customer_id,
             name=name,
             attribute_type=attribute_type,
-            status=status,
-            partial_failure=partial_failure,
-            validate_only=validate_only,
-            response_content_type=response_content_type,
-        )
-
-    async def update_customizer_attribute(
-        ctx: Context,
-        customer_id: str,
-        attribute_resource_name: str,
-        status: Optional[str] = None,
-        partial_failure: bool = False,
-        validate_only: bool = False,
-        response_content_type: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """Update a customizer attribute.
-
-        Args:
-            customer_id: The customer ID
-            attribute_resource_name: Resource name of the attribute to update
-            status: Optional new status (ENABLED, REMOVED)
-
-        Returns:
-            Updated customizer attribute details with list of updated fields
-        """
-        return await service.update_customizer_attribute(
-            ctx=ctx,
-            customer_id=customer_id,
-            attribute_resource_name=attribute_resource_name,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -445,7 +355,6 @@ def create_customizer_attribute_tools(
     tools.extend(
         [
             create_customizer_attribute,
-            update_customizer_attribute,
             list_customizer_attributes,
             remove_customizer_attribute,
         ]

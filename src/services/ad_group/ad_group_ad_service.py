@@ -56,7 +56,7 @@ class AdGroupAdService:
         customer_id: str,
         ad_group_id: str,
         ad_resource_name: str,
-        status: AdGroupAdStatusEnum.AdGroupAdStatus = AdGroupAdStatusEnum.AdGroupAdStatus.ENABLED,
+        status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -85,7 +85,8 @@ class AdGroupAdService:
             ad = Ad()
             ad.resource_name = ad_resource_name
             ad_group_ad.ad = ad
-            ad_group_ad.status = status
+            if status is not None:
+                ad_group_ad.status = status
 
             # Create operation
             operation = AdGroupAdOperation()
@@ -411,7 +412,7 @@ def create_ad_group_ad_tools(
         customer_id: str,
         ad_group_id: str,
         ad_resource_name: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -427,8 +428,12 @@ def create_ad_group_ad_tools(
         Returns:
             Created ad group ad details including resource_name and status
         """
-        # Convert string enum to proper enum type
-        status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+        # Convert string enum to proper enum type only when caller supplied one.
+        status_enum = (
+            getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_ad_group_ad(
             ctx=ctx,

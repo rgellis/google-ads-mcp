@@ -55,7 +55,6 @@ async def test_create_target_cpa_strategy(
     customer_id = "1234567890"
     name = "Test Target CPA Strategy"
     target_cpa_micros = 50000000  # $50.00
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateBiddingStrategiesResponse)
@@ -83,7 +82,6 @@ async def test_create_target_cpa_strategy(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=target_cpa_micros,
-            status=status,
         )
 
     # Assert
@@ -119,7 +117,6 @@ async def test_create_target_roas_strategy(
     customer_id = "1234567890"
     name = "Test Target ROAS Strategy"
     target_roas = 4.0  # 400% ROAS
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateBiddingStrategiesResponse)
@@ -147,7 +144,6 @@ async def test_create_target_roas_strategy(
             customer_id=customer_id,
             name=name,
             target_roas=target_roas,
-            status=status,
         )
 
     # Assert
@@ -182,7 +178,6 @@ async def test_create_maximize_conversions_strategy(
     customer_id = "1234567890"
     name = "Test Maximize Conversions Strategy"
     target_cpa_micros = 30000000  # $30.00
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateBiddingStrategiesResponse)
@@ -210,7 +205,6 @@ async def test_create_maximize_conversions_strategy(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=target_cpa_micros,
-            status=status,
         )
 
     # Assert
@@ -244,7 +238,6 @@ async def test_create_maximize_conversions_strategy_without_target(
     # Arrange
     customer_id = "1234567890"
     name = "Test Maximize Conversions No Target"
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateBiddingStrategiesResponse)
@@ -272,7 +265,6 @@ async def test_create_maximize_conversions_strategy_without_target(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=None,
-            status=status,
         )
 
     # Assert
@@ -302,7 +294,6 @@ async def test_create_target_impression_share_strategy(
     location = "TOP_OF_PAGE"
     location_fraction_micros = 650000  # 65%
     max_cpc_bid_ceiling_micros = 2000000  # $2.00
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateBiddingStrategiesResponse)
@@ -332,7 +323,6 @@ async def test_create_target_impression_share_strategy(
             location=location,
             location_fraction_micros=location_fraction_micros,
             max_cpc_bid_ceiling_micros=max_cpc_bid_ceiling_micros,
-            status=status,
         )
 
     # Assert

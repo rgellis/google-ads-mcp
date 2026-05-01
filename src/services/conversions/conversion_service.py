@@ -66,7 +66,7 @@ class ConversionService:
         name: str,
         category: str,
         type: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         value_settings: Optional[Dict[str, Any]] = None,
         counting_type: Optional[str] = None,
         attribution_model: Optional[str] = None,
@@ -111,10 +111,13 @@ class ConversionService:
             conversion_action = ConversionAction()
             conversion_action.name = name
 
-            # Set enums
-            conversion_action.status = getattr(
-                ConversionActionStatusEnum.ConversionActionStatus, status
-            )
+            # Set enums. ConversionAction.status is mutable + optional per
+            # the v23 ref (only `name` and `type` are required); gate the
+            # write so omitting it leaves the field unset on the wire.
+            if status is not None:
+                conversion_action.status = getattr(
+                    ConversionActionStatusEnum.ConversionActionStatus, status
+                )
             conversion_action.type_ = getattr(
                 ConversionActionTypeEnum.ConversionActionType, type
             )
@@ -381,7 +384,7 @@ def create_conversion_tools(
         name: str,
         category: str,
         type: str,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         value_settings: Optional[Dict[str, Any]] = None,
         counting_type: Optional[str] = None,
         attribution_model: Optional[str] = None,

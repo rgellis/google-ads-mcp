@@ -51,7 +51,6 @@ async def test_create_combined_audience_with_age(
     name = "Young Adults Audience"
     description = "Audience targeting 18-34 age range"
     dimensions = [{"type": "AGE", "age_ranges": ["AGE_RANGE_18_24", "AGE_RANGE_25_34"]}]
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateAudiencesResponse)
@@ -79,7 +78,6 @@ async def test_create_combined_audience_with_age(
             name=name,
             description=description,
             dimensions=dimensions,
-            status=status,
         )
 
     # Assert

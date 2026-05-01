@@ -59,7 +59,9 @@ class ConversionValueRuleService:
         customer_id: str,
         action_operation: str,
         action_value: float,
-        status: ConversionValueRuleStatusEnum.ConversionValueRuleStatus = ConversionValueRuleStatusEnum.ConversionValueRuleStatus.ENABLED,
+        status: Optional[
+            ConversionValueRuleStatusEnum.ConversionValueRuleStatus
+        ] = None,
         device_types: Optional[List[str]] = None,
         geo_location_geo_target_constants: Optional[List[str]] = None,
         audience_user_lists: Optional[List[str]] = None,
@@ -86,7 +88,8 @@ class ConversionValueRuleService:
             customer_id = format_customer_id(customer_id)
 
             rule = ConversionValueRule()
-            rule.status = status
+            if status is not None:
+                rule.status = status
 
             # Set action
             rule.action.operation = getattr(
@@ -358,7 +361,7 @@ def create_conversion_value_rule_tools(
         customer_id: str,
         action_operation: str,
         action_value: float,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         device_types: Optional[List[str]] = None,
         geo_location_geo_target_constants: Optional[List[str]] = None,
         audience_user_lists: Optional[List[str]] = None,

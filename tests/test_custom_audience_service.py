@@ -65,7 +65,6 @@ async def test_create_custom_audience(
         {"type": "APP", "app": "com.example.techapp"},
     ]
     type_ = "AUTO"
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateCustomAudiencesResponse)
@@ -94,7 +93,6 @@ async def test_create_custom_audience(
             description=description,
             members=members,
             type_=type_,
-            status=status,
         )
 
     # Assert
@@ -162,7 +160,6 @@ async def test_create_custom_audience_with_place_category(
         {"type": "PLACE_CATEGORY", "place_category": 13000},  # Restaurant category
     ]
     type_ = "PURCHASE_INTENT"
-    status = "ENABLED"
 
     # Create mock response
     mock_response = Mock(spec=MutateCustomAudiencesResponse)
@@ -191,7 +188,6 @@ async def test_create_custom_audience_with_place_category(
             description=description,
             members=members,
             type_=type_,
-            status=status,
         )
 
     # Assert
@@ -233,7 +229,6 @@ async def test_update_custom_audience(
         {"type": "KEYWORD", "keyword": "blockchain"},
         {"type": "KEYWORD", "keyword": "cryptocurrency"},
     ]
-    status = "REMOVED"
 
     # Create mock response
     mock_response = Mock(spec=MutateCustomAudiencesResponse)

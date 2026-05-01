@@ -65,7 +65,6 @@ class CustomAudienceService:
         description: str,
         members: List[Dict[str, Any]],
         type_: Optional[str] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -85,7 +84,6 @@ class CustomAudienceService:
                 ]
             type_: Optional type - AUTO, INTEREST, PURCHASE_INTENT, or SEARCH.
                 Omit to let the API default apply.
-            status: Status - ENABLED or REMOVED
 
         Returns:
             Created custom audience details
@@ -507,12 +505,15 @@ def create_custom_audience_tools(
         description: str,
         members: List[Dict[str, Any]],
         type_: Optional[str] = None,
-        status: str = "ENABLED",
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new custom audience (custom segment).
+
+        Note: ``CustomAudience.status`` is Output-only per the v23 ref —
+        the API does not accept it on create. Use ``remove_custom_audience``
+        to mark a custom audience as REMOVED.
 
         Args:
             customer_id: The customer ID
@@ -529,7 +530,6 @@ def create_custom_audience_tools(
                 - INTEREST: Interest-based segment
                 - PURCHASE_INTENT: Purchase intent segment
                 - SEARCH: Search-based segment
-            status: Status - ENABLED or REMOVED
 
         Returns:
             Created custom audience details with resource_name and custom_audience_id
@@ -541,7 +541,6 @@ def create_custom_audience_tools(
             description=description,
             members=members,
             type_=type_,
-            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -65,7 +65,7 @@ class CustomInterestService:
         description: str,
         members: List[Dict[str, str]],
         type_: Optional[str] = None,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -100,9 +100,11 @@ class CustomInterestService:
                 custom_interest.type_ = getattr(
                     CustomInterestTypeEnum.CustomInterestType, type_
                 )
-            custom_interest.status = getattr(
-                CustomInterestStatusEnum.CustomInterestStatus, status
-            )
+            # CustomInterest.status is mutable + optional per the v23 ref.
+            if status is not None:
+                custom_interest.status = getattr(
+                    CustomInterestStatusEnum.CustomInterestStatus, status
+                )
 
             # Add members
             for member in members:
@@ -455,7 +457,7 @@ def create_custom_interest_tools(
         description: str,
         members: List[Dict[str, str]],
         type_: Optional[str] = None,
-        status: str = "ENABLED",
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,

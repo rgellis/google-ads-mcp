@@ -17,9 +17,6 @@ from google.ads.googleads.v23.resources.types.bidding_data_exclusion import (
 from google.ads.googleads.v23.enums.types.seasonality_event_scope import (
     SeasonalityEventScopeEnum,
 )
-from google.ads.googleads.v23.enums.types.seasonality_event_status import (
-    SeasonalityEventStatusEnum,
-)
 from google.ads.googleads.v23.enums.types.device import DeviceEnum
 from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
@@ -66,7 +63,6 @@ class BiddingDataExclusionService:
         scope: str,
         start_date_time: str,
         end_date_time: str,
-        status: str = "ENABLED",
         campaigns: Optional[List[str]] = None,
         advertising_channel_types: Optional[List[str]] = None,
         devices: Optional[List[str]] = None,
@@ -84,7 +80,6 @@ class BiddingDataExclusionService:
             scope: Scope of the exclusion (CUSTOMER, CAMPAIGN)
             start_date_time: Start date and time (YYYY-MM-DD HH:MM:SS)
             end_date_time: End date and time (YYYY-MM-DD HH:MM:SS)
-            status: Status of the exclusion (ENABLED, PAUSED, REMOVED)
             campaigns: List of campaign resource names (required if scope is CAMPAIGN)
             advertising_channel_types: List of advertising channel types to apply to
             devices: List of device types to apply to (DESKTOP, MOBILE, TABLET)
@@ -172,13 +167,16 @@ class BiddingDataExclusionService:
         name: Optional[str] = None,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
-        status: Optional[str] = None,
         description: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a bidding data exclusion.
+
+        Note: ``BiddingDataExclusion.status`` is Output-only per the v23
+        ref — the wrapper does not expose it on update. Use
+        ``remove_bidding_data_exclusion`` to retire one.
 
         Args:
             ctx: FastMCP context
@@ -187,7 +185,6 @@ class BiddingDataExclusionService:
             name: Optional new name
             start_date_time: Optional new start date and time
             end_date_time: Optional new end date and time
-            status: Optional new status (ENABLED, PAUSED, REMOVED)
             description: Optional new description
 
         Returns:
@@ -214,9 +211,6 @@ class BiddingDataExclusionService:
             if end_date_time is not None:
                 exclusion.end_date_time = end_date_time
                 update_mask_paths.append("end_date_time")
-
-            if status is not None:
-                update_mask_paths.append("status")
 
             if description is not None:
                 exclusion.description = description
@@ -425,7 +419,6 @@ def create_bidding_data_exclusion_tools(
         scope: str,
         start_date_time: str,
         end_date_time: str,
-        status: str = "ENABLED",
         campaigns: Optional[List[str]] = None,
         advertising_channel_types: Optional[List[str]] = None,
         devices: Optional[List[str]] = None,
@@ -436,13 +429,15 @@ def create_bidding_data_exclusion_tools(
     ) -> Dict[str, Any]:
         """Create a bidding data exclusion to exclude specific date ranges from automated bidding.
 
+        Note: ``BiddingDataExclusion.status`` is Output-only per the v23
+        ref. Use ``remove_bidding_data_exclusion`` to retire an exclusion.
+
         Args:
             customer_id: The customer ID
             name: Name for the data exclusion
             scope: Scope of the exclusion (CUSTOMER for account-wide, CAMPAIGN for specific campaigns)
             start_date_time: Start date and time in YYYY-MM-DD HH:MM:SS format
             end_date_time: End date and time in YYYY-MM-DD HH:MM:SS format
-            status: Status (ENABLED, PAUSED, REMOVED)
             campaigns: List of campaign resource names (required if scope is CAMPAIGN)
             advertising_channel_types: List of channel types (SEARCH, DISPLAY, SHOPPING, etc.)
             devices: List of device types (DESKTOP, MOBILE, TABLET)
@@ -458,7 +453,6 @@ def create_bidding_data_exclusion_tools(
             scope=scope,
             start_date_time=start_date_time,
             end_date_time=end_date_time,
-            status=status,
             campaigns=campaigns,
             advertising_channel_types=advertising_channel_types,
             devices=devices,
@@ -475,7 +469,6 @@ def create_bidding_data_exclusion_tools(
         name: Optional[str] = None,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
-        status: Optional[str] = None,
         description: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -483,13 +476,14 @@ def create_bidding_data_exclusion_tools(
     ) -> Dict[str, Any]:
         """Update a bidding data exclusion.
 
+        Note: status is Output-only per the v23 ref; not exposed here.
+
         Args:
             customer_id: The customer ID
             exclusion_resource_name: Resource name of the exclusion to update
             name: Optional new name
             start_date_time: Optional new start date and time (YYYY-MM-DD HH:MM:SS)
             end_date_time: Optional new end date and time (YYYY-MM-DD HH:MM:SS)
-            status: Optional new status (ENABLED, PAUSED, REMOVED)
             description: Optional new description
 
         Returns:
@@ -502,7 +496,6 @@ def create_bidding_data_exclusion_tools(
             name=name,
             start_date_time=start_date_time,
             end_date_time=end_date_time,
-            status=status,
             description=description,
             partial_failure=partial_failure,
             validate_only=validate_only,

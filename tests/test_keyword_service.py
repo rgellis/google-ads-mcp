@@ -116,9 +116,12 @@ async def test_add_keywords(
         operation1.create.keyword.match_type
         == KeywordMatchTypeEnum.KeywordMatchType.EXACT
     )
+    # Phase 11: omitting `status` leaves the field unset on the wire
+    # (proto-default rule); reads back as UNSPECIFIED so the API applies
+    # its server-side default.
     assert (
         operation1.create.status
-        == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
+        == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.UNSPECIFIED
     )
     assert operation1.create.cpc_bid_micros == default_cpc_bid_micros
 

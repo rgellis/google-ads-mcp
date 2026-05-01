@@ -78,7 +78,6 @@ async def test_create_asset_set(
             customer_id=customer_id,
             name=name,
             asset_set_type=asset_set_type,
-            status=status,
             merchant_id=12345,
         )
 

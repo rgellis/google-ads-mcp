@@ -105,7 +105,10 @@ async def test_create_asset_group(
     assert list(operation.create.final_mobile_urls) == final_mobile_urls
     assert operation.create.path1 == path1
     assert operation.create.path2 == path2
-    assert operation.create.status == AssetGroupStatusEnum.AssetGroupStatus.ENABLED
+    # Phase 11: omitting `status` leaves the field unset on the wire
+    # (proto-default rule); reads back as UNSPECIFIED so the API applies
+    # its server-side default.
+    assert operation.create.status == AssetGroupStatusEnum.AssetGroupStatus.UNSPECIFIED
 
     # Verify logging
     mock_ctx.log.assert_called_once_with(  # type: ignore
