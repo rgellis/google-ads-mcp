@@ -199,3 +199,7 @@ cython_debug/
 # Claude Code
 .claude
 CLAUDE.local.md
+
+# audit_coverage.py — fetched markdown cache of the v23 RPC reference.
+# Re-fetched on demand; no need to track.
+tools/.audit_cache/
