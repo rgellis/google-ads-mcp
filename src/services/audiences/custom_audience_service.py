@@ -32,6 +32,7 @@ from src.utils import (
     format_customer_id,
     gaql_enum_name,
     gaql_int,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -298,6 +299,7 @@ class CustomAudienceService:
         customer_id: str,
         type_filter: Optional[str] = None,
         status_filter: Optional[str] = None,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all custom audiences in the account.
 
@@ -306,6 +308,9 @@ class CustomAudienceService:
             customer_id: The customer ID
             type_filter: Optional filter by type
             status_filter: Optional filter by status (ENABLED or REMOVED)
+            name_contains: Optional substring filter on custom_audience.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
 
         Returns:
             List of custom audiences
@@ -339,6 +344,10 @@ class CustomAudienceService:
             if status_filter:
                 conditions.append(
                     f"custom_audience.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
+            if name_contains:
+                conditions.append(
+                    f"custom_audience.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -592,6 +601,7 @@ def create_custom_audience_tools(
         customer_id: str,
         type_filter: Optional[str] = None,
         status_filter: Optional[str] = None,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all custom audiences in the account.
 
@@ -599,6 +609,10 @@ def create_custom_audience_tools(
             customer_id: The customer ID
             type_filter: Optional filter by type - AUTO, INTEREST, PURCHASE_INTENT, or SEARCH
             status_filter: Optional filter - ENABLED or REMOVED
+            name_contains: Optional substring filter on custom audience name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
 
         Returns:
             List of custom audiences with basic details
@@ -608,6 +622,7 @@ def create_custom_audience_tools(
             customer_id=customer_id,
             type_filter=type_filter,
             status_filter=status_filter,
+            name_contains=name_contains,
         )
 
     async def get_custom_audience_details(

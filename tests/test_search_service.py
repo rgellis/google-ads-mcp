@@ -92,6 +92,50 @@ async def test_search_campaigns(
 
 
 @pytest.mark.asyncio
+async def test_search_campaigns_name_contains_escapes_quote(
+    search_service: SearchService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """name_contains apostrophes are escaped server-side."""
+    mock_google_ads_service = search_service.client  # type: ignore
+    mock_google_ads_service.search.return_value = []  # type: ignore
+
+    await search_service.search_campaigns(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        name_contains="Joe's",
+    )
+
+    call_args = mock_google_ads_service.search.call_args  # type: ignore
+    query = call_args[1]["request"].query
+    assert "campaign.name LIKE '%Joe\\'s%'" in query
+    assert "name_contains" not in query
+
+
+@pytest.mark.asyncio
+async def test_search_ad_groups_name_contains_escapes_quote(
+    search_service: SearchService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """name_contains apostrophes are escaped server-side."""
+    mock_google_ads_service = search_service.client  # type: ignore
+    mock_google_ads_service.search.return_value = []  # type: ignore
+
+    await search_service.search_ad_groups(
+        ctx=mock_ctx,
+        customer_id="1234567890",
+        name_contains="Joe's",
+    )
+
+    call_args = mock_google_ads_service.search.call_args  # type: ignore
+    query = call_args[1]["request"].query
+    assert "ad_group.name LIKE '%Joe\\'s%'" in query
+    assert "name_contains" not in query
+
+
+@pytest.mark.asyncio
 async def test_search_ad_groups(
     search_service: SearchService,
     mock_sdk_client: Any,

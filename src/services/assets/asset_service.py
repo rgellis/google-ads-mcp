@@ -85,7 +85,9 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     gaql_int,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -328,6 +330,7 @@ class AssetService:
         ctx: Context,
         customer_id: str,
         asset_types: Optional[List[str]] = None,
+        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """Search for assets in the account.
@@ -336,6 +339,9 @@ class AssetService:
             ctx: FastMCP context
             customer_id: The customer ID
             asset_types: Optional list of asset types to filter by
+            name_contains: Optional substring filter on asset.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
             limit: Maximum number of results
 
         Returns:
@@ -363,9 +369,20 @@ class AssetService:
                 FROM asset
             """
 
+            conditions: List[str] = []
             if asset_types:
-                type_conditions = [f"asset.type = '{t}'" for t in asset_types]
-                query += " WHERE " + " OR ".join(type_conditions)
+                type_conditions = [
+                    f"asset.type = '{gaql_enum_name(t, 'asset_types[]')}'"
+                    for t in asset_types
+                ]
+                conditions.append("(" + " OR ".join(type_conditions) + ")")
+            if name_contains:
+                conditions.append(
+                    f"asset.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
+                )
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
             query += f" ORDER BY asset.id DESC LIMIT {gaql_int(limit, 'limit')}"
 
@@ -2866,6 +2883,7 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         ctx: Context,
         customer_id: str,
         asset_types: Optional[List[str]] = None,
+        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """Search for assets in the account.
@@ -2873,6 +2891,12 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         Args:
             customer_id: The customer ID
             asset_types: Optional list of asset types to filter by (TEXT, IMAGE, YOUTUBE_VIDEO)
+            name_contains: Optional substring filter on asset name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale"). Note that asset.name is often
+                empty (Google sometimes auto-fills from URL/text); a
+                non-matching substring simply yields no rows.
             limit: Maximum number of results
 
         Returns:
@@ -2882,6 +2906,7 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             ctx=ctx,
             customer_id=customer_id,
             asset_types=asset_types,
+            name_contains=name_contains,
             limit=limit,
         )
 

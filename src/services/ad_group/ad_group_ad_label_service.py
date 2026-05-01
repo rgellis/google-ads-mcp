@@ -157,8 +157,10 @@ class AdGroupAdLabelService:
 
             conditions = []
             if ad_group_id:
+                # customer_id is validated to be 10 digits by
+                # format_customer_id; wrap ad_group_id as int.
                 conditions.append(
-                    f"ad_group_ad.ad_group = 'customers/{customer_id}/adGroups/{ad_group_id}'"
+                    f"ad_group_ad.ad_group = 'customers/{customer_id}/adGroups/{gaql_int(ad_group_id, 'ad_group_id')}'"
                 )
             if label_id:
                 conditions.append(f"label.id = {gaql_int(label_id, 'label_id')}")

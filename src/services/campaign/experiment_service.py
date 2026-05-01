@@ -31,6 +31,7 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_enum_name,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -384,6 +385,7 @@ class ExperimentService:
         customer_id: str,
         campaign_id: Optional[str] = None,
         status_filter: Optional[str] = None,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all experiments in the account.
 
@@ -392,6 +394,9 @@ class ExperimentService:
             customer_id: The customer ID
             campaign_id: Optional filter by campaign
             status_filter: Optional filter by status
+            name_contains: Optional substring filter on experiment.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
 
         Returns:
             List of experiments
@@ -429,6 +434,10 @@ class ExperimentService:
             if status_filter:
                 conditions.append(
                     f"experiment.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
+            if name_contains:
+                conditions.append(
+                    f"experiment.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -769,6 +778,7 @@ def create_experiment_tools(
         customer_id: str,
         campaign_id: Optional[str] = None,
         status_filter: Optional[str] = None,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all experiments in the account.
 
@@ -782,6 +792,10 @@ def create_experiment_tools(
                 - GRADUATED: Successfully completed
                 - HALTED: Stopped early
                 - PROMOTED: Changes applied to base campaign
+            name_contains: Optional substring filter on experiment name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
 
         Returns:
             List of experiments with details
@@ -791,6 +805,7 @@ def create_experiment_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             status_filter=status_filter,
+            name_contains=name_contains,
         )
 
     async def graduate_experiment(

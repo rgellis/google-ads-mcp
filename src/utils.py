@@ -8,6 +8,8 @@ from google.protobuf.json_format import MessageToDict
 
 _GAQL_ENUM_NAME_RE = re.compile(r"[A-Z][A-Z0-9_]*")
 _GAQL_RESOURCE_FIELD_RE = re.compile(r"[a-z][a-z0-9_]*")
+_GAQL_STRING_DISALLOWED_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
+_CUSTOMER_ID_RE = re.compile(r"\d{10}")
 
 
 def gaql_int(value: Any, field_name: str) -> str:
@@ -55,6 +57,38 @@ def gaql_resource_field(value: Any, field_name: str) -> str:
     return value
 
 
+def gaql_string_literal(value: Any, field_name: str) -> str:
+    """Escape ``value`` and wrap it as a GAQL single-quoted string literal.
+
+    Use for freeform user content interpolated into GAQL — campaign names,
+    asset text, search patterns, etc. Returns the value already enclosed
+    in single quotes; the caller writes the equality/LIKE operator and
+    inserts the result directly (no surrounding quotes in the f-string).
+
+    Per the GAQL grammar
+    (https://developers.google.com/google-ads/api/docs/query/grammar) string
+    literals escape only ``\\`` and the surrounding quote character. We
+    additionally reject ASCII control characters (``\\x00``-``\\x1f``,
+    ``\\x7f``) because GAQL parsers typically do not accept them and the
+    LLM has no legitimate reason to send them.
+
+    Example::
+
+        name_contains = "Joe's Pizza"
+        query += f" AND campaign.name LIKE {gaql_string_literal('%' + name_contains + '%', 'name_contains')}"
+        # → " AND campaign.name LIKE '%Joe\\'s Pizza%'"
+    """
+    if not isinstance(value, str):
+        raise ValueError(f"{field_name} must be a string; got {type(value).__name__}")
+    if _GAQL_STRING_DISALLOWED_CHAR_RE.search(value):
+        raise ValueError(
+            f"{field_name} contains a control character; "
+            "control characters (\\x00-\\x1f, \\x7f) are not allowed in GAQL string literals"
+        )
+    escaped = value.replace("\\", "\\\\").replace("'", "\\'")
+    return f"'{escaped}'"
+
+
 def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
     if not logger.hasHandlers():
@@ -85,19 +119,36 @@ def load_dotenv(dotenv_path: str = ".env") -> None:
             os.environ.setdefault(key, value)
 
 
-def format_customer_id(customer_id: str) -> str:
-    """Format a customer ID by removing hyphens.
+def format_customer_id(customer_id: Any) -> str:
+    """Normalize and validate a Google Ads customer ID.
 
-    Google Ads customer IDs can be provided with or without hyphens.
-    This function ensures they are in the format expected by the API (without hyphens).
+    Strips hyphens, then verifies the result is exactly 10 digits — the
+    shape Google Ads customer IDs always take. Validating here means the
+    normalized ID is safe to interpolate into GAQL string literals,
+    resource names, or proto fields without further escaping.
 
     Args:
-        customer_id: The customer ID with or without hyphens (e.g., "123-456-7890" or "1234567890")
+        customer_id: The customer ID with or without hyphens
+            (e.g., "123-456-7890" or "1234567890")
 
     Returns:
-        The customer ID without hyphens (e.g., "1234567890")
+        The customer ID with hyphens removed (e.g., "1234567890")
+
+    Raises:
+        ValueError: If the input isn't a string, or doesn't normalize to
+            exactly 10 digits.
     """
-    return customer_id.replace("-", "")
+    if not isinstance(customer_id, str):
+        raise ValueError(
+            f"customer_id must be a string; got {type(customer_id).__name__}"
+        )
+    normalized = customer_id.replace("-", "")
+    if not _CUSTOMER_ID_RE.fullmatch(normalized):
+        raise ValueError(
+            f"customer_id must be 10 digits (with or without hyphens); "
+            f"got {customer_id!r}"
+        )
+    return normalized
 
 
 def set_request_options(

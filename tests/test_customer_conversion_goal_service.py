@@ -44,7 +44,7 @@ class TestCustomerConversionGoalService:
         # Mock response
         mock_result = Mock()
         mock_result.resource_name = (
-            "customers/123/customerConversionGoals/PURCHASE~WEBSITE"
+            "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE"
         )
 
         mock_response = Mock()
@@ -56,7 +56,7 @@ class TestCustomerConversionGoalService:
         operations = [
             {
                 "update": {
-                    "resource_name": "customers/123/customerConversionGoals/PURCHASE~WEBSITE",
+                    "resource_name": "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE",
                     "biddable": True,
                 }
             }
@@ -65,14 +65,14 @@ class TestCustomerConversionGoalService:
         # Call the method
         result = await service.mutate_customer_conversion_goals(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/customerConversionGoals/PURCHASE~WEBSITE"
+            == "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE"
         )
 
         # Verify the API call
@@ -80,11 +80,11 @@ class TestCustomerConversionGoalService:
         call_args = mock_client.mutate_customer_conversion_goals.call_args[1]  # type: ignore
         request = call_args["request"]
 
-        assert request.customer_id == "123"
+        assert request.customer_id == "1234567890"
         assert len(request.operations) == 1
         assert (
             request.operations[0].update.resource_name
-            == "customers/123/customerConversionGoals/PURCHASE~WEBSITE"
+            == "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE"
         )
         assert request.operations[0].update.biddable == True
         assert "biddable" in request.operations[0].update_mask.paths
@@ -96,7 +96,9 @@ class TestCustomerConversionGoalService:
         """Test disabling biddability for customer conversion goals."""
         # Mock response
         mock_result = Mock()
-        mock_result.resource_name = "customers/123/customerConversionGoals/LEAD~WEBSITE"
+        mock_result.resource_name = (
+            "customers/1234567890/customerConversionGoals/LEAD~WEBSITE"
+        )
 
         mock_response = Mock()
         mock_response.results = [mock_result]
@@ -107,7 +109,7 @@ class TestCustomerConversionGoalService:
         operations = [
             {
                 "update": {
-                    "resource_name": "customers/123/customerConversionGoals/LEAD~WEBSITE",
+                    "resource_name": "customers/1234567890/customerConversionGoals/LEAD~WEBSITE",
                     "biddable": False,
                 }
             }
@@ -116,14 +118,14 @@ class TestCustomerConversionGoalService:
         # Call the method
         result = await service.mutate_customer_conversion_goals(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/customerConversionGoals/LEAD~WEBSITE"
+            == "customers/1234567890/customerConversionGoals/LEAD~WEBSITE"
         )
 
         # Verify the API call
@@ -141,7 +143,7 @@ class TestCustomerConversionGoalService:
         operations = [
             {
                 "update": {
-                    "resource_name": "customers/123/customerConversionGoals/SIGNUP~WEBSITE",
+                    "resource_name": "customers/1234567890/customerConversionGoals/SIGNUP~WEBSITE",
                     "category": "SIGNUP",
                     "origin": "WEBSITE",
                     "biddable": True,
@@ -152,7 +154,7 @@ class TestCustomerConversionGoalService:
         with pytest.raises(Exception, match="identity-immutable"):
             await service.mutate_customer_conversion_goals(
                 ctx=mock_context,
-                customer_id="123",
+                customer_id="1234567890",
                 operations=operations,
             )
 
@@ -164,11 +166,11 @@ class TestCustomerConversionGoalService:
         # Mock response
         mock_result1 = Mock()
         mock_result1.resource_name = (
-            "customers/123/customerConversionGoals/PURCHASE~WEBSITE"
+            "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE"
         )
         mock_result2 = Mock()
         mock_result2.resource_name = (
-            "customers/123/customerConversionGoals/LEAD~WEBSITE"
+            "customers/1234567890/customerConversionGoals/LEAD~WEBSITE"
         )
 
         mock_response = Mock()
@@ -180,13 +182,13 @@ class TestCustomerConversionGoalService:
         operations = [
             {
                 "update": {
-                    "resource_name": "customers/123/customerConversionGoals/PURCHASE~WEBSITE",
+                    "resource_name": "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE",
                     "biddable": True,
                 }
             },
             {
                 "update": {
-                    "resource_name": "customers/123/customerConversionGoals/LEAD~WEBSITE",
+                    "resource_name": "customers/1234567890/customerConversionGoals/LEAD~WEBSITE",
                     "biddable": False,
                 }
             },
@@ -195,7 +197,7 @@ class TestCustomerConversionGoalService:
         # Call the method
         result = await service.mutate_customer_conversion_goals(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
@@ -203,11 +205,11 @@ class TestCustomerConversionGoalService:
         assert len(result["results"]) == 2
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/customerConversionGoals/PURCHASE~WEBSITE"
+            == "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE"
         )
         assert (
             result["results"][1]["resource_name"]
-            == "customers/123/customerConversionGoals/LEAD~WEBSITE"
+            == "customers/1234567890/customerConversionGoals/LEAD~WEBSITE"
         )
 
         # Verify the API call
@@ -234,7 +236,7 @@ class TestCustomerConversionGoalService:
         operations = [
             {
                 "update": {
-                    "resource_name": "customers/123/customerConversionGoals/PURCHASE~WEBSITE",
+                    "resource_name": "customers/1234567890/customerConversionGoals/PURCHASE~WEBSITE",
                     "biddable": True,
                 }
             }
@@ -243,7 +245,7 @@ class TestCustomerConversionGoalService:
         # Call the method
         _ = await service.mutate_customer_conversion_goals(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
             validate_only=True,
         )
@@ -276,13 +278,13 @@ class TestCustomerConversionGoalTools:
         mutate_tool = tools[0]
         await mutate_tool(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=[],
         )
 
         service.mutate_customer_conversion_goals.assert_called_once_with(  # type: ignore
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=[],
             validate_only=False,
             partial_failure=False,

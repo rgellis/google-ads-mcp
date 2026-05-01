@@ -47,7 +47,7 @@ class TestAdGroupCriterionCustomizerService:
         # Mock response
         mock_result = Mock()
         mock_result.resource_name = (
-            "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
         mock_result.ad_group_criterion_customizer = None
 
@@ -61,7 +61,7 @@ class TestAdGroupCriterionCustomizerService:
         mock_serialize.return_value = {
             "results": [
                 {
-                    "resource_name": "customers/123/adGroupCriterionCustomizers/456~789~101112"
+                    "resource_name": "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
                 }
             ],
             "partial_failure_error": None,
@@ -71,8 +71,8 @@ class TestAdGroupCriterionCustomizerService:
         operations = [
             {
                 "create": {
-                    "ad_group_criterion": "customers/123/adGroupCriteria/456~789",
-                    "customizer_attribute": "customers/123/customizerAttributes/101112",
+                    "ad_group_criterion": "customers/1234567890/adGroupCriteria/456~789",
+                    "customizer_attribute": "customers/1234567890/customizerAttributes/101112",
                     "value": {"type": "TEXT", "value": "Custom Text Value"},
                 }
             }
@@ -81,14 +81,14 @@ class TestAdGroupCriterionCustomizerService:
         # Call the method
         result = await service.mutate_ad_group_criterion_customizers(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            == "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
         assert result["partial_failure_error"] is None
 
@@ -97,15 +97,15 @@ class TestAdGroupCriterionCustomizerService:
         call_args = mock_client.mutate_ad_group_criterion_customizers.call_args[1]  # type: ignore
         request = call_args["request"]
 
-        assert request.customer_id == "123"
+        assert request.customer_id == "1234567890"
         assert len(request.operations) == 1
         assert (
             request.operations[0].create.ad_group_criterion
-            == "customers/123/adGroupCriteria/456~789"
+            == "customers/1234567890/adGroupCriteria/456~789"
         )
         assert (
             request.operations[0].create.customizer_attribute
-            == "customers/123/customizerAttributes/101112"
+            == "customers/1234567890/customizerAttributes/101112"
         )
         assert request.operations[0].create.value.string_value == "Custom Text Value"
 
@@ -120,7 +120,7 @@ class TestAdGroupCriterionCustomizerService:
         # Mock response
         mock_result = Mock()
         mock_result.resource_name = (
-            "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
         mock_result.ad_group_criterion_customizer = None
 
@@ -134,27 +134,29 @@ class TestAdGroupCriterionCustomizerService:
         mock_serialize.return_value = {
             "results": [
                 {
-                    "resource_name": "customers/123/adGroupCriterionCustomizers/456~789~101112"
+                    "resource_name": "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
                 }
             ]
         }
 
         # Test data
         operations = [
-            {"remove": "customers/123/adGroupCriterionCustomizers/456~789~101112"}
+            {
+                "remove": "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
+            }
         ]
 
         # Call the method
         result = await service.mutate_ad_group_criterion_customizers(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            == "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
 
         # Verify the API call
@@ -162,11 +164,11 @@ class TestAdGroupCriterionCustomizerService:
         call_args = mock_client.mutate_ad_group_criterion_customizers.call_args[1]  # type: ignore
         request = call_args["request"]
 
-        assert request.customer_id == "123"
+        assert request.customer_id == "1234567890"
         assert len(request.operations) == 1
         assert (
             request.operations[0].remove
-            == "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            == "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
 
     @pytest.mark.asyncio
@@ -180,7 +182,7 @@ class TestAdGroupCriterionCustomizerService:
         # Mock response
         mock_result = Mock()
         mock_result.resource_name = (
-            "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
         mock_result.ad_group_criterion_customizer = None
 
@@ -194,7 +196,7 @@ class TestAdGroupCriterionCustomizerService:
         mock_serialize.return_value = {
             "results": [
                 {
-                    "resource_name": "customers/123/adGroupCriterionCustomizers/456~789~101112"
+                    "resource_name": "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
                 }
             ]
         }
@@ -203,8 +205,8 @@ class TestAdGroupCriterionCustomizerService:
         operations = [
             {
                 "create": {
-                    "ad_group_criterion": "customers/123/adGroupCriteria/456~789",
-                    "customizer_attribute": "customers/123/customizerAttributes/101112",
+                    "ad_group_criterion": "customers/1234567890/adGroupCriteria/456~789",
+                    "customizer_attribute": "customers/1234567890/customizerAttributes/101112",
                     "value": {"type": "NUMBER", "value": "99.99"},
                 }
             }
@@ -213,7 +215,7 @@ class TestAdGroupCriterionCustomizerService:
         # Call the method
         _ = await service.mutate_ad_group_criterion_customizers(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
@@ -235,7 +237,7 @@ class TestAdGroupCriterionCustomizerService:
         # Mock response with partial failure
         mock_result = Mock()
         mock_result.resource_name = (
-            "customers/123/adGroupCriterionCustomizers/456~789~101112"
+            "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
         )
         mock_result.ad_group_criterion_customizer = None
 
@@ -254,7 +256,7 @@ class TestAdGroupCriterionCustomizerService:
         mock_serialize.return_value = {
             "results": [
                 {
-                    "resource_name": "customers/123/adGroupCriterionCustomizers/456~789~101112"
+                    "resource_name": "customers/1234567890/adGroupCriterionCustomizers/456~789~101112"
                 }
             ],
             "partial_failure_error": {
@@ -268,8 +270,8 @@ class TestAdGroupCriterionCustomizerService:
         operations = [
             {
                 "create": {
-                    "ad_group_criterion": "customers/123/adGroupCriteria/456~789",
-                    "customizer_attribute": "customers/123/customizerAttributes/101112",
+                    "ad_group_criterion": "customers/1234567890/adGroupCriteria/456~789",
+                    "customizer_attribute": "customers/1234567890/customizerAttributes/101112",
                     "value": {"type": "TEXT", "value": "Test Value"},
                 }
             }
@@ -278,7 +280,7 @@ class TestAdGroupCriterionCustomizerService:
         # Call the method
         result = await service.mutate_ad_group_criterion_customizers(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
             partial_failure=True,
         )
@@ -310,13 +312,13 @@ class TestAdGroupCriterionCustomizerTools:
         mutate_tool = tools[0]
         await mutate_tool(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=[],
         )
 
         service.mutate_ad_group_criterion_customizers.assert_called_once_with(  # type: ignore
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=[],
             partial_failure=False,
             validate_only=False,

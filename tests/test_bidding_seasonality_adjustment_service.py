@@ -154,6 +154,43 @@ async def test_list_bidding_seasonality_adjustments(
 
 
 @pytest.mark.asyncio
+async def test_list_bidding_seasonality_adjustments_name_contains_escapes_quote(
+    service: BiddingSeasonalityAdjustmentService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """name_contains apostrophes are escaped server-side."""
+    from google.ads.googleads.v23.services.services.google_ads_service import (
+        GoogleAdsServiceClient,
+    )
+
+    mock_google_ads_service = Mock(spec=GoogleAdsServiceClient)
+    mock_google_ads_service.search.return_value = []
+
+    def get_service_side_effect(service_name: str):  # type: ignore
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with patch(
+        "src.services.bidding.bidding_seasonality_adjustment_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        await service.list_bidding_seasonality_adjustments(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name_contains="Joe's",
+        )
+
+    call_args = mock_google_ads_service.search.call_args
+    query = call_args[1]["query"]
+    assert "bidding_seasonality_adjustment.name LIKE '%Joe\\'s%'" in query
+    assert "name_contains" not in query
+
+
+@pytest.mark.asyncio
 async def test_remove_bidding_seasonality_adjustment(
     service: BiddingSeasonalityAdjustmentService,
     mock_sdk_client: Any,

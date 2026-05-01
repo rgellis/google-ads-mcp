@@ -24,6 +24,7 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_int,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -254,12 +255,16 @@ class RemarketingActionService:
         self,
         ctx: Context,
         customer_id: str,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all remarketing actions in the account.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
+            name_contains: Optional substring filter on remarketing_action.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
 
         Returns:
             List of remarketing actions
@@ -280,8 +285,18 @@ class RemarketingActionService:
                     remarketing_action.name,
                     remarketing_action.resource_name
                 FROM remarketing_action
-                ORDER BY remarketing_action.name
             """
+
+            conditions: List[str] = []
+            if name_contains:
+                conditions.append(
+                    f"remarketing_action.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
+                )
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += " ORDER BY remarketing_action.name"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)
@@ -413,11 +428,16 @@ def create_remarketing_action_tools(
     async def list_remarketing_actions(
         ctx: Context,
         customer_id: str,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all remarketing actions in the account.
 
         Args:
             customer_id: The customer ID
+            name_contains: Optional substring filter on remarketing action name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
 
         Returns:
             List of remarketing actions with basic details
@@ -425,6 +445,7 @@ def create_remarketing_action_tools(
         return await service.list_remarketing_actions(
             ctx=ctx,
             customer_id=customer_id,
+            name_contains=name_contains,
         )
 
     async def get_remarketing_action_tags(

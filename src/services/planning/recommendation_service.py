@@ -29,6 +29,7 @@ from google.ads.googleads.v23.services.types.recommendation_service import (
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
+    gaql_enum_name,
     gaql_int,
     get_logger,
     serialize_proto_message,
@@ -108,12 +109,17 @@ class RecommendationService:
                 conditions.append("recommendation.dismissed = FALSE")
 
             if types:
-                type_conditions = [f"recommendation.type = '{t}'" for t in types]
+                type_conditions = [
+                    f"recommendation.type = '{gaql_enum_name(t, 'types[]')}'"
+                    for t in types
+                ]
                 conditions.append(f"({' OR '.join(type_conditions)})")
 
             if campaign_ids:
+                # customer_id is already validated to be 10 digits by
+                # format_customer_id; wrap each cid as int for safety.
                 campaign_conditions = [
-                    f"recommendation.campaign = 'customers/{customer_id}/campaigns/{cid}'"
+                    f"recommendation.campaign = 'customers/{customer_id}/campaigns/{gaql_int(cid, 'campaign_ids[]')}'"
                     for cid in campaign_ids
                 ]
                 conditions.append(f"({' OR '.join(campaign_conditions)})")

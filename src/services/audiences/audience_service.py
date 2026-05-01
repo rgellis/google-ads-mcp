@@ -36,6 +36,7 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_int,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -421,6 +422,7 @@ class AudienceService:
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List audiences.
@@ -429,6 +431,9 @@ class AudienceService:
             ctx: FastMCP context
             customer_id: The customer ID
             include_removed: Whether to include removed audiences
+            name_contains: Optional substring filter on audience.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
             limit: Maximum number of results
 
         Returns:
@@ -454,8 +459,16 @@ class AudienceService:
                 FROM audience
             """
 
+            conditions: List[str] = []
             if not include_removed:
-                query += " WHERE audience.status != 'REMOVED'"
+                conditions.append("audience.status != 'REMOVED'")
+            if name_contains:
+                conditions.append(
+                    f"audience.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
+                )
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
             query += f" ORDER BY audience.id DESC LIMIT {gaql_int(limit, 'limit')}"
 
@@ -597,6 +610,7 @@ def create_audience_tools(
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List audiences.
@@ -604,6 +618,10 @@ def create_audience_tools(
         Args:
             customer_id: The customer ID
             include_removed: Whether to include removed audiences
+            name_contains: Optional substring filter on audience name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
             limit: Maximum number of results
 
         Returns:
@@ -613,6 +631,7 @@ def create_audience_tools(
             ctx=ctx,
             customer_id=customer_id,
             include_removed=include_removed,
+            name_contains=name_contains,
             limit=limit,
         )
 

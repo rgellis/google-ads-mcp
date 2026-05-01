@@ -98,6 +98,37 @@ async def test_list_customizer_attributes(
     mock_google_ads_service.search.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_list_customizer_attributes_name_contains_escapes_quote(
+    service: CustomizerAttributeService, mock_sdk_client: Any, mock_ctx: Context
+) -> None:
+    """name_contains apostrophes are escaped server-side."""
+    mock_google_ads_service = Mock()
+    mock_google_ads_service.search.return_value = []
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect
+
+    with patch(
+        "src.services.shared.customizer_attribute_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        await service.list_customizer_attributes(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name_contains="Joe's",
+        )
+
+    call_args = mock_google_ads_service.search.call_args
+    query = call_args[1]["query"]
+    assert "customizer_attribute.name LIKE '%Joe\\'s%'" in query
+    assert "name_contains" not in query
+
+
 def test_update_customizer_attribute_method_removed() -> None:
     """The update method was removed in Phase 11. CustomizerAttribute has
     no mutable fields per the v23 ref (name + type are Immutable, status

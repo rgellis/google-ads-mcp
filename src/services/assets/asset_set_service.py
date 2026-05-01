@@ -24,6 +24,7 @@ from src.utils import (
     format_customer_id,
     gaql_enum_name,
     gaql_int,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -247,6 +248,7 @@ class AssetSetService:
         customer_id: str,
         asset_set_type: Optional[str] = None,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List asset sets.
@@ -256,6 +258,9 @@ class AssetSetService:
             customer_id: The customer ID
             asset_set_type: Optional asset set type to filter by
             include_removed: Whether to include removed asset sets
+            name_contains: Optional substring filter on asset_set.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
             limit: Maximum number of results
 
         Returns:
@@ -287,6 +292,10 @@ class AssetSetService:
             if asset_set_type:
                 conditions.append(
                     f"asset_set.type = '{gaql_enum_name(asset_set_type, 'asset_set_type')}'"
+                )
+            if name_contains:
+                conditions.append(
+                    f"asset_set.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -487,6 +496,7 @@ def create_asset_set_tools(
         customer_id: str,
         asset_set_type: Optional[str] = None,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List asset sets.
@@ -495,6 +505,10 @@ def create_asset_set_tools(
             customer_id: The customer ID
             asset_set_type: Optional asset set type to filter by
             include_removed: Whether to include removed asset sets
+            name_contains: Optional substring filter on asset set name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
             limit: Maximum number of results
 
         Returns:
@@ -505,6 +519,7 @@ def create_asset_set_tools(
             customer_id=customer_id,
             asset_set_type=asset_set_type,
             include_removed=include_removed,
+            name_contains=name_contains,
             limit=limit,
         )
 

@@ -16,6 +16,7 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_int,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
 )
@@ -44,6 +45,7 @@ class SearchService:
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for campaigns in a customer account.
@@ -52,6 +54,9 @@ class SearchService:
             ctx: FastMCP context
             customer_id: The customer ID
             include_removed: Whether to include removed campaigns
+            name_contains: Optional substring filter on campaign.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
             limit: Maximum number of results to return
 
         Returns:
@@ -74,8 +79,15 @@ class SearchService:
                 FROM campaign
             """
 
+            conditions = []
             if not include_removed:
-                query += " WHERE campaign.status != 'REMOVED'"
+                conditions.append("campaign.status != 'REMOVED'")
+            if name_contains:
+                conditions.append(
+                    f"campaign.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
+                )
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
             query += f" ORDER BY campaign.id LIMIT {gaql_int(limit, 'limit')}"
 
@@ -115,6 +127,7 @@ class SearchService:
         customer_id: str,
         campaign_id: Optional[str] = None,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for ad groups.
@@ -124,6 +137,9 @@ class SearchService:
             customer_id: The customer ID
             campaign_id: Optional campaign ID to filter by
             include_removed: Whether to include removed ad groups
+            name_contains: Optional substring filter on ad_group.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
             limit: Maximum number of results to return
 
         Returns:
@@ -154,6 +170,11 @@ class SearchService:
             if campaign_id:
                 conditions.append(
                     f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
+                )
+
+            if name_contains:
+                conditions.append(
+                    f"ad_group.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -377,6 +398,7 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for campaigns in a customer account.
@@ -384,6 +406,10 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
         Args:
             customer_id: The customer ID
             include_removed: Whether to include removed campaigns
+            name_contains: Optional substring filter on campaign name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
             limit: Maximum number of results to return
 
         Returns:
@@ -393,6 +419,7 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
             ctx=ctx,
             customer_id=customer_id,
             include_removed=include_removed,
+            name_contains=name_contains,
             limit=limit,
         )
 
@@ -401,6 +428,7 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
         customer_id: str,
         campaign_id: Optional[str] = None,
         include_removed: bool = False,
+        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for ad groups.
@@ -409,6 +437,10 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
             customer_id: The customer ID
             campaign_id: Optional campaign ID to filter by
             include_removed: Whether to include removed ad groups
+            name_contains: Optional substring filter on ad group name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
             limit: Maximum number of results to return
 
         Returns:
@@ -419,6 +451,7 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
             customer_id=customer_id,
             campaign_id=campaign_id,
             include_removed=include_removed,
+            name_contains=name_contains,
             limit=limit,
         )
 

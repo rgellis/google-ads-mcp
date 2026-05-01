@@ -29,6 +29,7 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_enum_name,
+    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -221,6 +222,7 @@ class LabelService:
         ctx: Context,
         customer_id: str,
         status_filter: Optional[str] = None,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all labels in the account.
 
@@ -228,6 +230,9 @@ class LabelService:
             ctx: FastMCP context
             customer_id: The customer ID
             status_filter: Optional filter by status (ENABLED or REMOVED)
+            name_contains: Optional substring filter on label.name
+                (case-sensitive LIKE match). Quotes/backslashes are
+                escaped server-side; pass the raw substring.
 
         Returns:
             List of labels
@@ -253,8 +258,18 @@ class LabelService:
                 FROM label
             """
 
+            conditions: List[str] = []
             if status_filter:
-                query += f" WHERE label.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                conditions.append(
+                    f"label.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
+                )
+            if name_contains:
+                conditions.append(
+                    f"label.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
+                )
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
             query += " ORDER BY label.name"
 
@@ -593,12 +608,17 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
         ctx: Context,
         customer_id: str,
         status_filter: Optional[str] = None,
+        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all labels in the account.
 
         Args:
             customer_id: The customer ID
             status_filter: Optional filter by status - ENABLED or REMOVED
+            name_contains: Optional substring filter on label name
+                (case-sensitive). Quotes and backslashes in the value are
+                escaped server-side, so pass the raw substring (e.g.
+                "Pizza" or "Joe's Sale").
 
         Returns:
             List of labels with details
@@ -607,6 +627,7 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             ctx=ctx,
             customer_id=customer_id,
             status_filter=status_filter,
+            name_contains=name_contains,
         )
 
     async def apply_label_to_campaigns(

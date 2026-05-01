@@ -245,6 +245,39 @@ async def test_list_remarketing_actions(
 
 
 @pytest.mark.asyncio
+async def test_list_remarketing_actions_name_contains_escapes_quote(
+    remarketing_action_service: RemarketingActionService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """name_contains apostrophes are escaped server-side."""
+    mock_google_ads_service = Mock(spec=GoogleAdsServiceClient)
+    mock_google_ads_service.search.return_value = []  # type: ignore
+
+    def get_service_side_effect(service_name: str):
+        if service_name == "GoogleAdsService":
+            return mock_google_ads_service
+        return remarketing_action_service.client
+
+    mock_sdk_client.client.get_service.side_effect = get_service_side_effect  # type: ignore
+
+    with patch(
+        "src.services.audiences.remarketing_action_service.get_sdk_client",
+        return_value=mock_sdk_client,
+    ):
+        await remarketing_action_service.list_remarketing_actions(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name_contains="Joe's",
+        )
+
+    call_args = mock_google_ads_service.search.call_args  # type: ignore
+    query = call_args[1]["query"]
+    assert "remarketing_action.name LIKE '%Joe\\'s%'" in query
+    assert "name_contains" not in query
+
+
+@pytest.mark.asyncio
 async def test_get_remarketing_action_tags(
     remarketing_action_service: RemarketingActionService,
     mock_sdk_client: Any,

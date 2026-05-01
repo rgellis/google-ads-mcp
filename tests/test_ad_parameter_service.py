@@ -44,7 +44,7 @@ class TestAdParameterService:
         """Test creating ad parameters."""
         # Mock response
         mock_result = Mock()
-        mock_result.resource_name = "customers/123/adParameters/456~789~1"
+        mock_result.resource_name = "customers/1234567890/adParameters/456~789~1"
         mock_result.ad_parameter = None
 
         mock_response = Mock()
@@ -55,7 +55,9 @@ class TestAdParameterService:
 
         # Mock the serialization to return a dict
         mock_serialize.return_value = {
-            "results": [{"resource_name": "customers/123/adParameters/456~789~1"}],
+            "results": [
+                {"resource_name": "customers/1234567890/adParameters/456~789~1"}
+            ],
             "partial_failure_error": None,
         }
 
@@ -63,7 +65,7 @@ class TestAdParameterService:
         operations = [
             {
                 "create": {
-                    "ad_group_criterion": "customers/123/adGroupCriteria/456~789",
+                    "ad_group_criterion": "customers/1234567890/adGroupCriteria/456~789",
                     "parameter_index": 1,
                     "insertion_text": "$99.99",
                 }
@@ -73,14 +75,14 @@ class TestAdParameterService:
         # Call the method
         result = await service.mutate_ad_parameters(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/adParameters/456~789~1"
+            == "customers/1234567890/adParameters/456~789~1"
         )
         assert result["partial_failure_error"] is None
 
@@ -89,11 +91,11 @@ class TestAdParameterService:
         call_args = mock_client.mutate_ad_parameters.call_args[1]  # type: ignore
         request = call_args["request"]
 
-        assert request.customer_id == "123"
+        assert request.customer_id == "1234567890"
         assert len(request.operations) == 1
         assert (
             request.operations[0].create.ad_group_criterion
-            == "customers/123/adGroupCriteria/456~789"
+            == "customers/1234567890/adGroupCriteria/456~789"
         )
         assert request.operations[0].create.parameter_index == 1
         assert request.operations[0].create.insertion_text == "$99.99"
@@ -106,7 +108,7 @@ class TestAdParameterService:
         """Test updating ad parameters."""
         # Mock response
         mock_result = Mock()
-        mock_result.resource_name = "customers/123/adParameters/456~789~1"
+        mock_result.resource_name = "customers/1234567890/adParameters/456~789~1"
         mock_result.ad_parameter = None
 
         mock_response = Mock()
@@ -117,14 +119,16 @@ class TestAdParameterService:
 
         # Mock the serialization to return a dict
         mock_serialize.return_value = {
-            "results": [{"resource_name": "customers/123/adParameters/456~789~1"}]
+            "results": [
+                {"resource_name": "customers/1234567890/adParameters/456~789~1"}
+            ]
         }
 
         # Test data
         operations = [
             {
                 "update": {
-                    "resource_name": "customers/123/adParameters/456~789~1",
+                    "resource_name": "customers/1234567890/adParameters/456~789~1",
                     "insertion_text": "$149.99",
                 }
             }
@@ -133,14 +137,14 @@ class TestAdParameterService:
         # Call the method
         result = await service.mutate_ad_parameters(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/adParameters/456~789~1"
+            == "customers/1234567890/adParameters/456~789~1"
         )
 
         # Verify the API call
@@ -148,11 +152,11 @@ class TestAdParameterService:
         call_args = mock_client.mutate_ad_parameters.call_args[1]  # type: ignore
         request = call_args["request"]
 
-        assert request.customer_id == "123"
+        assert request.customer_id == "1234567890"
         assert len(request.operations) == 1
         assert (
             request.operations[0].update.resource_name
-            == "customers/123/adParameters/456~789~1"
+            == "customers/1234567890/adParameters/456~789~1"
         )
         assert request.operations[0].update.insertion_text == "$149.99"
         assert "insertion_text" in request.operations[0].update_mask.paths
@@ -165,7 +169,7 @@ class TestAdParameterService:
         """Test removing ad parameters."""
         # Mock response
         mock_result = Mock()
-        mock_result.resource_name = "customers/123/adParameters/456~789~1"
+        mock_result.resource_name = "customers/1234567890/adParameters/456~789~1"
         mock_result.ad_parameter = None
 
         mock_response = Mock()
@@ -176,23 +180,25 @@ class TestAdParameterService:
 
         # Mock the serialization to return a dict
         mock_serialize.return_value = {
-            "results": [{"resource_name": "customers/123/adParameters/456~789~1"}]
+            "results": [
+                {"resource_name": "customers/1234567890/adParameters/456~789~1"}
+            ]
         }
 
         # Test data
-        operations = [{"remove": "customers/123/adParameters/456~789~1"}]
+        operations = [{"remove": "customers/1234567890/adParameters/456~789~1"}]
 
         # Call the method
         result = await service.mutate_ad_parameters(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
         # Verify the result
         assert (
             result["results"][0]["resource_name"]
-            == "customers/123/adParameters/456~789~1"
+            == "customers/1234567890/adParameters/456~789~1"
         )
 
         # Verify the API call
@@ -200,9 +206,12 @@ class TestAdParameterService:
         call_args = mock_client.mutate_ad_parameters.call_args[1]  # type: ignore
         request = call_args["request"]
 
-        assert request.customer_id == "123"
+        assert request.customer_id == "1234567890"
         assert len(request.operations) == 1
-        assert request.operations[0].remove == "customers/123/adParameters/456~789~1"
+        assert (
+            request.operations[0].remove
+            == "customers/1234567890/adParameters/456~789~1"
+        )
 
     @pytest.mark.asyncio
     @patch("src.services.ad_group.ad_parameter_service.serialize_proto_message")
@@ -212,7 +221,7 @@ class TestAdParameterService:
         """Test creating ad parameters with parameter index 2."""
         # Mock response
         mock_result = Mock()
-        mock_result.resource_name = "customers/123/adParameters/456~789~2"
+        mock_result.resource_name = "customers/1234567890/adParameters/456~789~2"
         mock_result.ad_parameter = None
 
         mock_response = Mock()
@@ -223,14 +232,16 @@ class TestAdParameterService:
 
         # Mock the serialization to return a dict
         mock_serialize.return_value = {
-            "results": [{"resource_name": "customers/123/adParameters/456~789~2"}]
+            "results": [
+                {"resource_name": "customers/1234567890/adParameters/456~789~2"}
+            ]
         }
 
         # Test data
         operations = [
             {
                 "create": {
-                    "ad_group_criterion": "customers/123/adGroupCriteria/456~789",
+                    "ad_group_criterion": "customers/1234567890/adGroupCriteria/456~789",
                     "parameter_index": 2,
                     "insertion_text": "50% off",
                 }
@@ -240,7 +251,7 @@ class TestAdParameterService:
         # Call the method
         _ = await service.mutate_ad_parameters(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
         )
 
@@ -260,7 +271,7 @@ class TestAdParameterService:
         """Test mutating ad parameters with partial failure."""
         # Mock response with partial failure
         mock_result = Mock()
-        mock_result.resource_name = "customers/123/adParameters/456~789~1"
+        mock_result.resource_name = "customers/1234567890/adParameters/456~789~1"
         mock_result.ad_parameter = None
 
         mock_error = Mock()
@@ -276,7 +287,9 @@ class TestAdParameterService:
 
         # Mock the serialization to return a dict
         mock_serialize.return_value = {
-            "results": [{"resource_name": "customers/123/adParameters/456~789~1"}],
+            "results": [
+                {"resource_name": "customers/1234567890/adParameters/456~789~1"}
+            ],
             "partial_failure_error": {
                 "code": 3,
                 "message": "Invalid parameter index",
@@ -288,7 +301,7 @@ class TestAdParameterService:
         operations = [
             {
                 "create": {
-                    "ad_group_criterion": "customers/123/adGroupCriteria/456~789",
+                    "ad_group_criterion": "customers/1234567890/adGroupCriteria/456~789",
                     "parameter_index": 1,
                     "insertion_text": "$99.99",
                 }
@@ -298,7 +311,7 @@ class TestAdParameterService:
         # Call the method
         result = await service.mutate_ad_parameters(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=operations,
             partial_failure=True,
         )
@@ -328,13 +341,13 @@ class TestAdParameterTools:
         mutate_tool = tools[0]
         await mutate_tool(
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=[],
         )
 
         service.mutate_ad_parameters.assert_called_once_with(  # type: ignore
             ctx=mock_context,
-            customer_id="123",
+            customer_id="1234567890",
             operations=[],
             partial_failure=False,
             validate_only=False,
