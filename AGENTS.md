@@ -19,7 +19,7 @@ src/utils.py               → format_customer_id, serialize_proto_message, set_
                               gaql_string_literal)
 src/sdk_client.py          → Google Ads SDK client wrapper
 tools/audit_coverage.py    → Coverage audit script (writes API_COVERAGE.md)
-AUDIT.md                   → How the coverage audit works and how to extend it
+API_AUDIT.md               → How the coverage audit works and how to extend it
 API_COVERAGE.md            → Auto-generated coverage report (do not hand-edit)
 ```
 
