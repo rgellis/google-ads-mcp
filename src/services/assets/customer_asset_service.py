@@ -114,11 +114,10 @@ class CustomerAssetService:
         Returns:
             CustomerAssetOperation: The operation to create the customer asset.
         """
-        customer_asset = CustomerAsset(
-            asset=asset,
-            field_type=field_type,
-            status=status,
-        )
+        customer_asset = CustomerAsset(asset=asset, field_type=field_type)
+        # Only set status when caller supplied one (proto-default rule).
+        if status is not None:
+            customer_asset.status = status
 
         return CustomerAssetOperation(create=customer_asset)
 
@@ -298,9 +297,12 @@ def create_customer_asset_tools(
                 field_type = getattr(
                     AssetFieldTypeEnum.AssetFieldType, op_data["field_type"]
                 )
-                status = getattr(
-                    AssetLinkStatusEnum.AssetLinkStatus,
-                    op_data.get("status", "ENABLED"),
+                # Only convert status when caller explicitly supplied one;
+                # otherwise let the API apply its server-side default.
+                status = (
+                    getattr(AssetLinkStatusEnum.AssetLinkStatus, op_data["status"])
+                    if "status" in op_data
+                    else None
                 )
 
                 operation = service.create_customer_asset_operation(

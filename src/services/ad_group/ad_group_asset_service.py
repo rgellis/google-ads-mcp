@@ -169,7 +169,6 @@ class AdGroupAssetService:
             for link in asset_links:
                 asset_id = link["asset_id"]
                 field_type = link["field_type"]
-                status = link.get("status", "ENABLED")
                 asset_resource = f"customers/{customer_id}/assets/{asset_id}"
 
                 # Create ad group asset
@@ -179,9 +178,13 @@ class AdGroupAssetService:
                 ad_group_asset.field_type = getattr(
                     AssetFieldTypeEnum.AssetFieldType, field_type
                 )
-                ad_group_asset.status = getattr(
-                    AssetLinkStatusEnum.AssetLinkStatus, status
-                )
+                # AdGroupAsset.status is mutable + optional per the v23
+                # ref. Only write it when the per-link dict supplied
+                # one; otherwise let the API apply its default.
+                if "status" in link:
+                    ad_group_asset.status = getattr(
+                        AssetLinkStatusEnum.AssetLinkStatus, link["status"]
+                    )
 
                 # Create operation
                 operation = AdGroupAssetOperation()
@@ -204,19 +207,21 @@ class AdGroupAssetService:
                 request=request
             )
 
-            # Process results
+            # Process results. Echo back what the caller supplied so the
+            # response is parallel to the input; status is only included
+            # when explicitly set (the API may have applied its default).
             results = []
             for i, result in enumerate(response.results):
                 link = asset_links[i]
-                results.append(
-                    {
-                        "resource_name": result.resource_name,
-                        "ad_group_id": ad_group_id,
-                        "asset_id": link["asset_id"],
-                        "field_type": link["field_type"],
-                        "status": link.get("status", "ENABLED"),
-                    }
-                )
+                entry: Dict[str, Any] = {
+                    "resource_name": result.resource_name,
+                    "ad_group_id": ad_group_id,
+                    "asset_id": link["asset_id"],
+                    "field_type": link["field_type"],
+                }
+                if "status" in link:
+                    entry["status"] = link["status"]
+                results.append(entry)
 
             await ctx.log(
                 level="info",
@@ -557,7 +562,8 @@ def create_ad_group_asset_tools(
             asset_links: List of dicts with:
                 - asset_id: The asset ID to link
                 - field_type: The field type for the asset
-                - status: Optional status (defaults to ENABLED)
+                - status: Optional status (ENABLED, PAUSED, REMOVED).
+                  Omit to let the API apply its server-side default.
 
         Returns:
             List of created ad group asset links

@@ -73,7 +73,8 @@ class KeywordService:
                 'match_type' is required (EXACT, PHRASE, or BROAD) — no safe
                 default; match type fundamentally changes which queries match.
             default_cpc_bid_micros: Default CPC bid for keywords in micros
-            status: Keyword status - ENABLED or PAUSED (default: ENABLED)
+            status: Optional keyword status (ENABLED, PAUSED, REMOVED).
+                Omit to let the API apply its server-side default.
 
         Returns:
             Response with created keyword details
@@ -322,7 +323,8 @@ def create_keyword_tools(
                   default; match type fundamentally changes which queries match.
                 - cpc_bid_micros: Optional CPC bid for this keyword
             default_cpc_bid_micros: Default CPC bid for keywords without individual bids
-            status: Keyword status - ENABLED or PAUSED (default: ENABLED)
+            status: Optional keyword status (ENABLED, PAUSED, REMOVED).
+                Omit to let the API apply its server-side default.
 
         Returns:
             Response with created keyword details

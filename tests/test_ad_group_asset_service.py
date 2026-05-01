@@ -160,7 +160,9 @@ async def test_link_multiple_assets_to_ad_group(
 
     assert result[1]["asset_id"] == "200"
     assert result[1]["field_type"] == "DESCRIPTION"
-    assert result[1]["status"] == "ENABLED"  # Default
+    # Caller omitted status; result entry omits it (wrapper does not
+    # invent an ENABLED default — API applies its own server-side default).
+    assert "status" not in result[1]
 
     assert result[2]["asset_id"] == "300"
     assert result[2]["field_type"] == "SITELINK"
