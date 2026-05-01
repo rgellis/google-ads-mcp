@@ -121,8 +121,9 @@ class CustomConversionGoalService:
         custom_conversion_goal = CustomConversionGoal(
             name=name,
             conversion_actions=conversion_actions,
-            status=status,
         )
+        if status is not None:
+            custom_conversion_goal.status = status
 
         return CustomConversionGoalOperation(create=custom_conversion_goal)
 
@@ -185,9 +186,11 @@ def create_custom_conversion_goal_tools(
     tools: List[Callable[..., Awaitable[Any]]] = []
 
     def _get_status_enum(
-        status_str: str,
-    ) -> CustomConversionGoalStatusEnum.CustomConversionGoalStatus:
-        """Convert string to custom conversion goal status enum."""
+        status_str: Optional[str],
+    ) -> Optional[CustomConversionGoalStatusEnum.CustomConversionGoalStatus]:
+        """Convert string to custom conversion goal status enum, or None when omitted."""
+        if status_str is None:
+            return None
         if status_str == "ENABLED":
             return CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED
         elif status_str == "REMOVED":
@@ -210,7 +213,8 @@ def create_custom_conversion_goal_tools(
                 For create:
                     - name: Goal name
                     - conversion_actions: List of conversion action resource names
-                    - status: ENABLED or REMOVED (default: ENABLED)
+                    - status: Optional ENABLED or REMOVED. Omit to let
+                      the API apply its default (ENABLED).
                 For update:
                     - resource_name: The custom conversion goal resource name
                     - name, conversion_actions, status: Fields to update (all optional)
@@ -227,10 +231,8 @@ def create_custom_conversion_goal_tools(
 
             if op_type == "create":
                 status = (
-                    CustomConversionGoalStatusEnum.CustomConversionGoalStatus.ENABLED
+                    _get_status_enum(op_data["status"]) if "status" in op_data else None
                 )
-                if "status" in op_data:
-                    status = _get_status_enum(op_data["status"])
 
                 operation = service.create_custom_conversion_goal_operation(
                     name=op_data["name"],
@@ -280,7 +282,8 @@ def create_custom_conversion_goal_tools(
             customer_id: The customer ID
             name: The name for this custom conversion goal
             conversion_actions: List of conversion action resource names
-            status: The status (ENABLED or REMOVED)
+            status: Optional. ENABLED or REMOVED. Omit to let the API
+                apply its default (ENABLED).
 
         Returns:
             Serialized response with created custom conversion goal details
@@ -313,7 +316,8 @@ def create_custom_conversion_goal_tools(
             resource_name: The custom conversion goal resource name
             name: The name for this custom conversion goal
             conversion_actions: List of conversion action resource names
-            status: The status (ENABLED or REMOVED)
+            status: Optional new status (ENABLED or REMOVED). Omit to
+                leave unchanged.
 
         Returns:
             Serialized response with updated custom conversion goal details

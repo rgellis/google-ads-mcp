@@ -334,7 +334,8 @@ def create_ad_group_tools(
                 DISPLAY_STANDARD for DISPLAY, SHOPPING_PRODUCT_ADS for
                 SHOPPING, VIDEO_BUMPER / VIDEO_TRUE_VIEW_IN_STREAM /
                 VIDEO_NON_SKIPPABLE_IN_STREAM for VIDEO, etc.
-            status: Ad group status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED).
             cpc_bid_micros: Cost per click bid in micros (1 million micros = 1 unit)
             cpm_bid_micros: Cost per thousand impressions bid in micros
 

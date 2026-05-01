@@ -435,7 +435,8 @@ def create_asset_group_tools(
             final_mobile_urls: Optional list of mobile-specific URLs
             path1: Optional first URL path element (max 15 characters)
             path2: Optional second URL path element (max 15 characters)
-            status: Asset group status - ENABLED, PAUSED, or REMOVED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED).
 
         Returns:
             Created asset group details including resource_name and asset_group_id

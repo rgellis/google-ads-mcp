@@ -4,9 +4,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v23.enums.types.customizer_attribute_status import (
-    CustomizerAttributeStatusEnum,
-)
 from google.ads.googleads.v23.enums.types.customizer_attribute_type import (
     CustomizerAttributeTypeEnum,
 )

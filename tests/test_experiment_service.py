@@ -100,7 +100,7 @@ async def test_create_experiment(
     operation = request.operations[0]
     assert operation.create.name == name
     assert operation.create.type_ == ExperimentTypeEnum.ExperimentType.SEARCH_CUSTOM
-    assert operation.create.status == ExperimentStatusEnum.ExperimentStatus.SETUP
+    assert operation.create.status == ExperimentStatusEnum.ExperimentStatus.UNSPECIFIED
     assert operation.create.description == description
     assert operation.create.suffix == suffix
     assert operation.create.start_date == start_date

@@ -351,7 +351,8 @@ def create_account_link_tools(
             app_analytics_provider_id: The ID of the app analytics provider
             app_id: The app ID (e.g. "com.example.app" for Android or "123456789" for iOS)
             app_vendor: The app vendor - APPLE_APP_STORE or GOOGLE_APP_STORE
-            status: Link status - ENABLED or REMOVED
+            status: Optional. ENABLED or REMOVED. Omit to let the API
+                apply its default (ENABLED).
 
         Returns:
             Created account link details with resource_name

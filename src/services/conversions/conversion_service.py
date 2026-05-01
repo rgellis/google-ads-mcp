@@ -406,7 +406,8 @@ def create_conversion_tools(
                 UPLOAD_CLICKS, GOOGLE_PLAY_DOWNLOAD, GOOGLE_PLAY_IN_APP_PURCHASE,
                 FIREBASE_*, etc. No safe default — type drives which other fields
                 are valid (AD_CALL/WEBSITE_CALL forbid lookback windows).
-            status: Status - ENABLED, REMOVED, HIDDEN
+            status: Optional. ENABLED, REMOVED, or HIDDEN. Omit to let
+                the API apply its default (ENABLED).
             value_settings: Optional dict with:
                 - default_value: Default conversion value
                 - always_use_default_value: Whether to always use default value

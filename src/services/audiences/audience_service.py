@@ -18,7 +18,6 @@ from google.ads.googleads.v23.common.types.audiences import (
     UserInterestSegment,
     UserListSegment,
 )
-from google.ads.googleads.v23.enums.types.audience_status import AudienceStatusEnum
 from google.ads.googleads.v23.resources.types.audience import Audience
 from google.ads.googleads.v23.services.services.audience_service import (
     AudienceServiceClient,

@@ -40,9 +40,6 @@ from google.ads.googleads.v23.common.types.criteria import (
     YouTubeChannelInfo,
     YouTubeVideoInfo,
 )
-from google.ads.googleads.v23.enums.types.ad_group_criterion_status import (
-    AdGroupCriterionStatusEnum,
-)
 from google.ads.googleads.v23.enums.types.age_range_type import AgeRangeTypeEnum
 from google.ads.googleads.v23.enums.types.app_payment_model_type import (
     AppPaymentModelTypeEnum,
@@ -201,9 +198,6 @@ class AdGroupCriterionService:
                 # Create ad group criterion
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.status = (
-                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
-                )
                 if negative:
                     ad_group_criterion.negative = True
 
@@ -295,9 +289,6 @@ class AdGroupCriterionService:
                 # Create ad group criterion
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.status = (
-                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
-                )
 
                 if negative:
                     ad_group_criterion.negative = True
@@ -405,9 +396,6 @@ class AdGroupCriterionService:
                 # Create ad group criterion
                 ad_group_criterion = AdGroupCriterion()
                 ad_group_criterion.ad_group = ad_group_resource
-                ad_group_criterion.status = (
-                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
-                )
 
                 # Set negative flag only when truthy (proto-default rule:
                 # don't write False — it's the default and writing it

@@ -1801,7 +1801,9 @@ class AdService:
                 free text.
             breadcrumb1: Optional first breadcrumb
             breadcrumb2: Optional second breadcrumb
-            status: Ad status - ENABLED or PAUSED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2484,7 +2486,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls: List of landing page URLs
             path1: First path component for display URL (max 15 chars)
             path2: Second path component for display URL (max 15 chars)
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2541,7 +2545,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls: List of landing page URLs
             path1: First path component for display URL (max 15 chars)
             path2: Second path component for display URL (max 15 chars)
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2684,7 +2690,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls: List of landing page URLs
             square_marketing_images: Optional square image asset resource names
             logo_images: Optional logo image asset resource names
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2746,7 +2754,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             in_feed_headline: Headline for in-feed video ads
             in_feed_description1: First description for in-feed video ads
             in_feed_description2: Second description for in-feed video ads
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2807,7 +2817,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             portrait_marketing_images: Optional portrait image asset resource names
             logo_images: Optional logo image asset resource names
             call_to_action_text: Optional call to action text
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2856,7 +2868,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             headlines: List of headline texts
             descriptions: List of description texts
             final_urls: List of landing page URLs
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2903,7 +2917,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls: List of landing page URLs
             images: Optional list of image asset resource names
             videos: Optional list of video asset resource names
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2944,7 +2960,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -2980,7 +2998,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3036,7 +3056,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             companion_banners: Optional companion banner asset resource names
             breadcrumb1: First breadcrumb for display URL
             breadcrumb2: Second breadcrumb for display URL
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3099,7 +3121,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             videos: Optional video asset resource names
             path1: First path for display URL
             path2: Second path for display URL
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3144,7 +3168,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         Args:
             customer_id: The customer ID
             ad_group_id: The ad group ID
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3192,7 +3218,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls: List of landing page URLs
             logo_image: Optional logo image asset resource name
             call_to_action_text: Optional call to action text
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3240,7 +3268,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             display_upload_product_type: Product type - e.g. 'HTML5_UPLOAD_AD',
                 'DYNAMIC_HTML5_CUSTOM_AD', 'DYNAMIC_HTML5_EDUCATION_AD', etc.
             final_urls: List of landing page URLs
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3297,7 +3327,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
                 AdCallToActionAsset references, not free CTA text.
             breadcrumb1: Optional first URL breadcrumb
             breadcrumb2: Optional second URL breadcrumb
-            status: Ad status - ENABLED or PAUSED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3342,7 +3374,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             ad_group_id: The ad group ID
             description: First description text
             description2: Optional second description text
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3382,7 +3416,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             customer_id: The customer ID
             ad_group_id: The ad group ID
             headline: The headline text
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3425,7 +3461,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             descriptions: List of description texts
             images: Optional list of image asset resource names
             videos: Optional list of video asset resource names
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3471,7 +3509,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             descriptions: List of description texts
             images: Optional list of image asset resource names
             youtube_videos: Optional list of YouTube video asset resource names
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3525,7 +3565,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             breadcrumb1: Optional first breadcrumb for display URL
             breadcrumb2: Optional second breadcrumb for display URL
             call_to_action: Optional call to action asset resource name
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details
@@ -3577,7 +3619,9 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             image_asset: Image asset resource name
             data: Raw image bytes (alternative to image_asset)
             final_urls: Optional list of landing page URLs
-            status: Ad status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED). Pass PAUSED
+                explicitly to create a non-serving ad.
 
         Returns:
             Created ad details

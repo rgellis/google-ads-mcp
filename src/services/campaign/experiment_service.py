@@ -62,6 +62,7 @@ class ExperimentService:
         description: Optional[str] = None,
         suffix: Optional[str] = None,
         experiment_type: str = "SEARCH_CUSTOM",
+        status: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         partial_failure: bool = False,
@@ -77,6 +78,8 @@ class ExperimentService:
             description: Optional description
             suffix: Optional suffix for experiment campaigns
             experiment_type: Type of experiment (SEARCH_CUSTOM, DISPLAY_CUSTOM, etc.)
+            status: Optional experiment status (SETUP, INITIATED, etc.). Omit
+                to let the API apply its default (SETUP).
             start_date: Start date (YYYY-MM-DD format)
             end_date: End date (YYYY-MM-DD format)
 
@@ -92,7 +95,10 @@ class ExperimentService:
             experiment.type_ = getattr(
                 ExperimentTypeEnum.ExperimentType, experiment_type
             )
-            experiment.status = getattr(ExperimentStatusEnum.ExperimentStatus, "SETUP")
+            if status is not None:
+                experiment.status = getattr(
+                    ExperimentStatusEnum.ExperimentStatus, status
+                )
 
             if description:
                 experiment.description = description
@@ -639,6 +645,7 @@ def create_experiment_tools(
         description: Optional[str] = None,
         suffix: Optional[str] = None,
         experiment_type: str = "SEARCH_CUSTOM",
+        status: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         partial_failure: bool = False,
@@ -660,6 +667,8 @@ def create_experiment_tools(
                 - DISPLAY_CUSTOM: For display campaigns
                 - VIDEO_CUSTOM: For video campaigns
                 - SHOPPING_COMPARISON_LISTING_ADS: For shopping campaigns
+            status: Optional initial status (SETUP, INITIATED, etc.). Omit to
+                let the API default to SETUP.
             start_date: Start date in YYYY-MM-DD format (optional)
             end_date: End date in YYYY-MM-DD format (optional)
 
@@ -673,6 +682,7 @@ def create_experiment_tools(
             description=description,
             suffix=suffix,
             experiment_type=experiment_type,
+            status=status,
             start_date=start_date,
             end_date=end_date,
             partial_failure=partial_failure,
@@ -862,7 +872,8 @@ def create_experiment_tools(
             experiment_id: The experiment ID to update
             name: New experiment name
             description: New experiment description
-            status: New experiment status
+            status: Optional new status (SETUP, INITIATED, ENABLED,
+                HALTED, PROMOTED, REMOVED). Omit to leave unchanged.
 
         Returns:
             Updated experiment details including resource_name

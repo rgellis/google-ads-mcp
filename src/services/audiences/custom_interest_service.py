@@ -476,7 +476,8 @@ def create_custom_interest_tools(
             type_: Optional type of custom interest. Omit to use API default.
                 - CUSTOM_AFFINITY: For reaching users with specific interests
                 - CUSTOM_INTENT: For reaching users actively researching
-            status: Status - ENABLED or REMOVED
+            status: Optional. ENABLED or REMOVED. Omit to let the API
+                apply its default (ENABLED).
 
         Returns:
             Created custom interest details with resource_name and custom_interest_id

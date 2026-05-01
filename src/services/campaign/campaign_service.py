@@ -561,7 +561,10 @@ def create_campaign_tools(
                 SHOPPING, HOTEL, VIDEO, MULTI_CHANNEL, LOCAL, SMART,
                 PERFORMANCE_MAX, LOCAL_SERVICES, TRAVEL, DEMAND_GEN. Cannot
                 be changed after the campaign is created.
-            status: Campaign status - ENABLED or PAUSED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED — the campaign
+                serves immediately on create). Pass PAUSED explicitly
+                to create a non-serving campaign.
             target_google_search: Show ads on Google Search results
                 (omit to leave unset)
             target_search_network: Show ads on Google search partner sites

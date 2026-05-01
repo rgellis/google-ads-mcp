@@ -423,7 +423,8 @@ def create_ad_group_ad_tools(
             customer_id: The customer ID
             ad_group_id: The ad group ID
             ad_resource_name: The resource name of the ad to add (e.g., "customers/123/ads/456")
-            status: Ad group ad status - ENABLED, PAUSED, or REMOVED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED).
 
         Returns:
             Created ad group ad details including resource_name and status

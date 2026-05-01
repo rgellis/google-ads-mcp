@@ -124,7 +124,10 @@ async def test_add_keywords(
     operation = request.operations[0]
     criterion = operation.create
     assert criterion.ad_group == f"customers/{customer_id}/adGroups/{ad_group_id}"
-    assert criterion.status == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
+    assert (
+        criterion.status
+        == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.UNSPECIFIED
+    )
     assert criterion.negative == negative
     assert criterion.cpc_bid_micros == 1000000
     assert criterion.keyword.text == "running shoes"
@@ -259,7 +262,10 @@ async def test_add_audience_criteria(
     operation = request.operations[0]
     criterion = operation.create
     assert criterion.ad_group == f"customers/{customer_id}/adGroups/{ad_group_id}"
-    assert criterion.status == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
+    assert (
+        criterion.status
+        == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.UNSPECIFIED
+    )
     assert abs(criterion.bid_modifier - bid_modifier) < 0.001
     assert (
         criterion.user_list.user_list
@@ -450,7 +456,7 @@ async def test_add_demographic_criteria(
     assert age_criterion.ad_group == f"customers/{customer_id}/adGroups/{ad_group_id}"
     assert (
         age_criterion.status
-        == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.ENABLED
+        == AdGroupCriterionStatusEnum.AdGroupCriterionStatus.UNSPECIFIED
     )
     assert abs(age_criterion.bid_modifier - 1.1) < 0.001
     assert (

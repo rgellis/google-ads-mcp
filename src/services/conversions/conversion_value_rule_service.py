@@ -375,7 +375,8 @@ def create_conversion_value_rule_tools(
             customer_id: The customer ID
             action_operation: Value operation - ADD, MULTIPLY, or SET
             action_value: The value to apply (e.g. 10.0 for ADD $10, 1.5 for MULTIPLY 1.5x)
-            status: Rule status - ENABLED, PAUSED, or REMOVED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED).
             device_types: Optional device filter - MOBILE, DESKTOP, TABLET
             geo_location_geo_target_constants: Optional geo target constant resource names
             audience_user_lists: Optional user list resource names
@@ -383,8 +384,10 @@ def create_conversion_value_rule_tools(
         Returns:
             Created conversion value rule details
         """
-        status_enum = getattr(
-            ConversionValueRuleStatusEnum.ConversionValueRuleStatus, status
+        status_enum = (
+            getattr(ConversionValueRuleStatusEnum.ConversionValueRuleStatus, status)
+            if status is not None
+            else None
         )
         return await service.create_conversion_value_rule(
             ctx=ctx,
@@ -416,7 +419,8 @@ def create_conversion_value_rule_tools(
         Args:
             customer_id: The customer ID
             rule_resource_name: Resource name of the rule to update
-            status: New status - ENABLED, PAUSED, or REMOVED
+            status: Optional new status (ENABLED, PAUSED, or REMOVED).
+                Omit to leave unchanged.
             action_operation: New operation - ADD, MULTIPLY, or SET
             action_value: New value
 

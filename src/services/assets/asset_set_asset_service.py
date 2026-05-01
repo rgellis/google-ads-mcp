@@ -86,7 +86,7 @@ class AssetSetAssetService:
 
             await ctx.log(
                 level="info",
-                message=f"Added asset to asset set",
+                message="Added asset to asset set",
             )
 
             return serialize_proto_message(response)

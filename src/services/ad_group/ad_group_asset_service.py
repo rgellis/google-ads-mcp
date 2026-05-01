@@ -528,7 +528,8 @@ def create_ad_group_asset_tools(
                 - LEAD_FORM (for lead form extensions)
                 - BUSINESS_LOGO, MARKETING_IMAGE (for image assets)
                 - YOUTUBE_VIDEO (for video assets)
-            status: Asset link status - ENABLED, PAUSED, or REMOVED
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED).
 
         Returns:
             Created ad group asset link details including resource_name

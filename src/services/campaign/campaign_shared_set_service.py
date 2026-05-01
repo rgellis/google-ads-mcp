@@ -548,7 +548,10 @@ def create_campaign_shared_set_tools(
             attachments: List of dicts with:
                 - campaign_id: The campaign ID
                 - shared_set_id: The shared set ID
-                - status: Optional status (defaults to ENABLED)
+                CampaignSharedSet.status is Output-only per the v23 ref;
+                any "status" key in an attachment dict is ignored. Use
+                ``update_campaign_shared_set_status`` (detach + re-attach)
+                to toggle.
 
         Returns:
             Mutation response with results for each attachment

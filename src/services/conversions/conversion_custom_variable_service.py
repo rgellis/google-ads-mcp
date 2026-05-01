@@ -248,7 +248,8 @@ def create_conversion_custom_variable_tools(
             customer_id: The customer ID
             name: Name of the custom variable (max 100 chars, must be unique)
             tag: Tag used in event snippets (max 100 bytes, lowercase letters/numbers/underscores only)
-            status: Status of the variable - ENABLED or PAUSED (default: ENABLED)
+            status: Optional. ENABLED or PAUSED. Omit to let the API
+                apply its default (ENABLED).
             partial_failure: If true, valid operations succeed even if others fail
             validate_only: If true, only validates without executing
 

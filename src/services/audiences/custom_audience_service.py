@@ -7,9 +7,6 @@ from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.enums.types.custom_audience_member_type import (
     CustomAudienceMemberTypeEnum,
 )
-from google.ads.googleads.v23.enums.types.custom_audience_status import (
-    CustomAudienceStatusEnum,
-)
 from google.ads.googleads.v23.enums.types.custom_audience_type import (
     CustomAudienceTypeEnum,
 )

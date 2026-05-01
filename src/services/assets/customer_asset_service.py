@@ -363,7 +363,8 @@ def create_customer_asset_tools(
             customer_id: The customer ID
             asset: The asset resource name
             field_type: The asset field type (e.g., LOGO, HEADLINE, etc.)
-            status: The asset link status (ENABLED, PAUSED, REMOVED)
+            status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
+                the API apply its default (ENABLED).
             validate_only: Only validate the request
 
         Returns:
