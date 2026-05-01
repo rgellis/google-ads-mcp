@@ -24,6 +24,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -181,6 +182,8 @@ class CustomerService:
         call_conversion_reporting_enabled: Optional[bool] = None,
         call_conversion_action: Optional[str] = None,
         video_brand_safety_suitability: Optional[str] = None,
+        conversion_tracking_setting: Optional[Dict[str, Any]] = None,
+        video_customer: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -205,6 +208,12 @@ class CustomerService:
             video_brand_safety_suitability: Brand safety inventory type
                 for video ads. One of EXPANDED_INVENTORY,
                 STANDARD_INVENTORY, LIMITED_INVENTORY.
+            conversion_tracking_setting: Optional dict that builds a
+                ``ConversionTrackingSetting`` submessage. See the v23
+                proto reference for the schema.
+            video_customer: Optional dict that builds a
+                ``VideoCustomer`` submessage with video-specific
+                customer fields.
 
         Returns:
             Updated customer details
@@ -267,6 +276,32 @@ class CustomerService:
                     video_brand_safety_suitability,
                 )
                 update_mask_fields.append("video_brand_safety_suitability")
+
+            if conversion_tracking_setting is not None:
+                from google.ads.googleads.v23.resources.types.customer import (
+                    ConversionTrackingSetting,
+                )
+
+                set_optional_submessage(
+                    customer,
+                    "conversion_tracking_setting",
+                    conversion_tracking_setting,
+                    ConversionTrackingSetting,
+                )
+                update_mask_fields.append("conversion_tracking_setting")
+
+            if video_customer is not None:
+                from google.ads.googleads.v23.resources.types.customer import (
+                    VideoCustomer,
+                )
+
+                set_optional_submessage(
+                    customer,
+                    "video_customer",
+                    video_customer,
+                    VideoCustomer,
+                )
+                update_mask_fields.append("video_customer")
 
             operation = CustomerOperation()
             operation.update = customer
@@ -381,6 +416,8 @@ def create_customer_tools(
         call_conversion_reporting_enabled: Optional[bool] = None,
         call_conversion_action: Optional[str] = None,
         video_brand_safety_suitability: Optional[str] = None,
+        conversion_tracking_setting: Optional[Dict[str, Any]] = None,
+        video_customer: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -403,6 +440,11 @@ def create_customer_tools(
                 reporting is enabled)
             video_brand_safety_suitability: One of EXPANDED_INVENTORY,
                 STANDARD_INVENTORY, LIMITED_INVENTORY
+            conversion_tracking_setting: Optional dict that builds a
+                ``ConversionTrackingSetting`` submessage (see v23 proto
+                reference).
+            video_customer: Optional dict that builds a ``VideoCustomer``
+                submessage with video-specific customer fields.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -420,6 +462,8 @@ def create_customer_tools(
             call_conversion_reporting_enabled=call_conversion_reporting_enabled,
             call_conversion_action=call_conversion_action,
             video_brand_safety_suitability=video_brand_safety_suitability,
+            conversion_tracking_setting=conversion_tracking_setting,
+            video_customer=video_customer,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

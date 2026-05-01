@@ -25,6 +25,7 @@ from src.utils import (
     gaql_int,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
 )
 
 logger = get_logger(__name__)
@@ -50,7 +51,8 @@ class BillingSetupService:
         self,
         ctx: Context,
         customer_id: str,
-        payments_account_id: str,
+        payments_account_id: Optional[str] = None,
+        payments_account_info: Optional[Dict[str, Any]] = None,
         start_date: Optional[str] = None,
         start_time_type: Optional[TimeTypeEnum.TimeType] = None,
     ) -> Dict[str, Any]:
@@ -60,10 +62,28 @@ class BillingSetupService:
         validate_only, or response_content_type — those parameters were
         removed because passing them was a silent no-op.
 
+        ``payments_account_id`` and ``payments_account_info`` are
+        mutually-exclusive members of the BillingSetup payments-account
+        oneof. Pass exactly one:
+
+        - ``payments_account_id``: link an existing payments account
+          by ID. The wrapper builds the
+          ``customers/{customer_id}/paymentsAccounts/{id}`` resource
+          name for you.
+        - ``payments_account_info``: dict that builds an inline
+          ``BillingSetup.PaymentsAccountInfo`` submessage, used when
+          you want the API to create a new payments account along
+          with the billing setup. See the v23 BillingSetup proto
+          reference for the full nested schema; common fields:
+          ``payments_account_name``, ``payments_profile_id``,
+          ``secondary_payments_profile_id``, ``payments_account_id``.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             payments_account_id: The payments account ID to link
+            payments_account_info: Inline payments-account-info dict.
+                Mutually exclusive with payments_account_id.
             start_date: Start date in YYYY-MM-DD format (used when start_time_type is not NOW)
             start_time_type: Optional start time type enum (NOW or
                 FUTURE). The proto's start_time oneof requires exactly one
@@ -73,14 +93,32 @@ class BillingSetupService:
         Returns:
             Created billing setup details
         """
+        if payments_account_id is None and payments_account_info is None:
+            raise ValueError(
+                "create_billing_setup requires payments_account_id or "
+                "payments_account_info."
+            )
+        if payments_account_id is not None and payments_account_info is not None:
+            raise ValueError(
+                "payments_account_id and payments_account_info are mutually "
+                "exclusive (BillingSetup.payments_account oneof)."
+            )
         try:
             customer_id = format_customer_id(customer_id)
 
             billing_setup = BillingSetup()
 
-            billing_setup.payments_account = (
-                f"customers/{customer_id}/paymentsAccounts/{payments_account_id}"
-            )
+            if payments_account_id is not None:
+                billing_setup.payments_account = (
+                    f"customers/{customer_id}/paymentsAccounts/{payments_account_id}"
+                )
+            if payments_account_info is not None:
+                set_optional_submessage(
+                    billing_setup,
+                    "payments_account_info",
+                    payments_account_info,
+                    BillingSetup.PaymentsAccountInfo,
+                )
 
             # Set start date/time (mutually exclusive oneof fields)
             if start_time_type is not None:
@@ -376,15 +414,28 @@ def create_billing_setup_tools(
     async def create_billing_setup(
         ctx: Context,
         customer_id: str,
-        payments_account_id: str,
+        payments_account_id: Optional[str] = None,
+        payments_account_info: Optional[Dict[str, Any]] = None,
         start_date: Optional[str] = None,
         start_time_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a billing setup for a customer.
 
+        Pass exactly one of ``payments_account_id`` (link existing
+        payments account) or ``payments_account_info`` (inline new
+        payments-account submessage). Both are members of the
+        BillingSetup payments-account oneof.
+
         Args:
             customer_id: The customer ID
-            payments_account_id: The payments account ID to link
+            payments_account_id: Existing payments account ID to link.
+            payments_account_info: Inline payments-account-info dict
+                used to create a new payments account inline. See the
+                v23 BillingSetup proto reference for the schema —
+                common fields: ``payments_account_name``,
+                ``payments_profile_id``,
+                ``secondary_payments_profile_id``,
+                ``payments_account_id``.
             start_date: Start date in YYYY-MM-DD format. Mutually exclusive
                 with start_time_type (proto oneof). Omit both to let the API
                 handle defaults.
@@ -404,6 +455,7 @@ def create_billing_setup_tools(
             ctx=ctx,
             customer_id=customer_id,
             payments_account_id=payments_account_id,
+            payments_account_info=payments_account_info,
             start_date=start_date,
             start_time_type=start_enum,
         )

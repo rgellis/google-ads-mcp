@@ -32,6 +32,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -98,6 +99,28 @@ class CampaignService:
         final_url_suffix: Optional[str] = None,
         brand_guidelines_enabled: Optional[bool] = None,
         hotel_property_asset_set: Optional[str] = None,
+        keyword_match_type: Optional[str] = None,
+        audience_setting: Optional[Dict[str, Any]] = None,
+        targeting_setting: Optional[Dict[str, Any]] = None,
+        selective_optimization: Optional[Dict[str, Any]] = None,
+        optimization_goal_setting: Optional[Dict[str, Any]] = None,
+        geo_target_type_setting: Optional[Dict[str, Any]] = None,
+        ai_max_setting: Optional[Dict[str, Any]] = None,
+        third_party_integration_partners: Optional[Dict[str, Any]] = None,
+        vanity_pharma: Optional[Dict[str, Any]] = None,
+        text_guidelines: Optional[Dict[str, Any]] = None,
+        brand_guidelines: Optional[Dict[str, Any]] = None,
+        shopping_setting: Optional[Dict[str, Any]] = None,
+        video_campaign_settings: Optional[Dict[str, Any]] = None,
+        hotel_setting: Optional[Dict[str, Any]] = None,
+        pmax_campaign_settings: Optional[Dict[str, Any]] = None,
+        travel_campaign_settings: Optional[Dict[str, Any]] = None,
+        dynamic_search_ads_setting: Optional[Dict[str, Any]] = None,
+        demand_gen_campaign_settings: Optional[Dict[str, Any]] = None,
+        app_campaign_setting: Optional[Dict[str, Any]] = None,
+        local_campaign_setting: Optional[Dict[str, Any]] = None,
+        local_services_campaign_settings: Optional[Dict[str, Any]] = None,
+        real_time_bidding_setting: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -169,6 +192,43 @@ class CampaignService:
             hotel_property_asset_set: Immutable. Resource name of the
                 AssetSet of HotelProperty assets attached to this
                 campaign (Performance Max for travel goals).
+            keyword_match_type: ``CampaignKeywordMatchType`` enum
+                value applied across all keywords in the campaign.
+
+            **Universal-setting submessages** — each accepts a dict
+            that builds the matching proto submessage. See the v23
+            reference for each submessage's field schema:
+
+            audience_setting: ``Campaign.AudienceSetting`` (Immutable).
+            targeting_setting: ``TargetingSetting`` (targeting-type filters).
+            selective_optimization: ``Campaign.SelectiveOptimization``.
+            optimization_goal_setting: ``Campaign.OptimizationGoalSetting``.
+            geo_target_type_setting: ``Campaign.GeoTargetTypeSetting``.
+            ai_max_setting: ``Campaign.AiMaxSetting``.
+            third_party_integration_partners:
+                ``CampaignThirdPartyIntegrationPartners``.
+            vanity_pharma: ``Campaign.VanityPharma``.
+            text_guidelines: ``Campaign.TextGuidelines``.
+            brand_guidelines: ``Campaign.BrandGuidelines``.
+
+            **Channel-specific submessages** — only valid when the
+            campaign's channel type matches:
+
+            shopping_setting: ``Campaign.ShoppingSetting`` (SHOPPING).
+            video_campaign_settings: ``Campaign.VideoCampaignSettings`` (VIDEO).
+            hotel_setting: ``Campaign.HotelSettingInfo`` (HOTEL).
+            pmax_campaign_settings: ``Campaign.PmaxCampaignSettings``
+                (PERFORMANCE_MAX).
+            travel_campaign_settings: ``Campaign.TravelCampaignSettings`` (TRAVEL).
+            dynamic_search_ads_setting: ``Campaign.DynamicSearchAdsSetting`` (SEARCH).
+            demand_gen_campaign_settings:
+                ``Campaign.DemandGenCampaignSettings`` (DEMAND_GEN).
+            app_campaign_setting: ``Campaign.AppCampaignSetting`` (APP via
+                MULTI_CHANNEL).
+            local_campaign_setting: ``Campaign.LocalCampaignSetting`` (LOCAL).
+            local_services_campaign_settings:
+                ``Campaign.LocalServicesCampaignSettings`` (LOCAL_SERVICES).
+            real_time_bidding_setting: ``RealTimeBiddingSetting`` (Ad Exchange).
 
         Returns:
             Created campaign details
@@ -331,6 +391,178 @@ class CampaignService:
                 campaign.brand_guidelines_enabled = brand_guidelines_enabled
             if hotel_property_asset_set is not None:
                 campaign.hotel_property_asset_set = hotel_property_asset_set
+
+            if keyword_match_type is not None:
+                from google.ads.googleads.v23.enums.types.campaign_keyword_match_type import (
+                    CampaignKeywordMatchTypeEnum,
+                )
+
+                campaign.keyword_match_type = getattr(
+                    CampaignKeywordMatchTypeEnum.CampaignKeywordMatchType,
+                    keyword_match_type,
+                )
+
+            # Submessage wiring. proto-plus handles arbitrary nesting via
+            # ``Class(mapping=dict_value)`` so each one is a one-liner.
+            if audience_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "audience_setting",
+                    audience_setting,
+                    Campaign.AudienceSetting,
+                )
+            if targeting_setting is not None:
+                from google.ads.googleads.v23.common.types.targeting_setting import (
+                    TargetingSetting,
+                )
+
+                set_optional_submessage(
+                    campaign,
+                    "targeting_setting",
+                    targeting_setting,
+                    TargetingSetting,
+                )
+            if selective_optimization is not None:
+                set_optional_submessage(
+                    campaign,
+                    "selective_optimization",
+                    selective_optimization,
+                    Campaign.SelectiveOptimization,
+                )
+            if optimization_goal_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "optimization_goal_setting",
+                    optimization_goal_setting,
+                    Campaign.OptimizationGoalSetting,
+                )
+            if geo_target_type_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "geo_target_type_setting",
+                    geo_target_type_setting,
+                    Campaign.GeoTargetTypeSetting,
+                )
+            if ai_max_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "ai_max_setting",
+                    ai_max_setting,
+                    Campaign.AiMaxSetting,
+                )
+            if third_party_integration_partners is not None:
+                from google.ads.googleads.v23.common.types.third_party_integration_partners import (
+                    CampaignThirdPartyIntegrationPartners,
+                )
+
+                set_optional_submessage(
+                    campaign,
+                    "third_party_integration_partners",
+                    third_party_integration_partners,
+                    CampaignThirdPartyIntegrationPartners,
+                )
+            if vanity_pharma is not None:
+                set_optional_submessage(
+                    campaign,
+                    "vanity_pharma",
+                    vanity_pharma,
+                    Campaign.VanityPharma,
+                )
+            if text_guidelines is not None:
+                set_optional_submessage(
+                    campaign,
+                    "text_guidelines",
+                    text_guidelines,
+                    Campaign.TextGuidelines,
+                )
+            if brand_guidelines is not None:
+                set_optional_submessage(
+                    campaign,
+                    "brand_guidelines",
+                    brand_guidelines,
+                    Campaign.BrandGuidelines,
+                )
+            if shopping_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "shopping_setting",
+                    shopping_setting,
+                    Campaign.ShoppingSetting,
+                )
+            if video_campaign_settings is not None:
+                set_optional_submessage(
+                    campaign,
+                    "video_campaign_settings",
+                    video_campaign_settings,
+                    Campaign.VideoCampaignSettings,
+                )
+            if hotel_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "hotel_setting",
+                    hotel_setting,
+                    Campaign.HotelSettingInfo,
+                )
+            if pmax_campaign_settings is not None:
+                set_optional_submessage(
+                    campaign,
+                    "pmax_campaign_settings",
+                    pmax_campaign_settings,
+                    Campaign.PmaxCampaignSettings,
+                )
+            if travel_campaign_settings is not None:
+                set_optional_submessage(
+                    campaign,
+                    "travel_campaign_settings",
+                    travel_campaign_settings,
+                    Campaign.TravelCampaignSettings,
+                )
+            if dynamic_search_ads_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "dynamic_search_ads_setting",
+                    dynamic_search_ads_setting,
+                    Campaign.DynamicSearchAdsSetting,
+                )
+            if demand_gen_campaign_settings is not None:
+                set_optional_submessage(
+                    campaign,
+                    "demand_gen_campaign_settings",
+                    demand_gen_campaign_settings,
+                    Campaign.DemandGenCampaignSettings,
+                )
+            if app_campaign_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "app_campaign_setting",
+                    app_campaign_setting,
+                    Campaign.AppCampaignSetting,
+                )
+            if local_campaign_setting is not None:
+                set_optional_submessage(
+                    campaign,
+                    "local_campaign_setting",
+                    local_campaign_setting,
+                    Campaign.LocalCampaignSetting,
+                )
+            if local_services_campaign_settings is not None:
+                set_optional_submessage(
+                    campaign,
+                    "local_services_campaign_settings",
+                    local_services_campaign_settings,
+                    Campaign.LocalServicesCampaignSettings,
+                )
+            if real_time_bidding_setting is not None:
+                from google.ads.googleads.v23.common.types.real_time_bidding_setting import (
+                    RealTimeBiddingSetting,
+                )
+
+                set_optional_submessage(
+                    campaign,
+                    "real_time_bidding_setting",
+                    real_time_bidding_setting,
+                    RealTimeBiddingSetting,
+                )
 
             # Create the operation
             operation = CampaignOperation()
@@ -639,6 +871,28 @@ def create_campaign_tools(
         final_url_suffix: Optional[str] = None,
         brand_guidelines_enabled: Optional[bool] = None,
         hotel_property_asset_set: Optional[str] = None,
+        keyword_match_type: Optional[str] = None,
+        audience_setting: Optional[Dict[str, Any]] = None,
+        targeting_setting: Optional[Dict[str, Any]] = None,
+        selective_optimization: Optional[Dict[str, Any]] = None,
+        optimization_goal_setting: Optional[Dict[str, Any]] = None,
+        geo_target_type_setting: Optional[Dict[str, Any]] = None,
+        ai_max_setting: Optional[Dict[str, Any]] = None,
+        third_party_integration_partners: Optional[Dict[str, Any]] = None,
+        vanity_pharma: Optional[Dict[str, Any]] = None,
+        text_guidelines: Optional[Dict[str, Any]] = None,
+        brand_guidelines: Optional[Dict[str, Any]] = None,
+        shopping_setting: Optional[Dict[str, Any]] = None,
+        video_campaign_settings: Optional[Dict[str, Any]] = None,
+        hotel_setting: Optional[Dict[str, Any]] = None,
+        pmax_campaign_settings: Optional[Dict[str, Any]] = None,
+        travel_campaign_settings: Optional[Dict[str, Any]] = None,
+        dynamic_search_ads_setting: Optional[Dict[str, Any]] = None,
+        demand_gen_campaign_settings: Optional[Dict[str, Any]] = None,
+        app_campaign_setting: Optional[Dict[str, Any]] = None,
+        local_campaign_setting: Optional[Dict[str, Any]] = None,
+        local_services_campaign_settings: Optional[Dict[str, Any]] = None,
+        real_time_bidding_setting: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -704,9 +958,28 @@ def create_campaign_tools(
             campaign_group: Resource name of the parent CampaignGroup.
             ad_serving_optimization_status: Optimization-status setting (OPTIMIZE, CONVERSION_OPTIMIZE, ROTATE).
             listing_type: Immutable. Listing type for shopping/display campaigns.
-
-
-
+            app_campaign_setting: Dict that builds a Campaign.AppCampaignSetting submessage (App campaigns).
+            selective_optimization: Dict that builds a Campaign.SelectiveOptimization submessage.
+            demand_gen_campaign_settings: Dict that builds a Campaign.DemandGenCampaignSettings submessage (Demand Gen).
+            local_services_campaign_settings: Dict that builds a Campaign.LocalServicesCampaignSettings submessage (Local Services).
+            third_party_integration_partners: Dict that builds a CampaignThirdPartyIntegrationPartners submessage.
+            real_time_bidding_setting: Dict that builds a RealTimeBiddingSetting submessage (Ad Exchange).
+            travel_campaign_settings: Dict that builds a Campaign.TravelCampaignSettings submessage (Travel campaigns).
+            video_campaign_settings: Dict that builds a Campaign.VideoCampaignSettings submessage (Video campaigns).
+            local_campaign_setting: Dict that builds a Campaign.LocalCampaignSetting submessage (Local campaigns).
+            hotel_setting: Dict that builds a Campaign.HotelSettingInfo submessage (Hotel campaigns).
+            dynamic_search_ads_setting: Dict that builds a Campaign.DynamicSearchAdsSetting submessage (Search DSA).
+            geo_target_type_setting: Dict that builds a Campaign.GeoTargetTypeSetting submessage.
+            shopping_setting: Dict that builds a Campaign.ShoppingSetting submessage (Shopping campaigns).
+            text_guidelines: Dict that builds a Campaign.TextGuidelines submessage (auto-generated text controls).
+            optimization_goal_setting: Dict that builds a Campaign.OptimizationGoalSetting submessage.
+            vanity_pharma: Dict that builds a Campaign.VanityPharma submessage (unbranded pharma display rules).
+            keyword_match_type: CampaignKeywordMatchType enum value applied across all keywords.
+            targeting_setting: Dict that builds a TargetingSetting submessage controlling targeting-type filters.
+            audience_setting: Dict that builds the resource's AudienceSetting submessage (Immutable on Campaign/AdGroup).
+            ai_max_setting: Dict that builds a Campaign.AiMaxSetting submessage (AI Max for search campaigns).
+            brand_guidelines: Dict that builds a Campaign.BrandGuidelines submessage (auto-generated brand controls).
+            pmax_campaign_settings: Dict that builds a Campaign.PmaxCampaignSettings submessage (PMax campaigns).
         """
         channel_type_enum = getattr(
             AdvertisingChannelTypeEnum.AdvertisingChannelType, advertising_channel_type
@@ -746,6 +1019,28 @@ def create_campaign_tools(
             final_url_suffix=final_url_suffix,
             brand_guidelines_enabled=brand_guidelines_enabled,
             hotel_property_asset_set=hotel_property_asset_set,
+            keyword_match_type=keyword_match_type,
+            audience_setting=audience_setting,
+            targeting_setting=targeting_setting,
+            selective_optimization=selective_optimization,
+            optimization_goal_setting=optimization_goal_setting,
+            geo_target_type_setting=geo_target_type_setting,
+            ai_max_setting=ai_max_setting,
+            third_party_integration_partners=third_party_integration_partners,
+            vanity_pharma=vanity_pharma,
+            text_guidelines=text_guidelines,
+            brand_guidelines=brand_guidelines,
+            shopping_setting=shopping_setting,
+            video_campaign_settings=video_campaign_settings,
+            hotel_setting=hotel_setting,
+            pmax_campaign_settings=pmax_campaign_settings,
+            travel_campaign_settings=travel_campaign_settings,
+            dynamic_search_ads_setting=dynamic_search_ads_setting,
+            demand_gen_campaign_settings=demand_gen_campaign_settings,
+            app_campaign_setting=app_campaign_setting,
+            local_campaign_setting=local_campaign_setting,
+            local_services_campaign_settings=local_services_campaign_settings,
+            real_time_bidding_setting=real_time_bidding_setting,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

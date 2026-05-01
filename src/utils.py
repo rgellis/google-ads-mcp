@@ -151,6 +151,45 @@ def format_customer_id(customer_id: Any) -> str:
     return normalized
 
 
+def set_optional_submessage(
+    parent: Any,
+    field_name: str,
+    dict_value: Any,
+    message_class: Any,
+) -> None:
+    """Set ``parent.<field_name>`` to a proto submessage built from ``dict_value``.
+
+    No-ops when ``dict_value`` is ``None`` so the field stays unset on the
+    wire (proto-default rule). When ``dict_value`` is a mapping, builds
+    ``message_class(mapping=dict_value)`` — proto-plus handles arbitrary
+    nesting, enum-name conversion, and field-name normalization. When
+    ``dict_value`` is already an instance of ``message_class`` it's
+    assigned through directly.
+
+    This is the standard wrapper pattern for "expose a deeply-nested
+    settings submessage as one Optional[Dict[str, Any]] param". Each
+    submessage param's docstring should link to the v23 proto reference
+    so callers know what fields the dict can contain.
+
+    Args:
+        parent: The proto message that owns the submessage field.
+        field_name: The submessage field's name on ``parent``.
+        dict_value: A dict, an instance of ``message_class``, or None.
+        message_class: The proto-plus class to build the submessage from.
+    """
+    if dict_value is None:
+        return
+    if isinstance(dict_value, message_class):
+        setattr(parent, field_name, dict_value)
+        return
+    if isinstance(dict_value, dict):
+        setattr(parent, field_name, message_class(mapping=dict_value))
+        return
+    raise TypeError(
+        f"{field_name} must be a dict or {message_class.__name__}, got {type(dict_value).__name__}"
+    )
+
+
 def set_request_options(
     request: Any,
     partial_failure: bool = False,

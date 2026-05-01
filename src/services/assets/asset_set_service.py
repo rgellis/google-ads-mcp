@@ -26,6 +26,7 @@ from src.utils import (
     gaql_int,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -57,6 +58,9 @@ class AssetSetService:
         merchant_id: Optional[int] = None,
         feed_label: Optional[str] = None,
         location_group_parent_asset_set_id: Optional[int] = None,
+        location_set: Optional[Dict[str, Any]] = None,
+        business_profile_location_group: Optional[Dict[str, Any]] = None,
+        chain_location_group: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -66,18 +70,25 @@ class AssetSetService:
         Note: ``AssetSet.status`` is Output-only per the v23 ref. The
         wrapper does not expose it on create.
 
+        ``location_set``, ``business_profile_location_group``, and
+        ``chain_location_group`` are members of the AssetSet
+        ``asset_set_source`` oneof. Pass at most one of them, and only
+        when ``asset_set_type`` is the matching location source.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             name: Asset set name
             asset_set_type: Type of asset set. Supported by this wrapper:
-                MERCHANT_CENTER_FEED (requires merchant_id) and the
-                "dynamic" types (DYNAMIC_EDUCATION, DYNAMIC_REAL_ESTATE,
+                MERCHANT_CENTER_FEED (requires merchant_id), all "dynamic"
+                types (DYNAMIC_EDUCATION, DYNAMIC_REAL_ESTATE,
                 DYNAMIC_FLIGHTS, DYNAMIC_HOTELS_AND_RENTALS, DYNAMIC_TRAVEL,
                 DYNAMIC_LOCAL, DYNAMIC_JOBS, DYNAMIC_CUSTOM, PAGE_FEED,
-                STATIC_LOCATION_GROUP). Location-sync, business-profile, and
-                chain-location types need their own submessages and are not
-                supported by this wrapper yet.
+                STATIC_LOCATION_GROUP), and the location-source types
+                (LOCATION_SYNC, BUSINESS_PROFILE_DYNAMIC_LOCATION_GROUP,
+                CHAIN_DYNAMIC_LOCATION_GROUP) when the matching source dict
+                is supplied. HOTEL_PROPERTY is API-managed and remains
+                unsupported by create.
             merchant_id: Merchant Center merchant ID. Required when
                 asset_set_type is MERCHANT_CENTER_FEED.
             feed_label: Optional Merchant Center feed label
@@ -85,25 +96,41 @@ class AssetSetService:
             location_group_parent_asset_set_id: Immutable. Required for
                 Location Group typed AssetSets — the sync-level location
                 AssetSet ID this LocationGroup AssetSet derives from.
+            location_set: Immutable. Dict that builds a ``LocationSet``
+                submessage. Required when asset_set_type is LOCATION_SYNC.
+                See the v23 ``LocationSet`` proto reference for the schema.
+            business_profile_location_group: Immutable. Dict that builds
+                a ``BusinessProfileLocationGroup`` submessage. Required
+                when asset_set_type is BUSINESS_PROFILE_DYNAMIC_LOCATION_GROUP.
+            chain_location_group: Immutable. Dict that builds a
+                ``ChainLocationGroup`` submessage. Required when
+                asset_set_type is CHAIN_DYNAMIC_LOCATION_GROUP.
 
         Returns:
             Created asset set details
         """
-        # Restrict to types this wrapper can actually populate. The
-        # unsupported types require submessage builders we haven't written.
-        unsupported_types = {
-            AssetSetTypeEnum.AssetSetType.LOCATION_SYNC,
-            AssetSetTypeEnum.AssetSetType.BUSINESS_PROFILE_DYNAMIC_LOCATION_GROUP,
-            AssetSetTypeEnum.AssetSetType.CHAIN_DYNAMIC_LOCATION_GROUP,
-            AssetSetTypeEnum.AssetSetType.STATIC_LOCATION_GROUP,
-            AssetSetTypeEnum.AssetSetType.HOTEL_PROPERTY,
-        }
-        if asset_set_type in unsupported_types:
+        if asset_set_type == AssetSetTypeEnum.AssetSetType.HOTEL_PROPERTY:
             raise NotImplementedError(
-                f"asset_set_type={asset_set_type.name} requires a source "
-                "submessage (location_set / business_profile_location_group / "
-                "chain_location_group / hotel_property_data) that this wrapper "
-                "does not yet expose."
+                "asset_set_type=HOTEL_PROPERTY is API-managed (created by "
+                "linking a Hotel Center account); the wrapper does not "
+                "support direct creation."
+            )
+
+        # Mutually exclusive source dicts; at most one
+        sources_supplied = sum(
+            1
+            for v in (
+                location_set,
+                business_profile_location_group,
+                chain_location_group,
+            )
+            if v is not None
+        )
+        if sources_supplied > 1:
+            raise ValueError(
+                "location_set, business_profile_location_group, and "
+                "chain_location_group are members of the AssetSet "
+                "asset_set_source oneof — pass at most one."
             )
 
         merchant_center_type = AssetSetTypeEnum.AssetSetType.MERCHANT_CENTER_FEED
@@ -135,6 +162,37 @@ class AssetSetService:
             if location_group_parent_asset_set_id is not None:
                 asset_set.location_group_parent_asset_set_id = (
                     location_group_parent_asset_set_id
+                )
+
+            if location_set is not None:
+                from google.ads.googleads.v23.common.types.asset_set_types import (
+                    LocationSet,
+                )
+
+                set_optional_submessage(
+                    asset_set, "location_set", location_set, LocationSet
+                )
+            if business_profile_location_group is not None:
+                from google.ads.googleads.v23.common.types.asset_set_types import (
+                    BusinessProfileLocationGroup,
+                )
+
+                set_optional_submessage(
+                    asset_set,
+                    "business_profile_location_group",
+                    business_profile_location_group,
+                    BusinessProfileLocationGroup,
+                )
+            if chain_location_group is not None:
+                from google.ads.googleads.v23.common.types.asset_set_types import (
+                    ChainLocationGroup,
+                )
+
+                set_optional_submessage(
+                    asset_set,
+                    "chain_location_group",
+                    chain_location_group,
+                    ChainLocationGroup,
                 )
 
             # Create operation
@@ -413,6 +471,9 @@ def create_asset_set_tools(
         merchant_id: Optional[int] = None,
         feed_label: Optional[str] = None,
         location_group_parent_asset_set_id: Optional[int] = None,
+        location_set: Optional[Dict[str, Any]] = None,
+        business_profile_location_group: Optional[Dict[str, Any]] = None,
+        chain_location_group: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -424,19 +485,16 @@ def create_asset_set_tools(
             name: Asset set name
             asset_set_type: Type of asset set. Supported values:
                 - MERCHANT_CENTER_FEED (requires merchant_id)
-                - DYNAMIC_EDUCATION
-                - DYNAMIC_FLIGHTS
-                - DYNAMIC_HOTELS_AND_RENTALS
-                - DYNAMIC_JOBS
-                - DYNAMIC_LOCAL
-                - DYNAMIC_REAL_ESTATE
-                - DYNAMIC_CUSTOM
-                - DYNAMIC_TRAVEL
-                - PAGE_FEED
-                Location-sync, business-profile, chain, hotel-property, and
-                static-location-group types require source submessages this
-                wrapper does not yet expose; pass them and the wrapper
-                raises NotImplementedError.
+                - DYNAMIC_EDUCATION / DYNAMIC_FLIGHTS / DYNAMIC_HOTELS_AND_RENTALS /
+                  DYNAMIC_JOBS / DYNAMIC_LOCAL / DYNAMIC_REAL_ESTATE /
+                  DYNAMIC_CUSTOM / DYNAMIC_TRAVEL / PAGE_FEED /
+                  STATIC_LOCATION_GROUP
+                - LOCATION_SYNC (requires ``location_set``)
+                - BUSINESS_PROFILE_DYNAMIC_LOCATION_GROUP (requires
+                  ``business_profile_location_group``)
+                - CHAIN_DYNAMIC_LOCATION_GROUP (requires
+                  ``chain_location_group``)
+                HOTEL_PROPERTY is API-managed and not supported by create.
             merchant_id: Required when asset_set_type=MERCHANT_CENTER_FEED.
                 Merchant Center merchant ID.
             feed_label: Optional Merchant Center feed label (only valid for
@@ -444,6 +502,15 @@ def create_asset_set_tools(
             location_group_parent_asset_set_id: Immutable. Required for
                 Location Group typed AssetSets — the sync-level location
                 AssetSet ID that this LocationGroup AssetSet derives from.
+            location_set: Immutable. Dict that builds a ``LocationSet``
+                submessage. Required when asset_set_type=LOCATION_SYNC.
+                See the v23 LocationSet proto reference.
+            business_profile_location_group: Immutable. Dict that builds
+                a ``BusinessProfileLocationGroup`` submessage. Required
+                when asset_set_type=BUSINESS_PROFILE_DYNAMIC_LOCATION_GROUP.
+            chain_location_group: Immutable. Dict that builds a
+                ``ChainLocationGroup`` submessage. Required when
+                asset_set_type=CHAIN_DYNAMIC_LOCATION_GROUP.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -461,6 +528,9 @@ def create_asset_set_tools(
             merchant_id=merchant_id,
             feed_label=feed_label,
             location_group_parent_asset_set_id=location_group_parent_asset_set_id,
+            location_set=location_set,
+            business_profile_location_group=business_profile_location_group,
+            chain_location_group=chain_location_group,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -14,12 +14,12 @@ Sources cross-checked, in order of preference:
 - Skipped (no resource / fetch error): **29**
 - Resources with **no wrapper file**: **0**
 - Total fields across all resources: **639**
-- Settable: **170 / 200** (85.0%)
-- Immutable (create-only): **174 / 177** (98.3%)
+- Settable: **200 / 200** (100.0%)
+- Immutable (create-only): **177 / 177** (100.0%)
 - Required: **15 / 15** (100.0%)
 - Output-only (skipped intentionally): **245**
 - Source disagreements (md vs proto vs sdk): **0**
-- Tool-wrapper docstring args documented: **2374 / 2374** (100.0%)
+- Tool-wrapper docstring args documented: **2410 / 2410** (100.0%)
 
 Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 input-only · 🚫 output-only · ✅ exposed by wrapper · ❌ gap · 🛡️ intentionally suppressed · — n/a
 
@@ -234,15 +234,15 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `ad_rotation_mode` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The ad rotation mode of the ad group. |
-| `ai_max_ad_group_setting` | ✏️ | ❌ | — | — | agree | Settings for AI Max feature in standard search adgroups. |
-| `audience_setting` | 🔒 | ❌ | — | — | agree | Immutable |
+| `ai_max_ad_group_setting` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Settings for AI Max feature in standard search adgroups. |
+| `audience_setting` | 🔒 | ✅ | `create_ad_group` | create_ad_group | agree | Immutable |
 | `base_ad_group` | 🚫 | — | — | — | agree | Output only |
 | `campaign` | 🔒 | ✅ | — | create_ad_group | agree | Immutable |
 | `cpc_bid_micros` | ✏️ | ✅ | `create_ad_group`, `update_ad_group` | create_ad_group, update_ad_group | agree | The maximum CPC (cost-per-click) bid |
 | `cpm_bid_micros` | ✏️ | ✅ | `create_ad_group`, `update_ad_group` | create_ad_group, update_ad_group | agree | The maximum CPM (cost-per-thousand viewable impressions) bid. |
 | `cpv_bid_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The CPV (cost-per-view) bid. |
-| `demand_gen_ad_group_settings` | ✏️ | ❌ | — | — | agree | Settings for Demand Gen ad groups. |
-| `display_custom_bid_dimension` | ✏️ | ❌ | — | — | agree | Lets advertisers specify a targeting dimension on which to place absolute bids |
+| `demand_gen_ad_group_settings` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Settings for Demand Gen ad groups. |
+| `display_custom_bid_dimension` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Lets advertisers specify a targeting dimension on which to place absolute bids |
 | `effective_cpc_bid_micros` | 🚫 | — | — | — | agree | Output only |
 | `effective_target_cpa_micros` | 🚫 | — | — | — | agree | Output only |
 | `effective_target_cpa_source` | 🚫 | — | — | — | agree | Output only |
@@ -265,20 +265,11 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `target_cpm_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Average amount in micros that the advertiser is willing to pay for every thousand times the ad is shown. |
 | `target_cpv_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Average amount in micros that the advertiser is willing to pay for every ad view. |
 | `target_roas` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The target ROAS (return-on-ad-spend) for this ad group |
-| `targeting_setting` | ✏️ | ❌ | — | — | agree | Setting for targeting related features. |
+| `targeting_setting` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Setting for targeting related features. |
 | `tracking_url_template` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The URL template for constructing a tracking URL. |
 | `type` | 🔒 | ✅ | `create_ad_group` | create_ad_group | agree | Immutable |
-| `vertical_ads_format_setting` | ✏️ | ❌ | — | — | agree | Vertical ads setting feature to enable/disable ad group format controls in search campaigns |
-| `video_ad_group_settings` | ✏️ | ❌ | — | — | agree | Settings for video ad groups. |
-
-**Field gaps:**
-- ✏️ `ai_max_ad_group_setting` — settable: Settings for AI Max feature in standard search adgroups.
-- 🔒 `audience_setting` — immutable: Immutable
-- ✏️ `demand_gen_ad_group_settings` — settable: Settings for Demand Gen ad groups.
-- ✏️ `display_custom_bid_dimension` — settable: Lets advertisers specify a targeting dimension on which to place absolute bids
-- ✏️ `targeting_setting` — settable: Setting for targeting related features.
-- ✏️ `vertical_ads_format_setting` — settable: Vertical ads setting feature to enable/disable ad group format controls in search campaigns
-- ✏️ `video_ad_group_settings` — settable: Settings for video ad groups.
+| `vertical_ads_format_setting` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Vertical ads setting feature to enable/disable ad group format controls in search campaigns |
+| `video_ad_group_settings` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Settings for video ad groups. |
 
 ## AdParameterService
 
@@ -582,12 +573,9 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 |---|---|---|---|---|---|---|
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `payments_account` | 🔒 | ✅ | — | create_billing_setup | agree | Immutable |
-| `payments_account_info` | 🔒 | ❌ | — | — | agree | Immutable |
+| `payments_account_info` | 🔒 | ✅ | `create_billing_setup` | create_billing_setup | agree | Immutable |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Field gaps:**
-- 🔒 `payments_account_info` — immutable: Immutable
 
 ## BrandSuggestionService
 
@@ -814,79 +802,55 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `ad_serving_optimization_status` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The ad serving optimization status of the campaign. |
 | `advertising_channel_sub_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `advertising_channel_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
-| `ai_max_setting` | ✏️ | ❌ | — | — | agree | Settings for AI Max in search campaigns. |
-| `app_campaign_setting` | ✏️ | ❌ | — | — | agree | The setting related to App Campaign. |
-| `audience_setting` | 🔒 | ❌ | — | — | agree | Immutable |
+| `ai_max_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for AI Max in search campaigns. |
+| `app_campaign_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting related to App Campaign. |
+| `audience_setting` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `base_campaign` | 🚫 | — | — | — | agree | Output only |
 | `bidding_strategy_system_status` | 🚫 | — | — | — | agree | Output only |
 | `bidding_strategy_type` | 🚫 | — | — | — | agree | Output only |
-| `brand_guidelines` | ✏️ | ❌ | — | — | agree | These settings control how your brand appears in automatically generated assets and formats within this campaign |
+| `brand_guidelines` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | These settings control how your brand appears in automatically generated assets and formats within this campaign |
 | `brand_guidelines_enabled` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `campaign_budget` | ✏️ | ✅ | — | create_campaign | agree | The resource name of the campaign budget of the campaign. |
 | `campaign_group` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The resource name of the campaign group that this campaign belongs to. |
 | `contains_eu_political_advertising` | ✏️ | ✅ | — | create_campaign | agree | The advertiser should self-declare whether this campaign contains political advertising content targeted towards the European Union. |
-| `demand_gen_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Demand Gen campaign. |
-| `dynamic_search_ads_setting` | ✏️ | ❌ | — | — | agree | The setting for controlling Dynamic Search Ads (DSA). |
+| `demand_gen_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Demand Gen campaign. |
+| `dynamic_search_ads_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting for controlling Dynamic Search Ads (DSA). |
 | `end_date_time` | ✏️ | ✅ | — | create_campaign, update_campaign | agree | The last day and time of the campaign in serving customer's timezone in "yyyy-MM-dd HH:mm:ss" format |
 | `experiment_type` | 🚫 | — | — | — | agree | Output only |
 | `final_url_suffix` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Suffix used to append query parameters to landing pages that are served with parallel tracking. |
-| `geo_target_type_setting` | ✏️ | ❌ | — | — | agree | The setting for ads geotargeting. |
+| `geo_target_type_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting for ads geotargeting. |
 | `hotel_property_asset_set` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
-| `hotel_setting` | ✏️ | ❌ | — | — | agree | The hotel setting for the campaign. |
+| `hotel_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The hotel setting for the campaign. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
-| `keyword_match_type` | ✏️ | ❌ | — | — | agree | Keyword match type of Campaign |
+| `keyword_match_type` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Keyword match type of Campaign |
 | `listing_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
-| `local_campaign_setting` | ✏️ | ❌ | — | — | agree | The setting for local campaign. |
-| `local_services_campaign_settings` | ✏️ | ❌ | — | — | agree | The Local Services Campaign related settings. |
+| `local_campaign_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting for local campaign. |
+| `local_services_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The Local Services Campaign related settings. |
 | `missing_eu_political_advertising_declaration` | 🚫 | — | — | — | agree | Output only |
 | `name` | ✏️ | ✅ | `create_campaign`, `update_campaign` | create_campaign, update_campaign | agree | The name of the campaign |
 | `network_settings` | ✏️ | ✅ | — | create_campaign | agree | The network settings for the campaign. |
-| `optimization_goal_setting` | ✏️ | ❌ | — | — | agree | Optimization goal setting for this campaign, which includes a set of optimization goal types. |
+| `optimization_goal_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Optimization goal setting for this campaign, which includes a set of optimization goal types. |
 | `optimization_score` | 🚫 | — | — | — | agree | Output only |
 | `payment_mode` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Payment mode for the campaign. |
 | `performance_max_upgrade` | 🚫 | — | — | — | agree | Output only |
-| `pmax_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Performance Max campaign. |
+| `pmax_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Performance Max campaign. |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
-| `real_time_bidding_setting` | ✏️ | ❌ | — | — | agree | Settings for Real-Time Bidding, a feature only available for campaigns targeting the Ad Exchange network. |
+| `real_time_bidding_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Real-Time Bidding, a feature only available for campaigns targeting the Ad Exchange network. |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-| `selective_optimization` | ✏️ | ❌ | — | — | agree | Selective optimization setting for this campaign, which includes a set of conversion actions to optimize this campaign towards |
+| `selective_optimization` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Selective optimization setting for this campaign, which includes a set of conversion actions to optimize this campaign towards |
 | `serving_status` | 🚫 | — | — | — | agree | Output only |
-| `shopping_setting` | ✏️ | ❌ | — | — | agree | The setting for controlling Shopping campaigns. |
+| `shopping_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting for controlling Shopping campaigns. |
 | `start_date_time` | ✏️ | ✅ | — | create_campaign, update_campaign | agree | The date and time when campaign started in serving |
 | `status` | ✏️ | ✅ | `create_campaign`, `update_campaign` | create_campaign, update_campaign | agree | The status of the campaign |
-| `targeting_setting` | ✏️ | ❌ | — | — | agree | Setting for targeting related features. |
-| `text_guidelines` | ✏️ | ❌ | — | — | agree | Settings to control automatically generated text assets |
-| `third_party_integration_partners` | ✏️ | ❌ | — | — | agree | Third-Party integration partners. |
+| `targeting_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Setting for targeting related features. |
+| `text_guidelines` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings to control automatically generated text assets |
+| `third_party_integration_partners` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Third-Party integration partners. |
 | `tracking_setting` | 🚫 | — | — | — | agree | Output only |
 | `tracking_url_template` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The URL template for constructing a tracking URL. |
-| `travel_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Travel campaign. |
-| `vanity_pharma` | ✏️ | ❌ | — | — | agree | Describes how unbranded pharma ads will be displayed. |
+| `travel_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Travel campaign. |
+| `vanity_pharma` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Describes how unbranded pharma ads will be displayed. |
 | `video_brand_safety_suitability` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Brand Safety setting at the individual campaign level |
-| `video_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Video campaign. |
-
-**Field gaps:**
-- ✏️ `ai_max_setting` — settable: Settings for AI Max in search campaigns.
-- ✏️ `app_campaign_setting` — settable: The setting related to App Campaign.
-- 🔒 `audience_setting` — immutable: Immutable
-- ✏️ `brand_guidelines` — settable: These settings control how your brand appears in automatically generated assets and formats within this campaign
-- ✏️ `demand_gen_campaign_settings` — settable: Settings for Demand Gen campaign.
-- ✏️ `dynamic_search_ads_setting` — settable: The setting for controlling Dynamic Search Ads (DSA).
-- ✏️ `geo_target_type_setting` — settable: The setting for ads geotargeting.
-- ✏️ `hotel_setting` — settable: The hotel setting for the campaign.
-- ✏️ `keyword_match_type` — settable: Keyword match type of Campaign
-- ✏️ `local_campaign_setting` — settable: The setting for local campaign.
-- ✏️ `local_services_campaign_settings` — settable: The Local Services Campaign related settings.
-- ✏️ `optimization_goal_setting` — settable: Optimization goal setting for this campaign, which includes a set of optimization goal types.
-- ✏️ `pmax_campaign_settings` — settable: Settings for Performance Max campaign.
-- ✏️ `real_time_bidding_setting` — settable: Settings for Real-Time Bidding, a feature only available for campaigns targeting the Ad Exchange network.
-- ✏️ `selective_optimization` — settable: Selective optimization setting for this campaign, which includes a set of conversion actions to optimize this campaign towards
-- ✏️ `shopping_setting` — settable: The setting for controlling Shopping campaigns.
-- ✏️ `targeting_setting` — settable: Setting for targeting related features.
-- ✏️ `text_guidelines` — settable: Settings to control automatically generated text assets
-- ✏️ `third_party_integration_partners` — settable: Third-Party integration partners.
-- ✏️ `travel_campaign_settings` — settable: Settings for Travel campaign.
-- ✏️ `vanity_pharma` — settable: Describes how unbranded pharma ads will be displayed.
-- ✏️ `video_campaign_settings` — settable: Settings for Video campaign.
+| `video_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Video campaign. |
 
 ## CampaignSharedSetService
 
@@ -999,13 +963,10 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `device_condition` | ✏️ | ✅ | — | create_conversion_value_rule | agree | Condition for device type that must be satisfied for the value rule to apply. |
 | `geo_location_condition` | ✏️ | ✅ | — | create_conversion_value_rule | agree | Condition for Geo location that must be satisfied for the value rule to apply. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
-| `itinerary_condition` | ✏️ | ❌ | — | — | agree | Condition for itinerary that must be satisfied for the value rule to apply. |
+| `itinerary_condition` | ✏️ | ✅ | `create_conversion_value_rule` | create_conversion_value_rule | agree | Condition for itinerary that must be satisfied for the value rule to apply. |
 | `owner_customer` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | ✏️ | ✅ | `create_conversion_value_rule`, `update_conversion_value_rule` | create_conversion_value_rule, update_conversion_value_rule | agree | The status of the conversion value rule. |
-
-**Field gaps:**
-- ✏️ `itinerary_condition` — settable: Condition for itinerary that must be satisfied for the value rule to apply.
 
 ## ConversionValueRuleSetService
 
@@ -1224,7 +1185,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `auto_tagging_enabled` | ✏️ | ✅ | `mutate_customer` | mutate_customer | agree | Whether auto-tagging is enabled for the customer |
 | `call_reporting_setting` | ✏️ | ✅ | — | mutate_customer | agree | Call reporting setting for a customer |
 | `contains_eu_political_advertising` | 🚫 | — | — | — | agree | Output only |
-| `conversion_tracking_setting` | ✏️ | ❌ | — | — | agree | Conversion tracking setting for a customer. |
+| `conversion_tracking_setting` | ✏️ | ✅ | `mutate_customer` | mutate_customer | agree | Conversion tracking setting for a customer. |
 | `currency_code` | 🔒 | ✅ | `create_customer_client` | create_customer_client | agree | Immutable |
 | `customer_agreement_setting` | 🚫 | — | — | — | agree | Output only |
 | `descriptive_name` | ✏️ | ✅ | `create_customer_client`, `mutate_customer` | create_customer_client, mutate_customer | agree | Optional, non-unique descriptive name of the customer. |
@@ -1246,11 +1207,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `time_zone` | 🔒 | ✅ | `create_customer_client` | create_customer_client | agree | Immutable |
 | `tracking_url_template` | ✏️ | ✅ | `mutate_customer` | mutate_customer | agree | The URL template for constructing a tracking URL out of parameters |
 | `video_brand_safety_suitability` | ✏️ | ✅ | `mutate_customer` | mutate_customer | agree | Brand Safety setting at the account level |
-| `video_customer` | ✏️ | ❌ | — | — | agree | Video specific information about a Customer. |
-
-**Field gaps:**
-- ✏️ `conversion_tracking_setting` — settable: Conversion tracking setting for a customer.
-- ✏️ `video_customer` — settable: Video specific information about a Customer.
+| `video_customer` | ✏️ | ✅ | `mutate_customer` | mutate_customer | agree | Video specific information about a Customer. |
 
 ## CustomerSkAdNetworkConversionValueSchemaService
 

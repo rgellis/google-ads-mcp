@@ -32,6 +32,7 @@ from src.utils import (
     gaql_int,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -66,6 +67,7 @@ class ConversionValueRuleService:
         device_types: Optional[List[str]] = None,
         geo_location_geo_target_constants: Optional[List[str]] = None,
         audience_user_lists: Optional[List[str]] = None,
+        itinerary_condition: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -81,6 +83,13 @@ class ConversionValueRuleService:
             device_types: Optional list of device types (MOBILE, DESKTOP, TABLET)
             geo_location_geo_target_constants: Optional list of geo target constant resource names
             audience_user_lists: Optional list of user list resource names
+            itinerary_condition: Optional dict configuring the
+                itinerary-based condition for the rule. Builds a
+                ``ConversionValueRule.ValueRuleItineraryCondition``
+                submessage. See the v23
+                ``ConversionValueRule.ValueRuleItineraryCondition``
+                proto reference for the schema (advance booking
+                window, travel start day, length-of-stay range, etc.).
 
         Returns:
             Created conversion value rule details
@@ -118,6 +127,13 @@ class ConversionValueRuleService:
             if audience_user_lists:
                 for user_list in audience_user_lists:
                     rule.audience_condition.user_lists.append(user_list)
+
+            set_optional_submessage(
+                rule,
+                "itinerary_condition",
+                itinerary_condition,
+                ConversionValueRule.ValueRuleItineraryCondition,
+            )
 
             operation = ConversionValueRuleOperation()
             operation.create = rule
@@ -366,6 +382,7 @@ def create_conversion_value_rule_tools(
         device_types: Optional[List[str]] = None,
         geo_location_geo_target_constants: Optional[List[str]] = None,
         audience_user_lists: Optional[List[str]] = None,
+        itinerary_condition: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -381,6 +398,11 @@ def create_conversion_value_rule_tools(
             device_types: Optional device filter - MOBILE, DESKTOP, TABLET
             geo_location_geo_target_constants: Optional geo target constant resource names
             audience_user_lists: Optional user list resource names
+            itinerary_condition: Optional dict configuring the
+                itinerary-based condition (advance booking window, travel
+                start day, length-of-stay range). See the v23
+                ``ConversionValueRule.ValueRuleItineraryCondition`` proto
+                reference for the schema.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -401,6 +423,7 @@ def create_conversion_value_rule_tools(
             device_types=device_types,
             geo_location_geo_target_constants=geo_location_geo_target_constants,
             audience_user_lists=audience_user_lists,
+            itinerary_condition=itinerary_condition,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

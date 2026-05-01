@@ -22,6 +22,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -67,6 +68,13 @@ class AdGroupService:
         final_url_suffix: Optional[str] = None,
         optimized_targeting_enabled: Optional[bool] = None,
         exclude_demographic_expansion: Optional[bool] = None,
+        display_custom_bid_dimension: Optional[str] = None,
+        audience_setting: Optional[Dict[str, Any]] = None,
+        targeting_setting: Optional[Dict[str, Any]] = None,
+        vertical_ads_format_setting: Optional[Dict[str, Any]] = None,
+        ai_max_ad_group_setting: Optional[Dict[str, Any]] = None,
+        demand_gen_ad_group_settings: Optional[Dict[str, Any]] = None,
+        video_ad_group_settings: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -116,6 +124,23 @@ class AdGroupService:
             exclude_demographic_expansion: When True, demographics are
                 excluded from the targeting types expanded by optimized
                 targeting.
+            display_custom_bid_dimension: Targeting dimension on which
+                to place absolute bids — TargetingDimension enum value
+                (e.g. AGE_RANGE, GENDER, AUDIENCE).
+            audience_setting: Immutable. Dict that builds an
+                ``AdGroup.AudienceSetting`` submessage.
+            targeting_setting: Dict that builds a ``TargetingSetting``
+                submessage controlling targeting-type-level filters.
+            vertical_ads_format_setting: Dict that builds an
+                ``AdGroup.VerticalAdsFormatSetting`` (vertical ads
+                feature toggle for search ad groups).
+            ai_max_ad_group_setting: Dict that builds an
+                ``AdGroup.AiMaxAdGroupSetting`` (AI Max feature for
+                standard search ad groups).
+            demand_gen_ad_group_settings: Dict that builds a
+                ``DemandGenAdGroupSettings`` submessage.
+            video_ad_group_settings: Dict that builds a
+                ``VideoAdGroupSettings`` submessage.
 
         Returns:
             Created ad group details
@@ -179,6 +204,63 @@ class AdGroupService:
                 ad_group.optimized_targeting_enabled = optimized_targeting_enabled
             if exclude_demographic_expansion is not None:
                 ad_group.exclude_demographic_expansion = exclude_demographic_expansion
+
+            if display_custom_bid_dimension is not None:
+                from google.ads.googleads.v23.enums.types.targeting_dimension import (
+                    TargetingDimensionEnum,
+                )
+
+                ad_group.display_custom_bid_dimension = getattr(
+                    TargetingDimensionEnum.TargetingDimension,
+                    display_custom_bid_dimension,
+                )
+
+            if audience_setting is not None:
+                set_optional_submessage(
+                    ad_group,
+                    "audience_setting",
+                    audience_setting,
+                    AdGroup.AudienceSetting,
+                )
+            if targeting_setting is not None:
+                from google.ads.googleads.v23.common.types.targeting_setting import (
+                    TargetingSetting,
+                )
+
+                set_optional_submessage(
+                    ad_group,
+                    "targeting_setting",
+                    targeting_setting,
+                    TargetingSetting,
+                )
+            if vertical_ads_format_setting is not None:
+                set_optional_submessage(
+                    ad_group,
+                    "vertical_ads_format_setting",
+                    vertical_ads_format_setting,
+                    AdGroup.VerticalAdsFormatSetting,
+                )
+            if ai_max_ad_group_setting is not None:
+                set_optional_submessage(
+                    ad_group,
+                    "ai_max_ad_group_setting",
+                    ai_max_ad_group_setting,
+                    AdGroup.AiMaxAdGroupSetting,
+                )
+            if demand_gen_ad_group_settings is not None:
+                set_optional_submessage(
+                    ad_group,
+                    "demand_gen_ad_group_settings",
+                    demand_gen_ad_group_settings,
+                    AdGroup.DemandGenAdGroupSettings,
+                )
+            if video_ad_group_settings is not None:
+                set_optional_submessage(
+                    ad_group,
+                    "video_ad_group_settings",
+                    video_ad_group_settings,
+                    AdGroup.VideoAdGroupSettings,
+                )
 
             # Create the operation
             operation = AdGroupOperation()
@@ -399,6 +481,13 @@ def create_ad_group_tools(
         final_url_suffix: Optional[str] = None,
         optimized_targeting_enabled: Optional[bool] = None,
         exclude_demographic_expansion: Optional[bool] = None,
+        display_custom_bid_dimension: Optional[str] = None,
+        audience_setting: Optional[Dict[str, Any]] = None,
+        targeting_setting: Optional[Dict[str, Any]] = None,
+        vertical_ads_format_setting: Optional[Dict[str, Any]] = None,
+        ai_max_ad_group_setting: Optional[Dict[str, Any]] = None,
+        demand_gen_ad_group_settings: Optional[Dict[str, Any]] = None,
+        video_ad_group_settings: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -439,9 +528,13 @@ def create_ad_group_tools(
             target_cpc_micros: Target CPC in micros.
             target_cpa_micros: Target CPA in micros (1_000_000 = $1).
             optimized_targeting_enabled: Whether optimized targeting is enabled.
-
-
-
+            ai_max_ad_group_setting: Dict that builds an AiMaxAdGroupSetting submessage (AI Max for standard search ad groups).
+            display_custom_bid_dimension: TargetingDimension enum value (e.g. AGE_RANGE, GENDER) for absolute bids.
+            demand_gen_ad_group_settings: Dict that builds a DemandGenAdGroupSettings submessage.
+            video_ad_group_settings: Dict that builds a VideoAdGroupSettings submessage.
+            targeting_setting: Dict that builds a TargetingSetting submessage controlling targeting-type filters.
+            audience_setting: Dict that builds the resource's AudienceSetting submessage (Immutable on Campaign/AdGroup).
+            vertical_ads_format_setting: Dict that builds a VerticalAdsFormatSetting submessage (search-ads vertical formats).
         """
         # Convert string enums to proper enum types. status is Optional;
         # only convert when caller supplied a value.
@@ -474,6 +567,13 @@ def create_ad_group_tools(
             final_url_suffix=final_url_suffix,
             optimized_targeting_enabled=optimized_targeting_enabled,
             exclude_demographic_expansion=exclude_demographic_expansion,
+            display_custom_bid_dimension=display_custom_bid_dimension,
+            audience_setting=audience_setting,
+            targeting_setting=targeting_setting,
+            vertical_ads_format_setting=vertical_ads_format_setting,
+            ai_max_ad_group_setting=ai_max_ad_group_setting,
+            demand_gen_ad_group_settings=demand_gen_ad_group_settings,
+            video_ad_group_settings=video_ad_group_settings,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
