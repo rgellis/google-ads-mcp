@@ -67,6 +67,7 @@ class OfflineUserDataJobService:
         store_sales_loyalty_fraction: Optional[float] = None,
         store_sales_transaction_upload_fraction: Optional[float] = None,
         store_sales_custom_key: Optional[str] = None,
+        external_id: Optional[int] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
@@ -97,6 +98,9 @@ class OfflineUserDataJobService:
                 exclusive of 0). Required for store sales jobs.
             store_sales_custom_key: Optional custom variable key for
                 store sales (only valid on allow-listed customers).
+            external_id: Immutable. Optional caller-supplied identifier
+                stored on the job. Useful for reconciling jobs created
+                via the API back to your own system.
 
         Returns:
             Created job details with resource_name
@@ -156,6 +160,9 @@ class OfflineUserDataJobService:
                 )
                 if store_sales_custom_key is not None:
                     job.store_sales_metadata.custom_key = store_sales_custom_key
+
+            if external_id is not None:
+                job.external_id = external_id
 
             # Create request
             request = CreateOfflineUserDataJobRequest()
@@ -742,6 +749,7 @@ def create_offline_user_data_job_tools(
         store_sales_loyalty_fraction: Optional[float] = None,
         store_sales_transaction_upload_fraction: Optional[float] = None,
         store_sales_custom_key: Optional[str] = None,
+        external_id: Optional[int] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
@@ -765,6 +773,8 @@ def create_offline_user_data_job_tools(
                 sales (0-1, exclusive of 0).
             store_sales_custom_key: Optional custom variable key for store
                 sales (only valid on allow-listed customers).
+            external_id: Immutable. Optional caller-supplied identifier
+                stored on the job for reconciling back to your own system.
             validate_only: Whether to only validate the request
             enable_match_rate_range_preview: Whether to enable match rate range preview
 
@@ -779,6 +789,7 @@ def create_offline_user_data_job_tools(
             store_sales_loyalty_fraction=store_sales_loyalty_fraction,
             store_sales_transaction_upload_fraction=store_sales_transaction_upload_fraction,
             store_sales_custom_key=store_sales_custom_key,
+            external_id=external_id,
             validate_only=validate_only,
             enable_match_rate_range_preview=enable_match_rate_range_preview,
         )

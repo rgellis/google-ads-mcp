@@ -12,14 +12,14 @@ Sources cross-checked, in order of preference:
 
 - Resources audited: **111**
 - Skipped (no resource / fetch error): **29**
-- Resources with **no wrapper file**: **2**
+- Resources with **no wrapper file**: **0**
 - Total fields across all resources: **639**
-- Settable: **127 / 200** (63.5%)
-- Immutable (create-only): **161 / 177** (91.0%)
-- Required: **13 / 15** (86.7%)
+- Settable: **170 / 200** (85.0%)
+- Immutable (create-only): **174 / 177** (98.3%)
+- Required: **15 / 15** (100.0%)
 - Output-only (skipped intentionally): **245**
 - Source disagreements (md vs proto vs sdk): **0**
-- Tool-wrapper docstring args documented: **1677 / 2309** (72.6%)
+- Tool-wrapper docstring args documented: **2374 / 2374** (100.0%)
 
 Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 input-only · 🚫 output-only · ✅ exposed by wrapper · ❌ gap · 🛡️ intentionally suppressed · — n/a
 
@@ -42,14 +42,10 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `proposal_type` | 🔒 | ✅ | `create_account_budget_proposal` | create_account_budget_proposal, update_account_budget_proposal | agree | Immutable |
 | `proposed_name` | 🔒 | ✅ | `create_account_budget_proposal`, `update_account_budget_proposal` | create_account_budget_proposal, update_account_budget_proposal | agree | Immutable |
-| `proposed_notes` | 🔒 | ❌ | — | — | agree | Immutable |
-| `proposed_purchase_order_number` | 🔒 | ❌ | — | — | agree | Immutable |
+| `proposed_notes` | 🔒 | ✅ | `create_account_budget_proposal` | create_account_budget_proposal | agree | Immutable |
+| `proposed_purchase_order_number` | 🔒 | ✅ | `create_account_budget_proposal` | create_account_budget_proposal | agree | Immutable |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Field gaps:**
-- 🔒 `proposed_notes` — immutable: Immutable
-- 🔒 `proposed_purchase_order_number` — immutable: Immutable
 
 ## AccountLinkService
 
@@ -85,20 +81,12 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `ad` | 🔒 | ✅ | — | create_ad_group_ad | agree | Immutable |
 | `ad_group` | 🔒 | ✅ | — | create_ad_group_ad | agree | Immutable |
 | `ad_strength` | 🚫 | — | — | — | agree | Output only |
-| `end_date_time` | ✏️ | ❌ | — | — | agree | The last day and time when ad group ad serves |
+| `end_date_time` | ✏️ | ✅ | `create_ad_group_ad` | create_ad_group_ad | agree | The last day and time when ad group ad serves |
 | `policy_summary` | 🚫 | — | — | — | agree | Output only |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-| `start_date_time` | ✏️ | ❌ | — | — | agree | The date and time when ad group ad starts serving |
+| `start_date_time` | ✏️ | ✅ | `create_ad_group_ad` | create_ad_group_ad | agree | The date and time when ad group ad starts serving |
 | `status` | ✏️ | ✅ | `create_ad_group_ad`, `update_ad_group_ad_status` | create_ad_group_ad, update_ad_group_ad_status | agree | The status of the ad. |
-
-**Field gaps:**
-- ✏️ `end_date_time` — settable: The last day and time when ad group ad serves
-- ✏️ `start_date_time` — settable: The date and time when ad group ad starts serving
-
-**Docstring gaps:**
-- `create_ad_group_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_ad_group_ad_status` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AdGroupAssetService
 
@@ -119,11 +107,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `source` | 🚫 | — | — | — | agree | Output only |
 | `status` | ✏️ | ✅ | `link_asset_to_ad_group`, `update_ad_group_asset_status` | link_asset_to_ad_group, link_multiple_assets_to_ad_group, update_ad_group_asset_status | agree | Status of the ad group asset. |
 
-**Docstring gaps:**
-- `link_asset_to_ad_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `link_multiple_assets_to_ad_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_ad_group_asset_status` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## AdGroupAssetSetService
 
 - **Resource**: `AdGroupAssetSet`
@@ -139,9 +122,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `asset_set` | 🔒 | ✅ | — | create_ad_group_asset_set | agree | Immutable |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Docstring gaps:**
-- `create_ad_group_asset_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AdGroupBidModifierService
 
@@ -160,15 +140,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `bid_modifier_source` | 🚫 | — | — | — | agree | Output only |
 | `criterion_id` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Docstring gaps:**
-- `create_ad_group_device_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_ad_group_hotel_check_in_day_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_ad_group_hotel_date_selection_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_ad_group_hotel_advance_booking_window_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_ad_group_hotel_length_of_stay_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_ad_group_hotel_check_in_date_range_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_ad_group_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AdGroupCriterionCustomizerService
 
@@ -206,8 +177,8 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `approval_status` | 🚫 | — | — | — | agree | Output only |
 | `bid_modifier` | ✏️ | ✅ | `add_app_payment_model_criteria`, `add_audience_criteria`, `add_combined_audience_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_extended_demographic_criteria`, `add_life_event_criteria`, `add_location_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_placement_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria`, `add_youtube_channel_criteria`, `add_youtube_video_criteria`, `update_criterion_bid` | add_app_payment_model_criteria, add_audience_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_life_event_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria, update_criterion_bid | agree | The modifier for the bid when the criterion matches |
 | `cpc_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | add_keywords, update_criterion_bid | agree | The CPC (cost-per-click) bid. |
-| `cpm_bid_micros` | ✏️ | ❌ | — | — | agree | The CPM (cost-per-thousand viewable impressions) bid. |
-| `cpv_bid_micros` | ✏️ | ❌ | — | — | agree | The CPV (cost-per-view) bid. |
+| `cpm_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The CPM (cost-per-thousand viewable impressions) bid. |
+| `cpv_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The CPV (cost-per-view) bid. |
 | `criterion_id` | 🚫 | — | — | add_audience_criteria | agree | Output only |
 | `display_name` | 🚫 | — | — | — | agree | Output only |
 | `effective_cpc_bid_micros` | 🚫 | — | — | — | agree | Output only |
@@ -218,51 +189,17 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `effective_cpv_bid_source` | 🚫 | — | — | — | agree | Output only |
 | `effective_percent_cpc_bid_micros` | 🚫 | — | — | — | agree | Output only |
 | `effective_percent_cpc_bid_source` | 🚫 | — | — | — | agree | Output only |
-| `final_url_suffix` | ✏️ | ❌ | — | — | agree | URL template for appending params to final URL. |
+| `final_url_suffix` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | URL template for appending params to final URL. |
 | `negative` | 🔒 | ✅ | `add_audience_criteria`, `add_brand_list_criteria`, `add_combined_audience_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_extended_demographic_criteria`, `add_keywords`, `add_life_event_criteria`, `add_location_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_placement_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_vertical_ads_item_group_rule_list_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria`, `add_youtube_channel_criteria`, `add_youtube_video_criteria` | add_audience_criteria, add_brand_list_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_keywords, add_life_event_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_vertical_ads_item_group_rule_list_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria | agree | Immutable |
-| `percent_cpc_bid_micros` | ✏️ | ❌ | — | — | agree | The CPC bid amount, expressed as a fraction of the advertised price for some good or service |
+| `percent_cpc_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The CPC bid amount, expressed as a fraction of the advertised price for some good or service |
 | `position_estimates` | 🚫 | — | — | — | agree | Output only |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
 | `quality_info` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-| `status` | ✏️ | ❌ | — | — | agree | The status of the criterion |
+| `status` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The status of the criterion |
 | `system_serving_status` | 🚫 | — | — | — | agree | Output only |
-| `tracking_url_template` | ✏️ | ❌ | — | — | agree | The URL template for constructing a tracking URL. |
+| `tracking_url_template` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The URL template for constructing a tracking URL. |
 | `type` | 🚫 | — | — | add_app_payment_model_criteria, add_demographic_criteria, add_listing_group_criteria | agree | Output only |
-
-**Field gaps:**
-- ✏️ `cpm_bid_micros` — settable: The CPM (cost-per-thousand viewable impressions) bid.
-- ✏️ `cpv_bid_micros` — settable: The CPV (cost-per-view) bid.
-- ✏️ `final_url_suffix` — settable: URL template for appending params to final URL.
-- ✏️ `percent_cpc_bid_micros` — settable: The CPC bid amount, expressed as a fraction of the advertised price for some good or service
-- ✏️ `status` — settable: The status of the criterion
-- ✏️ `tracking_url_template` — settable: The URL template for constructing a tracking URL.
-
-**Docstring gaps:**
-- `add_keywords` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_audience_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_demographic_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_placement_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_app_category_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_application_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_video_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_channel_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_topic_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_user_interest_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_webpage_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_custom_affinity_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_custom_audience_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_combined_audience_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_location_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_language_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_life_event_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_video_lineup_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_extended_demographic_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_brand_list_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_listing_group_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_app_payment_model_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_vertical_ads_item_group_rule_list_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_criterion_bid` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AdGroupCustomizerService
 
@@ -279,10 +216,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `customizer_attribute` | 🔒 | ✅ | `create_ad_group_customizer`, `create_number_customizer`, `create_price_customizer`, `create_text_customizer` | create_ad_group_customizer, create_number_customizer, create_percent_customizer, create_price_customizer, create_text_customizer | agree | Required |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-| `value` | ❗ | ❌ | — | — | agree | Required |
-
-**Field gaps:**
-- ❗ `value` — required: Required
+| `value` | ❗ | 🛡️ _Wired through value_type + string_value via create_ad_group_customizer_operation helper._ | — | — | agree | Required |
 
 ## AdGroupLabelService
 
@@ -299,14 +233,14 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `ad_rotation_mode` | ✏️ | ❌ | — | — | agree | The ad rotation mode of the ad group. |
+| `ad_rotation_mode` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The ad rotation mode of the ad group. |
 | `ai_max_ad_group_setting` | ✏️ | ❌ | — | — | agree | Settings for AI Max feature in standard search adgroups. |
 | `audience_setting` | 🔒 | ❌ | — | — | agree | Immutable |
 | `base_ad_group` | 🚫 | — | — | — | agree | Output only |
 | `campaign` | 🔒 | ✅ | — | create_ad_group | agree | Immutable |
 | `cpc_bid_micros` | ✏️ | ✅ | `create_ad_group`, `update_ad_group` | create_ad_group, update_ad_group | agree | The maximum CPC (cost-per-click) bid |
 | `cpm_bid_micros` | ✏️ | ✅ | `create_ad_group`, `update_ad_group` | create_ad_group, update_ad_group | agree | The maximum CPM (cost-per-thousand viewable impressions) bid. |
-| `cpv_bid_micros` | ✏️ | ❌ | — | — | agree | The CPV (cost-per-view) bid. |
+| `cpv_bid_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The CPV (cost-per-view) bid. |
 | `demand_gen_ad_group_settings` | ✏️ | ❌ | — | — | agree | Settings for Demand Gen ad groups. |
 | `display_custom_bid_dimension` | ✏️ | ❌ | — | — | agree | Lets advertisers specify a targeting dimension on which to place absolute bids |
 | `effective_cpc_bid_micros` | 🚫 | — | — | — | agree | Output only |
@@ -316,52 +250,35 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `effective_target_cpc_source` | 🚫 | — | — | — | agree | Output only |
 | `effective_target_roas` | 🚫 | — | — | — | agree | Output only |
 | `effective_target_roas_source` | 🚫 | — | — | — | agree | Output only |
-| `exclude_demographic_expansion` | ✏️ | ❌ | — | — | agree | When this value is true, demographics will be excluded from the types of targeting which are expanded when optimized_targeting_enabled is true |
-| `final_url_suffix` | ✏️ | ❌ | — | — | agree | URL template for appending params to Final URL. |
-| `fixed_cpm_micros` | ✏️ | ❌ | — | — | agree | The fixed amount in micros that the advertiser pays for every thousand impressions of the ad. |
+| `exclude_demographic_expansion` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | When this value is true, demographics will be excluded from the types of targeting which are expanded when optimized_targeting_enabled is true |
+| `final_url_suffix` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | URL template for appending params to Final URL. |
+| `fixed_cpm_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The fixed amount in micros that the advertiser pays for every thousand impressions of the ad. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | ✏️ | ✅ | `create_ad_group`, `update_ad_group` | create_ad_group, update_ad_group | agree | The name of the ad group |
-| `optimized_targeting_enabled` | ✏️ | ❌ | — | — | agree | True if optimized targeting is enabled |
-| `percent_cpc_bid_micros` | ✏️ | ❌ | — | — | agree | The percent cpc bid amount, expressed as a fraction of the advertised price for some good or service |
+| `optimized_targeting_enabled` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | True if optimized targeting is enabled |
+| `percent_cpc_bid_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The percent cpc bid amount, expressed as a fraction of the advertised price for some good or service |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | ✏️ | ✅ | `create_ad_group`, `update_ad_group` | create_ad_group, update_ad_group | agree | The status of the ad group. |
-| `target_cpa_micros` | ✏️ | ❌ | — | — | agree | The target CPA (cost-per-acquisition) |
-| `target_cpc_micros` | ✏️ | ❌ | — | — | agree | Average amount in micros that the advertiser is willing to pay for every ad click |
-| `target_cpm_micros` | ✏️ | ❌ | — | — | agree | Average amount in micros that the advertiser is willing to pay for every thousand times the ad is shown. |
-| `target_cpv_micros` | ✏️ | ❌ | — | — | agree | Average amount in micros that the advertiser is willing to pay for every ad view. |
-| `target_roas` | ✏️ | ❌ | — | — | agree | The target ROAS (return-on-ad-spend) for this ad group |
+| `target_cpa_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The target CPA (cost-per-acquisition) |
+| `target_cpc_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Average amount in micros that the advertiser is willing to pay for every ad click |
+| `target_cpm_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Average amount in micros that the advertiser is willing to pay for every thousand times the ad is shown. |
+| `target_cpv_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Average amount in micros that the advertiser is willing to pay for every ad view. |
+| `target_roas` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The target ROAS (return-on-ad-spend) for this ad group |
 | `targeting_setting` | ✏️ | ❌ | — | — | agree | Setting for targeting related features. |
-| `tracking_url_template` | ✏️ | ❌ | — | — | agree | The URL template for constructing a tracking URL. |
+| `tracking_url_template` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The URL template for constructing a tracking URL. |
 | `type` | 🔒 | ✅ | `create_ad_group` | create_ad_group | agree | Immutable |
 | `vertical_ads_format_setting` | ✏️ | ❌ | — | — | agree | Vertical ads setting feature to enable/disable ad group format controls in search campaigns |
 | `video_ad_group_settings` | ✏️ | ❌ | — | — | agree | Settings for video ad groups. |
 
 **Field gaps:**
-- ✏️ `ad_rotation_mode` — settable: The ad rotation mode of the ad group.
 - ✏️ `ai_max_ad_group_setting` — settable: Settings for AI Max feature in standard search adgroups.
 - 🔒 `audience_setting` — immutable: Immutable
-- ✏️ `cpv_bid_micros` — settable: The CPV (cost-per-view) bid.
 - ✏️ `demand_gen_ad_group_settings` — settable: Settings for Demand Gen ad groups.
 - ✏️ `display_custom_bid_dimension` — settable: Lets advertisers specify a targeting dimension on which to place absolute bids
-- ✏️ `exclude_demographic_expansion` — settable: When this value is true, demographics will be excluded from the types of targeting which are expanded when optimized_targeting_enabled is true
-- ✏️ `final_url_suffix` — settable: URL template for appending params to Final URL.
-- ✏️ `fixed_cpm_micros` — settable: The fixed amount in micros that the advertiser pays for every thousand impressions of the ad.
-- ✏️ `optimized_targeting_enabled` — settable: True if optimized targeting is enabled
-- ✏️ `percent_cpc_bid_micros` — settable: The percent cpc bid amount, expressed as a fraction of the advertised price for some good or service
-- ✏️ `target_cpa_micros` — settable: The target CPA (cost-per-acquisition)
-- ✏️ `target_cpc_micros` — settable: Average amount in micros that the advertiser is willing to pay for every ad click
-- ✏️ `target_cpm_micros` — settable: Average amount in micros that the advertiser is willing to pay for every thousand times the ad is shown.
-- ✏️ `target_cpv_micros` — settable: Average amount in micros that the advertiser is willing to pay for every ad view.
-- ✏️ `target_roas` — settable: The target ROAS (return-on-ad-spend) for this ad group
 - ✏️ `targeting_setting` — settable: Setting for targeting related features.
-- ✏️ `tracking_url_template` — settable: The URL template for constructing a tracking URL.
 - ✏️ `vertical_ads_format_setting` — settable: Vertical ads setting feature to enable/disable ad group format controls in search campaigns
 - ✏️ `video_ad_group_settings` — settable: Settings for video ad groups.
-
-**Docstring gaps:**
-- `create_ad_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_ad_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AdParameterService
 
@@ -391,8 +308,8 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `added_by_google_ads` | 🚫 | — | — | — | agree | Output only |
-| `device_preference` | ✏️ | ❌ | — | — | agree | The device preference for the ad |
-| `display_url` | ✏️ | ❌ | — | — | agree | The URL that appears in the ad description for some ad formats. |
+| `device_preference` | ✏️ | ✅ | `update_ad` | update_ad | agree | The device preference for the ad |
+| `display_url` | ✏️ | ✅ | `update_ad` | update_ad | agree | The URL that appears in the ad description for some ad formats. |
 | `final_url_suffix` | ✏️ | ✅ | `create_demand_gen_video_responsive_ad_tool` | create_demand_gen_video_responsive_ad | agree | The suffix to use when constructing a final URL. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | 🔒 | ✅ | `create_image_ad` | create_image_ad | agree | Immutable |
@@ -400,35 +317,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `system_managed_resource_source` | 🚫 | — | — | — | agree | Output only |
 | `tracking_url_template` | ✏️ | ✅ | `create_demand_gen_video_responsive_ad_tool` | create_demand_gen_video_responsive_ad | agree | The URL template for constructing a tracking URL. |
 | `type` | 🚫 | — | — | — | agree | Output only |
-
-**Field gaps:**
-- ✏️ `device_preference` — settable: The device preference for the ad
-- ✏️ `display_url` — settable: The URL that appears in the ad description for some ad formats.
-
-**Docstring gaps:**
-- `create_responsive_search_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_expanded_text_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_ad_status` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_responsive_display_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_video_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_demand_gen_multi_asset_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_smart_campaign_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_app_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_shopping_product_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_hotel_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_video_responsive_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_local_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_travel_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_demand_gen_carousel_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_display_upload_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_demand_gen_video_responsive_ad_tool` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_expanded_dynamic_search_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_shopping_comparison_listing_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_app_engagement_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_app_pre_registration_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_demand_gen_product_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_image_ad` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AssetGenerationService
 
@@ -468,18 +356,11 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `asset_group` | 🔒 | ✅ | — | create_listing_group_filter | agree | Immutable |
 | `case_value` | ✏️ | ✅ | `create_listing_group_filter`, `update_listing_group_filter` | create_listing_group_filter, update_listing_group_filter | agree | Dimension value with which this listing group is refining its parent |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
-| `listing_source` | 🔒 | ❌ | — | — | agree | Immutable |
+| `listing_source` | 🔒 | ✅ | `create_listing_group_filter` | create_listing_group_filter | agree | Immutable |
 | `parent_listing_group_filter` | 🔒 | ✅ | `create_listing_group_filter` | create_listing_group_filter | agree | Immutable |
 | `path` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `type` | 🔒 | ✅ | — | create_listing_group_filter | agree | Immutable |
-
-**Field gaps:**
-- 🔒 `listing_source` — immutable: Immutable
-
-**Docstring gaps:**
-- `create_listing_group_filter` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_listing_group_filter` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AssetGroupService
 
@@ -502,10 +383,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | ✏️ | ✅ | `create_asset_group`, `update_asset_group` | create_asset_group, update_asset_group | agree | The status of the asset group. |
-
-**Docstring gaps:**
-- `create_asset_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_asset_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AssetGroupSignalService
 
@@ -533,25 +410,15 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `final_url_suffix` | ✏️ | ❌ | — | — | agree | URL template for appending params to landing page URLs served with parallel tracking. |
+| `final_url_suffix` | ✏️ | ✅ | `update_asset` | update_asset | agree | URL template for appending params to landing page URLs served with parallel tracking. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | ✏️ | ✅ | `create_app_deep_link_asset`, `create_book_on_google_asset`, `create_business_message_asset`, `create_call_asset`, `create_call_to_action_asset`, `create_callout_asset`, `create_demand_gen_carousel_card_asset`, `create_dynamic_custom_asset`, `create_dynamic_education_asset`, `create_dynamic_flights_asset`, `create_dynamic_hotels_and_rentals_asset`, `create_dynamic_jobs_asset`, `create_dynamic_local_asset`, `create_dynamic_real_estate_asset`, `create_dynamic_travel_asset`, `create_hotel_callout_asset`, `create_hotel_property_asset`, `create_image_asset`, `create_lead_form_asset`, `create_location_asset`, `create_media_bundle_asset`, `create_mobile_app_asset`, `create_page_feed_asset`, `create_price_asset`, `create_promotion_asset`, `create_sitelink_asset`, `create_structured_snippet_asset`, `create_text_asset`, `create_youtube_video_asset`, `create_youtube_video_list_asset`, `update_asset` | create_app_deep_link_asset, create_book_on_google_asset, create_business_message_asset, create_call_asset, create_call_to_action_asset, create_callout_asset, create_demand_gen_carousel_card_asset, create_dynamic_custom_asset, create_dynamic_education_asset, create_dynamic_flights_asset, create_dynamic_hotels_and_rentals_asset, create_dynamic_jobs_asset, create_dynamic_local_asset, create_dynamic_real_estate_asset, create_dynamic_travel_asset, create_hotel_callout_asset, create_hotel_property_asset, create_image_asset, create_lead_form_asset, create_location_asset, create_media_bundle_asset, create_mobile_app_asset, create_page_feed_asset, create_price_asset, create_promotion_asset, create_sitelink_asset, create_structured_snippet_asset, create_text_asset, create_youtube_video_asset, create_youtube_video_list_asset, update_asset | agree | Optional name of the asset. |
 | `orientation` | 🚫 | — | — | — | agree | Output only |
 | `policy_summary` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `source` | 🚫 | — | — | — | agree | Output only |
-| `tracking_url_template` | ✏️ | ❌ | — | — | agree | URL template for constructing a tracking URL. |
+| `tracking_url_template` | ✏️ | ✅ | `update_asset` | update_asset | agree | URL template for constructing a tracking URL. |
 | `type` | 🚫 | — | `create_price_asset` | create_price_asset | agree | Output only |
-
-**Field gaps:**
-- ✏️ `final_url_suffix` — settable: URL template for appending params to landing page URLs served with parallel tracking.
-- ✏️ `tracking_url_template` — settable: URL template for constructing a tracking URL.
-
-**Docstring gaps:**
-- `create_text_asset` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_image_asset` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_youtube_video_asset` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_youtube_video_list_asset` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AssetSetAssetService
 
@@ -568,9 +435,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `asset_set` | 🔒 | ✅ | — | add_asset_to_set | agree | Immutable |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Docstring gaps:**
-- `add_asset_to_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AssetSetService
 
@@ -592,10 +456,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🔒 | ✅ | — | create_asset_set | agree | Required |
 
-**Docstring gaps:**
-- `create_asset_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_asset_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## AudienceInsightsService
 
 - _No resource (query-only, suggestion, upload, or label-link service)._
@@ -611,22 +471,14 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `asset_group` | 🔒 | ❌ | — | — | agree | Immutable |
+| `asset_group` | 🔒 | ✅ | `create_combined_audience` | create_combined_audience | agree | Immutable |
 | `description` | ✏️ | ✅ | `create_combined_audience`, `update_audience` | create_combined_audience, update_audience | agree | Description of this audience. |
 | `exclusion_dimension` | ✏️ | ✅ | — | create_combined_audience | agree | Negative dimension specifying the audience composition. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | ✏️ | ✅ | `create_combined_audience`, `update_audience` | create_combined_audience, update_audience | agree | Name of the audience |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-| `scope` | ✏️ | ❌ | — | — | agree | Defines the scope this audience can be used in |
+| `scope` | ✏️ | ✅ | `create_combined_audience` | create_combined_audience | agree | Defines the scope this audience can be used in |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Field gaps:**
-- 🔒 `asset_group` — immutable: Immutable
-- ✏️ `scope` — settable: Defines the scope this audience can be used in
-
-**Docstring gaps:**
-- `create_combined_audience` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_audience` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## AutomaticallyCreatedAssetRemovalService
 
@@ -649,9 +501,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `next_add_sequence_token` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Docstring gaps:**
-- `create_batch_job` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## BenchmarksService
 
@@ -677,10 +526,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `start_date_time` | ❗ | ✅ | `create_bidding_data_exclusion`, `update_bidding_data_exclusion` | create_bidding_data_exclusion, update_bidding_data_exclusion | agree | Required |
 | `status` | 🚫 | — | — | — | agree | Output only |
 
-**Docstring gaps:**
-- `create_bidding_data_exclusion` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_bidding_data_exclusion` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## BiddingSeasonalityAdjustmentService
 
 - **Resource**: `BiddingSeasonalityAdjustment`
@@ -701,10 +546,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `seasonality_adjustment_id` | 🚫 | — | — | — | agree | Output only |
 | `start_date_time` | ❗ | ✅ | `create_bidding_seasonality_adjustment`, `update_bidding_seasonality_adjustment` | create_bidding_seasonality_adjustment, update_bidding_seasonality_adjustment | agree | Required |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Docstring gaps:**
-- `create_bidding_seasonality_adjustment` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_bidding_seasonality_adjustment` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## BiddingStrategyService
 
@@ -727,16 +568,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🚫 | — | — | — | agree | Output only |
-
-**Docstring gaps:**
-- `create_target_cpa_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `create_target_roas_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `create_maximize_conversions_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `create_target_impression_share_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `create_enhanced_cpc_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `create_maximize_conversion_value_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `create_target_spend_strategy` — missing: `aligned_campaign_budget_id`, `currency_code`, `partial_failure`, `response_content_type`, `validate_only`
-- `update_bidding_strategy` — missing: `aligned_campaign_budget_id`, `maximize_conversions_target_cpa_micros`, `name`, `partial_failure`, `response_content_type`, `target_cpa_micros`, `target_impression_share_cpc_bid_ceiling_micros`, `target_impression_share_location`, `target_impression_share_location_fraction_micros`, `target_roas`, `validate_only`
 
 ## BillingSetupService
 
@@ -781,11 +612,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `source` | 🚫 | — | — | — | agree | Output only |
 | `status` | ✏️ | ✅ | `update_campaign_asset` | update_campaign_asset | agree | Status of the campaign asset. |
 
-**Docstring gaps:**
-- `link_asset_to_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `link_multiple_assets_to_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign_asset` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CampaignAssetSetService
 
 - **Resource**: `CampaignAssetSet`
@@ -818,10 +644,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `criterion_id` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
-**Docstring gaps:**
-- `create_interaction_type_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_bid_modifier` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CampaignBudgetService
 
 - **Resource**: `CampaignBudget`
@@ -852,10 +674,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `total_amount_micros` | ✏️ | ✅ | `create_campaign_budget`, `update_campaign_budget` | create_campaign_budget, update_campaign_budget | agree | The total amount to be spent by the campaign over its entire duration |
 | `type` | 🔒 | ✅ | `create_campaign_budget` | create_campaign_budget | agree | Immutable |
 
-**Docstring gaps:**
-- `create_campaign_budget` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign_budget` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CampaignConversionGoalService
 
 - **Resource**: `CampaignConversionGoal`
@@ -868,16 +686,10 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `biddable` | ✏️ | ✅ | `update_campaign_conversion_goal` | update_campaign_conversion_goal | agree | The biddability of the campaign conversion goal. |
-| `campaign` | 🔒 | ❌ | — | — | agree | Immutable |
+| `campaign` | 🔒 | 🛡️ _Identity-encoded in resource_name (customers/X/campaignConversionGoals/Y)._ | — | — | agree | Immutable |
 | `category` | ✏️ | ✅ | `update_campaign_conversion_goal` | update_campaign_conversion_goal | agree | The conversion category of this campaign conversion goal. |
 | `origin` | ✏️ | ✅ | `update_campaign_conversion_goal` | update_campaign_conversion_goal | agree | The conversion origin of this campaign conversion goal. |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Field gaps:**
-- 🔒 `campaign` — immutable: Immutable
-
-**Docstring gaps:**
-- `update_campaign_conversion_goal` — missing: `partial_failure`, `response_content_type`
 
 ## CampaignCriterionService
 
@@ -896,50 +708,8 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `display_name` | 🚫 | — | — | — | agree | Output only |
 | `negative` | 🔒 | ✅ | `add_audience_criteria`, `add_carrier_criteria`, `add_extended_demographic_criteria`, `add_location_criteria`, `add_location_group_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria` | add_audience_criteria, add_carrier_criteria, add_combined_audience_criteria, add_content_label_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_extended_demographic_criteria, add_ip_block_criteria, add_life_event_criteria, add_location_criteria, add_location_group_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_negative_keyword_criteria, add_parental_status_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_video_lineup_criteria, add_webpage_criteria, add_webpage_list_criteria, add_youtube_channel_criteria, add_youtube_video_criteria | agree | Immutable |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-| `status` | ✏️ | ❌ | — | — | agree | The status of the criterion. |
+| `status` | ✏️ | ✅ | `update_campaign_criterion` | update_campaign_criterion | agree | The status of the criterion. |
 | `type` | 🚫 | — | — | add_age_range_criteria, add_content_label_criteria, add_device_criteria, add_gender_criteria, add_income_range_criteria, add_parental_status_criteria | agree | Output only |
-
-**Field gaps:**
-- ✏️ `status` — settable: The status of the criterion.
-
-**Docstring gaps:**
-- `add_location_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_language_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_device_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_negative_keyword_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_ad_schedule_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_audience_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_age_range_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_gender_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_income_range_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_proximity_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_parental_status_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_user_interest_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_topic_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_placement_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_channel_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_video_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_content_label_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_custom_audience_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_custom_affinity_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_combined_audience_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_life_event_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_keyword_theme_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_ip_block_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_carrier_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_app_category_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_application_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_device_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_operating_system_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_location_group_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_listing_scope_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_webpage_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_brand_list_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_local_service_id_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_webpage_list_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_video_lineup_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_extended_demographic_criteria` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign_criterion` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## CampaignCustomizerService
 
@@ -956,7 +726,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `customizer_attribute` | 🔒 | ✅ | `mutate_campaign_customizers` | create_campaign_customizer | agree | Required |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-| `value` | ❗ | ✅ | `create_campaign_customizer`, `mutate_campaign_customizers` | create_campaign_customizer | agree | Required |
+| `value` | ❗ | 🛡️ _Wired through value_type + string_value via create_campaign_customizer_operation helper._ | — | — | agree | Required |
 
 ## CampaignDraftService
 
@@ -978,10 +748,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 
-**Docstring gaps:**
-- `create_campaign_draft` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign_draft` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CampaignGoalConfigService
 
 - **Resource**: `CampaignGoalConfig`
@@ -997,9 +763,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `goal` | 🔒 | ✅ | — | mutate_campaign_goal_configs | agree | Immutable |
 | `goal_type` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Docstring gaps:**
-- `mutate_campaign_goal_config` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## CampaignGroupService
 
@@ -1017,10 +780,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | ✏️ | ✅ | `update_campaign_group` | update_campaign_group | agree | The status of the campaign group |
 
-**Docstring gaps:**
-- `create_campaign_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign_group` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CampaignLabelService
 
 - _No resource (query-only, suggestion, upload, or label-link service)._
@@ -1029,7 +788,16 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 - **Resource**: `CampaignLifecycleGoal`
 - **Sources**: md ✅ · proto ✅ · sdk ✅
-- **Wrapper**: ❌ no file found — service is unimplemented
+- **Wrapper file**: `src/services/campaign/campaign_lifecycle_goal_service.py`
+- **MCP tools registered** (1): `configure_campaign_lifecycle_goals`
+
+### Fields
+
+| Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
+|---|---|---|---|---|---|---|
+| `campaign` | 🚫 | — | `configure_campaign_lifecycle_goals` | configure_campaign_lifecycle_goals | agree | Output only |
+| `customer_acquisition_goal_settings` | 🚫 | — | — | configure_campaign_lifecycle_goals | agree | Output only |
+| `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
 ## CampaignService
 
@@ -1043,8 +811,8 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `accessible_bidding_strategy` | 🚫 | — | — | — | agree | Output only |
-| `ad_serving_optimization_status` | ✏️ | ❌ | — | — | agree | The ad serving optimization status of the campaign. |
-| `advertising_channel_sub_type` | 🔒 | ❌ | — | — | agree | Immutable |
+| `ad_serving_optimization_status` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The ad serving optimization status of the campaign. |
+| `advertising_channel_sub_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `advertising_channel_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `ai_max_setting` | ✏️ | ❌ | — | — | agree | Settings for AI Max in search campaigns. |
 | `app_campaign_setting` | ✏️ | ❌ | — | — | agree | The setting related to App Campaign. |
@@ -1053,21 +821,21 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `bidding_strategy_system_status` | 🚫 | — | — | — | agree | Output only |
 | `bidding_strategy_type` | 🚫 | — | — | — | agree | Output only |
 | `brand_guidelines` | ✏️ | ❌ | — | — | agree | These settings control how your brand appears in automatically generated assets and formats within this campaign |
-| `brand_guidelines_enabled` | 🔒 | ❌ | — | — | agree | Immutable |
+| `brand_guidelines_enabled` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `campaign_budget` | ✏️ | ✅ | — | create_campaign | agree | The resource name of the campaign budget of the campaign. |
-| `campaign_group` | ✏️ | ❌ | — | — | agree | The resource name of the campaign group that this campaign belongs to. |
+| `campaign_group` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The resource name of the campaign group that this campaign belongs to. |
 | `contains_eu_political_advertising` | ✏️ | ✅ | — | create_campaign | agree | The advertiser should self-declare whether this campaign contains political advertising content targeted towards the European Union. |
 | `demand_gen_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Demand Gen campaign. |
 | `dynamic_search_ads_setting` | ✏️ | ❌ | — | — | agree | The setting for controlling Dynamic Search Ads (DSA). |
 | `end_date_time` | ✏️ | ✅ | — | create_campaign, update_campaign | agree | The last day and time of the campaign in serving customer's timezone in "yyyy-MM-dd HH:mm:ss" format |
 | `experiment_type` | 🚫 | — | — | — | agree | Output only |
-| `final_url_suffix` | ✏️ | ❌ | — | — | agree | Suffix used to append query parameters to landing pages that are served with parallel tracking. |
+| `final_url_suffix` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Suffix used to append query parameters to landing pages that are served with parallel tracking. |
 | `geo_target_type_setting` | ✏️ | ❌ | — | — | agree | The setting for ads geotargeting. |
-| `hotel_property_asset_set` | 🔒 | ❌ | — | — | agree | Immutable |
+| `hotel_property_asset_set` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `hotel_setting` | ✏️ | ❌ | — | — | agree | The hotel setting for the campaign. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `keyword_match_type` | ✏️ | ❌ | — | — | agree | Keyword match type of Campaign |
-| `listing_type` | 🔒 | ❌ | — | — | agree | Immutable |
+| `listing_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `local_campaign_setting` | ✏️ | ❌ | — | — | agree | The setting for local campaign. |
 | `local_services_campaign_settings` | ✏️ | ❌ | — | — | agree | The Local Services Campaign related settings. |
 | `missing_eu_political_advertising_declaration` | 🚫 | — | — | — | agree | Output only |
@@ -1075,7 +843,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `network_settings` | ✏️ | ✅ | — | create_campaign | agree | The network settings for the campaign. |
 | `optimization_goal_setting` | ✏️ | ❌ | — | — | agree | Optimization goal setting for this campaign, which includes a set of optimization goal types. |
 | `optimization_score` | 🚫 | — | — | — | agree | Output only |
-| `payment_mode` | ✏️ | ❌ | — | — | agree | Payment mode for the campaign. |
+| `payment_mode` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Payment mode for the campaign. |
 | `performance_max_upgrade` | 🚫 | — | — | — | agree | Output only |
 | `pmax_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Performance Max campaign. |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
@@ -1090,33 +858,25 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `text_guidelines` | ✏️ | ❌ | — | — | agree | Settings to control automatically generated text assets |
 | `third_party_integration_partners` | ✏️ | ❌ | — | — | agree | Third-Party integration partners. |
 | `tracking_setting` | 🚫 | — | — | — | agree | Output only |
-| `tracking_url_template` | ✏️ | ❌ | — | — | agree | The URL template for constructing a tracking URL. |
+| `tracking_url_template` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The URL template for constructing a tracking URL. |
 | `travel_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Travel campaign. |
 | `vanity_pharma` | ✏️ | ❌ | — | — | agree | Describes how unbranded pharma ads will be displayed. |
-| `video_brand_safety_suitability` | ✏️ | ❌ | — | — | agree | Brand Safety setting at the individual campaign level |
+| `video_brand_safety_suitability` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Brand Safety setting at the individual campaign level |
 | `video_campaign_settings` | ✏️ | ❌ | — | — | agree | Settings for Video campaign. |
 
 **Field gaps:**
-- ✏️ `ad_serving_optimization_status` — settable: The ad serving optimization status of the campaign.
-- 🔒 `advertising_channel_sub_type` — immutable: Immutable
 - ✏️ `ai_max_setting` — settable: Settings for AI Max in search campaigns.
 - ✏️ `app_campaign_setting` — settable: The setting related to App Campaign.
 - 🔒 `audience_setting` — immutable: Immutable
 - ✏️ `brand_guidelines` — settable: These settings control how your brand appears in automatically generated assets and formats within this campaign
-- 🔒 `brand_guidelines_enabled` — immutable: Immutable
-- ✏️ `campaign_group` — settable: The resource name of the campaign group that this campaign belongs to.
 - ✏️ `demand_gen_campaign_settings` — settable: Settings for Demand Gen campaign.
 - ✏️ `dynamic_search_ads_setting` — settable: The setting for controlling Dynamic Search Ads (DSA).
-- ✏️ `final_url_suffix` — settable: Suffix used to append query parameters to landing pages that are served with parallel tracking.
 - ✏️ `geo_target_type_setting` — settable: The setting for ads geotargeting.
-- 🔒 `hotel_property_asset_set` — immutable: Immutable
 - ✏️ `hotel_setting` — settable: The hotel setting for the campaign.
 - ✏️ `keyword_match_type` — settable: Keyword match type of Campaign
-- 🔒 `listing_type` — immutable: Immutable
 - ✏️ `local_campaign_setting` — settable: The setting for local campaign.
 - ✏️ `local_services_campaign_settings` — settable: The Local Services Campaign related settings.
 - ✏️ `optimization_goal_setting` — settable: Optimization goal setting for this campaign, which includes a set of optimization goal types.
-- ✏️ `payment_mode` — settable: Payment mode for the campaign.
 - ✏️ `pmax_campaign_settings` — settable: Settings for Performance Max campaign.
 - ✏️ `real_time_bidding_setting` — settable: Settings for Real-Time Bidding, a feature only available for campaigns targeting the Ad Exchange network.
 - ✏️ `selective_optimization` — settable: Selective optimization setting for this campaign, which includes a set of conversion actions to optimize this campaign towards
@@ -1124,16 +884,9 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 - ✏️ `targeting_setting` — settable: Setting for targeting related features.
 - ✏️ `text_guidelines` — settable: Settings to control automatically generated text assets
 - ✏️ `third_party_integration_partners` — settable: Third-Party integration partners.
-- ✏️ `tracking_url_template` — settable: The URL template for constructing a tracking URL.
 - ✏️ `travel_campaign_settings` — settable: Settings for Travel campaign.
 - ✏️ `vanity_pharma` — settable: Describes how unbranded pharma ads will be displayed.
-- ✏️ `video_brand_safety_suitability` — settable: Brand Safety setting at the individual campaign level
 - ✏️ `video_campaign_settings` — settable: Settings for Video campaign.
-
-**Docstring gaps:**
-- `create_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `enable_p_max_brand_guidelines` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## CampaignSharedSetService
 
@@ -1151,12 +904,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `shared_set` | 🔒 | ✅ | — | attach_shared_set_to_campaign, attach_shared_sets_to_campaigns, update_campaign_shared_set_status | agree | Immutable |
 | `status` | 🚫 | — | `update_campaign_shared_set_status` | update_campaign_shared_set_status | agree | Output only |
 
-**Docstring gaps:**
-- `attach_shared_set_to_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `attach_shared_sets_to_campaigns` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_campaign_shared_set_status` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `detach_shared_set_from_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## ContentCreatorInsightsService
 
 - _No resource (query-only, suggestion, upload, or label-link service)._
@@ -1172,7 +919,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `app_id` | ✏️ | ❌ | — | — | agree | App ID for an app conversion action. |
+| `app_id` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | App ID for an app conversion action. |
 | `attribution_model_settings` | ✏️ | ✅ | — | create_conversion_action | agree | Settings related to this conversion action's attribution model. |
 | `category` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | The category of conversions reported for this conversion action. |
 | `click_through_lookback_window_days` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | The maximum number of days that may elapse between an interaction (for example, a click) and a conversion event. |
@@ -1180,29 +927,19 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `firebase_settings` | 🚫 | — | — | — | agree | Output only |
 | `google_analytics_4_settings` | 🚫 | — | — | — | agree | Output only |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
-| `include_in_conversions_metric` | ✏️ | ❌ | — | — | agree | Whether this conversion action should be included in the "conversions" metric. |
+| `include_in_conversions_metric` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | Whether this conversion action should be included in the "conversions" metric. |
 | `mobile_app_vendor` | 🚫 | — | — | — | agree | Output only |
 | `name` | ✏️ | ✅ | `create_conversion_action`, `update_conversion_action` | create_conversion_action, update_conversion_action | agree | The name of the conversion action |
 | `origin` | 🚫 | — | — | — | agree | Output only |
 | `owner_customer` | 🚫 | — | — | — | agree | Output only |
-| `phone_call_duration_seconds` | ✏️ | ❌ | — | — | agree | The phone call duration in seconds after which a conversion should be reported for this conversion action |
-| `primary_for_goal` | ✏️ | ❌ | — | — | agree | If a conversion action's primary_for_goal bit is false, the conversion action is non-biddable for all campaigns regardless of their customer conversion goal or campaign conversion goal |
+| `phone_call_duration_seconds` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | The phone call duration in seconds after which a conversion should be reported for this conversion action |
+| `primary_for_goal` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | If a conversion action's primary_for_goal bit is false, the conversion action is non-biddable for all campaigns regardless of their customer conversion goal or campaign conversion goal |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | ✏️ | ✅ | `create_conversion_action`, `update_conversion_action` | create_conversion_action, update_conversion_action | agree | The status of this conversion action for conversion event accrual. |
 | `third_party_app_analytics_settings` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🔒 | ✅ | `create_conversion_action` | create_conversion_action | agree | Immutable |
 | `value_settings` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action, update_conversion_action | agree | Settings related to the value for conversion events associated with this conversion action. |
 | `view_through_lookback_window_days` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | The maximum number of days which may elapse between an impression and a conversion without an interaction. |
-
-**Field gaps:**
-- ✏️ `app_id` — settable: App ID for an app conversion action.
-- ✏️ `include_in_conversions_metric` — settable: Whether this conversion action should be included in the "conversions" metric.
-- ✏️ `phone_call_duration_seconds` — settable: The phone call duration in seconds after which a conversion should be reported for this conversion action
-- ✏️ `primary_for_goal` — settable: If a conversion action's primary_for_goal bit is false, the conversion action is non-biddable for all campaigns regardless of their customer conversion goal or campaign conversion goal
-
-**Docstring gaps:**
-- `create_conversion_action` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_conversion_action` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## ConversionAdjustmentUploadService
 
@@ -1237,13 +974,10 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `campaign` | 🔒 | ❌ | — | — | agree | Immutable |
+| `campaign` | 🔒 | 🛡️ _Identity-encoded in resource_name (customers/X/conversionGoalCampaignConfigs/Y)._ | — | — | agree | Immutable |
 | `custom_conversion_goal` | ✏️ | ✅ | `update_conversion_goal_campaign_config` | — | agree | The custom conversion goal the campaign is using for optimization. |
 | `goal_config_level` | ✏️ | ✅ | `mutate_conversion_goal_campaign_configs`, `update_conversion_goal_campaign_config` | — | agree | The level of goal config the campaign is using. |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Field gaps:**
-- 🔒 `campaign` — immutable: Immutable
 
 ## ConversionUploadService
 
@@ -1273,10 +1007,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 **Field gaps:**
 - ✏️ `itinerary_condition` — settable: Condition for itinerary that must be satisfied for the value rule to apply.
 
-**Docstring gaps:**
-- `create_conversion_value_rule` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_conversion_value_rule` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## ConversionValueRuleSetService
 
 - **Resource**: `ConversionValueRuleSet`
@@ -1295,10 +1025,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 
-**Docstring gaps:**
-- `create_conversion_value_rule_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_conversion_value_rule_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CustomAudienceService
 
 - **Resource**: `CustomAudience`
@@ -1316,10 +1042,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | ✏️ | ✅ | `create_custom_audience` | create_custom_audience | agree | Type of the custom audience |
-
-**Docstring gaps:**
-- `create_custom_audience` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_custom_audience` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## CustomConversionGoalService
 
@@ -1355,10 +1077,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `status` | ✏️ | ✅ | `create_custom_interest`, `update_custom_interest` | create_custom_interest, update_custom_interest | agree | Status of this custom interest |
 | `type` | ✏️ | ✅ | `create_custom_interest` | create_custom_interest | agree | Type of the custom interest, CUSTOM_AFFINITY or CUSTOM_INTENT |
 
-**Docstring gaps:**
-- `create_custom_interest` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_custom_interest` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CustomerAssetService
 
 - **Resource**: `CustomerAsset`
@@ -1393,10 +1111,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 
-**Docstring gaps:**
-- `link_asset_set_to_customer` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `unlink_asset_set_from_customer` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## CustomerClientLinkService
 
 - **Resource**: `CustomerClientLink`
@@ -1426,16 +1140,9 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `biddable` | ✏️ | ✅ | — | mutate_customer_conversion_goals | agree | The biddability of the customer conversion goal. |
-| `category` | ✏️ | ❌ | — | — | agree | The conversion category of this customer conversion goal |
-| `origin` | ✏️ | ❌ | — | — | agree | The conversion origin of this customer conversion goal |
+| `category` | ✏️ | 🛡️ _Identity-encoded in resource_name — cannot be set as a standalone field._ | — | — | agree | The conversion category of this customer conversion goal |
+| `origin` | ✏️ | 🛡️ _Identity-encoded in resource_name — cannot be set as a standalone field._ | — | — | agree | The conversion origin of this customer conversion goal |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Field gaps:**
-- ✏️ `category` — settable: The conversion category of this customer conversion goal
-- ✏️ `origin` — settable: The conversion origin of this customer conversion goal
-
-**Docstring gaps:**
-- `mutate_customer_conversion_goals` — missing: `partial_failure`, `response_content_type`
 
 ## CustomerCustomizerService
 
@@ -1451,10 +1158,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `customizer_attribute` | 🔒 | ✅ | `create_customer_customizer`, `create_number_customizer`, `create_price_customizer`, `create_text_customizer` | create_customer_customizer, create_number_customizer, create_percent_customizer, create_price_customizer, create_text_customizer | agree | Required |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-| `value` | ❗ | ❌ | — | — | agree | Required |
-
-**Field gaps:**
-- ❗ `value` — required: Required
+| `value` | ❗ | 🛡️ _Wired through value_type + string_value via create_customer_customizer_operation helper (audit can't follow sync helpers)._ | — | — | agree | Required |
 
 ## CustomerLabelService
 
@@ -1464,7 +1168,16 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 - **Resource**: `CustomerLifecycleGoal`
 - **Sources**: md ✅ · proto ✅ · sdk ✅
-- **Wrapper**: ❌ no file found — service is unimplemented
+- **Wrapper file**: `src/services/account/customer_lifecycle_goal_service.py`
+- **MCP tools registered** (1): `configure_customer_lifecycle_goals`
+
+### Fields
+
+| Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
+|---|---|---|---|---|---|---|
+| `customer_acquisition_goal_value_settings` | 🚫 | — | — | configure_customer_lifecycle_goals | agree | Output only |
+| `owner_customer` | 🚫 | — | — | — | agree | Output only |
+| `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
 ## CustomerManagerLinkService
 
@@ -1496,17 +1209,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `type` | 🚫 | — | — | add_content_label_exclusions | agree | Output only |
-
-**Docstring gaps:**
-- `add_placement_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_content_label_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_application_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_app_category_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_video_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_channel_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_ip_block_exclusions` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_negative_keyword_list_exclusion` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_placement_list_exclusion` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## CustomerService
 
@@ -1549,9 +1251,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 **Field gaps:**
 - ✏️ `conversion_tracking_setting` — settable: Conversion tracking setting for a customer.
 - ✏️ `video_customer` — settable: Video specific information about a Customer.
-
-**Docstring gaps:**
-- `mutate_customer` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## CustomerSkAdNetworkConversionValueSchemaService
 
@@ -1620,9 +1319,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🔒 | ✅ | — | create_customizer_attribute | agree | Immutable |
 
-**Docstring gaps:**
-- `create_customizer_attribute` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## DataLinkService
 
 - _No resource (query-only, suggestion, upload, or label-link service)._
@@ -1643,9 +1339,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `name` | ❗ | ✅ | `create_experiment_arm`, `update_experiment_arm` | — | agree | Required |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `traffic_split` | ✏️ | ✅ | `create_experiment_arm`, `update_experiment_arm` | — | agree | Traffic split of the trial arm |
-
-**Docstring gaps:**
-- `mutate_experiment_arms` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## ExperimentService
 
@@ -1668,15 +1361,8 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `start_date` | ✏️ | ✅ | `create_experiment` | create_experiment | agree | Date when the experiment starts |
 | `status` | ✏️ | ✅ | `create_experiment`, `update_experiment` | create_experiment, update_experiment | agree | The Advertiser-chosen status of this experiment. |
 | `suffix` | ✏️ | ✅ | `create_experiment` | create_experiment | agree | For system managed experiments, the advertiser must provide a suffix during construction, in the setup stage before moving to initiated |
-| `sync_enabled` | 🔒 | ❌ | — | — | agree | Immutable |
+| `sync_enabled` | 🔒 | ✅ | `create_experiment` | create_experiment | agree | Immutable |
 | `type` | ❗ | ✅ | — | create_experiment | agree | Required |
-
-**Field gaps:**
-- 🔒 `sync_enabled` — immutable: Immutable
-
-**Docstring gaps:**
-- `create_experiment` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_experiment` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## GeoTargetConstantService
 
@@ -1811,12 +1497,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `name` | ✏️ | ✅ | `create_keyword_plan`, `create_keyword_plan_campaign`, `update_keyword_plan` | create_keyword_plan, create_keyword_plan_campaign, update_keyword_plan | agree | The name of the keyword plan |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
-**Docstring gaps:**
-- `create_keyword_plan` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_keyword_plan_campaign` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_keywords_to_plan` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_keyword_plan` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## KeywordThemeConstantService
 
 - _No resource (query-only, suggestion, upload, or label-link service)._
@@ -1837,12 +1517,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `text_label` | ✏️ | ✅ | — | create_label, update_label | agree | A type of label displaying text on a colored background. |
-
-**Docstring gaps:**
-- `create_label` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_label` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `apply_label_to_campaigns` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `apply_label_to_ad_groups` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## LocalServicesLeadService
 
@@ -1880,16 +1554,13 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `external_id` | 🔒 | ❌ | — | — | agree | Immutable |
+| `external_id` | 🔒 | ✅ | `create_offline_user_data_job` | create_offline_user_data_job | agree | Immutable |
 | `failure_reason` | 🚫 | — | — | — | agree | Output only |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `operation_metadata` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🔒 | ✅ | — | create_offline_user_data_job | agree | Immutable |
-
-**Field gaps:**
-- 🔒 `external_id` — immutable: Immutable
 
 ## PaymentsAccountService
 
@@ -1966,10 +1637,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `status` | ❗ | ✅ | `create_recommendation_subscription`, `update_recommendation_subscription` | create_subscription, update_subscription | agree | Required |
 | `type` | 🔒 | ✅ | — | create_subscription | agree | Required |
 
-**Docstring gaps:**
-- `create_recommendation_subscription` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_recommendation_subscription` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## RemarketingActionService
 
 - **Resource**: `RemarketingAction`
@@ -1984,10 +1651,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | ✏️ | ✅ | `create_remarketing_action`, `update_remarketing_action` | create_remarketing_action, update_remarketing_action | agree | The name of the remarketing action |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Docstring gaps:**
-- `create_remarketing_action` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_remarketing_action` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## ReservationService
 
@@ -2014,17 +1677,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `shared_set` | 🔒 | ✅ | — | add_brands_to_shared_set, add_keywords_to_shared_set, add_mobile_app_categories_to_shared_set, add_mobile_applications_to_shared_set, add_placements_to_shared_set, add_vertical_ads_item_group_rules_to_shared_set, add_webpages_to_shared_set, add_youtube_channels_to_shared_set, add_youtube_videos_to_shared_set | agree | Immutable |
 | `type` | 🚫 | — | — | — | agree | Output only |
 
-**Docstring gaps:**
-- `add_keywords_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_placements_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_videos_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_youtube_channels_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_app_categories_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_mobile_applications_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_brands_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_webpages_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `add_vertical_ads_item_group_rules_to_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## SharedSetService
 
 - **Resource**: `SharedSet`
@@ -2043,15 +1695,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🔒 | ✅ | `create_shared_set` | create_shared_set | agree | Immutable |
-| `vertical_ads_item_vertical_type` | 🔒 | ❌ | — | — | agree | Immutable |
-
-**Field gaps:**
-- 🔒 `vertical_ads_item_vertical_type` — immutable: Immutable
-
-**Docstring gaps:**
-- `create_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_shared_set` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `attach_shared_set_to_campaigns` — missing: `partial_failure`, `response_content_type`, `validate_only`
+| `vertical_ads_item_vertical_type` | 🔒 | ✅ | `create_shared_set` | create_shared_set | agree | Immutable |
 
 ## SmartCampaignSettingService
 
@@ -2068,9 +1712,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `campaign` | 🚫 | — | — | — | agree | Output only |
 | `phone_number` | ✏️ | ✅ | `update_smart_campaign_setting` | update_smart_campaign_setting | agree | Phone number and country code. |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-
-**Docstring gaps:**
-- `update_smart_campaign_setting` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## SmartCampaignSuggestService
 
@@ -2113,9 +1754,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `user_list` | 🔒 | ✅ | — | add_customer_type | agree | Immutable |
 
-**Docstring gaps:**
-- `add_customer_type_to_user_list` — missing: `partial_failure`, `response_content_type`, `validate_only`
-
 ## UserListService
 
 - **Resource**: `UserList`
@@ -2128,13 +1766,13 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `access_reason` | 🚫 | — | — | — | agree | Output only |
-| `account_user_list_status` | ✏️ | ❌ | — | — | agree | Indicates if this share is still enabled |
-| `closing_reason` | ✏️ | ❌ | — | — | agree | Indicating the reason why this user list membership status is closed |
+| `account_user_list_status` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | Indicates if this share is still enabled |
+| `closing_reason` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | Indicating the reason why this user list membership status is closed |
 | `description` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, update_user_list | agree | Description of this user list. |
 | `eligible_for_display` | 🚫 | — | — | — | agree | Output only |
-| `eligible_for_search` | ✏️ | ❌ | — | — | agree | Indicates if this user list is eligible for Google Search Network. |
+| `eligible_for_search` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | Indicates if this user list is eligible for Google Search Network. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
-| `integration_code` | ✏️ | ❌ | — | — | agree | An ID from external system |
+| `integration_code` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | An ID from external system |
 | `match_rate_percentage` | 🚫 | — | — | — | agree | Output only |
 | `membership_life_span` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, update_user_list | agree | Number of days a user's cookie stays on your list since its most recent addition to the list |
 | `membership_status` | ✏️ | ✅ | `create_basic_user_list`, `update_user_list` | create_basic_user_list, update_user_list | agree | Membership status of this user list |
@@ -2146,18 +1784,6 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `size_range_for_display` | 🚫 | — | — | — | agree | Output only |
 | `size_range_for_search` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🚫 | — | — | — | agree | Output only |
-
-**Field gaps:**
-- ✏️ `account_user_list_status` — settable: Indicates if this share is still enabled
-- ✏️ `closing_reason` — settable: Indicating the reason why this user list membership status is closed
-- ✏️ `eligible_for_search` — settable: Indicates if this user list is eligible for Google Search Network.
-- ✏️ `integration_code` — settable: An ID from external system
-
-**Docstring gaps:**
-- `create_basic_user_list` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_crm_based_user_list` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `create_logical_user_list` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_user_list` — missing: `partial_failure`, `response_content_type`, `validate_only`
 
 ## YouTubeVideoUploadService
 
@@ -2178,8 +1804,4 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `video_privacy` | ✏️ | ✅ | `create_youtube_video_upload`, `update_youtube_video_upload` | create_youtube_video_upload, update_youtube_video_upload | agree | The privacy state of the video |
 | `video_title` | 📥 | ✅ | `create_youtube_video_upload` | create_youtube_video_upload | agree | Input only |
 | `video_upload_id` | 🚫 | — | — | — | agree | Output only |
-
-**Docstring gaps:**
-- `create_youtube_video_upload` — missing: `partial_failure`, `response_content_type`, `validate_only`
-- `update_youtube_video_upload` — missing: `partial_failure`, `response_content_type`, `validate_only`
 

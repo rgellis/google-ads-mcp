@@ -383,9 +383,11 @@ def create_campaign_label_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             label_id: The label ID to apply
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created campaign label details including resource_name
+
         """
         return await service.apply_label_to_campaign(
             ctx=ctx,
@@ -412,9 +414,11 @@ def create_campaign_label_tools(
             campaign_label_pairs: List of dicts with:
                 - campaign_id: The campaign ID
                 - label_id: The label ID to apply
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created campaign label details
+
         """
         return await service.apply_labels_to_campaigns(
             ctx=ctx,

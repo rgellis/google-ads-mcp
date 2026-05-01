@@ -2878,6 +2878,7 @@ class CampaignCriterionService:
         campaign_id: str,
         criterion_id: str,
         bid_modifier: Optional[float] = None,
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2890,6 +2891,7 @@ class CampaignCriterionService:
             campaign_id: The campaign ID
             criterion_id: The criterion ID to update
             bid_modifier: New bid modifier (e.g., 1.2 for +20%, 0.8 for -20%)
+            status: New criterion status. ENABLED, PAUSED, or REMOVED.
 
         Returns:
             Updated campaign criterion details
@@ -2908,6 +2910,16 @@ class CampaignCriterionService:
             if bid_modifier is not None:
                 campaign_criterion.bid_modifier = bid_modifier
                 update_mask_fields.append("bid_modifier")
+
+            if status is not None:
+                from google.ads.googleads.v23.enums.types.campaign_criterion_status import (
+                    CampaignCriterionStatusEnum,
+                )
+
+                campaign_criterion.status = getattr(
+                    CampaignCriterionStatusEnum.CampaignCriterionStatus, status
+                )
+                update_mask_fields.append("status")
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")
@@ -3040,9 +3052,11 @@ def create_campaign_criterion_tools(
             negative: Whether these are negative criteria (exclude locations)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_location_criteria(
             ctx=ctx,
@@ -3071,9 +3085,11 @@ def create_campaign_criterion_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             language_ids: List of language constant IDs (e.g., ["1000"] for English)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_language_criteria(
             ctx=ctx,
@@ -3103,9 +3119,11 @@ def create_campaign_criterion_tools(
             device_types: List of device types - MOBILE, DESKTOP, TABLET
             bid_modifiers: Optional dict of device type to bid modifier
                 Example: {"MOBILE": 1.2, "DESKTOP": 0.9}
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         # Convert string enums to proper enum types
         device_type_enums = [
@@ -3145,9 +3163,11 @@ def create_campaign_criterion_tools(
                     {"text": "free", "match_type": "BROAD"},
                     {"text": "[cheap]", "match_type": "EXACT"}
                 ]
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_negative_keyword_criteria(
             ctx=ctx,
@@ -3183,9 +3203,11 @@ def create_campaign_criterion_tools(
                 - end_minute: End minute. Valid values: ZERO, FIFTEEN, THIRTY, FORTY_FIVE
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_ad_schedule_criteria(
             ctx=ctx,
@@ -3219,9 +3241,11 @@ def create_campaign_criterion_tools(
             negative: Whether these are negative criteria (exclude audiences)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_audience_criteria(
             ctx=ctx,
@@ -3260,9 +3284,11 @@ def create_campaign_criterion_tools(
                 AGE_RANGE_UNDETERMINED
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         age_range_enums = [
             getattr(AgeRangeTypeEnum.AgeRangeType, age_range)
@@ -3302,9 +3328,11 @@ def create_campaign_criterion_tools(
             genders: List of gender values. Valid values: MALE, FEMALE, UNDETERMINED
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         gender_enums = [
             getattr(GenderTypeEnum.GenderType, gender) for gender in genders
@@ -3346,9 +3374,11 @@ def create_campaign_criterion_tools(
                 INCOME_RANGE_UNDETERMINED
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         income_range_enums = [
             getattr(IncomeRangeTypeEnum.IncomeRangeType, income_range)
@@ -3392,9 +3422,11 @@ def create_campaign_criterion_tools(
             address: Optional address string for display purposes
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         radius_units_enum = getattr(
             ProximityRadiusUnitsEnum.ProximityRadiusUnits, radius_units
@@ -3438,9 +3470,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             parental_statuses: List of parental status values to exclude.
                 Valid values: PARENT, NOT_A_PARENT, UNDETERMINED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         parental_status_enums = [
             getattr(ParentalStatusTypeEnum.ParentalStatusType, ps)
@@ -3478,9 +3512,11 @@ def create_campaign_criterion_tools(
             negative: Whether these are negative criteria (exclude interests)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_user_interest_criteria(
             ctx=ctx,
@@ -3515,9 +3551,11 @@ def create_campaign_criterion_tools(
             negative: Whether these are negative criteria (exclude topics)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_topic_criteria(
             ctx=ctx,
@@ -3550,9 +3588,11 @@ def create_campaign_criterion_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             urls: List of placement URLs to exclude (e.g., ["example.com", "youtube.com"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_placement_criteria(
             ctx=ctx,
@@ -3583,9 +3623,11 @@ def create_campaign_criterion_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             channel_ids: List of YouTube channel IDs to exclude (e.g., ["UCxxxxxx"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_youtube_channel_criteria(
             ctx=ctx,
@@ -3616,9 +3658,11 @@ def create_campaign_criterion_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             video_ids: List of YouTube video IDs to exclude (e.g., ["dQw4w9WgXcQ"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_youtube_video_criteria(
             ctx=ctx,
@@ -3654,9 +3698,11 @@ def create_campaign_criterion_tools(
                 VIDEO_RATING_DV_G, VIDEO_RATING_DV_PG, VIDEO_RATING_DV_T,
                 VIDEO_RATING_DV_MA, VIDEO_NOT_YET_RATED, EMBEDDED_VIDEO,
                 LIVE_STREAMING_VIDEO, SOCIAL_ISSUES
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         content_label_enums = [
             getattr(ContentLabelTypeEnum.ContentLabelType, cl)
@@ -3695,9 +3741,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             custom_audience_resource_names: List of custom audience resource
                 names to exclude (e.g., ["customers/123/customAudiences/456"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_custom_audience_criteria(
             ctx=ctx,
@@ -3731,9 +3779,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             custom_affinity_resource_names: List of custom affinity resource
                 names to exclude (e.g., ["customers/123/customAffinities/456"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_custom_affinity_criteria(
             ctx=ctx,
@@ -3767,9 +3817,11 @@ def create_campaign_criterion_tools(
             combined_audience_resource_names: List of combined audience
                 resource names to exclude
                 (e.g., ["customers/123/combinedAudiences/456"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_combined_audience_criteria(
             ctx=ctx,
@@ -3805,9 +3857,11 @@ def create_campaign_criterion_tools(
                 exclude. Per the v23 proto, LifeEventInfo.life_event_id is
                 INT64, not a resource name. Look up taxonomy IDs from Google
                 Ads life event reference.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_life_event_criteria(
             ctx=ctx,
@@ -3835,9 +3889,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             keyword_theme_constants: List of keyword theme constant resource names
                 (e.g., ["keywordThemeConstants/123~456"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_keyword_theme_criteria(
             ctx=ctx,
@@ -3866,9 +3922,11 @@ def create_campaign_criterion_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             ip_addresses: List of IP addresses to exclude (e.g., ["192.168.1.0/24"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_ip_block_criteria(
             ctx=ctx,
@@ -3901,9 +3959,11 @@ def create_campaign_criterion_tools(
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_carrier_criteria(
             ctx=ctx,
@@ -3935,9 +3995,11 @@ def create_campaign_criterion_tools(
             mobile_app_category_constants: List of mobile app category constant
                 resource names (e.g., "mobileAppCategoryConstants/123")
             negative: Whether these are negative criteria
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_mobile_app_category_criteria(
             ctx=ctx,
@@ -3967,9 +4029,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             app_ids: List of mobile application IDs
             negative: Whether these are negative criteria
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_mobile_application_criteria(
             ctx=ctx,
@@ -4002,9 +4066,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             mobile_device_constants: List of mobile device constant resource names
                 (e.g., "mobileDeviceConstants/123")
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_mobile_device_criteria(
             ctx=ctx,
@@ -4036,9 +4102,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             os_version_constants: List of OS version constant resource names
                 (e.g., "operatingSystemVersionConstants/123")
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_operating_system_criteria(
             ctx=ctx,
@@ -4078,9 +4146,11 @@ def create_campaign_criterion_tools(
             enable_customer_level_location_asset_set: Whether to enable customer
                 level location asset set
             negative: Whether this is a negative criterion
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_location_group_criteria(
             ctx=ctx,
@@ -4119,9 +4189,11 @@ def create_campaign_criterion_tools(
                     {"type": "product_brand", "value": {"value": "Nike"}},
                     {"type": "product_item_id", "value": {"value": "SKU123"}}
                 ]
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_listing_scope_criteria(
             ctx=ctx,
@@ -4155,9 +4227,11 @@ def create_campaign_criterion_tools(
                 - argument: The argument string to match
                 - operator: Optional. Valid values: EQUALS, CONTAINS
             negative: Whether this is a negative criterion
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_webpage_criteria(
             ctx=ctx,
@@ -4187,9 +4261,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             shared_set_resource_name: Resource name of the shared set containing
                 the brand list (e.g., "customers/123/sharedSets/456")
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_brand_list_criteria(
             ctx=ctx,
@@ -4216,9 +4292,11 @@ def create_campaign_criterion_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             service_id: The local service ID string
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_local_service_id_criteria(
             ctx=ctx,
@@ -4252,9 +4330,11 @@ def create_campaign_criterion_tools(
             shared_set_resource_name: Resource name of the SharedSet that
                 contains the webpage list (e.g.,
                 "customers/{customer_id}/sharedSets/{shared_set_id}") to exclude
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criterion
+
         """
         return await service.add_webpage_list_criteria(
             ctx=ctx,
@@ -4283,9 +4363,11 @@ def create_campaign_criterion_tools(
             campaign_id: The campaign ID
             video_lineup_ids: List of video lineup IDs
             negative: Whether these are negative criteria
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_video_lineup_criteria(
             ctx=ctx,
@@ -4318,9 +4400,11 @@ def create_campaign_criterion_tools(
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%,
                 0.5 = -50%. Must be > 0.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with created campaign criteria
+
         """
         return await service.add_extended_demographic_criteria(
             ctx=ctx,
@@ -4366,6 +4450,7 @@ def create_campaign_criterion_tools(
         campaign_id: str,
         criterion_id: str,
         bid_modifier: Optional[float] = None,
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -4376,15 +4461,19 @@ def create_campaign_criterion_tools(
             - bid_modifier (float): Bid modifier for the criterion. Use values like
                 1.2 for +20%, 0.8 for -20%, 0.0 to remove the modifier.
                 Not applicable to negative criteria.
+            - status (str): ENABLED, PAUSED, or REMOVED.
 
         Args:
             customer_id: The customer ID
             campaign_id: The campaign ID
             criterion_id: The criterion ID to update
             bid_modifier: New bid modifier value
+            status: New criterion status (ENABLED, PAUSED, or REMOVED)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign criterion details including resource_name
+
         """
         return await service.update_campaign_criterion(
             ctx=ctx,
@@ -4392,6 +4481,7 @@ def create_campaign_criterion_tools(
             campaign_id=campaign_id,
             criterion_id=criterion_id,
             bid_modifier=bid_modifier,
+            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

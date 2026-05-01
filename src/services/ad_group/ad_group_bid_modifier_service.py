@@ -800,9 +800,11 @@ def create_ad_group_bid_modifier_tools(
             ad_group_id: The ad group ID
             device_type: Device type - MOBILE, DESKTOP, or TABLET
             bid_modifier: Bid modifier value (0.1-10.0, where 1.0 means no change)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details with resource_name
+
         """
         return await service.create_device_bid_modifier(
             ctx=ctx,
@@ -832,9 +834,11 @@ def create_ad_group_bid_modifier_tools(
             ad_group_id: The ad group ID
             day_of_week: Day of week (MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
             bid_modifier: Bid modifier value (0.1-10.0)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details
+
         """
         return await service.create_hotel_check_in_day_bid_modifier(
             ctx=ctx,
@@ -864,9 +868,11 @@ def create_ad_group_bid_modifier_tools(
             ad_group_id: The ad group ID
             date_selection_type: Date selection type - DEFAULT_SELECTION or USER_SELECTED
             bid_modifier: Bid modifier value (0.1-10.0)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details
+
         """
         return await service.create_hotel_date_selection_bid_modifier(
             ctx=ctx,
@@ -901,9 +907,11 @@ def create_ad_group_bid_modifier_tools(
             bid_modifier: Bid modifier value (0.1-10.0)
             min_days: Low end of the booking window (days prior to stay)
             max_days: High end of the booking window (days prior to stay)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details
+
         """
         return await service.create_hotel_advance_booking_window_bid_modifier(
             ctx=ctx,
@@ -939,9 +947,11 @@ def create_ad_group_bid_modifier_tools(
             bid_modifier: Bid modifier value (0.1-10.0)
             min_nights: Low end of stay length, in nights
             max_nights: High end of stay length, in nights
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details
+
         """
         return await service.create_hotel_length_of_stay_bid_modifier(
             ctx=ctx,
@@ -974,9 +984,11 @@ def create_ad_group_bid_modifier_tools(
             bid_modifier: Bid modifier value (0.1-10.0)
             start_date: Range start in YYYY-MM-DD
             end_date: Range end in YYYY-MM-DD
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details
+
         """
         return await service.create_hotel_check_in_date_range_bid_modifier(
             ctx=ctx,
@@ -1005,9 +1017,11 @@ def create_ad_group_bid_modifier_tools(
             customer_id: The customer ID
             bid_modifier_resource_name: Resource name of the bid modifier
             new_bid_modifier: New bid modifier value (0.1-10.0)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated bid modifier details
+
         """
         return await service.update_bid_modifier(
             ctx=ctx,

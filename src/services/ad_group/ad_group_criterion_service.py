@@ -2070,19 +2070,35 @@ class AdGroupCriterionService:
         customer_id: str,
         criterion_resource_name: str,
         cpc_bid_micros: Optional[int] = None,
+        cpm_bid_micros: Optional[int] = None,
+        cpv_bid_micros: Optional[int] = None,
+        percent_cpc_bid_micros: Optional[int] = None,
         bid_modifier: Optional[float] = None,
+        status: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Update the bid for an ad group criterion.
+        """Update an ad group criterion (bids, status, URL templates).
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             criterion_resource_name: The criterion resource name
             cpc_bid_micros: New CPC bid in micros
+            cpm_bid_micros: New CPM (cost-per-thousand-impressions) bid
+                in micros.
+            cpv_bid_micros: New CPV (cost-per-view) bid in micros.
+            percent_cpc_bid_micros: New percent-CPC bid in micros (a
+                fraction of the advertised price for some good or
+                service — only valid for hotel ad criteria).
             bid_modifier: New bid modifier
+            status: New criterion status. ENABLED, PAUSED, or REMOVED.
+            tracking_url_template: New URL template for tracking URL.
+            final_url_suffix: New URL template for appending params to
+                the final URL.
 
         Returns:
             Updated criterion details
@@ -2101,9 +2117,39 @@ class AdGroupCriterionService:
                 ad_group_criterion.cpc_bid_micros = cpc_bid_micros
                 update_mask_fields.append("cpc_bid_micros")
 
+            if cpm_bid_micros is not None:
+                ad_group_criterion.cpm_bid_micros = cpm_bid_micros
+                update_mask_fields.append("cpm_bid_micros")
+
+            if cpv_bid_micros is not None:
+                ad_group_criterion.cpv_bid_micros = cpv_bid_micros
+                update_mask_fields.append("cpv_bid_micros")
+
+            if percent_cpc_bid_micros is not None:
+                ad_group_criterion.percent_cpc_bid_micros = percent_cpc_bid_micros
+                update_mask_fields.append("percent_cpc_bid_micros")
+
             if bid_modifier is not None:
                 ad_group_criterion.bid_modifier = bid_modifier
                 update_mask_fields.append("bid_modifier")
+
+            if status is not None:
+                from google.ads.googleads.v23.enums.types.ad_group_criterion_status import (
+                    AdGroupCriterionStatusEnum,
+                )
+
+                ad_group_criterion.status = getattr(
+                    AdGroupCriterionStatusEnum.AdGroupCriterionStatus, status
+                )
+                update_mask_fields.append("status")
+
+            if tracking_url_template is not None:
+                ad_group_criterion.tracking_url_template = tracking_url_template
+                update_mask_fields.append("tracking_url_template")
+
+            if final_url_suffix is not None:
+                ad_group_criterion.final_url_suffix = final_url_suffix
+                update_mask_fields.append("final_url_suffix")
 
             if not update_mask_fields:
                 raise ValueError("at least one updatable field must be provided")
@@ -2234,9 +2280,11 @@ def create_ad_group_criterion_tools(
                 - match_type: BROAD, PHRASE, EXACT
                 - cpc_bid_micros: Optional CPC bid in micros
             negative: Whether these are negative keywords
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group criteria details
+
         """
         return await service.add_keywords(
             ctx=ctx,
@@ -2274,9 +2322,11 @@ def create_ad_group_criterion_tools(
                 still serves at -90%, not an exclusion. Omit to leave unset.
             bid_modifier: Multiplier on base bid, range 0.1–10.0 per proto
                 (so -90% to +900%). Not valid on negative criteria.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created ad group criteria with resource names and IDs
+
         """
         return await service.add_audience_criteria(
             ctx=ctx,
@@ -2315,9 +2365,11 @@ def create_ad_group_criterion_tools(
                 - bid_modifier: Optional. Multiplier on base bid, range
                   0.1–10.0 per proto (so -90% to +900%). Not valid on
                   negative criteria.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created ad group criteria with resource names and IDs
+
         """
         return await service.add_demographic_criteria(
             ctx=ctx,
@@ -2348,9 +2400,11 @@ def create_ad_group_criterion_tools(
             urls: List of placement URLs (e.g., "example.com", "youtube.com")
             negative: Whether these are negative placements (exclusions)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group placement criteria
+
         """
         return await service.add_placement_criteria(
             ctx=ctx,
@@ -2384,9 +2438,11 @@ def create_ad_group_criterion_tools(
                 resource names (e.g., "mobileAppCategoryConstants/123")
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group mobile app category criteria
+
         """
         return await service.add_mobile_app_category_criteria(
             ctx=ctx,
@@ -2420,9 +2476,11 @@ def create_ad_group_criterion_tools(
                 Android or "1-com.example.app" format)
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group mobile application criteria
+
         """
         return await service.add_mobile_application_criteria(
             ctx=ctx,
@@ -2455,9 +2513,11 @@ def create_ad_group_criterion_tools(
             video_ids: List of YouTube video IDs
             negative: Whether these are negative criteria (exclusions)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group YouTube video criteria
+
         """
         return await service.add_youtube_video_criteria(
             ctx=ctx,
@@ -2490,9 +2550,11 @@ def create_ad_group_criterion_tools(
             channel_ids: List of YouTube channel IDs
             negative: Whether these are negative criteria (exclusions)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group YouTube channel criteria
+
         """
         return await service.add_youtube_channel_criteria(
             ctx=ctx,
@@ -2526,9 +2588,11 @@ def create_ad_group_criterion_tools(
                 (e.g., "topicConstants/123")
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group topic criteria
+
         """
         return await service.add_topic_criteria(
             ctx=ctx,
@@ -2562,9 +2626,11 @@ def create_ad_group_criterion_tools(
                 (e.g., "customers/123/userInterests/456")
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group user interest criteria
+
         """
         return await service.add_user_interest_criteria(
             ctx=ctx,
@@ -2602,9 +2668,11 @@ def create_ad_group_criterion_tools(
                 - operator: Optional. EQUALS or CONTAINS (defaults to CONTAINS)
             negative: Whether this is a negative criterion
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group webpage criteria
+
         """
         return await service.add_webpage_criteria(
             ctx=ctx,
@@ -2639,9 +2707,11 @@ def create_ad_group_criterion_tools(
                 (e.g., "customers/123/customAffinities/456")
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group custom affinity criteria
+
         """
         return await service.add_custom_affinity_criteria(
             ctx=ctx,
@@ -2675,9 +2745,11 @@ def create_ad_group_criterion_tools(
                 (e.g., "customers/123/customAudiences/456")
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group custom audience criteria
+
         """
         return await service.add_custom_audience_criteria(
             ctx=ctx,
@@ -2711,9 +2783,11 @@ def create_ad_group_criterion_tools(
                 (e.g., "customers/123/combinedAudiences/456")
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group combined audience criteria
+
         """
         return await service.add_combined_audience_criteria(
             ctx=ctx,
@@ -2746,9 +2820,11 @@ def create_ad_group_criterion_tools(
             location_ids: List of geo target constant IDs (e.g., "2840" for US)
             negative: Whether these are negative criteria (exclusions)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group location criteria
+
         """
         return await service.add_location_criteria(
             ctx=ctx,
@@ -2777,9 +2853,11 @@ def create_ad_group_criterion_tools(
             customer_id: The customer ID
             ad_group_id: The ad group ID
             language_ids: List of language constant IDs (e.g., "1000" for English)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group language criteria
+
         """
         return await service.add_language_criteria(
             ctx=ctx,
@@ -2810,9 +2888,11 @@ def create_ad_group_criterion_tools(
             life_event_ids: List of life event taxonomy IDs
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group life event criteria
+
         """
         return await service.add_life_event_criteria(
             ctx=ctx,
@@ -2845,9 +2925,11 @@ def create_ad_group_criterion_tools(
             video_lineup_ids: List of video lineup IDs
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group video lineup criteria
+
         """
         return await service.add_video_lineup_criteria(
             ctx=ctx,
@@ -2880,9 +2962,11 @@ def create_ad_group_criterion_tools(
             extended_demographic_ids: List of extended demographic IDs
             negative: Whether these are negative criteria
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group extended demographic criteria
+
         """
         return await service.add_extended_demographic_criteria(
             ctx=ctx,
@@ -2915,9 +2999,11 @@ def create_ad_group_criterion_tools(
                 the brand list (e.g., "customers/123/sharedSets/456")
             negative: Pass True to exclude this brand list (the brand list
                 is NOT eligible to match). Omit to leave unset.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group brand list criteria
+
         """
         return await service.add_brand_list_criteria(
             ctx=ctx,
@@ -2957,9 +3043,11 @@ def create_ad_group_criterion_tools(
                 "product_condition" (str enum: NEW, USED, REFURBISHED),
                 "product_custom_attribute" ({"value": str, "index": str enum}).
             parent_ad_group_criterion: Optional parent ad group criterion resource name
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group listing group criteria
+
         """
         return await service.add_listing_group_criteria(
             ctx=ctx,
@@ -2992,9 +3080,11 @@ def create_ad_group_criterion_tools(
             ad_group_id: The ad group ID
             app_payment_model_type: The app payment model type (PAID)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group app payment model criteria
+
         """
         return await service.add_app_payment_model_criteria(
             ctx=ctx,
@@ -3025,9 +3115,11 @@ def create_ad_group_criterion_tools(
             shared_set_resource_name: Resource name of the shared set containing
                 the vertical ads item group rules
             negative: Whether this is a negative criterion
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created ad group vertical ads item group rule list criteria
+
         """
         return await service.add_vertical_ads_item_group_rule_list_criteria(
             ctx=ctx,
@@ -3045,28 +3137,55 @@ def create_ad_group_criterion_tools(
         customer_id: str,
         criterion_resource_name: str,
         cpc_bid_micros: Optional[int] = None,
+        cpm_bid_micros: Optional[int] = None,
+        cpv_bid_micros: Optional[int] = None,
+        percent_cpc_bid_micros: Optional[int] = None,
         bid_modifier: Optional[float] = None,
+        status: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update the bid for an ad group criterion.
+        """Update an ad group criterion (bids, status, URL templates).
+
+        Despite the legacy name ``update_criterion_bid``, this tool now
+        also updates status and URL templates.
 
         Args:
             customer_id: The customer ID
             criterion_resource_name: The full resource name of the criterion
             cpc_bid_micros: New CPC bid in micros (for keywords)
+            cpm_bid_micros: New CPM bid in micros (cost per 1000 viewable
+                impressions)
+            cpv_bid_micros: New CPV bid in micros (cost per view, for
+                video criteria)
+            percent_cpc_bid_micros: New percent-CPC bid in micros (only
+                valid for hotel ad criteria)
             bid_modifier: Multiplier on base bid. 1.0 = no change, 1.5 = +50%, 0.5 = -50%. (for audiences, demographics)
+            status: New criterion status (ENABLED, PAUSED, REMOVED).
+            tracking_url_template: New tracking URL template.
+            final_url_suffix: New URL template for appending params to the
+                final URL.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated criterion details with updated fields
+
         """
         return await service.update_criterion_bid(
             ctx=ctx,
             customer_id=customer_id,
             criterion_resource_name=criterion_resource_name,
             cpc_bid_micros=cpc_bid_micros,
+            cpm_bid_micros=cpm_bid_micros,
+            cpv_bid_micros=cpv_bid_micros,
+            percent_cpc_bid_micros=percent_cpc_bid_micros,
             bid_modifier=bid_modifier,
+            status=status,
+            tracking_url_template=tracking_url_template,
+            final_url_suffix=final_url_suffix,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -383,9 +383,11 @@ def create_campaign_bid_modifier_tools(
             campaign_id: The campaign ID
             interaction_type: Interaction type - CALLS
             bid_modifier: Bid modifier value (0.1-10.0, where 1.0 means no change)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bid modifier details with resource_name
+
         """
         # Convert string enum to proper enum type
         interaction_type_enum = getattr(
@@ -418,9 +420,11 @@ def create_campaign_bid_modifier_tools(
             customer_id: The customer ID
             bid_modifier_resource_name: Resource name of the bid modifier
             new_bid_modifier: New bid modifier value (0.1-10.0)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated bid modifier details
+
         """
         return await service.update_bid_modifier(
             ctx=ctx,

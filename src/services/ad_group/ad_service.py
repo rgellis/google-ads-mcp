@@ -397,6 +397,8 @@ class AdService:
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         ad_type: Optional[str] = None,
+        device_preference: Optional[str] = None,
+        display_url: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -421,6 +423,10 @@ class AdService:
                 supplied. Currently only "RESPONSIVE_SEARCH_AD" is supported —
                 pass it explicitly so the wrapper doesn't silently switch the
                 ad's oneof on a non-RSA ad.
+            device_preference: Optional device-preference enum value
+                (e.g. ``MOBILE``). Applies to any ad type.
+            display_url: Optional display URL shown in the ad description for
+                ad formats that support it.
 
         Returns:
             Updated ad details
@@ -436,6 +442,16 @@ class AdService:
             if final_urls is not None:
                 ad.final_urls[:] = final_urls
                 update_mask_fields.append("final_urls")
+
+            if device_preference is not None:
+                from google.ads.googleads.v23.enums.types.device import DeviceEnum
+
+                ad.device_preference = getattr(DeviceEnum.Device, device_preference)
+                update_mask_fields.append("device_preference")
+
+            if display_url is not None:
+                ad.display_url = display_url
+                update_mask_fields.append("display_url")
 
             rsa_fields_supplied = (
                 headlines is not None
@@ -2502,9 +2518,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         # Convert string enum to proper enum type
         status_enum = (
@@ -2561,9 +2579,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         # Convert string enum to proper enum type
         status_enum = (
@@ -2607,9 +2627,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             ad_group_id: The ad group ID
             ad_id: The ad ID
             status: New ad status (ENABLED, PAUSED, REMOVED)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated ad details
+
         """
         status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
 
@@ -2633,6 +2655,8 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         final_urls: Optional[List[str]] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
+        device_preference: Optional[str] = None,
+        display_url: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2650,6 +2674,12 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls: New landing page URLs
             path1: New first display URL path component
             path2: New second display URL path component
+            device_preference: Optional device-preference enum value (e.g. ``MOBILE``).
+            display_url: Optional display URL shown in the ad description for
+                ad formats that support it.
+            partial_failure: If True, valid operations succeed when others fail.
+            validate_only: If True, validate the request without executing.
+            response_content_type: Optional response content type override.
 
         Returns:
             Updated ad details
@@ -2663,6 +2693,8 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             final_urls=final_urls,
             path1=path1,
             path2=path2,
+            device_preference=device_preference,
+            display_url=display_url,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -2701,9 +2733,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -2765,9 +2799,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -2828,9 +2864,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -2879,9 +2917,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -2928,9 +2968,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -2971,9 +3013,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3009,9 +3053,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3067,9 +3113,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3132,9 +3180,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3179,9 +3229,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3229,9 +3281,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3279,9 +3333,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3346,9 +3402,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         return await service.create_demand_gen_video_responsive_ad(
             ctx=ctx,
@@ -3396,9 +3454,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3438,9 +3498,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3483,9 +3545,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3531,9 +3595,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3587,9 +3653,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
@@ -3641,9 +3709,11 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad details
+
         """
         status_enum = (
             getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)

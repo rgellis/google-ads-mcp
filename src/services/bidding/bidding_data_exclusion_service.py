@@ -449,9 +449,11 @@ def create_bidding_data_exclusion_tools(
             advertising_channel_types: List of channel types (SEARCH, DISPLAY, SHOPPING, etc.)
             devices: List of device types (DESKTOP, MOBILE, TABLET)
             description: Optional description for the exclusion
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bidding data exclusion details with resource_name
+
         """
         return await service.create_bidding_data_exclusion(
             ctx=ctx,
@@ -492,9 +494,11 @@ def create_bidding_data_exclusion_tools(
             start_date_time: Optional new start date and time (YYYY-MM-DD HH:MM:SS)
             end_date_time: Optional new end date and time (YYYY-MM-DD HH:MM:SS)
             description: Optional new description
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated bidding data exclusion details with list of updated fields
+
         """
         return await service.update_bidding_data_exclusion(
             ctx=ctx,

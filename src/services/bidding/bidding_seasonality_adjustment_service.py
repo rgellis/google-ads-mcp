@@ -504,9 +504,11 @@ def create_bidding_seasonality_adjustment_tools(
             advertising_channel_types: List of channel types (SEARCH, DISPLAY, SHOPPING - required if scope is CHANNEL)
             devices: List of device types (DESKTOP, MOBILE, TABLET)
             description: Optional description for the adjustment
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created bidding seasonality adjustment details with resource_name
+
         """
         return await service.create_bidding_seasonality_adjustment(
             ctx=ctx,
@@ -563,9 +565,11 @@ def create_bidding_seasonality_adjustment_tools(
             advertising_channel_types: Optional list of channel types
                 (DISPLAY, SEARCH, SHOPPING). Only valid when scope is
                 CHANNEL.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated bidding seasonality adjustment details with list of updated fields
+
         """
         return await service.update_bidding_seasonality_adjustment(
             ctx=ctx,

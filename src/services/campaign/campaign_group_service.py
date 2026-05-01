@@ -317,9 +317,11 @@ def create_campaign_group_tools(
         Args:
             customer_id: The customer ID
             name: Campaign group name
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created campaign group details
+
         """
         return await service.create_campaign_group(
             ctx=ctx,
@@ -348,9 +350,11 @@ def create_campaign_group_tools(
             name: New name
             status: New status. ENABLED or REMOVED. (To remove, prefer
                 ``remove_campaign_group``.)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign group details
+
         """
         return await service.update_campaign_group(
             ctx=ctx,

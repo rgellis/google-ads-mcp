@@ -382,9 +382,11 @@ def create_user_data_tools(
             user_identifier_source: Optional source of user data - FIRST_PARTY
                 (your own data) or THIRD_PARTY (data from a partner). Omit to
                 use API default.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Upload result with received operations count and any failure details
+
         """
         return await service.upload_enhanced_conversions(
             ctx=ctx,
@@ -413,9 +415,11 @@ def create_user_data_tools(
             user_data_list: List of user data. Each should contain:
                 - user_identifiers: List of identifiers (hashed_email, hashed_phone_number, mobile_id, etc.)
                 - user_attribute: Optional user attributes (lifetime_value_micros, shopping_loyalty)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Upload result with received operations count and any failure details
+
         """
         return await service.upload_customer_match_data(
             ctx=ctx,

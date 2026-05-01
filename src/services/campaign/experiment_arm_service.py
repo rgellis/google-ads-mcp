@@ -211,9 +211,11 @@ def create_experiment_arm_tools(
                     - name, traffic_split, campaigns: Fields to update (all optional)
                 For remove:
                     - resource_name: The experiment arm resource name
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation results with created/updated/removed resource names
+
         """
         ops = []
         for op_data in operations:

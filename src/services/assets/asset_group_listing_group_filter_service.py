@@ -131,6 +131,7 @@ class AssetGroupListingGroupFilterService:
         filter_type: str,
         parent_listing_group_filter: Optional[str] = None,
         case_value: Optional[Dict[str, Any]] = None,
+        listing_source: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -151,6 +152,8 @@ class AssetGroupListingGroupFilterService:
                 "product_channel" (str enum: ONLINE, LOCAL, ...),
                 "product_condition" (str enum: NEW, USED, REFURBISHED),
                 "product_custom_attribute" ({"value": str, "index": str enum}).
+            listing_source: Immutable. SHOPPING (default for Shopping/PMax)
+                or WEBPAGE (for travel goal asset groups).
 
         Returns:
             Created listing group filter details
@@ -171,6 +174,15 @@ class AssetGroupListingGroupFilterService:
                 lgf.parent_listing_group_filter = parent_listing_group_filter
             if case_value is not None:
                 lgf.case_value = _build_listing_dimension(case_value)
+            if listing_source is not None:
+                from google.ads.googleads.v23.enums.types.listing_group_filter_listing_source import (
+                    ListingGroupFilterListingSourceEnum,
+                )
+
+                lgf.listing_source = getattr(
+                    ListingGroupFilterListingSourceEnum.ListingGroupFilterListingSource,
+                    listing_source,
+                )
 
             operation = AssetGroupListingGroupFilterOperation()
             operation.create = lgf
@@ -343,6 +355,7 @@ def create_asset_group_listing_group_filter_tools(
         filter_type: str,
         parent_listing_group_filter: Optional[str] = None,
         case_value: Optional[Dict[str, Any]] = None,
+        listing_source: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -362,9 +375,13 @@ def create_asset_group_listing_group_filter_tools(
                 product_channel (str enum: ONLINE, LOCAL, ...),
                 product_condition (str enum: NEW, USED, REFURBISHED),
                 product_custom_attribute ({"value": str, "index": str enum}).
+            listing_source: Immutable. SHOPPING (Shopping/PMax) or WEBPAGE
+                (travel-goal asset groups).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created filter details
+
         """
         return await service.create_listing_group_filter(
             ctx=ctx,
@@ -373,6 +390,7 @@ def create_asset_group_listing_group_filter_tools(
             filter_type=filter_type,
             parent_listing_group_filter=parent_listing_group_filter,
             case_value=case_value,
+            listing_source=listing_source,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -424,9 +442,11 @@ def create_asset_group_listing_group_filter_tools(
             listing_group_filter_resource_name: Resource name of the filter
             case_value: New dimension value (see create_listing_group_filter
                 for the dict format)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated filter details
+
         """
         return await service.update_listing_group_filter(
             ctx=ctx,

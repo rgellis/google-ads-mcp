@@ -325,9 +325,11 @@ def create_keyword_tools(
             default_cpc_bid_micros: Default CPC bid for keywords without individual bids
             status: Optional keyword status (ENABLED, PAUSED, REMOVED).
                 Omit to let the API apply its server-side default.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Response with created keyword details
+
         """
         return await service.add_keywords(
             ctx=ctx,
@@ -358,9 +360,11 @@ def create_keyword_tools(
             ad_group_id: The ad group ID
             criterion_id: The criterion ID of the keyword
             cpc_bid_micros: New CPC bid in micros (1 million micros = 1 unit)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated keyword details
+
         """
         return await service.update_keyword_bid(
             ctx=ctx,

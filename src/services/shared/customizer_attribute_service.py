@@ -291,9 +291,11 @@ def create_customizer_attribute_tools(
             customer_id: The customer ID
             name: Name of the customizer attribute (will be used in ad text placeholders)
             attribute_type: Type of attribute - TEXT, NUMBER, PRICE, or PERCENT
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created customizer attribute details with resource_name and attribute_id
+
         """
         return await service.create_customizer_attribute(
             ctx=ctx,

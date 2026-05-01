@@ -537,9 +537,11 @@ def create_custom_audience_tools(
                 INTEREST and PURCHASE_INTENT exist on the enum and are
                 preserved on existing audiences, but the v23 proto explicitly
                 states they are NOT accepted on new creates.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created custom audience details with resource_name and custom_audience_id
+
         """
         return await service.create_custom_audience(
             ctx=ctx,
@@ -575,9 +577,11 @@ def create_custom_audience_tools(
             name: New name (optional)
             description: New description (optional)
             members: New list of members - replaces existing (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated custom audience details with updated_fields list
+
         """
         return await service.update_custom_audience(
             ctx=ctx,

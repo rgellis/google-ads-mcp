@@ -265,9 +265,11 @@ def create_campaign_goal_config_tools(
             retention_additional_high_lifetime_value: Override the goal's
                 additional_high_lifetime_value for this campaign
             retention_target_option: TARGET_ALL or TARGET_HIGH_LIFETIME_VALUE
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation result with resource name
+
         """
         return await service.mutate_campaign_goal_configs(
             ctx=ctx,

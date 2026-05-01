@@ -177,9 +177,10 @@ def create_customer_conversion_goal_tools(
                     - resource_name: Customer conversion goal resource name
                     - biddable: true to include in bidding, false to exclude
             validate_only: Whether to only validate the request
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation results with updated resource names
+
         """
         return await service.mutate_customer_conversion_goals(
             ctx=ctx,

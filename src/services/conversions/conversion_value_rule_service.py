@@ -381,9 +381,11 @@ def create_conversion_value_rule_tools(
             device_types: Optional device filter - MOBILE, DESKTOP, TABLET
             geo_location_geo_target_constants: Optional geo target constant resource names
             audience_user_lists: Optional user list resource names
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created conversion value rule details
+
         """
         status_enum = (
             getattr(ConversionValueRuleStatusEnum.ConversionValueRuleStatus, status)
@@ -424,9 +426,11 @@ def create_conversion_value_rule_tools(
                 Omit to leave unchanged.
             action_operation: New operation - ADD, MULTIPLY, or SET
             action_value: New value
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated conversion value rule details
+
         """
         status_enum = (
             getattr(ConversionValueRuleStatusEnum.ConversionValueRuleStatus, status)

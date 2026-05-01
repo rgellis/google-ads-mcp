@@ -66,6 +66,7 @@ class ExperimentService:
         status: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        sync_enabled: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -83,6 +84,8 @@ class ExperimentService:
                 to let the API apply its default (SETUP).
             start_date: Start date (YYYY-MM-DD format)
             end_date: End date (YYYY-MM-DD format)
+            sync_enabled: Immutable. When True the experiment's trial campaigns
+                stay in sync with the base campaign on Search-style edits.
 
         Returns:
             Created experiment details
@@ -111,6 +114,8 @@ class ExperimentService:
                 experiment.start_date = start_date
             if end_date:
                 experiment.end_date = end_date
+            if sync_enabled is not None:
+                experiment.sync_enabled = sync_enabled
 
             # Create operation
             operation = ExperimentOperation()
@@ -651,6 +656,7 @@ def create_experiment_tools(
         status: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        sync_enabled: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -674,9 +680,14 @@ def create_experiment_tools(
                 let the API default to SETUP.
             start_date: Start date in YYYY-MM-DD format (optional)
             end_date: End date in YYYY-MM-DD format (optional)
+            sync_enabled: Immutable. When True, the experiment's trial
+                campaigns stay in sync with their base campaigns on
+                Search-style edits.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created experiment details with resource_name and experiment_id
+
         """
         return await service.create_experiment(
             ctx=ctx,
@@ -688,6 +699,7 @@ def create_experiment_tools(
             status=status,
             start_date=start_date,
             end_date=end_date,
+            sync_enabled=sync_enabled,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -887,9 +899,11 @@ def create_experiment_tools(
             description: New experiment description
             status: Optional new status (SETUP, INITIATED, ENABLED,
                 HALTED, PROMOTED, REMOVED). Omit to leave unchanged.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated experiment details including resource_name
+
         """
         return await service.update_experiment(
             ctx=ctx,

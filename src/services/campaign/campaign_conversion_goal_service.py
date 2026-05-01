@@ -174,28 +174,10 @@ def create_campaign_conversion_goal_tools(
             origin: Conversion origin - WEBSITE, APP, UPLOAD, STORE, PHONE_CALL_FROM_ADS, etc.
             biddable: Whether to use these conversions for bidding optimization
             validate_only: If true, only validates without executing
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign conversion goal details
 
-        Example:
-            # Exclude app downloads from bidding for a specific campaign
-            result = await update_campaign_conversion_goal(
-                customer_id="1234567890",
-                campaign_id="9876543210",
-                category="DOWNLOAD",
-                origin="APP",
-                biddable=False
-            )
-
-            # Include website purchases for bidding
-            result = await update_campaign_conversion_goal(
-                customer_id="1234567890",
-                campaign_id="9876543210",
-                category="PURCHASE",
-                origin="WEBSITE",
-                biddable=True
-            )
         """
         # Convert string enums to proper enum types
         category_enum = getattr(

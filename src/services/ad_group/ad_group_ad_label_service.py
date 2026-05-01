@@ -292,9 +292,11 @@ def create_ad_group_ad_label_tools(
             customer_id: The customer ID
             ad_group_ad_resource_name: Resource name of the ad group ad
             label_resource_name: Resource name of the label
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad group ad label details with resource_name
+
         """
         return await service.create_ad_group_ad_label(
             ctx=ctx,

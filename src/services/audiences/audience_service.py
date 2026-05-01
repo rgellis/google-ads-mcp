@@ -68,6 +68,8 @@ class AudienceService:
         dimensions: List[Dict[str, Any]],
         description: Optional[str] = None,
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
+        scope: Optional[str] = None,
+        asset_group: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -84,6 +86,11 @@ class AudienceService:
             dimensions: List of audience dimensions to include
             description: Audience description (optional, per proto)
             exclusion_dimensions: Optional list of dimensions to exclude
+            scope: Defines the scope this audience can be used in.
+                CUSTOMER (default — shared across the account) or
+                ASSET_GROUP (exclusive to a single asset group).
+            asset_group: Immutable. Required when ``scope`` is ASSET_GROUP.
+                Resource name of the asset group this audience is scoped to.
 
         Returns:
             Created audience details
@@ -108,6 +115,15 @@ class AudienceService:
                     exclusion_dimensions[0]
                 )
                 audience.exclusion_dimension = exclusion
+
+            if scope is not None:
+                from google.ads.googleads.v23.enums.types.audience_scope import (
+                    AudienceScopeEnum,
+                )
+
+                audience.scope = getattr(AudienceScopeEnum.AudienceScope, scope)
+            if asset_group is not None:
+                audience.asset_group = asset_group
 
             # Create operation
             operation = AudienceOperation()
@@ -516,6 +532,8 @@ def create_audience_tools(
         dimensions: List[Dict[str, Any]],
         description: Optional[str] = None,
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
+        scope: Optional[str] = None,
+        asset_group: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -543,9 +561,15 @@ def create_audience_tools(
                     - LIFE_EVENT: life_event_resource (resource name)
                     - DETAILED_DEMOGRAPHIC: demographic_resource (resource name)
             exclusion_dimensions: Optional list of dimensions to exclude (same format as dimensions)
+            scope: CUSTOMER (default — shared across the account) or
+                ASSET_GROUP (exclusive to a single asset group).
+            asset_group: Immutable. Required when ``scope`` is ASSET_GROUP.
+                Resource name of the asset group this audience is scoped to.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created audience details including resource_name and audience_id
+
         """
         return await service.create_combined_audience(
             ctx=ctx,
@@ -554,6 +578,8 @@ def create_audience_tools(
             dimensions=dimensions,
             description=description,
             exclusion_dimensions=exclusion_dimensions,
+            scope=scope,
+            asset_group=asset_group,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -583,9 +609,11 @@ def create_audience_tools(
             audience_id: The audience ID to update
             name: Optional new name
             description: Optional new description
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated audience details with list of updated fields
+
         """
         return await service.update_audience(
             ctx=ctx,

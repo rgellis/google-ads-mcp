@@ -216,9 +216,11 @@ def create_recommendation_subscription_tools(
             recommendation_type: Type to auto-apply - CAMPAIGN_BUDGET, KEYWORD,
                 MAXIMIZE_CLICKS_OPT_IN, TARGET_CPA_OPT_IN, etc.
             status: ENABLED or PAUSED. Required.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created subscription details
+
         """
         return await service.create_subscription(
             ctx=ctx,
@@ -249,9 +251,11 @@ def create_recommendation_subscription_tools(
             customer_id: The customer ID
             subscription_resource_name: Resource name of the subscription
             status: New status. ENABLED or PAUSED.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated subscription details
+
         """
         return await service.update_subscription(
             ctx=ctx,

@@ -539,9 +539,11 @@ def create_batch_job_tools(
             execution_limit_seconds: Optional Immutable upper bound on how
                 long the job can run, in seconds. If the job exceeds this,
                 it is canceled. Settable on create only.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created batch job details with resource_name
+
         """
         return await service.create_batch_job(
             ctx=ctx,

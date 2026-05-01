@@ -72,6 +72,10 @@ class ConversionService:
         attribution_model: Optional[str] = None,
         click_through_lookback_window_days: Optional[int] = None,
         view_through_lookback_window_days: Optional[int] = None,
+        primary_for_goal: Optional[bool] = None,
+        include_in_conversions_metric: Optional[bool] = None,
+        phone_call_duration_seconds: Optional[int] = None,
+        app_id: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -100,6 +104,17 @@ class ConversionService:
             view_through_lookback_window_days: View lookback window (1-30).
                 Omit (None) to let the API apply its default. Must be unset for
                 AD_CALL and WEBSITE_CALL types.
+            primary_for_goal: Whether this conversion action is the primary
+                action for its conversion goal. Optional.
+            include_in_conversions_metric: Whether the conversions counted
+                under this action are reported in the ``conversions`` and
+                ``conversions_value`` metrics. Optional.
+            phone_call_duration_seconds: For phone-call conversion types,
+                the minimum call duration (in seconds) required to count as
+                a conversion. Optional.
+            app_id: For mobile-app conversion types, the app store ID
+                (e.g. iOS bundle ID or Android package name) the action is
+                associated with. Optional.
 
         Returns:
             Created conversion action details
@@ -167,6 +182,19 @@ class ConversionService:
                 conversion_action.view_through_lookback_window_days = (
                     view_through_lookback_window_days
                 )
+
+            if primary_for_goal is not None:
+                conversion_action.primary_for_goal = primary_for_goal
+            if include_in_conversions_metric is not None:
+                conversion_action.include_in_conversions_metric = (
+                    include_in_conversions_metric
+                )
+            if phone_call_duration_seconds is not None:
+                conversion_action.phone_call_duration_seconds = (
+                    phone_call_duration_seconds
+                )
+            if app_id is not None:
+                conversion_action.app_id = app_id
 
             # Create operation
             operation = ConversionActionOperation()
@@ -390,6 +418,10 @@ def create_conversion_tools(
         attribution_model: Optional[str] = None,
         click_through_lookback_window_days: Optional[int] = None,
         view_through_lookback_window_days: Optional[int] = None,
+        primary_for_goal: Optional[bool] = None,
+        include_in_conversions_metric: Optional[bool] = None,
+        phone_call_duration_seconds: Optional[int] = None,
+        app_id: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -420,9 +452,18 @@ def create_conversion_tools(
                 Omit to use API default. Must be omitted for AD_CALL and WEBSITE_CALL.
             view_through_lookback_window_days: View lookback window (1-30 days).
                 Omit to use API default. Must be omitted for AD_CALL and WEBSITE_CALL.
+            primary_for_goal: Whether this action is primary for its conversion goal.
+            include_in_conversions_metric: Whether to count under the
+                ``conversions`` / ``conversions_value`` metrics.
+            phone_call_duration_seconds: For phone-call conversion types,
+                minimum call duration in seconds to count as a conversion.
+            app_id: For mobile-app conversion types, the app store ID
+                (iOS bundle ID or Android package name).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created conversion action details
+
         """
         return await service.create_conversion_action(
             ctx=ctx,
@@ -436,6 +477,10 @@ def create_conversion_tools(
             attribution_model=attribution_model,
             click_through_lookback_window_days=click_through_lookback_window_days,
             view_through_lookback_window_days=view_through_lookback_window_days,
+            primary_for_goal=primary_for_goal,
+            include_in_conversions_metric=include_in_conversions_metric,
+            phone_call_duration_seconds=phone_call_duration_seconds,
+            app_id=app_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -464,9 +509,11 @@ def create_conversion_tools(
             default_value: New default value (optional)
             always_use_default_value: Whether to always use default value (optional)
             counting_type: New counting type - ONE_PER_CLICK or MANY_PER_CLICK (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated conversion action details
+
         """
         return await service.update_conversion_action(
             ctx=ctx,

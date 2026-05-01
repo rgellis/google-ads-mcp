@@ -395,9 +395,11 @@ def create_ad_group_label_tools(
             customer_id: The customer ID
             ad_group_id: The ad group ID
             label_id: The label ID to apply
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad group label details including resource_name
+
         """
         return await service.apply_label_to_ad_group(
             ctx=ctx,
@@ -424,9 +426,11 @@ def create_ad_group_label_tools(
             ad_group_label_pairs: List of dicts with:
                 - ad_group_id: The ad group ID
                 - label_id: The label ID to apply
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created ad group label details
+
         """
         return await service.apply_labels_to_ad_groups(
             ctx=ctx,

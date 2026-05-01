@@ -392,6 +392,10 @@ class UserListService:
         description: Optional[str] = None,
         membership_status: Optional[str] = None,
         membership_life_span: Optional[int] = None,
+        account_user_list_status: Optional[str] = None,
+        closing_reason: Optional[str] = None,
+        eligible_for_search: Optional[bool] = None,
+        integration_code: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -406,6 +410,15 @@ class UserListService:
             description: New description (optional)
             membership_status: New status - OPEN or CLOSED (optional)
             membership_life_span: New membership life span in days (optional)
+            account_user_list_status: Account-level user-list status
+                (ENABLED or REMOVED). Whether the list is shared with
+                this account.
+            closing_reason: Reason this list is closed if it is closed —
+                e.g. UNUSED.
+            eligible_for_search: Whether the list is eligible for the
+                Search network.
+            integration_code: Free-text integration code stored on the
+                list.
 
         Returns:
             Updated user list details
@@ -439,6 +452,35 @@ class UserListService:
             if membership_life_span is not None:
                 user_list.membership_life_span = membership_life_span
                 update_mask_fields.append("membership_life_span")
+
+            if account_user_list_status is not None:
+                from google.ads.googleads.v23.enums.types.user_list_access_status import (
+                    UserListAccessStatusEnum,
+                )
+
+                user_list.account_user_list_status = getattr(
+                    UserListAccessStatusEnum.UserListAccessStatus,
+                    account_user_list_status,
+                )
+                update_mask_fields.append("account_user_list_status")
+
+            if closing_reason is not None:
+                from google.ads.googleads.v23.enums.types.user_list_closing_reason import (
+                    UserListClosingReasonEnum,
+                )
+
+                user_list.closing_reason = getattr(
+                    UserListClosingReasonEnum.UserListClosingReason, closing_reason
+                )
+                update_mask_fields.append("closing_reason")
+
+            if eligible_for_search is not None:
+                user_list.eligible_for_search = eligible_for_search
+                update_mask_fields.append("eligible_for_search")
+
+            if integration_code is not None:
+                user_list.integration_code = integration_code
+                update_mask_fields.append("integration_code")
 
             if not update_mask_fields:
                 raise ValueError("at least one updatable field must be provided")
@@ -575,9 +617,11 @@ def create_user_list_tools(
                 0-540). Omit to use API default.
             membership_status: OPEN (can add users) or CLOSED. Omit to use
                 API default (OPEN).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created user list details including resource_name and user_list_id
+
         """
         return await service.create_basic_user_list(
             ctx=ctx,
@@ -617,9 +661,11 @@ def create_user_list_tools(
             data_source_type: Optional CRM data source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
                 THIRD_PARTY_PARTNER_DATA. Omit to use API default.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created user list details including resource_name and user_list_id
+
         """
         return await service.create_crm_based_user_list(
             ctx=ctx,
@@ -657,16 +703,11 @@ def create_user_list_tools(
             description: Optional description
             membership_life_span: How long users remain in the list (days,
                 0-540). Omit to use API default.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Example:
-            rules=[
-                {"user_list_ids": ["123", "456"], "operator": "ALL"},
-                {"user_list_ids": ["789"], "operator": "NONE"}
-            ]
-            This creates: (Users in both 123 AND 456) AND (NOT in 789)
 
-        Returns:
-            Created user list details including resource_name and user_list_id
         """
         return await service.create_logical_user_list(
             ctx=ctx,
@@ -688,6 +729,10 @@ def create_user_list_tools(
         description: Optional[str] = None,
         membership_status: Optional[str] = None,
         membership_life_span: Optional[int] = None,
+        account_user_list_status: Optional[str] = None,
+        closing_reason: Optional[str] = None,
+        eligible_for_search: Optional[bool] = None,
+        integration_code: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -701,9 +746,17 @@ def create_user_list_tools(
             description: New description (optional)
             membership_status: New status - OPEN or CLOSED (optional)
             membership_life_span: New membership life span in days (optional)
+            account_user_list_status: ENABLED or REMOVED — whether the
+                list is shared with this account.
+            closing_reason: Reason the list is closed (e.g. UNUSED).
+            eligible_for_search: Whether the list is eligible for Search
+                network usage.
+            integration_code: Optional integration code stored on the list.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated user list details with updated_fields list
+
         """
         return await service.update_user_list(
             ctx=ctx,
@@ -713,6 +766,10 @@ def create_user_list_tools(
             description=description,
             membership_status=membership_status,
             membership_life_span=membership_life_span,
+            account_user_list_status=account_user_list_status,
+            closing_reason=closing_reason,
+            eligible_for_search=eligible_for_search,
+            integration_code=integration_code,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

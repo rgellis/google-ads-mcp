@@ -425,6 +425,8 @@ class AssetService:
         customer_id: str,
         asset_id: str,
         name: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -436,6 +438,10 @@ class AssetService:
             customer_id: The customer ID
             asset_id: The asset ID to update
             name: New name for the asset
+            tracking_url_template: Optional URL template for constructing
+                a tracking URL.
+            final_url_suffix: Optional URL template for appending params
+                to the landing page URL served with parallel tracking.
 
         Returns:
             Updated asset details
@@ -453,6 +459,14 @@ class AssetService:
             if name is not None:
                 asset.name = name
                 update_mask_fields.append("name")
+
+            if tracking_url_template is not None:
+                asset.tracking_url_template = tracking_url_template
+                update_mask_fields.append("tracking_url_template")
+
+            if final_url_suffix is not None:
+                asset.final_url_suffix = final_url_suffix
+                update_mask_fields.append("final_url_suffix")
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")
@@ -2795,9 +2809,11 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             customer_id: The customer ID
             text: The text content
             name: Optional name for the asset
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset details including resource_name and asset_id
+
         """
         return await service.create_text_asset(
             ctx=ctx,
@@ -2826,9 +2842,11 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             image_data: The image data as bytes
             name: Name for the asset
             mime_type: MIME type (image/jpeg, image/png, image/gif)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset details including resource_name and asset_id
+
         """
         return await service.create_image_asset(
             ctx=ctx,
@@ -2856,9 +2874,11 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             customer_id: The customer ID
             youtube_video_id: The YouTube video ID (e.g., "dQw4w9WgXcQ")
             name: Optional name for the asset
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset details including resource_name and asset_id
+
         """
         return await service.create_youtube_video_asset(
             ctx=ctx,
@@ -2903,6 +2923,8 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         customer_id: str,
         asset_id: str,
         name: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2911,11 +2933,15 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
 
         Updatable fields:
             - name (str): The name of the asset
+            - tracking_url_template (str): URL template for constructing a tracking URL
+            - final_url_suffix (str): URL template for appending params to the final URL
 
         Args:
             customer_id: The customer ID
             asset_id: The asset ID to update
             name: New name for the asset
+            tracking_url_template: New tracking URL template
+            final_url_suffix: New final URL suffix
             partial_failure: Whether to enable partial failure
             validate_only: Whether to only validate without executing
             response_content_type: Response content type
@@ -2928,6 +2954,8 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             customer_id=customer_id,
             asset_id=asset_id,
             name=name,
+            tracking_url_template=tracking_url_template,
+            final_url_suffix=final_url_suffix,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -4245,9 +4273,11 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             customer_id: The customer ID
             youtube_videos: List of YouTube video asset resource names
             name: Optional name for the asset
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset details
+
         """
         return await service.create_youtube_video_list_asset(
             ctx=ctx,

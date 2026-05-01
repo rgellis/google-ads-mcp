@@ -930,9 +930,11 @@ def create_customer_negative_criterion_tools(
         Args:
             customer_id: The customer ID
             placement_urls: List of website URLs to exclude (e.g., ["example.com", "site.com"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_placement_exclusions(
             ctx=ctx,
@@ -968,9 +970,11 @@ def create_customer_negative_criterion_tools(
                 - EMBEDDED_VIDEO
                 - LIVE_STREAMING_VIDEO
                 - SOCIAL_ISSUES
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_content_label_exclusions(
             ctx=ctx,
@@ -1045,9 +1049,11 @@ def create_customer_negative_criterion_tools(
         Args:
             customer_id: The customer ID
             app_ids: List of mobile app IDs to exclude (e.g., ["com.example.app"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_mobile_application_exclusions(
             ctx=ctx,
@@ -1072,9 +1078,11 @@ def create_customer_negative_criterion_tools(
             customer_id: The customer ID
             category_constants: List of mobile app category constant resource names
                 (e.g., ["mobileAppCategoryConstants/60001"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_mobile_app_category_exclusions(
             ctx=ctx,
@@ -1098,9 +1106,11 @@ def create_customer_negative_criterion_tools(
         Args:
             customer_id: The customer ID
             video_ids: List of YouTube video IDs to exclude (e.g., ["dQw4w9WgXcQ"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_youtube_video_exclusions(
             ctx=ctx,
@@ -1124,9 +1134,11 @@ def create_customer_negative_criterion_tools(
         Args:
             customer_id: The customer ID
             channel_ids: List of YouTube channel IDs to exclude (e.g., ["UCxxxxxx"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_youtube_channel_exclusions(
             ctx=ctx,
@@ -1151,9 +1163,11 @@ def create_customer_negative_criterion_tools(
             customer_id: The customer ID
             ip_addresses: List of IP addresses or CIDR ranges to exclude
                 (e.g., ["192.168.1.0/24", "10.0.0.1"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created customer negative criteria with resource names and IDs
+
         """
         return await service.add_ip_block_exclusions(
             ctx=ctx,
@@ -1181,9 +1195,11 @@ def create_customer_negative_criterion_tools(
             customer_id: The customer ID
             shared_set_resource_name: Resource name of the shared set
                 (e.g., "customers/1234567890/sharedSets/111222")
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created customer negative criterion with resource name and ID
+
         """
         return await service.add_negative_keyword_list_exclusion(
             ctx=ctx,
@@ -1208,9 +1224,11 @@ def create_customer_negative_criterion_tools(
             customer_id: The customer ID
             shared_set_resource_name: Resource name of the shared set (placement list)
                 (e.g., "customers/1234567890/sharedSets/111222")
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created customer negative criterion with resource name and ID
+
         """
         return await service.add_placement_list_exclusion(
             ctx=ctx,

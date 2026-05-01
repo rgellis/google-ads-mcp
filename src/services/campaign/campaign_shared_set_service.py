@@ -527,9 +527,11 @@ def create_campaign_shared_set_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             shared_set_id: The shared set ID to attach
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created campaign shared set attachment details
+
         """
         return await service.attach_shared_set_to_campaign(
             ctx=ctx,
@@ -560,9 +562,11 @@ def create_campaign_shared_set_tools(
                 any "status" key in an attachment dict is ignored. Use
                 ``update_campaign_shared_set_status`` (detach + re-attach)
                 to toggle.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Mutation response with results for each attachment
+
         """
         return await service.attach_shared_sets_to_campaigns(
             ctx=ctx,
@@ -590,9 +594,11 @@ def create_campaign_shared_set_tools(
             campaign_id: The campaign ID
             shared_set_id: The shared set ID
             status: New status - ENABLED or REMOVED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign shared set details
+
         """
         return await service.update_campaign_shared_set_status(
             ctx=ctx,
@@ -651,9 +657,11 @@ def create_campaign_shared_set_tools(
             customer_id: The customer ID
             campaign_id: The campaign ID
             shared_set_id: The shared set ID to detach
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Detachment result
+
         """
         return await service.detach_shared_set_from_campaign(
             ctx=ctx,

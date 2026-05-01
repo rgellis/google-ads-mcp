@@ -512,9 +512,11 @@ def create_campaign_asset_tools(
                 - LEAD_FORM (for lead form extensions)
                 - BUSINESS_LOGO, MARKETING_IMAGE (for image assets)
                 - YOUTUBE_VIDEO (for video assets)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created campaign asset link details including resource_name
+
         """
         # Convert string enum to proper enum type
         field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
@@ -547,9 +549,11 @@ def create_campaign_asset_tools(
             asset_links: List of dicts with:
                 - asset_id: The asset ID to link
                 - field_type: The field type for the asset
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created campaign asset links
+
         """
         return await service.link_multiple_assets_to_campaign(
             ctx=ctx,
@@ -656,9 +660,11 @@ def create_campaign_asset_tools(
             asset_id: The asset ID
             field_type: The field type of the asset link (e.g., HEADLINE, SITELINK, CALLOUT)
             status: New status for the asset link - ENABLED, REMOVED, PAUSED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign asset details including resource_name
+
         """
         return await service.update_campaign_asset(
             ctx=ctx,

@@ -88,6 +88,16 @@ class CampaignService:
         eu_political_advertising: str = "DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        advertising_channel_sub_type: Optional[str] = None,
+        ad_serving_optimization_status: Optional[str] = None,
+        payment_mode: Optional[str] = None,
+        video_brand_safety_suitability: Optional[str] = None,
+        listing_type: Optional[str] = None,
+        campaign_group: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
+        brand_guidelines_enabled: Optional[bool] = None,
+        hotel_property_asset_set: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -136,6 +146,29 @@ class CampaignService:
             end_date: Campaign end. Accepts "YYYY-MM-DD" (interpreted as
                 start of day, exclusive — campaign does NOT serve on this
                 date) or full "YYYY-MM-DD HH:MM:SS"
+            advertising_channel_sub_type: Immutable. Sub-type within the
+                channel (e.g. SEARCH_MOBILE_APP, DISPLAY_SMART_CAMPAIGN,
+                APP_CAMPAIGN). Cannot be changed after creation.
+            ad_serving_optimization_status: Optimization-status setting
+                (e.g. OPTIMIZE, CONVERSION_OPTIMIZE, ROTATE).
+            payment_mode: Payment mode for the campaign (CLICKS,
+                CONVERSION_VALUE, CONVERSIONS, GUEST_STAY).
+            video_brand_safety_suitability: Brand-safety inventory type
+                for video campaigns (EXPANDED_INVENTORY,
+                STANDARD_INVENTORY, LIMITED_INVENTORY).
+            listing_type: Immutable. Listing type for shopping/display
+                campaigns (e.g. VEHICLES).
+            campaign_group: Optional resource name of the parent
+                CampaignGroup.
+            tracking_url_template: URL template for constructing a
+                tracking URL.
+            final_url_suffix: URL template for appending params to the
+                final URL.
+            brand_guidelines_enabled: Immutable. Enables brand-guidelines
+                features for the campaign.
+            hotel_property_asset_set: Immutable. Resource name of the
+                AssetSet of HotelProperty assets attached to this
+                campaign (Performance Max for travel goals).
 
         Returns:
             Created campaign details
@@ -239,6 +272,65 @@ class CampaignService:
                 campaign.start_date_time = _normalize_campaign_datetime(start_date)
             if end_date:
                 campaign.end_date_time = _normalize_campaign_datetime(end_date)
+
+            if advertising_channel_sub_type is not None:
+                from google.ads.googleads.v23.enums.types.advertising_channel_sub_type import (
+                    AdvertisingChannelSubTypeEnum,
+                )
+
+                campaign.advertising_channel_sub_type = getattr(
+                    AdvertisingChannelSubTypeEnum.AdvertisingChannelSubType,
+                    advertising_channel_sub_type,
+                )
+
+            if ad_serving_optimization_status is not None:
+                from google.ads.googleads.v23.enums.types.ad_serving_optimization_status import (
+                    AdServingOptimizationStatusEnum,
+                )
+
+                campaign.ad_serving_optimization_status = getattr(
+                    AdServingOptimizationStatusEnum.AdServingOptimizationStatus,
+                    ad_serving_optimization_status,
+                )
+
+            if payment_mode is not None:
+                from google.ads.googleads.v23.enums.types.payment_mode import (
+                    PaymentModeEnum,
+                )
+
+                campaign.payment_mode = getattr(
+                    PaymentModeEnum.PaymentMode, payment_mode
+                )
+
+            if video_brand_safety_suitability is not None:
+                from google.ads.googleads.v23.enums.types.brand_safety_suitability import (
+                    BrandSafetySuitabilityEnum,
+                )
+
+                campaign.video_brand_safety_suitability = getattr(
+                    BrandSafetySuitabilityEnum.BrandSafetySuitability,
+                    video_brand_safety_suitability,
+                )
+
+            if listing_type is not None:
+                from google.ads.googleads.v23.enums.types.listing_type import (
+                    ListingTypeEnum,
+                )
+
+                campaign.listing_type = getattr(
+                    ListingTypeEnum.ListingType, listing_type
+                )
+
+            if campaign_group is not None:
+                campaign.campaign_group = campaign_group
+            if tracking_url_template is not None:
+                campaign.tracking_url_template = tracking_url_template
+            if final_url_suffix is not None:
+                campaign.final_url_suffix = final_url_suffix
+            if brand_guidelines_enabled is not None:
+                campaign.brand_guidelines_enabled = brand_guidelines_enabled
+            if hotel_property_asset_set is not None:
+                campaign.hotel_property_asset_set = hotel_property_asset_set
 
             # Create the operation
             operation = CampaignOperation()
@@ -537,6 +629,16 @@ def create_campaign_tools(
         eu_political_advertising: str = "DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        advertising_channel_sub_type: Optional[str] = None,
+        ad_serving_optimization_status: Optional[str] = None,
+        payment_mode: Optional[str] = None,
+        video_brand_safety_suitability: Optional[str] = None,
+        listing_type: Optional[str] = None,
+        campaign_group: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
+        brand_guidelines_enabled: Optional[bool] = None,
+        hotel_property_asset_set: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -589,9 +691,22 @@ def create_campaign_tools(
             end_date: Campaign end. Accepts "YYYY-MM-DD" (interpreted as
                 start of day, exclusive — campaign does NOT serve on this
                 date) or full "YYYY-MM-DD HH:MM:SS"
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            payment_mode: Payment mode (CLICKS, CONVERSION_VALUE, CONVERSIONS, GUEST_STAY).
+            hotel_property_asset_set: Immutable. AssetSet resource name for HotelProperty assets (PMax travel).
+            final_url_suffix: URL template for appending params to the final URL.
+            advertising_channel_sub_type: Immutable. Sub-type within the channel (e.g. SEARCH_MOBILE_APP).
+            brand_guidelines_enabled: Immutable. Enables brand-guidelines features.
+            video_brand_safety_suitability: Brand-safety inventory type (EXPANDED_INVENTORY, STANDARD_INVENTORY, LIMITED_INVENTORY).
+            tracking_url_template: URL template for constructing a tracking URL.
+            campaign_group: Resource name of the parent CampaignGroup.
+            ad_serving_optimization_status: Optimization-status setting (OPTIMIZE, CONVERSION_OPTIMIZE, ROTATE).
+            listing_type: Immutable. Listing type for shopping/display campaigns.
 
-        Returns:
-            Created campaign details
+
+
         """
         channel_type_enum = getattr(
             AdvertisingChannelTypeEnum.AdvertisingChannelType, advertising_channel_type
@@ -621,6 +736,16 @@ def create_campaign_tools(
             eu_political_advertising=eu_political_advertising,
             start_date=start_date,
             end_date=end_date,
+            advertising_channel_sub_type=advertising_channel_sub_type,
+            ad_serving_optimization_status=ad_serving_optimization_status,
+            payment_mode=payment_mode,
+            video_brand_safety_suitability=video_brand_safety_suitability,
+            listing_type=listing_type,
+            campaign_group=campaign_group,
+            tracking_url_template=tracking_url_template,
+            final_url_suffix=final_url_suffix,
+            brand_guidelines_enabled=brand_guidelines_enabled,
+            hotel_property_asset_set=hotel_property_asset_set,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -647,9 +772,11 @@ def create_campaign_tools(
             status: New campaign status (ENABLED, PAUSED, REMOVED) (optional)
             start_date: New start date (YYYY-MM-DD) (optional)
             end_date: New end date (YYYY-MM-DD) (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign details
+
         """
         # Convert string enum to proper enum type if provided
         status_enum = (
@@ -692,9 +819,11 @@ def create_campaign_tools(
                 - main_color: str (optional)
                 - accent_color: str (optional)
                 - font_family: str (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Enablement results per campaign
+
         """
         return await service.enable_p_max_brand_guidelines(
             ctx=ctx,

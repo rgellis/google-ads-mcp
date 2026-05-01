@@ -67,6 +67,8 @@ class AccountBudgetProposalService:
         proposed_start_date_time: Optional[str] = None,
         proposed_end_date_time: Optional[str] = None,
         proposed_end_time_type: Optional[TimeTypeEnum.TimeType] = None,
+        proposed_purchase_order_number: Optional[str] = None,
+        proposed_notes: Optional[str] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create an account budget proposal.
@@ -122,6 +124,11 @@ class AccountBudgetProposalService:
                 proposal.proposed_end_date_time = proposed_end_date_time
             elif proposed_end_time_type:
                 proposal.proposed_end_time_type = proposed_end_time_type
+
+            if proposed_purchase_order_number is not None:
+                proposal.proposed_purchase_order_number = proposed_purchase_order_number
+            if proposed_notes is not None:
+                proposal.proposed_notes = proposed_notes
 
             # Create operation
             operation = AccountBudgetProposalOperation()
@@ -388,6 +395,8 @@ def create_account_budget_proposal_tools(
         proposed_start_date_time: Optional[str] = None,
         proposed_end_date_time: Optional[str] = None,
         proposed_end_time_type: Optional[str] = None,
+        proposed_purchase_order_number: Optional[str] = None,
+        proposed_notes: Optional[str] = None,
         validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create an account budget proposal for account-level budget management.
@@ -405,6 +414,10 @@ def create_account_budget_proposal_tools(
             proposed_start_date_time: Start date/time (YYYY-MM-DD HH:MM:SS format)
             proposed_end_date_time: End date/time (YYYY-MM-DD HH:MM:SS format)
             proposed_end_time_type: End time type (NEVER, FOREVER)
+            proposed_purchase_order_number: Immutable. Optional purchase order
+                number for the budget. Sent to invoices.
+            proposed_notes: Immutable. Optional free-text notes about the
+                budget. Stored on the budget; not sent to invoices.
             validate_only: If true, only validates without executing
 
         Returns:
@@ -440,6 +453,8 @@ def create_account_budget_proposal_tools(
             proposed_start_date_time=proposed_start_date_time,
             proposed_end_date_time=proposed_end_date_time,
             proposed_end_time_type=end_time_enum,
+            proposed_purchase_order_number=proposed_purchase_order_number,
+            proposed_notes=proposed_notes,
             validate_only=validate_only,
         )
 

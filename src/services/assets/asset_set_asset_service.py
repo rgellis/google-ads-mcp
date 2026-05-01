@@ -177,9 +177,11 @@ def create_asset_set_asset_tools(
             customer_id: The customer ID
             asset_resource_name: Resource name of the asset
             asset_set_resource_name: Resource name of the asset set
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset set asset link details
+
         """
         return await service.add_asset_to_set(
             ctx=ctx,

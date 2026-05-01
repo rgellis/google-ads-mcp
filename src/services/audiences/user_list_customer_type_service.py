@@ -189,9 +189,11 @@ def create_user_list_customer_type_tools(
             customer_type_category: Category - PURCHASERS, HIGH_VALUE_CUSTOMERS,
                 DISENGAGED_CUSTOMERS, QUALIFIED_LEADS, CONVERTED_LEADS,
                 PAID_SUBSCRIBERS, LOYALTY_SIGN_UPS, CART_ABANDONERS
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created classification details
+
         """
         return await service.add_customer_type(
             ctx=ctx,

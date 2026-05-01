@@ -247,9 +247,11 @@ def create_smart_campaign_setting_tools(
             business_profile_location: Business Profile location resource
                 name in form "locations/{locationId}"
                 (business_setting oneof)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated smart campaign setting details
+
         """
         return await service.update_smart_campaign_setting(
             ctx=ctx,

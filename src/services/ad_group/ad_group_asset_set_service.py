@@ -298,9 +298,11 @@ def create_ad_group_asset_set_tools(
             customer_id: The customer ID
             ad_group_resource_name: Resource name of the ad group
             asset_set_resource_name: Resource name of the asset set
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad group asset set details with resource_name
+
         """
         return await service.create_ad_group_asset_set(
             ctx=ctx,

@@ -479,9 +479,11 @@ def create_campaign_draft_tools(
             customer_id: The customer ID
             base_campaign: Resource name of the base campaign (e.g., customers/123/campaigns/456)
             draft_name: Name for the campaign draft
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created campaign draft details with resource_name and status
+
         """
         return await service.create_campaign_draft(
             ctx=ctx,
@@ -508,9 +510,11 @@ def create_campaign_draft_tools(
             customer_id: The customer ID
             draft_resource_name: Resource name of the draft to update
             draft_name: Optional new name for the draft
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated campaign draft details with list of updated fields
+
         """
         return await service.update_campaign_draft(
             ctx=ctx,

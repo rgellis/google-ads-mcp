@@ -485,9 +485,11 @@ def create_custom_interest_tools(
                 - CUSTOM_INTENT: For reaching users actively researching
             status: Optional. ENABLED or REMOVED. Omit to let the API
                 apply its default (ENABLED).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created custom interest details with resource_name and custom_interest_id
+
         """
         return await service.create_custom_interest(
             ctx=ctx,
@@ -523,9 +525,11 @@ def create_custom_interest_tools(
             description: New description (optional)
             members: New list of members - replaces existing (optional)
             status: New status - ENABLED or REMOVED (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated custom interest details with updated_fields list
+
         """
         return await service.update_custom_interest(
             ctx=ctx,

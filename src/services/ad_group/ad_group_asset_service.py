@@ -538,9 +538,11 @@ def create_ad_group_asset_tools(
                 - YOUTUBE_VIDEO (for video assets)
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created ad group asset link details including resource_name
+
         """
         return await service.link_asset_to_ad_group(
             ctx=ctx,
@@ -573,9 +575,11 @@ def create_ad_group_asset_tools(
                 - field_type: The field type for the asset
                 - status: Optional status (ENABLED, PAUSED, REMOVED).
                   Omit to let the API apply its server-side default.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created ad group asset links
+
         """
         return await service.link_multiple_assets_to_ad_group(
             ctx=ctx,
@@ -606,9 +610,11 @@ def create_ad_group_asset_tools(
             asset_id: The asset ID
             field_type: The field type
             status: New status - ENABLED, PAUSED, or REMOVED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated ad group asset details
+
         """
         return await service.update_ad_group_asset_status(
             ctx=ctx,

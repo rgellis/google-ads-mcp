@@ -284,6 +284,9 @@ def create_youtube_video_upload_tools(
                 to let the API apply its default (UNLISTED). For videos
                 uploaded to the Google-managed channel only UNLISTED is
                 allowed.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
         """
         return await service.create_youtube_video_upload(
             ctx=ctx,
@@ -316,6 +319,9 @@ def create_youtube_video_upload_tools(
             customer_id: The customer ID
             resource_name: Resource name of the video upload
             video_privacy: PUBLIC, PRIVATE, or UNLISTED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
         """
         return await service.update_youtube_video_upload(
             ctx=ctx,

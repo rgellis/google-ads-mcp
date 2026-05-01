@@ -54,6 +54,19 @@ class AdGroupService:
         status: Optional[AdGroupStatusEnum.AdGroupStatus] = None,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
+        cpv_bid_micros: Optional[int] = None,
+        target_cpa_micros: Optional[int] = None,
+        target_cpc_micros: Optional[int] = None,
+        target_cpm_micros: Optional[int] = None,
+        target_cpv_micros: Optional[int] = None,
+        target_roas: Optional[float] = None,
+        percent_cpc_bid_micros: Optional[int] = None,
+        fixed_cpm_micros: Optional[int] = None,
+        ad_rotation_mode: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
+        optimized_targeting_enabled: Optional[bool] = None,
+        exclude_demographic_expansion: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -79,6 +92,30 @@ class AdGroupService:
             status: Ad group status enum value
             cpc_bid_micros: Cost per click bid in micros (1 million micros = 1 unit)
             cpm_bid_micros: Cost per thousand impressions bid in micros
+            cpv_bid_micros: Cost-per-view bid in micros (video).
+            target_cpa_micros: Target CPA in micros for the ad group.
+            target_cpc_micros: Average amount in micros the advertiser is
+                willing to pay per click.
+            target_cpm_micros: Average amount in micros the advertiser is
+                willing to pay per 1000 impressions.
+            target_cpv_micros: Average amount in micros the advertiser is
+                willing to pay per view.
+            target_roas: Target ROAS (e.g. 4.0 for 400%).
+            percent_cpc_bid_micros: Percent CPC bid in micros (a fraction
+                of the advertised price; only valid for hotel ad groups).
+            fixed_cpm_micros: Fixed CPM in micros (only valid for ad
+                groups using FIXED_CPM bidding).
+            ad_rotation_mode: Ad rotation mode (OPTIMIZE or
+                ROTATE_FOREVER).
+            tracking_url_template: URL template for constructing a
+                tracking URL.
+            final_url_suffix: URL template for appending params to the
+                final URL.
+            optimized_targeting_enabled: Whether optimized targeting is
+                enabled for the ad group.
+            exclude_demographic_expansion: When True, demographics are
+                excluded from the targeting types expanded by optimized
+                targeting.
 
         Returns:
             Created ad group details
@@ -107,6 +144,41 @@ class AdGroupService:
                 ad_group.cpc_bid_micros = cpc_bid_micros
             if cpm_bid_micros is not None:
                 ad_group.cpm_bid_micros = cpm_bid_micros
+            if cpv_bid_micros is not None:
+                ad_group.cpv_bid_micros = cpv_bid_micros
+            if target_cpa_micros is not None:
+                ad_group.target_cpa_micros = target_cpa_micros
+            if target_cpc_micros is not None:
+                ad_group.target_cpc_micros = target_cpc_micros
+            if target_cpm_micros is not None:
+                ad_group.target_cpm_micros = target_cpm_micros
+            if target_cpv_micros is not None:
+                ad_group.target_cpv_micros = target_cpv_micros
+            if target_roas is not None:
+                ad_group.target_roas = target_roas
+            if percent_cpc_bid_micros is not None:
+                ad_group.percent_cpc_bid_micros = percent_cpc_bid_micros
+            if fixed_cpm_micros is not None:
+                ad_group.fixed_cpm_micros = fixed_cpm_micros
+
+            if ad_rotation_mode is not None:
+                from google.ads.googleads.v23.enums.types.ad_group_ad_rotation_mode import (
+                    AdGroupAdRotationModeEnum,
+                )
+
+                ad_group.ad_rotation_mode = getattr(
+                    AdGroupAdRotationModeEnum.AdGroupAdRotationMode,
+                    ad_rotation_mode,
+                )
+
+            if tracking_url_template is not None:
+                ad_group.tracking_url_template = tracking_url_template
+            if final_url_suffix is not None:
+                ad_group.final_url_suffix = final_url_suffix
+            if optimized_targeting_enabled is not None:
+                ad_group.optimized_targeting_enabled = optimized_targeting_enabled
+            if exclude_demographic_expansion is not None:
+                ad_group.exclude_demographic_expansion = exclude_demographic_expansion
 
             # Create the operation
             operation = AdGroupOperation()
@@ -314,6 +386,19 @@ def create_ad_group_tools(
         status: Optional[str] = None,
         cpc_bid_micros: Optional[int] = None,
         cpm_bid_micros: Optional[int] = None,
+        cpv_bid_micros: Optional[int] = None,
+        target_cpa_micros: Optional[int] = None,
+        target_cpc_micros: Optional[int] = None,
+        target_cpm_micros: Optional[int] = None,
+        target_cpv_micros: Optional[int] = None,
+        target_roas: Optional[float] = None,
+        percent_cpc_bid_micros: Optional[int] = None,
+        fixed_cpm_micros: Optional[int] = None,
+        ad_rotation_mode: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
+        optimized_targeting_enabled: Optional[bool] = None,
+        exclude_demographic_expansion: Optional[bool] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -338,9 +423,25 @@ def create_ad_group_tools(
                 the API apply its default (ENABLED).
             cpc_bid_micros: Cost per click bid in micros (1 million micros = 1 unit)
             cpm_bid_micros: Cost per thousand impressions bid in micros
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            percent_cpc_bid_micros: Percent CPC bid in micros — fraction of advertised price (hotel only).
+            final_url_suffix: URL template for appending params to the final URL.
+            cpv_bid_micros: Cost-per-view bid in micros (video).
+            target_cpm_micros: Target CPM in micros (cost per 1000 impressions).
+            ad_rotation_mode: Ad rotation mode (OPTIMIZE or ROTATE_FOREVER).
+            tracking_url_template: URL template for constructing a tracking URL.
+            exclude_demographic_expansion: When True, demographics are excluded from optimized-targeting expansion.
+            target_roas: Target ROAS (e.g. 4.0 for 400%).
+            target_cpv_micros: Target CPV in micros (cost per view).
+            fixed_cpm_micros: Fixed CPM in micros (for FIXED_CPM bidding).
+            target_cpc_micros: Target CPC in micros.
+            target_cpa_micros: Target CPA in micros (1_000_000 = $1).
+            optimized_targeting_enabled: Whether optimized targeting is enabled.
 
-        Returns:
-            Created ad group details
+
+
         """
         # Convert string enums to proper enum types. status is Optional;
         # only convert when caller supplied a value.
@@ -360,6 +461,19 @@ def create_ad_group_tools(
             status=status_enum,
             cpc_bid_micros=cpc_bid_micros,
             cpm_bid_micros=cpm_bid_micros,
+            cpv_bid_micros=cpv_bid_micros,
+            target_cpa_micros=target_cpa_micros,
+            target_cpc_micros=target_cpc_micros,
+            target_cpm_micros=target_cpm_micros,
+            target_cpv_micros=target_cpv_micros,
+            target_roas=target_roas,
+            percent_cpc_bid_micros=percent_cpc_bid_micros,
+            fixed_cpm_micros=fixed_cpm_micros,
+            ad_rotation_mode=ad_rotation_mode,
+            tracking_url_template=tracking_url_template,
+            final_url_suffix=final_url_suffix,
+            optimized_targeting_enabled=optimized_targeting_enabled,
+            exclude_demographic_expansion=exclude_demographic_expansion,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -386,9 +500,11 @@ def create_ad_group_tools(
             status: New ad group status (ENABLED, PAUSED, REMOVED) (optional)
             cpc_bid_micros: New CPC bid in micros (optional)
             cpm_bid_micros: New CPM bid in micros (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated ad group details
+
         """
         # Convert string enum to proper enum type if provided
         status_enum = (

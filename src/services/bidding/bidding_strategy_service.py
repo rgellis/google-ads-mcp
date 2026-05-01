@@ -836,9 +836,14 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Target cost per acquisition in micros (1 million micros = 1 unit)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_target_cpa_strategy(
             ctx=ctx,
@@ -869,9 +874,14 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_roas: Target return on ad spend (e.g., 4.0 for 400% ROAS)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_target_roas_strategy(
             ctx=ctx,
@@ -902,9 +912,14 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Optional target CPA constraint in micros
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_maximize_conversions_strategy(
             ctx=ctx,
@@ -939,9 +954,14 @@ def create_bidding_strategy_tools(
             location: Where to show ads - ABSOLUTE_TOP_OF_PAGE, TOP_OF_PAGE, ANYWHERE_ON_PAGE
             location_fraction_micros: Target impression share in micros (e.g., 650000 for 65%)
             max_cpc_bid_ceiling_micros: Optional max CPC bid limit in micros
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_target_impression_share_strategy(
             ctx=ctx,
@@ -972,9 +992,14 @@ def create_bidding_strategy_tools(
         Args:
             customer_id: The customer ID
             name: Strategy name
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_enhanced_cpc_strategy(
             ctx=ctx,
@@ -1004,9 +1029,14 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_roas: Optional target return on ad spend (e.g., 2.0 for 200% return)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_maximize_conversion_value_strategy(
             ctx=ctx,
@@ -1037,9 +1067,14 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_spend_micros: Optional spending target in micros
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
+            currency_code: Immutable. ISO 4217 currency code (e.g. USD, EUR). Settable on create only — defaults to the manager's currency.
 
-        Returns:
-            Created bidding strategy details
+
+
         """
         return await service.create_target_spend_strategy(
             ctx=ctx,
@@ -1117,9 +1152,20 @@ def create_bidding_strategy_tools(
         Args:
             customer_id: The customer ID
             bidding_strategy_id: The bidding strategy ID to update
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+            target_impression_share_location_fraction_micros: New impression-share fraction in micros (e.g. 650000 for 65%).
+            target_impression_share_location: New location for TARGET_IMPRESSION_SHARE — ABSOLUTE_TOP_OF_PAGE, TOP_OF_PAGE, or ANYWHERE_ON_PAGE.
+            target_cpa_micros: New target CPA in micros (for TARGET_CPA strategies; 1_000_000 = $1).
+            maximize_conversions_target_cpa_micros: New target CPA constraint in micros for MAXIMIZE_CONVERSIONS strategies.
+            target_roas: New target ROAS (for TARGET_ROAS strategies, e.g. 4.0 for 400%).
+            name: New bidding strategy name.
+            target_impression_share_cpc_bid_ceiling_micros: New max CPC bid ceiling in micros for TARGET_IMPRESSION_SHARE.
+            aligned_campaign_budget_id: ID of the campaign budget the portfolio strategy is aligned with.
 
-        Returns:
-            Updated bidding strategy details
+
+
         """
         return await service.update_bidding_strategy(
             ctx=ctx,

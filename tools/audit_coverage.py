@@ -129,6 +129,25 @@ INTENTIONAL_NON_EXPOSURE: dict[str, dict[str, str]] = {
     "CustomerNegativeCriterion": {
         "negative": "Phase 9.1 — resource is by definition negative.",
     },
+    "CustomerConversionGoal": {
+        "category": "Identity-encoded in resource_name — cannot be set as a standalone field.",
+        "origin": "Identity-encoded in resource_name — cannot be set as a standalone field.",
+    },
+    "CampaignConversionGoal": {
+        "campaign": "Identity-encoded in resource_name (customers/X/campaignConversionGoals/Y).",
+    },
+    "ConversionGoalCampaignConfig": {
+        "campaign": "Identity-encoded in resource_name (customers/X/conversionGoalCampaignConfigs/Y).",
+    },
+    "CustomerCustomizer": {
+        "value": "Wired through value_type + string_value via create_customer_customizer_operation helper (audit can't follow sync helpers).",
+    },
+    "AdGroupCustomizer": {
+        "value": "Wired through value_type + string_value via create_ad_group_customizer_operation helper.",
+    },
+    "CampaignCustomizer": {
+        "value": "Wired through value_type + string_value via create_campaign_customizer_operation helper.",
+    },
 }
 
 
@@ -622,11 +641,31 @@ def _build_wrapper_method(
             p = _attr_chain(sub.target)
             if p:
                 wm.writes.add(p)
-        elif isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute):
-            if sub.func.attr in {"append", "extend", "MergeFrom", "CopyFrom", "add"}:
+        elif isinstance(sub, ast.Call):
+            if isinstance(sub.func, ast.Attribute) and sub.func.attr in {
+                "append",
+                "extend",
+                "MergeFrom",
+                "CopyFrom",
+                "add",
+            }:
                 p = _attr_chain(sub.func.value)
                 if p:
                     wm.writes.add(p)
+            # Detect proto-message kwargs constructor calls:
+            # ``Resource(name=foo, value=customizer_value)`` — every kwarg
+            # name corresponds to a proto field assignment. Heuristic: a
+            # plain Name() call where the callee starts with an uppercase
+            # letter (proto-plus convention) and there are kwargs.
+            if (
+                isinstance(sub.func, ast.Name)
+                and sub.func.id
+                and sub.func.id[0].isupper()
+                and sub.keywords
+            ):
+                for kw in sub.keywords:
+                    if kw.arg:
+                        wm.writes.add(f"{sub.func.id}.{kw.arg}")
     return wm
 
 

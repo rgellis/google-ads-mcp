@@ -342,13 +342,9 @@ def create_conversion_upload_tools(
                 - conversion_value: Value of the conversion (optional)
                 - currency_code: Currency code like "USD" (optional)
             partial_failure: Process valid conversions even if some fail
+            validate_only: If True, validate the request without executing it.
 
-        Returns:
-            Upload results with:
-            - successful_conversions: Count of successful uploads
-            - failed_conversions: Count of failed uploads
-            - results: Details for each conversion
-            - partial_failure_error: Error details if any
+
         """
         return await service.upload_call_conversions(
             ctx=ctx,

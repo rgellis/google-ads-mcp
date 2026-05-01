@@ -403,9 +403,11 @@ def create_customer_tools(
                 reporting is enabled)
             video_brand_safety_suitability: One of EXPANDED_INVENTORY,
                 STANDARD_INVENTORY, LIMITED_INVENTORY
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated customer details
+
         """
         return await service.mutate_customer(
             ctx=ctx,

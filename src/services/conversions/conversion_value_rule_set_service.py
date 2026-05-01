@@ -274,9 +274,11 @@ def create_conversion_value_rule_set_tools(
             conversion_value_rules: List of conversion value rule resource names
             attachment_type: CUSTOMER or CAMPAIGN
             campaign: Campaign resource name (required for CAMPAIGN attachment)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created rule set details
+
         """
         return await service.create_conversion_value_rule_set(
             ctx=ctx,
@@ -305,9 +307,11 @@ def create_conversion_value_rule_set_tools(
             customer_id: The customer ID
             resource_name: Resource name of the rule set
             conversion_value_rules: New list of rule resource names
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated rule set details
+
         """
         return await service.update_conversion_value_rule_set(
             ctx=ctx,

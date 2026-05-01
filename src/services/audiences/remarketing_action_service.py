@@ -368,15 +368,11 @@ def create_remarketing_action_tools(
         Args:
             customer_id: The customer ID
             name: The remarketing action name
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created remarketing action with:
-            - resource_name: The resource identifier
-            - remarketing_action_id: The numeric ID
-            - name: The action name
-            - tag_snippets: List of tag snippets including:
-                - global_site_tag: The global site tag to add to all pages
-                - event_snippet: The event snippet for specific conversions
+
         """
         return await service.create_remarketing_action(
             ctx=ctx,
@@ -402,9 +398,11 @@ def create_remarketing_action_tools(
             customer_id: The customer ID
             remarketing_action_id: The remarketing action ID to update
             name: New name for the remarketing action
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated remarketing action details
+
         """
         return await service.update_remarketing_action(
             ctx=ctx,

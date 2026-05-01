@@ -56,6 +56,7 @@ class SharedSetService:
         customer_id: str,
         name: str,
         type: SharedSetTypeEnum.SharedSetType,
+        vertical_ads_item_vertical_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -69,6 +70,11 @@ class SharedSetService:
             type: Required. Type of shared set (NEGATIVE_KEYWORDS or
                 NEGATIVE_PLACEMENTS). Required + Immutable per the v23
                 proto — no safe default.
+            vertical_ads_item_vertical_type: Immutable. Vertical type for
+                vertical-ads item shared sets. One of HOTELS,
+                VACATION_RENTALS, RENTAL_CARS, EVENTS, THINGS_TO_DO,
+                FLIGHTS. Only meaningful for vertical-ads item shared
+                set types.
 
         Returns:
             Created shared set details
@@ -80,6 +86,15 @@ class SharedSetService:
             shared_set = SharedSet()
             shared_set.name = name
             shared_set.type_ = type
+            if vertical_ads_item_vertical_type is not None:
+                from google.ads.googleads.v23.enums.types.vertical_ads_item_vertical_type import (
+                    VerticalAdsItemVerticalTypeEnum,
+                )
+
+                shared_set.vertical_ads_item_vertical_type = getattr(
+                    VerticalAdsItemVerticalTypeEnum.VerticalAdsItemVerticalType,
+                    vertical_ads_item_vertical_type,
+                )
 
             # Create operation
             operation = SharedSetOperation()
@@ -434,6 +449,7 @@ def create_shared_set_tools(
         customer_id: str,
         name: str,
         type: str,
+        vertical_ads_item_vertical_type: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -445,9 +461,14 @@ def create_shared_set_tools(
             name: The name of the shared set
             type: Required. NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS.
                 Required + Immutable per the v23 proto — no safe default.
+            vertical_ads_item_vertical_type: Immutable. For vertical-ads
+                item shared sets, one of HOTELS, VACATION_RENTALS,
+                RENTAL_CARS, EVENTS, THINGS_TO_DO, FLIGHTS.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created shared set details with resource_name and shared_set_id
+
         """
         # Convert string enums to proper enum types
         type_enum = getattr(SharedSetTypeEnum.SharedSetType, type)
@@ -457,6 +478,7 @@ def create_shared_set_tools(
             customer_id=customer_id,
             name=name,
             type=type_enum,
+            vertical_ads_item_vertical_type=vertical_ads_item_vertical_type,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -477,9 +499,11 @@ def create_shared_set_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID to update
             name: New name (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated shared set details with updated_fields list
+
         """
         return await service.update_shared_set(
             ctx=ctx,
@@ -534,9 +558,11 @@ def create_shared_set_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID to attach
             campaign_ids: List of campaign IDs to attach the shared set to
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Attachment result with status
+
         """
         return await service.attach_shared_set_to_campaigns(
             ctx=ctx,

@@ -380,9 +380,11 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             type_: STANDARD, FIXED_CPA, SMART_CAMPAIGN, or LOCAL_SERVICES (Immutable).
             aligned_bidding_strategy_id: ID of the portfolio bidding
                 strategy this shared budget is aligned with.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created budget details including resource_name and budget_id
+
         """
         return await service.create_campaign_budget(
             ctx=ctx,
@@ -430,9 +432,11 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
                 shared. A non-shared budget can become shared (also set
                 name); a shared budget cannot become non-shared.
             aligned_bidding_strategy_id: New aligned portfolio bidding strategy ID
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated budget details
+
         """
         return await service.update_campaign_budget(
             ctx=ctx,

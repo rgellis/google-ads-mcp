@@ -1018,9 +1018,11 @@ def create_shared_criterion_tools(
             keywords: List of keyword dicts with:
                 - text: Keyword text
                 - match_type: BROAD, PHRASE, or EXACT
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_keywords_to_shared_set(
             ctx=ctx,
@@ -1047,9 +1049,11 @@ def create_shared_criterion_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID
             placement_urls: List of website URLs to exclude
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_placements_to_shared_set(
             ctx=ctx,
@@ -1130,9 +1134,11 @@ def create_shared_criterion_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID
             video_ids: List of YouTube video IDs (e.g., ["dQw4w9WgXcQ"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_youtube_videos_to_shared_set(
             ctx=ctx,
@@ -1159,9 +1165,11 @@ def create_shared_criterion_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID
             channel_ids: List of YouTube channel IDs (e.g., ["UCxxxxxx"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_youtube_channels_to_shared_set(
             ctx=ctx,
@@ -1189,9 +1197,11 @@ def create_shared_criterion_tools(
             shared_set_id: The shared set ID
             category_constants: List of mobile app category constant resource names
                 (e.g., ["mobileAppCategoryConstants/60001"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_mobile_app_categories_to_shared_set(
             ctx=ctx,
@@ -1218,9 +1228,11 @@ def create_shared_criterion_tools(
             customer_id: The customer ID
             shared_set_id: The shared set ID
             app_ids: List of mobile app IDs (e.g., ["com.example.app"])
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_mobile_applications_to_shared_set(
             ctx=ctx,
@@ -1250,9 +1262,11 @@ def create_shared_criterion_tools(
                 - entity_id: The brand entity ID
                 - display_name: The brand display name
                 - primary_url: The brand primary URL
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_brands_to_shared_set(
             ctx=ctx,
@@ -1280,9 +1294,11 @@ def create_shared_criterion_tools(
             shared_set_id: The shared set ID
             webpages: List of webpage dicts with:
                 - criterion_name: Name for the webpage criterion
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_webpages_to_shared_set(
             ctx=ctx,
@@ -1314,9 +1330,11 @@ def create_shared_criterion_tools(
                 - region_criterion_id: Optional region criterion ID
                 - city_criterion_id: Optional city criterion ID
                 - hotel_class: Optional hotel class
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created shared criteria with resource names and IDs
+
         """
         return await service.add_vertical_ads_item_group_rules_to_shared_set(
             ctx=ctx,

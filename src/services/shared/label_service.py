@@ -545,9 +545,11 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name: The label name
             description: Optional description for the label
             background_color: Optional hex color code (e.g., "#FF0000" for red)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created label details with resource_name and label_id
+
         """
         return await service.create_label(
             ctx=ctx,
@@ -579,9 +581,11 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             name: New name (optional)
             description: New description (optional)
             background_color: New hex color code (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated label details with updated_fields list
+
         """
         return await service.update_label(
             ctx=ctx,
@@ -635,9 +639,11 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             customer_id: The customer ID
             label_id: The label ID to apply
             campaign_ids: List of campaign IDs to label
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Application result with status
+
         """
         return await service.apply_label_to_campaigns(
             ctx=ctx,
@@ -664,9 +670,11 @@ def create_label_tools(service: LabelService) -> List[Callable[..., Awaitable[An
             customer_id: The customer ID
             label_id: The label ID to apply
             ad_group_ids: List of ad group IDs to label
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Application result with status
+
         """
         return await service.apply_label_to_ad_groups(
             ctx=ctx,

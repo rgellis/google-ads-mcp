@@ -601,9 +601,11 @@ def create_keyword_plan_tools(
             customer_id: The customer ID
             name: The keyword plan name
             forecast_period_days: Forecast period in days (default 30)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created keyword plan details with resource_name and keyword_plan_id
+
         """
         return await service.create_keyword_plan(
             ctx=ctx,
@@ -677,9 +679,11 @@ def create_keyword_plan_tools(
             cpc_bid_micros: Default CPC bid in micros (e.g., 1000000 for $1.00)
             location_ids: Geo target location IDs (default: US)
             language_id: Language ID (default: English)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created campaign details with resource_name and campaign_id
+
         """
         return await service.create_keyword_plan_campaign(
             ctx=ctx,
@@ -712,9 +716,11 @@ def create_keyword_plan_tools(
                 - text: Keyword text (required)
                 - match_type: BROAD, PHRASE, or EXACT (default: BROAD)
                 - cpc_bid_micros: CPC bid override (optional)
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            List of created keyword details
+
         """
         return await service.add_keywords_to_plan(
             ctx=ctx,
@@ -774,9 +780,11 @@ def create_keyword_plan_tools(
             keyword_plan_id: The keyword plan ID to update
             name: New name for the keyword plan
             forecast_period: New forecast period - NEXT_WEEK, NEXT_MONTH, NEXT_QUARTER
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated keyword plan details including resource_name
+
         """
         return await service.update_keyword_plan(
             ctx=ctx,

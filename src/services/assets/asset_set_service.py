@@ -444,9 +444,11 @@ def create_asset_set_tools(
             location_group_parent_asset_set_id: Immutable. Required for
                 Location Group typed AssetSets — the sync-level location
                 AssetSet ID that this LocationGroup AssetSet derives from.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset set details including resource_name and asset_set_id
+
         """
         # Convert string enums to proper enum types
         asset_set_type_enum = getattr(AssetSetTypeEnum.AssetSetType, asset_set_type)
@@ -482,9 +484,11 @@ def create_asset_set_tools(
             customer_id: The customer ID
             asset_set_id: The asset set ID to update
             name: New name. Required (only mutable field on AssetSet).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated asset set details with list of updated fields
+
         """
         return await service.update_asset_set(
             ctx=ctx,

@@ -172,9 +172,11 @@ def create_customer_asset_set_tools(
         Args:
             customer_id: The customer ID
             asset_set_resource_name: Resource name of the asset set
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created link details
+
         """
         return await service.link_asset_set_to_customer(
             ctx=ctx,
@@ -198,9 +200,11 @@ def create_customer_asset_set_tools(
         Args:
             customer_id: The customer ID
             customer_asset_set_resource_name: Resource name of the link to remove
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Removal result
+
         """
         return await service.unlink_asset_set_from_customer(
             ctx=ctx,

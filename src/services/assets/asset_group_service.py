@@ -440,9 +440,11 @@ def create_asset_group_tools(
             path2: Optional second URL path element (max 15 characters)
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Created asset group details including resource_name and asset_group_id
+
         """
         # Convert string enum to proper enum type only when caller supplied one.
         status_enum = (
@@ -491,9 +493,11 @@ def create_asset_group_tools(
             path1: Optional new first path element (max 15 characters)
             path2: Optional new second path element (max 15 characters)
             status: Optional new status - ENABLED, PAUSED, or REMOVED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated asset group details with list of updated fields
+
         """
         # Convert string enum to proper enum type if provided
         status_enum = (

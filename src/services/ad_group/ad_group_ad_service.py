@@ -58,6 +58,8 @@ class AdGroupAdService:
         ad_group_id: str,
         ad_resource_name: str,
         status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
+        start_date_time: Optional[str] = None,
+        end_date_time: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -70,6 +72,10 @@ class AdGroupAdService:
             ad_group_id: The ad group ID
             ad_resource_name: The resource name of the ad to add
             status: Ad group ad status enum value
+            start_date_time: Optional. The date and time when the ad starts
+                serving. Format ``YYYY-MM-DD HH:MM:SS+HH:MM``.
+            end_date_time: Optional. The last date and time when the ad
+                serves. Format ``YYYY-MM-DD HH:MM:SS+HH:MM``.
 
         Returns:
             Created ad group ad details
@@ -88,6 +94,10 @@ class AdGroupAdService:
             ad_group_ad.ad = ad
             if status is not None:
                 ad_group_ad.status = status
+            if start_date_time is not None:
+                ad_group_ad.start_date_time = start_date_time
+            if end_date_time is not None:
+                ad_group_ad.end_date_time = end_date_time
 
             # Create operation
             operation = AdGroupAdOperation()
@@ -414,6 +424,8 @@ def create_ad_group_ad_tools(
         ad_group_id: str,
         ad_resource_name: str,
         status: Optional[str] = None,
+        start_date_time: Optional[str] = None,
+        end_date_time: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -426,6 +438,13 @@ def create_ad_group_ad_tools(
             ad_resource_name: The resource name of the ad to add (e.g., "customers/123/ads/456")
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED).
+            start_date_time: Optional first day/time the ad serves
+                (``YYYY-MM-DD HH:MM:SS+HH:MM``).
+            end_date_time: Optional last day/time the ad serves
+                (``YYYY-MM-DD HH:MM:SS+HH:MM``).
+            partial_failure: If True, valid operations succeed when others fail.
+            validate_only: If True, validate the request without executing.
+            response_content_type: Optional response content type override.
 
         Returns:
             Created ad group ad details including resource_name and status
@@ -443,6 +462,8 @@ def create_ad_group_ad_tools(
             ad_group_id=ad_group_id,
             ad_resource_name=ad_resource_name,
             status=status_enum,
+            start_date_time=start_date_time,
+            end_date_time=end_date_time,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -463,9 +484,11 @@ def create_ad_group_ad_tools(
             customer_id: The customer ID
             ad_group_ad_resource_name: The resource name of the ad group ad
             status: New status - ENABLED, PAUSED, or REMOVED
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
 
-        Returns:
-            Updated ad group ad details
+
         """
         # Convert string enum to proper enum type
         status_enum = getattr(AdGroupAdStatusEnum.AdGroupAdStatus, status)
