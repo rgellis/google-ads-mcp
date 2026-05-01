@@ -76,7 +76,7 @@ class CampaignService:
         name: str,
         budget_resource_name: str,
         advertising_channel_type: AdvertisingChannelTypeEnum.AdvertisingChannelType,
-        status: CampaignStatusEnum.CampaignStatus = CampaignStatusEnum.CampaignStatus.PAUSED,
+        status: Optional[CampaignStatusEnum.CampaignStatus] = None,
         target_google_search: Optional[bool] = None,
         target_search_network: Optional[bool] = None,
         target_content_network: Optional[bool] = None,
@@ -167,8 +167,13 @@ class CampaignService:
             # Set advertising channel type (Required, Immutable per proto)
             campaign.advertising_channel_type = advertising_channel_type
 
-            # Set status
-            campaign.status = status
+            # Set status only when supplied. Per the v23 ref + proto
+            # docstring, Campaign.status is mutable + optional and "When
+            # a new campaign is added, the status defaults to ENABLED."
+            # The previous wrapper imposed PAUSED, silently overriding
+            # the API default and giving callers a non-serving campaign.
+            if status is not None:
+                campaign.status = status
 
             # Set bidding strategy
             if bidding_strategy_resource_name:
@@ -520,7 +525,7 @@ def create_campaign_tools(
         name: str,
         budget_resource_name: str,
         advertising_channel_type: str,
-        status: str = "PAUSED",
+        status: Optional[str] = None,
         target_google_search: Optional[bool] = None,
         target_search_network: Optional[bool] = None,
         target_content_network: Optional[bool] = None,
@@ -588,7 +593,12 @@ def create_campaign_tools(
         channel_type_enum = getattr(
             AdvertisingChannelTypeEnum.AdvertisingChannelType, advertising_channel_type
         )
-        status_enum = getattr(CampaignStatusEnum.CampaignStatus, status)
+        # Convert status string to enum only when caller supplied one.
+        status_enum = (
+            getattr(CampaignStatusEnum.CampaignStatus, status)
+            if status is not None
+            else None
+        )
 
         return await service.create_campaign(
             ctx=ctx,

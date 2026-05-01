@@ -521,6 +521,8 @@ async def test_tool_wrapper_create_campaign(
         operation.create.advertising_channel_type
         == AdvertisingChannelTypeEnum.AdvertisingChannelType.SEARCH
     )
+    # Test passes status_str="PAUSED" explicitly, so the wrapper converts
+    # and writes it.
     assert operation.create.status == CampaignStatusEnum.CampaignStatus.PAUSED
 
 
