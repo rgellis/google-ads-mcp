@@ -26,7 +26,6 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_enum_name,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -201,7 +200,6 @@ class SharedSetService:
         customer_id: str,
         type_filter: Optional[str] = None,
         status_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List shared sets in the account.
 
@@ -210,9 +208,6 @@ class SharedSetService:
             customer_id: The customer ID
             type_filter: Optional filter by type
             status_filter: Optional filter by status
-            name_contains: Optional substring filter on shared_set.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
 
         Returns:
             List of shared sets
@@ -248,10 +243,6 @@ class SharedSetService:
             if status_filter:
                 conditions.append(
                     f"shared_set.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
-                )
-            if name_contains:
-                conditions.append(
-                    f"shared_set.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -505,18 +496,18 @@ def create_shared_set_tools(
         customer_id: str,
         type_filter: Optional[str] = None,
         status_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List shared sets in the account.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             type_filter: Optional filter by type - NEGATIVE_KEYWORDS or NEGATIVE_PLACEMENTS
             status_filter: Optional filter by status - ENABLED or REMOVED
-            name_contains: Optional substring filter on shared set name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
 
         Returns:
             List of shared sets with details including member_count and reference_count
@@ -526,7 +517,6 @@ def create_shared_set_tools(
             customer_id=customer_id,
             type_filter=type_filter,
             status_filter=status_filter,
-            name_contains=name_contains,
         )
 
     async def attach_shared_set_to_campaigns(

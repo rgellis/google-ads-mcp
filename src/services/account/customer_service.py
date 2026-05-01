@@ -295,6 +295,11 @@ def create_customer_tools(
     async def list_accessible_customers(ctx: Context) -> Dict[str, Any]:
         """List all accessible customers for the authenticated user.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Returns:
             List of accessible customer resource names and IDs
         """

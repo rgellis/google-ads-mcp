@@ -464,39 +464,6 @@ async def test_list_custom_audiences(
 
 
 @pytest.mark.asyncio
-async def test_list_custom_audiences_name_contains_escapes_quote(
-    custom_audience_service: CustomAudienceService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """name_contains apostrophes are escaped server-side."""
-    mock_google_ads_service = Mock(spec=GoogleAdsServiceClient)
-    mock_google_ads_service.search.return_value = []  # type: ignore
-
-    def get_service_side_effect(service_name: str):
-        if service_name == "GoogleAdsService":
-            return mock_google_ads_service
-        return custom_audience_service.client
-
-    mock_sdk_client.client.get_service.side_effect = get_service_side_effect  # type: ignore
-
-    with patch(
-        "src.services.audiences.custom_audience_service.get_sdk_client",
-        return_value=mock_sdk_client,
-    ):
-        await custom_audience_service.list_custom_audiences(
-            ctx=mock_ctx,
-            customer_id="1234567890",
-            name_contains="Joe's",
-        )
-
-    call_args = mock_google_ads_service.search.call_args  # type: ignore
-    query = call_args[1]["query"]
-    assert "custom_audience.name LIKE '%Joe\\'s%'" in query
-    assert "name_contains" not in query
-
-
-@pytest.mark.asyncio
 async def test_get_custom_audience_details(
     custom_audience_service: CustomAudienceService,
     mock_sdk_client: Any,

@@ -359,6 +359,11 @@ def create_customer_client_link_tools(
     ) -> List[Dict[str, Any]]:
         """List customer client links for a manager account.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The manager customer ID
             status_filter: Optional status filter (PENDING, ACTIVE, CANCELED, REJECTED)

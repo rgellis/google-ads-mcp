@@ -92,50 +92,6 @@ async def test_search_campaigns(
 
 
 @pytest.mark.asyncio
-async def test_search_campaigns_name_contains_escapes_quote(
-    search_service: SearchService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """name_contains apostrophes are escaped server-side."""
-    mock_google_ads_service = search_service.client  # type: ignore
-    mock_google_ads_service.search.return_value = []  # type: ignore
-
-    await search_service.search_campaigns(
-        ctx=mock_ctx,
-        customer_id="1234567890",
-        name_contains="Joe's",
-    )
-
-    call_args = mock_google_ads_service.search.call_args  # type: ignore
-    query = call_args[1]["request"].query
-    assert "campaign.name LIKE '%Joe\\'s%'" in query
-    assert "name_contains" not in query
-
-
-@pytest.mark.asyncio
-async def test_search_ad_groups_name_contains_escapes_quote(
-    search_service: SearchService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """name_contains apostrophes are escaped server-side."""
-    mock_google_ads_service = search_service.client  # type: ignore
-    mock_google_ads_service.search.return_value = []  # type: ignore
-
-    await search_service.search_ad_groups(
-        ctx=mock_ctx,
-        customer_id="1234567890",
-        name_contains="Joe's",
-    )
-
-    call_args = mock_google_ads_service.search.call_args  # type: ignore
-    query = call_args[1]["request"].query
-    assert "ad_group.name LIKE '%Joe\\'s%'" in query
-    assert "name_contains" not in query
-
-
-@pytest.mark.asyncio
 async def test_search_ad_groups(
     search_service: SearchService,
     mock_sdk_client: Any,
@@ -264,64 +220,6 @@ async def test_search_keywords(
 
 
 @pytest.mark.asyncio
-async def test_execute_query(
-    search_service: SearchService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """Test executing a custom query."""
-    # Arrange
-    customer_id = "1234567890"
-    query = """
-        SELECT campaign.id, campaign.name, metrics.impressions
-        FROM campaign
-        WHERE segments.date DURING LAST_7_DAYS
-    """
-
-    # Create mock search results
-    mock_results = []
-    for i in range(2):
-        row = Mock()
-        row.campaign = Mock()
-        row.campaign.id = f"1000{i}"
-        row.campaign.name = f"Campaign {i}"
-        row.metrics = Mock()
-        row.metrics.impressions = 1000 * (i + 1)
-        mock_results.append(row)
-
-    # Get the mocked GoogleAdsService from the fixture
-    mock_google_ads_service = search_service.client  # type: ignore
-    mock_google_ads_service.search.return_value = mock_results  # type: ignore
-
-    with patch(
-        "src.services.metadata.search_service.serialize_proto_message",
-        side_effect=[{"row": f"data{i}"} for i in range(2)],
-    ):
-        # Act
-        results = await search_service.execute_query(
-            ctx=mock_ctx,
-            customer_id=customer_id,
-            query=query,
-        )
-
-    # Assert
-    assert len(results) == 2
-
-    # Verify the query
-    mock_google_ads_service.search.assert_called_once()  # type: ignore
-    call_args = mock_google_ads_service.search.call_args  # type: ignore
-    request = call_args[1]["request"]
-    assert request.customer_id == customer_id
-    assert request.query.strip() == query.strip()
-
-    # Verify logging
-    mock_ctx.log.assert_called_once_with(  # type: ignore
-        level="info",
-        message="Query returned 2 rows",
-    )
-
-
-@pytest.mark.asyncio
 async def test_error_handling(
     search_service: SearchService,
     mock_sdk_client: Any,
@@ -364,7 +262,7 @@ def test_register_search_tools() -> None:
     assert isinstance(service, SearchService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 4  # 4 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 3  # 3 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -374,7 +272,6 @@ def test_register_search_tools() -> None:
         "search_campaigns",
         "search_ad_groups",
         "search_keywords",
-        "execute_query",
     ]
 
     assert set(tool_names) == set(expected_tools)

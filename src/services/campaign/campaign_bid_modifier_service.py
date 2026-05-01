@@ -439,6 +439,11 @@ def create_campaign_bid_modifier_tools(
     ) -> List[Dict[str, Any]]:
         """List campaign bid modifiers (interaction type only).
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Note: This only lists interaction type bid modifiers. For device, location,
         demographic, and ad schedule bid modifiers, use the campaign criterion service.
 

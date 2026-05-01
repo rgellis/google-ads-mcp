@@ -24,7 +24,6 @@ from google.ads.googleads.v23.services.types.customizer_attribute_service import
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -132,7 +131,6 @@ class CustomizerAttributeService:
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List customizer attributes.
 
@@ -140,9 +138,6 @@ class CustomizerAttributeService:
             ctx: FastMCP context
             customer_id: The customer ID
             include_removed: Whether to include removed attributes
-            name_contains: Optional substring filter on customizer_attribute.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
 
         Returns:
             List of customizer attributes
@@ -170,10 +165,6 @@ class CustomizerAttributeService:
             conditions: List[str] = []
             if not include_removed:
                 conditions.append("customizer_attribute.status != 'REMOVED'")
-            if name_contains:
-                conditions.append(
-                    f"customizer_attribute.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
-                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
@@ -318,17 +309,17 @@ def create_customizer_attribute_tools(
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List customizer attributes.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             include_removed: Whether to include removed attributes
-            name_contains: Optional substring filter on customizer attribute name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
 
         Returns:
             List of customizer attributes with details
@@ -337,7 +328,6 @@ def create_customizer_attribute_tools(
             ctx=ctx,
             customer_id=customer_id,
             include_removed=include_removed,
-            name_contains=name_contains,
         )
 
     async def remove_customizer_attribute(

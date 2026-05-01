@@ -499,39 +499,6 @@ async def test_list_experiments(
 
 
 @pytest.mark.asyncio
-async def test_list_experiments_name_contains_escapes_quote(
-    experiment_service: ExperimentService,
-    mock_sdk_client: Any,
-    mock_ctx: Context,
-) -> None:
-    """name_contains apostrophes are escaped server-side."""
-    mock_google_ads_service = Mock(spec=GoogleAdsServiceClient)
-    mock_google_ads_service.search.return_value = []  # type: ignore
-
-    def get_service_side_effect(service_name: str):
-        if service_name == "GoogleAdsService":
-            return mock_google_ads_service
-        return experiment_service.client
-
-    mock_sdk_client.client.get_service.side_effect = get_service_side_effect  # type: ignore
-
-    with patch(
-        "src.services.campaign.experiment_service.get_sdk_client",
-        return_value=mock_sdk_client,
-    ):
-        await experiment_service.list_experiments(
-            ctx=mock_ctx,
-            customer_id="1234567890",
-            name_contains="Joe's",
-        )
-
-    call_args = mock_google_ads_service.search.call_args  # type: ignore
-    query = call_args[1]["query"]
-    assert "experiment.name LIKE '%Joe\\'s%'" in query
-    assert "name_contains" not in query
-
-
-@pytest.mark.asyncio
 async def test_list_experiments_no_filters(
     experiment_service: ExperimentService,
     mock_sdk_client: Any,

@@ -212,6 +212,11 @@ def create_benchmarks_tools(
     async def list_benchmarks_locations(ctx: Context) -> Dict[str, Any]:
         """List available geographic locations for competitive benchmarking.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Returns:
             List of locations (countries/regions) with geo target constant resource names
         """
@@ -219,6 +224,11 @@ def create_benchmarks_tools(
 
     async def list_benchmarks_products(ctx: Context) -> Dict[str, Any]:
         """List available Google Ads products for competitive benchmarking (e.g. Search, Shopping, Display).
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Returns:
             List of products with codes that can be passed to generate_benchmarks_metrics
@@ -229,6 +239,11 @@ def create_benchmarks_tools(
         ctx: Context, benchmarks_source_types: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """List available benchmark sources (industry verticals).
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             benchmarks_source_types: Optional filter by source type

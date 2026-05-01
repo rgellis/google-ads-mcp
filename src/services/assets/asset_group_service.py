@@ -23,7 +23,6 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_int,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -251,7 +250,6 @@ class AssetGroupService:
         customer_id: str,
         campaign_id: Optional[str] = None,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List asset groups.
@@ -261,9 +259,6 @@ class AssetGroupService:
             customer_id: The customer ID
             campaign_id: Optional campaign ID to filter by
             include_removed: Whether to include removed asset groups
-            name_contains: Optional substring filter on asset_group.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
             limit: Maximum number of results
 
         Returns:
@@ -301,10 +296,6 @@ class AssetGroupService:
             if campaign_id:
                 conditions.append(
                     f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
-                )
-            if name_contains:
-                conditions.append(
-                    f"asset_group.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -529,19 +520,19 @@ def create_asset_group_tools(
         customer_id: str,
         campaign_id: Optional[str] = None,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List asset groups.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             campaign_id: Optional campaign ID to filter by
             include_removed: Whether to include removed asset groups
-            name_contains: Optional substring filter on asset group name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
             limit: Maximum number of results
 
         Returns:
@@ -552,7 +543,6 @@ def create_asset_group_tools(
             customer_id=customer_id,
             campaign_id=campaign_id,
             include_removed=include_removed,
-            name_contains=name_contains,
             limit=limit,
         )
 

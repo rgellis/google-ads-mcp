@@ -910,6 +910,11 @@ def create_audience_insights_tools(
     ) -> Dict[str, Any]:
         """Search for audience insights attributes by text query.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             dimensions: Dimensions to search - CATEGORY, KNOWLEDGE_GRAPH,
@@ -939,6 +944,11 @@ def create_audience_insights_tools(
         customer_insights_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List eligible date ranges for audience insights reports.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_insights_group: Optional user-defined grouping label

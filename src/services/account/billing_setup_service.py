@@ -415,6 +415,11 @@ def create_billing_setup_tools(
     ) -> List[Dict[str, Any]]:
         """List billing setups for a customer.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             status_filter: Optional status filter (UNKNOWN, PENDING, APPROVED, CANCELLED)
@@ -453,6 +458,11 @@ def create_billing_setup_tools(
         customer_id: str,
     ) -> List[Dict[str, Any]]:
         """List available payments accounts for a customer.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID

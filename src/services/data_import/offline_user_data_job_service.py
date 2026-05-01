@@ -873,6 +873,11 @@ def create_offline_user_data_job_tools(
     ) -> List[Dict[str, Any]]:
         """List offline user data jobs for a customer.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             job_type_filter: Optional job type filter (CUSTOMER_MATCH_USER_LIST, STORE_SALES_UPLOAD_FIRST_PARTY)

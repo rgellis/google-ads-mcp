@@ -117,6 +117,11 @@ def create_payments_account_tools(
     ) -> List[Dict[str, Any]]:
         """List all accessible payments accounts for a customer.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
 

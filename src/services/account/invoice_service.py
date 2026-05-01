@@ -110,6 +110,11 @@ def create_invoice_tools(
     ) -> Dict[str, Any]:
         """List invoices for a specific billing setup and date range.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             billing_setup: Resource name of the billing setup (e.g., customers/123/billingSetups/456)

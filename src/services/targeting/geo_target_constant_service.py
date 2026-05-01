@@ -293,6 +293,11 @@ def create_geo_target_constant_tools(
     ) -> List[Dict[str, Any]]:
         """Search for geo target constants using a query.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             query: Search query for geo targets (e.g., "California", "London")
             locale: Language locale for results (e.g., "en", "es", "fr")

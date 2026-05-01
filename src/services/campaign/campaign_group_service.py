@@ -22,7 +22,6 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_int,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -230,7 +229,6 @@ class CampaignGroupService:
         self,
         ctx: Context,
         customer_id: str,
-        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List campaign groups.
@@ -238,9 +236,6 @@ class CampaignGroupService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            name_contains: Optional substring filter on campaign_group.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
             limit: Maximum number of results
 
         Returns:
@@ -264,10 +259,6 @@ class CampaignGroupService:
             """
 
             conditions: List[str] = []
-            if name_contains:
-                conditions.append(
-                    f"campaign_group.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
-                )
 
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
@@ -384,17 +375,17 @@ def create_campaign_group_tools(
     async def list_campaign_groups(
         ctx: Context,
         customer_id: str,
-        name_contains: Optional[str] = None,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """List campaign groups.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
-            name_contains: Optional substring filter on campaign group name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
             limit: Maximum number of results
 
         Returns:
@@ -403,7 +394,6 @@ def create_campaign_group_tools(
         return await service.list_campaign_groups(
             ctx=ctx,
             customer_id=customer_id,
-            name_contains=name_contains,
             limit=limit,
         )
 

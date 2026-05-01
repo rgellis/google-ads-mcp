@@ -359,6 +359,11 @@ def create_reach_plan_tools(
     ) -> Dict[str, Any]:
         """List all available plannable locations for reach planning.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Returns:
             Plannable locations with ID, name, country code, and location type
         """
@@ -369,6 +374,11 @@ def create_reach_plan_tools(
         plannable_location_id: str,
     ) -> Dict[str, Any]:
         """List all plannable products available for a specific location.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             plannable_location_id: The plannable location ID to get products for
@@ -460,6 +470,11 @@ def create_reach_plan_tools(
     ) -> Dict[str, Any]:
         """List plannable user interests for reach targeting.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             taxonomy_types: Optional filter - AFFINITY, IN_MARKET
@@ -483,6 +498,11 @@ def create_reach_plan_tools(
         customer_reach_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         """List plannable user lists for reach targeting.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Lists user lists eligible for reach planning (size 10k-700k, 30+ day membership, 10+ days old).
 

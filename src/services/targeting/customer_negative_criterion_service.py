@@ -988,6 +988,11 @@ def create_customer_negative_criterion_tools(
     ) -> List[Dict[str, Any]]:
         """List all customer negative criteria.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             criterion_type: Optional filter by type - KEYWORD, PLACEMENT, or CONTENT_LABEL

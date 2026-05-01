@@ -294,6 +294,18 @@ def create_google_ads_tools(
     ) -> Dict[str, Any]:
         """Execute a GAQL query with pagination support.
 
+        Use this whenever the structured ``search_*`` / ``list_*`` tools
+        don't expose the filter you need. The structured tools cover the
+        universal filters (status, type, ID, limit). Anything else —
+        substring-on-name, date ranges, metric thresholds, custom SELECT
+        field lists, ORDER BY on user-chosen fields, multi-condition
+        AND/OR combinations — goes through this tool.
+
+        ``query`` is passed through verbatim. The caller is responsible
+        for valid GAQL syntax including escaping single quotes (``\\'``)
+        and backslashes (``\\\\``) inside string literals. Malformed
+        queries return an InvalidArgument error from the API.
+
         Args:
             customer_id: The customer ID
             query: The GAQL (Google Ads Query Language) query
@@ -307,7 +319,9 @@ def create_google_ads_tools(
 
         Example queries:
             - "SELECT campaign.id, campaign.name FROM campaign WHERE campaign.status = 'ENABLED'"
+            - "SELECT campaign.id, campaign.name FROM campaign WHERE campaign.name LIKE '%Pizza%'"
             - "SELECT metrics.clicks, metrics.impressions FROM campaign WHERE segments.date DURING LAST_7_DAYS"
+            - "SELECT campaign.id, metrics.cost_micros FROM campaign WHERE metrics.cost_micros > 1000000000"
             - "SELECT ad_group.id, ad_group.name FROM ad_group WHERE ad_group.campaign = 'customers/123/campaigns/456'"
         """
         summary_row_setting = (
@@ -335,7 +349,10 @@ def create_google_ads_tools(
         """Execute a GAQL query and stream all results.
 
         Use this for large result sets where you need all data at once.
-        More efficient than pagination for large queries.
+        More efficient than pagination for large queries. Same usage
+        contract as ``search_google_ads`` — see that tool's docstring
+        for when to use the free-form GAQL path and the caller's
+        responsibility for escaping string literals.
 
         Args:
             customer_id: The customer ID

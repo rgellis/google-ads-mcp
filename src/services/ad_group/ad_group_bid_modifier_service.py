@@ -685,6 +685,11 @@ def create_ad_group_bid_modifier_tools(
     ) -> List[Dict[str, Any]]:
         """List ad group bid modifiers.
 
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             ad_group_id: Optional ad group ID to filter by

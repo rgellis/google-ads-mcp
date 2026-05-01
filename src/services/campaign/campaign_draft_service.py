@@ -25,7 +25,6 @@ from google.protobuf import field_mask_pb2
 from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -199,7 +198,6 @@ class CampaignDraftService:
         ctx: Context,
         customer_id: str,
         base_campaign_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List campaign drafts for a customer.
 
@@ -207,9 +205,6 @@ class CampaignDraftService:
             ctx: FastMCP context
             customer_id: The customer ID
             base_campaign_filter: Optional base campaign resource name to filter by
-            name_contains: Optional substring filter on campaign_draft.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
 
         Returns:
             List of campaign drafts
@@ -249,10 +244,6 @@ class CampaignDraftService:
                     )
                 conditions.append(
                     f"campaign_draft.base_campaign = '{base_campaign_filter}'"
-                )
-            if name_contains:
-                conditions.append(
-                    f"campaign_draft.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -535,17 +526,17 @@ def create_campaign_draft_tools(
         ctx: Context,
         customer_id: str,
         base_campaign_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List campaign drafts for a customer.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             base_campaign_filter: Optional base campaign resource name to filter results
-            name_contains: Optional substring filter on campaign draft name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
 
         Returns:
             List of campaign drafts with details including status and experiment info
@@ -554,7 +545,6 @@ def create_campaign_draft_tools(
             ctx=ctx,
             customer_id=customer_id,
             base_campaign_filter=base_campaign_filter,
-            name_contains=name_contains,
         )
 
     async def promote_campaign_draft(
@@ -585,6 +575,11 @@ def create_campaign_draft_tools(
         page_size: int = 1000,
     ) -> List[Dict[str, Any]]:
         """List async errors that occurred during campaign draft operations.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID

@@ -32,7 +32,6 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_enum_name,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -261,7 +260,6 @@ class BiddingDataExclusionService:
         ctx: Context,
         customer_id: str,
         scope_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List bidding data exclusions for a customer.
 
@@ -269,9 +267,6 @@ class BiddingDataExclusionService:
             ctx: FastMCP context
             customer_id: The customer ID
             scope_filter: Optional scope filter (CUSTOMER, CAMPAIGN)
-            name_contains: Optional substring filter on bidding_data_exclusion.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
 
         Returns:
             List of bidding data exclusions
@@ -306,10 +301,6 @@ class BiddingDataExclusionService:
             if scope_filter:
                 conditions.append(
                     f"bidding_data_exclusion.scope = '{gaql_enum_name(scope_filter, 'scope_filter')}'"
-                )
-            if name_contains:
-                conditions.append(
-                    f"bidding_data_exclusion.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -522,17 +513,17 @@ def create_bidding_data_exclusion_tools(
         ctx: Context,
         customer_id: str,
         scope_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List bidding data exclusions for a customer.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             scope_filter: Optional scope filter (CUSTOMER, CAMPAIGN)
-            name_contains: Optional substring filter on bidding data exclusion name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
 
         Returns:
             List of bidding data exclusions with details including date ranges and scope
@@ -541,7 +532,6 @@ def create_bidding_data_exclusion_tools(
             ctx=ctx,
             customer_id=customer_id,
             scope_filter=scope_filter,
-            name_contains=name_contains,
         )
 
     async def remove_bidding_data_exclusion(

@@ -35,7 +35,6 @@ from src.utils import (
     format_customer_id,
     gaql_enum_name,
     gaql_int,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
     set_request_options,
@@ -278,7 +277,6 @@ class CustomInterestService:
         customer_id: str,
         type_filter: Optional[str] = None,
         status_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all custom interests in the account.
 
@@ -287,9 +285,6 @@ class CustomInterestService:
             customer_id: The customer ID
             type_filter: Optional filter by type (CUSTOM_AFFINITY or CUSTOM_INTENT)
             status_filter: Optional filter by status (ENABLED or REMOVED)
-            name_contains: Optional substring filter on custom_interest.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
 
         Returns:
             List of custom interests
@@ -323,10 +318,6 @@ class CustomInterestService:
             if status_filter:
                 conditions.append(
                     f"custom_interest.status = '{gaql_enum_name(status_filter, 'status_filter')}'"
-                )
-            if name_contains:
-                conditions.append(
-                    f"custom_interest.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -553,18 +544,18 @@ def create_custom_interest_tools(
         customer_id: str,
         type_filter: Optional[str] = None,
         status_filter: Optional[str] = None,
-        name_contains: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """List all custom interests in the account.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             type_filter: Optional filter - CUSTOM_AFFINITY or CUSTOM_INTENT
             status_filter: Optional filter - ENABLED or REMOVED
-            name_contains: Optional substring filter on custom interest name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
 
         Returns:
             List of custom interests with basic details
@@ -574,7 +565,6 @@ def create_custom_interest_tools(
             customer_id=customer_id,
             type_filter=type_filter,
             status_filter=status_filter,
-            name_contains=name_contains,
         )
 
     async def get_custom_interest_details(

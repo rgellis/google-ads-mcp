@@ -16,7 +16,6 @@ from src.sdk_client import get_sdk_client
 from src.utils import (
     format_customer_id,
     gaql_int,
-    gaql_string_literal,
     get_logger,
     serialize_proto_message,
 )
@@ -45,7 +44,6 @@ class SearchService:
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for campaigns in a customer account.
@@ -54,9 +52,6 @@ class SearchService:
             ctx: FastMCP context
             customer_id: The customer ID
             include_removed: Whether to include removed campaigns
-            name_contains: Optional substring filter on campaign.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
             limit: Maximum number of results to return
 
         Returns:
@@ -79,15 +74,8 @@ class SearchService:
                 FROM campaign
             """
 
-            conditions = []
             if not include_removed:
-                conditions.append("campaign.status != 'REMOVED'")
-            if name_contains:
-                conditions.append(
-                    f"campaign.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
-                )
-            if conditions:
-                query += " WHERE " + " AND ".join(conditions)
+                query += " WHERE campaign.status != 'REMOVED'"
 
             query += f" ORDER BY campaign.id LIMIT {gaql_int(limit, 'limit')}"
 
@@ -127,7 +115,6 @@ class SearchService:
         customer_id: str,
         campaign_id: Optional[str] = None,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for ad groups.
@@ -137,9 +124,6 @@ class SearchService:
             customer_id: The customer ID
             campaign_id: Optional campaign ID to filter by
             include_removed: Whether to include removed ad groups
-            name_contains: Optional substring filter on ad_group.name
-                (case-sensitive LIKE match). Quotes/backslashes are
-                escaped server-side; pass the raw substring.
             limit: Maximum number of results to return
 
         Returns:
@@ -170,11 +154,6 @@ class SearchService:
             if campaign_id:
                 conditions.append(
                     f"campaign.id = {gaql_int(campaign_id, 'campaign_id')}"
-                )
-
-            if name_contains:
-                conditions.append(
-                    f"ad_group.name LIKE {gaql_string_literal(f'%{name_contains}%', 'name_contains')}"
                 )
 
             if conditions:
@@ -290,101 +269,6 @@ class SearchService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
-    async def execute_query(
-        self,
-        ctx: Context,
-        customer_id: str,
-        query: str,
-        page_size: int = 1000,
-    ) -> List[Dict[str, Any]]:
-        """Execute a custom GAQL query.
-
-        Args:
-            ctx: FastMCP context
-            customer_id: The customer ID
-            query: The GAQL (Google Ads Query Language) query
-            page_size: Number of results per page
-
-        Returns:
-            List of query results as dictionaries
-        """
-        try:
-            customer_id = format_customer_id(customer_id)
-
-            # Create request
-            request = SearchGoogleAdsRequest()
-            request.customer_id = customer_id
-            request.query = query
-            request.page_size = page_size
-
-            # Execute search
-            response = self.client.search(request=request)
-
-            # Process results
-            results: List[Dict[str, Any]] = []
-            row: GoogleAdsRow
-            for row in response:
-                # Serialize the entire row using proto-plus serialization
-                try:
-                    row_dict = serialize_proto_message(row)
-                    results.append(row_dict)
-                except Exception as e:
-                    # Fallback to manual extraction if serialization fails
-                    await ctx.log(
-                        level="warning",
-                        message=f"Could not serialize row, using fallback: {str(e)}",
-                    )
-                    # Convert GoogleAdsRow to dictionary manually
-                    row_dict: Dict[str, Any] = {}
-
-                    # Common fields that might be in the query
-                    field_names = [
-                        "campaign",
-                        "ad_group",
-                        "ad_group_criterion",
-                        "keyword_view",
-                        "metrics",
-                        "segments",
-                        "customer",
-                        "campaign_budget",
-                        "bidding_strategy",
-                        "ad",
-                        "asset",
-                        "user_list",
-                    ]
-
-                    for field_name in field_names:
-                        if hasattr(row, field_name):
-                            field_value = getattr(row, field_name)
-                            if field_value is not None:
-                                try:
-                                    # Try to serialize the field
-                                    row_dict[field_name] = serialize_proto_message(
-                                        field_value
-                                    )
-                                except Exception:
-                                    # If serialization fails, skip this field
-                                    pass
-
-                    if row_dict:
-                        results.append(row_dict)
-
-            await ctx.log(
-                level="info",
-                message=f"Query returned {len(results)} rows",
-            )
-
-            return results
-
-        except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-        except Exception as e:
-            error_msg = f"Failed to execute query: {str(e)}"
-            await ctx.log(level="error", message=error_msg)
-            raise Exception(error_msg) from e
-
 
 def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[Any]]]:
     """Create tool functions for the search service.
@@ -398,18 +282,17 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
         ctx: Context,
         customer_id: str,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for campaigns in a customer account.
 
+        For filters beyond the structured params here (name substring,
+        date ranges, metric thresholds, custom field selection, etc.),
+        use ``search_google_ads`` with a free-form GAQL query.
+
         Args:
             customer_id: The customer ID
             include_removed: Whether to include removed campaigns
-            name_contains: Optional substring filter on campaign name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
             limit: Maximum number of results to return
 
         Returns:
@@ -419,7 +302,6 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
             ctx=ctx,
             customer_id=customer_id,
             include_removed=include_removed,
-            name_contains=name_contains,
             limit=limit,
         )
 
@@ -428,19 +310,18 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
         customer_id: str,
         campaign_id: Optional[str] = None,
         include_removed: bool = False,
-        name_contains: Optional[str] = None,
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for ad groups.
+
+        For filters beyond the structured params here (name substring,
+        date ranges, metric thresholds, custom field selection, etc.),
+        use ``search_google_ads`` with a free-form GAQL query.
 
         Args:
             customer_id: The customer ID
             campaign_id: Optional campaign ID to filter by
             include_removed: Whether to include removed ad groups
-            name_contains: Optional substring filter on ad group name
-                (case-sensitive). Quotes and backslashes in the value are
-                escaped server-side, so pass the raw substring (e.g.
-                "Pizza" or "Joe's Sale").
             limit: Maximum number of results to return
 
         Returns:
@@ -451,7 +332,6 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
             customer_id=customer_id,
             campaign_id=campaign_id,
             include_removed=include_removed,
-            name_contains=name_contains,
             limit=limit,
         )
 
@@ -463,6 +343,11 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
         limit: int = 1000,
     ) -> List[Dict[str, Any]]:
         """Search for keywords.
+
+        For filters beyond the structured params here (substring-on-name,
+        date ranges, metric thresholds, custom SELECT/ORDER BY,
+        multi-condition AND/OR), use ``search_google_ads`` with a
+        free-form GAQL query.
 
         Args:
             customer_id: The customer ID
@@ -481,34 +366,7 @@ def create_search_tools(service: SearchService) -> List[Callable[..., Awaitable[
             limit=limit,
         )
 
-    async def execute_query(
-        ctx: Context,
-        customer_id: str,
-        query: str,
-        page_size: int = 1000,
-    ) -> List[Dict[str, Any]]:
-        """Execute a custom GAQL (Google Ads Query Language) query.
-
-        Args:
-            customer_id: The customer ID
-            query: The GAQL query to execute
-            page_size: Number of results per page
-
-        Returns:
-            List of query results as dictionaries
-
-        Example queries:
-            - "SELECT campaign.id, campaign.name FROM campaign WHERE campaign.status = 'ENABLED'"
-            - "SELECT metrics.clicks, metrics.impressions FROM campaign WHERE segments.date DURING LAST_7_DAYS"
-        """
-        return await service.execute_query(
-            ctx=ctx,
-            customer_id=customer_id,
-            query=query,
-            page_size=page_size,
-        )
-
-    tools.extend([search_campaigns, search_ad_groups, search_keywords, execute_query])
+    tools.extend([search_campaigns, search_ad_groups, search_keywords])
     return tools
 
 
