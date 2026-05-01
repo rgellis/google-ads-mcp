@@ -7,7 +7,7 @@ MCP server wrapping the entire Google Ads API v23 for LLM interaction. Built on 
 - `main.py` — Entry point, SERVER_GROUPS dict, `--groups` CLI flag
 - `src/servers/` — 12 domain modules (core, assets, targeting, bidding, etc.) using `create_server()` factory
 - `src/services/` — 113 service files organized by domain (account, ad_group, assets, campaign, etc.)
-- `src/utils.py` — `format_customer_id`, `serialize_proto_message`, `set_request_options`
+- `src/utils.py` — `format_customer_id`, `serialize_proto_message`, `set_request_options`, GAQL helpers (`gaql_int`, `gaql_enum_name`, `gaql_resource_field`, `gaql_string_literal`)
 - `src/sdk_client.py` — Google Ads SDK client wrapper with lazy initialization
 - `tests/` — 113 test files, one per service, 991+ tests
 
@@ -42,6 +42,17 @@ def register_foo_tools(mcp):
 - **Never set proto fields to default values explicitly** — `criterion.negative = False` marks the field as "set" on the wire. Google's API rejects fields that shouldn't be present even if the value is the default. Let proto defaults work implicitly.
 - **Campaign-level demographics on Search are exclusion-only** — bid adjustments must be done at ad group level.
 - **custom_audience/custom_affinity** only work on Display, Demand Gen, and Video campaigns.
+
+## GAQL safety and tool surface
+
+- **Structured tools take only universal filters** (status, type, ID, limit). Anything else — substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, multi-condition AND/OR — goes through `search_google_ads` (the free-form GAQL passthrough). Don't add `name_contains` / `start_date` / similar one-off params to structured list endpoints.
+- **`list_*` / `search_*` tool wrapper docstrings** must include the standard GAQL escape-hatch hint that points the LLM to `search_google_ads`. See any service for the canonical wording (e.g. `metadata/search_service.py`).
+- **Use the GAQL helpers in `src/utils.py`** when interpolating user input into a GAQL string:
+  - `gaql_int(value, field_name)` — IDs and `LIMIT` (~32 sites).
+  - `gaql_enum_name(value, field_name)` — status / type / scope filters; validates `[A-Z][A-Z0-9_]*`.
+  - `gaql_resource_field(value, field_name)` — resource/field names; validates `[a-z][a-z0-9_]*`.
+  - `gaql_string_literal(value, field_name)` — freeform user content (names, ad text). Escapes `\\` and `'`, rejects control chars, returns the value already wrapped in single quotes.
+- **`format_customer_id` is hardened**: it strips hyphens and validates the result is exactly 10 digits, rejecting non-string input. A normalized `customer_id` is therefore safe to interpolate into GAQL string literals, resource paths, or proto fields without further escaping.
 
 ## Output-only proto annotations are not always trustworthy
 

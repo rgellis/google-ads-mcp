@@ -374,7 +374,11 @@ def create_user_data_tools(
             conversion_adjustments: List of conversion adjustments with user data. Each should contain:
                 - user_identifiers: List of identifiers (hashed_email, hashed_phone_number, address_info)
                 - transaction_attribute: Transaction details with conversion_action, currency_code,
-                  transaction_amount_micros, transaction_date_time, order_id
+                  transaction_amount_micros, transaction_date_time, order_id.
+                  transaction_date_time format: "YYYY-MM-DD HH:MM:SS" (TZ-less,
+                  treated as customer's account timezone) or
+                  "YYYY-MM-DD HH:MM:SS+HH:MM" (with explicit timezone offset).
+                  Example: "2024-01-15 10:30:00" or "2024-01-15 10:30:00-08:00".
             user_identifier_source: Optional source of user data - FIRST_PARTY
                 (your own data) or THIRD_PARTY (data from a partner). Omit to
                 use API default.

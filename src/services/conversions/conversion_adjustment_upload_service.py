@@ -186,8 +186,12 @@ class ConversionAdjustmentUploadService:
             customer_id: The customer ID
             conversion_action: Conversion action resource name
             gclid: Google click ID
-            conversion_date_time: Original conversion date time (YYYY-MM-DD HH:MM:SS)
-            adjustment_date_time: Adjustment date time (YYYY-MM-DD HH:MM:SS)
+            conversion_date_time: Original conversion date time. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-15 10:30:00-08:00".
+            adjustment_date_time: When this adjustment occurred. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-16 09:00:00-08:00".
             adjusted_value: New conversion value
             currency_code: Currency code (e.g., "USD")
             order_id: Optional order ID for the conversion
@@ -233,8 +237,12 @@ class ConversionAdjustmentUploadService:
             customer_id: The customer ID
             conversion_action: Conversion action resource name
             gclid: Google click ID
-            conversion_date_time: Original conversion date time (YYYY-MM-DD HH:MM:SS)
-            adjustment_date_time: Adjustment date time (YYYY-MM-DD HH:MM:SS)
+            conversion_date_time: Original conversion date time. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-15 10:30:00-08:00".
+            adjustment_date_time: When this adjustment occurred. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-16 09:00:00-08:00".
             order_id: Optional order ID for the conversion
 
         Returns:
@@ -283,8 +291,12 @@ def create_conversion_adjustment_upload_tools(
                 - conversion_action: Conversion action resource name
                 - adjustment_type: RESTATEMENT or RETRACTION
                 - gclid: Google click ID
-                - conversion_date_time: Original conversion date (YYYY-MM-DD HH:MM:SS)
-                - adjustment_date_time: When adjustment occurred (YYYY-MM-DD HH:MM:SS)
+                - conversion_date_time: Original conversion date. Format:
+                    "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                    Example: "2024-01-15 10:30:00-08:00".
+                - adjustment_date_time: When the adjustment occurred. Format:
+                    "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                    Example: "2024-01-16 09:00:00-08:00".
                 - order_id: Optional order ID
                 - restatement_value: For RESTATEMENT type, dict with:
                     - adjusted_value: New conversion value
@@ -324,8 +336,12 @@ def create_conversion_adjustment_upload_tools(
             customer_id: The customer ID
             conversion_action: Conversion action resource name (e.g., "customers/123/conversionActions/456")
             gclid: Google click ID from the original conversion
-            conversion_date_time: Original conversion date time (YYYY-MM-DD HH:MM:SS format)
-            adjustment_date_time: When this adjustment occurred (YYYY-MM-DD HH:MM:SS format)
+            conversion_date_time: Original conversion date time. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-15 10:30:00-08:00".
+            adjustment_date_time: When this adjustment occurred. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-16 09:00:00-08:00".
             adjusted_value: New conversion value to replace the original
             currency_code: Currency code (e.g., "USD", "EUR")
             order_id: Optional order ID to match the original conversion
@@ -360,8 +376,12 @@ def create_conversion_adjustment_upload_tools(
             customer_id: The customer ID
             conversion_action: Conversion action resource name (e.g., "customers/123/conversionActions/456")
             gclid: Google click ID from the original conversion
-            conversion_date_time: Original conversion date time (YYYY-MM-DD HH:MM:SS format)
-            adjustment_date_time: When this adjustment occurred (YYYY-MM-DD HH:MM:SS format)
+            conversion_date_time: Original conversion date time. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-15 10:30:00-08:00".
+            adjustment_date_time: When this adjustment occurred. Format:
+                "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is REQUIRED.
+                Example: "2024-01-16 09:00:00-08:00".
             order_id: Optional order ID to match the original conversion
 
         Returns:

@@ -88,7 +88,7 @@ def create_brand_suggestion_tools(
         ctx: Context,
         customer_id: str,
         brand_prefix: str,
-        selected_brands: list[str] = [],
+        selected_brands: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Get brand suggestions based on a brand prefix.
 

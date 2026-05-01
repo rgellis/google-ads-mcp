@@ -65,8 +65,8 @@ class AudienceService:
         ctx: Context,
         customer_id: str,
         name: str,
-        description: str,
         dimensions: List[Dict[str, Any]],
+        description: Optional[str] = None,
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -80,9 +80,9 @@ class AudienceService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            name: Audience name
-            description: Audience description
+            name: Audience name (required)
             dimensions: List of audience dimensions to include
+            description: Audience description (optional, per proto)
             exclusion_dimensions: Optional list of dimensions to exclude
 
         Returns:
@@ -94,7 +94,8 @@ class AudienceService:
             # Create audience
             audience = Audience()
             audience.name = name
-            audience.description = description
+            if description is not None:
+                audience.description = description
 
             # Add dimensions
             for dim_config in dimensions:
@@ -512,8 +513,8 @@ def create_audience_tools(
         ctx: Context,
         customer_id: str,
         name: str,
-        description: str,
         dimensions: List[Dict[str, Any]],
+        description: Optional[str] = None,
         exclusion_dimensions: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -526,8 +527,8 @@ def create_audience_tools(
 
         Args:
             customer_id: The customer ID
-            name: Audience name
-            description: Audience description
+            name: Audience name (required)
+            description: Audience description (optional, per proto)
             dimensions: List of audience dimensions to include. Each dimension dict should have:
                 - type: Dimension type (AGE, GENDER, HOUSEHOLD_INCOME, PARENTAL_STATUS,
                         USER_LIST, USER_INTEREST, CUSTOM_AUDIENCE, LIFE_EVENT, DETAILED_DEMOGRAPHIC)
@@ -550,8 +551,8 @@ def create_audience_tools(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
-            description=description,
             dimensions=dimensions,
+            description=description,
             exclusion_dimensions=exclusion_dimensions,
             partial_failure=partial_failure,
             validate_only=validate_only,

@@ -77,7 +77,9 @@ class ConversionUploadService:
             conversions: List of conversions to upload, each containing:
                 - gclid: Google Click ID (required)
                 - conversion_action_id: Conversion action ID (required)
-                - conversion_date_time: ISO format datetime string (required)
+                - conversion_date_time: When the conversion happened (required).
+                    Format: "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is
+                    REQUIRED. Example: "2024-01-15 10:30:00-08:00".
                 - conversion_value: Conversion value (optional)
                 - currency_code: Currency code (optional)
                 - order_id: Order ID for deduplication (optional)
@@ -194,9 +196,13 @@ class ConversionUploadService:
             customer_id: The customer ID
             conversions: List of call conversions to upload, each containing:
                 - caller_id: Phone number that called (required)
-                - call_start_date_time: ISO format datetime string (required)
+                - call_start_date_time: When the call started (required).
+                    Format: "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is
+                    REQUIRED. Example: "2024-01-15 10:00:00-08:00".
                 - conversion_action_id: Conversion action ID (required)
-                - conversion_date_time: ISO format datetime string (required)
+                - conversion_date_time: When the conversion happened (required).
+                    Format: "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is
+                    REQUIRED. Example: "2024-01-15 10:30:00-08:00".
                 - conversion_value: Conversion value (optional)
                 - currency_code: Currency code (optional)
             partial_failure: Whether to process valid conversions if some
@@ -283,7 +289,9 @@ def create_conversion_upload_tools(
             conversions: List of conversions to upload, each containing:
                 - gclid: Google Click ID from the ad click (required)
                 - conversion_action_id: ID of the conversion action to credit (required)
-                - conversion_date_time: When the conversion happened, ISO format (required)
+                - conversion_date_time: When the conversion happened (required).
+                    Format: "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is
+                    REQUIRED by the API.
                     Example: "2024-01-15 10:30:00-08:00"
                 - conversion_value: Value of the conversion (optional)
                 - currency_code: Currency code like "USD" (optional)
@@ -322,10 +330,14 @@ def create_conversion_upload_tools(
             conversions: List of call conversions to upload, each containing:
                 - caller_id: Phone number that called (required)
                     Example: "+1234567890"
-                - call_start_date_time: When the call started, ISO format (required)
+                - call_start_date_time: When the call started (required).
+                    Format: "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is
+                    REQUIRED by the API.
                     Example: "2024-01-15 10:00:00-08:00"
                 - conversion_action_id: ID of the conversion action to credit (required)
-                - conversion_date_time: When the conversion happened, ISO format (required)
+                - conversion_date_time: When the conversion happened (required).
+                    Format: "YYYY-MM-DD HH:MM:SS+HH:MM" — timezone offset is
+                    REQUIRED by the API.
                     Example: "2024-01-15 10:30:00-08:00"
                 - conversion_value: Value of the conversion (optional)
                 - currency_code: Currency code like "USD" (optional)

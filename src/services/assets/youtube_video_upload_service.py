@@ -49,9 +49,9 @@ class YouTubeVideoUploadService:
         self,
         ctx: Context,
         customer_id: str,
-        channel_id: str,
         video_title: str,
         video_file_path: str,
+        channel_id: Optional[str] = None,
         video_description: Optional[str] = None,
         video_privacy: Optional[str] = None,
         partial_failure: bool = False,
@@ -63,12 +63,14 @@ class YouTubeVideoUploadService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            channel_id: YouTube channel ID
             video_title: Title for the video
             video_file_path: Path to the video file
+            channel_id: Optional destination YouTube channel ID. Per the v23
+                proto, if omitted the video uploads to the Google-managed
+                YouTube channel associated with the Ads account.
             video_description: Optional description
             video_privacy: Optional privacy setting (PUBLIC, PRIVATE, UNLISTED).
-                Omit to let the API default apply.
+                Omit to let the API default apply (UNLISTED).
 
         Returns:
             Created video upload details
@@ -81,7 +83,8 @@ class YouTubeVideoUploadService:
             )
 
             upload = YouTubeVideoUpload()
-            upload.channel_id = channel_id
+            if channel_id is not None:
+                upload.channel_id = channel_id
             upload.video_title = video_title
             if video_privacy is not None:
                 upload.video_privacy = getattr(
@@ -258,9 +261,9 @@ def create_youtube_video_upload_tools(
     async def create_youtube_video_upload(
         ctx: Context,
         customer_id: str,
-        channel_id: str,
         video_title: str,
         video_file_path: str,
+        channel_id: Optional[str] = None,
         video_description: Optional[str] = None,
         video_privacy: Optional[str] = None,
         partial_failure: bool = False,
@@ -271,18 +274,23 @@ def create_youtube_video_upload_tools(
 
         Args:
             customer_id: The customer ID
-            channel_id: YouTube channel ID
             video_title: Title for the video
             video_file_path: Path to the video file
+            channel_id: Optional destination YouTube channel ID. If omitted,
+                the video uploads to the Google-managed YouTube channel
+                associated with the Ads account (per v23 proto).
             video_description: Optional description
-            video_privacy: Optional - PUBLIC, PRIVATE, or UNLISTED. Omit to use API default.
+            video_privacy: Optional - PUBLIC, PRIVATE, or UNLISTED. Omit
+                to let the API apply its default (UNLISTED). For videos
+                uploaded to the Google-managed channel only UNLISTED is
+                allowed.
         """
         return await service.create_youtube_video_upload(
             ctx=ctx,
             customer_id=customer_id,
-            channel_id=channel_id,
             video_title=video_title,
             video_file_path=video_file_path,
+            channel_id=channel_id,
             video_description=video_description,
             video_privacy=video_privacy,
             partial_failure=partial_failure,

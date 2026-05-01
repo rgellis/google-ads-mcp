@@ -14,7 +14,9 @@ src/servers/               → 12 domain modules creating FastMCP instances
 src/services/              → 113 service files (one per API service)
 src/services/{domain}/     → Service class + create_*_tools() + register_*_tools()
 tests/                     → 113 test files (one per service)
-src/utils.py               → format_customer_id, serialize_proto_message, set_request_options
+src/utils.py               → format_customer_id, serialize_proto_message, set_request_options,
+                              GAQL helpers (gaql_int, gaql_enum_name, gaql_resource_field,
+                              gaql_string_literal)
 src/sdk_client.py          → Google Ads SDK client wrapper
 ```
 
@@ -62,10 +64,37 @@ uv run ruff format .              # Format code
 - Don't add a tool to a service without adding it to the `tools.extend()` list
 - Don't add imports at the top level if they're only needed conditionally (use inline imports in method bodies for rare enum types)
 - Don't reference v20 — everything is v23
+- Don't add one-off filter parameters (`name_contains`, `start_date`, `min_spend`, etc.) to structured `list_*` / `search_*` tools. Structured tools take only **universal** filters (status, type, ID, limit). Anything else routes through `search_google_ads` — the free-form GAQL passthrough.
+
+### GAQL safety
+
+When a service builds a GAQL query that interpolates caller input, never f-string the value directly. Use the helpers in `src/utils.py`:
+
+- `gaql_int(value, field_name)` — for IDs and `LIMIT` clauses; coerces to int and stringifies, raises `ValueError` on bad input.
+- `gaql_enum_name(value, field_name)` — for status/type/scope filters; validates `[A-Z][A-Z0-9_]*` (proper GAQL enum-name shape).
+- `gaql_resource_field(value, field_name)` — for resource/field names; validates `[a-z][a-z0-9_]*`.
+- `gaql_string_literal(value, field_name)` — for freeform user content (names, ad text); escapes `\\` and `'` per the GAQL grammar, rejects ASCII control chars, and returns the value already wrapped in single quotes (caller writes the LIKE/`=` operator without surrounding quotes).
+
+`format_customer_id` is hardened: it requires exactly 10 digits after stripping hyphens, so a normalized `customer_id` is safe to interpolate directly. New `list_*` / `search_*` tool wrappers must include the standard GAQL escape-hatch hint paragraph in their docstring (grep any existing service for the wording — it points the LLM to `search_google_ads` for filters beyond the structured params).
 
 ---
 
 ## Part 2: For LLM Agents Using This MCP Server
+
+### Filtering and querying — when to use `search_google_ads`
+
+Structured `list_*` / `search_*` tools (e.g. `search_campaigns`, `list_audiences`) accept only **universal** filters: status, type, ID, limit. They do NOT accept name substrings, date ranges, metric thresholds, custom field selection, ORDER BY, or multi-condition AND/OR.
+
+For anything beyond the structured params, use **`search_google_ads`** with a free-form GAQL query. Examples:
+
+- Find campaigns whose name contains "Pizza":
+  `SELECT campaign.id, campaign.name FROM campaign WHERE campaign.name LIKE '%Pizza%'`
+- Campaigns spending more than $100 in the last 30 days:
+  `SELECT campaign.id, campaign.name, metrics.cost_micros FROM campaign WHERE metrics.cost_micros > 100000000 AND segments.date DURING LAST_30_DAYS`
+- Top 10 keywords by clicks:
+  `SELECT ad_group_criterion.keyword.text, metrics.clicks FROM keyword_view ORDER BY metrics.clicks DESC LIMIT 10`
+
+When constructing a GAQL string literal, escape `\\` → `\\\\` and `'` → `\\'` per the [GAQL grammar](https://developers.google.com/google-ads/api/docs/query/grammar).
 
 ### Key targeting rules
 

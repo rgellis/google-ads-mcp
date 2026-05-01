@@ -64,8 +64,8 @@ class CustomInterestService:
         ctx: Context,
         customer_id: str,
         name: str,
-        description: str,
         members: List[Dict[str, str]],
+        description: Optional[str] = None,
         type_: Optional[str] = None,
         status: Optional[str] = None,
         partial_failure: bool = False,
@@ -77,13 +77,13 @@ class CustomInterestService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            name: The custom interest name
-            description: Description of the custom interest
+            name: The custom interest name (required)
             members: List of members with type and value
                 Example: [
                     {"type": "KEYWORD", "value": "running shoes"},
                     {"type": "URL", "value": "example.com/shoes"}
                 ]
+            description: Description of the custom interest (optional, per proto)
             type_: Optional type - CUSTOM_AFFINITY or CUSTOM_INTENT. Omit to
                 let the API default apply.
             status: Status - ENABLED or REMOVED
@@ -97,7 +97,8 @@ class CustomInterestService:
             # Create custom interest
             custom_interest = CustomInterest()
             custom_interest.name = name
-            custom_interest.description = description
+            if description is not None:
+                custom_interest.description = description
             if type_ is not None:
                 custom_interest.type_ = getattr(
                     CustomInterestTypeEnum.CustomInterestType, type_
@@ -460,8 +461,8 @@ def create_custom_interest_tools(
         ctx: Context,
         customer_id: str,
         name: str,
-        description: str,
         members: List[Dict[str, str]],
+        description: Optional[str] = None,
         type_: Optional[str] = None,
         status: Optional[str] = None,
         partial_failure: bool = False,
@@ -472,13 +473,13 @@ def create_custom_interest_tools(
 
         Args:
             customer_id: The customer ID
-            name: The custom interest name
-            description: Description of the custom interest
+            name: The custom interest name (required)
             members: List of audience members, each with type and value
                 Example: [
                     {"type": "KEYWORD", "value": "running shoes"},
                     {"type": "URL", "value": "example.com/shoes"}
                 ]
+            description: Description of the custom interest (optional, per proto)
             type_: Optional type of custom interest. Omit to use API default.
                 - CUSTOM_AFFINITY: For reaching users with specific interests
                 - CUSTOM_INTENT: For reaching users actively researching
@@ -492,8 +493,8 @@ def create_custom_interest_tools(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
-            description=description,
             members=members,
+            description=description,
             type_=type_,
             status=status,
             partial_failure=partial_failure,

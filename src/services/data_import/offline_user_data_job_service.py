@@ -804,7 +804,13 @@ def create_offline_user_data_job_tools(
                     - mobile_id: Mobile advertising ID
                     - third_party_user_id: Third-party user ID
                     - address_info: Address information with hashed fields
-                - transaction_attribute: Optional transaction data for enhanced conversions
+                - transaction_attribute: Optional transaction data for enhanced
+                    conversions. Fields: conversion_action, currency_code,
+                    transaction_amount_micros, transaction_date_time, order_id.
+                    transaction_date_time format: "YYYY-MM-DD HH:MM:SS" (TZ-less,
+                    treated as customer's account timezone) or
+                    "YYYY-MM-DD HH:MM:SS+HH:MM" (with explicit timezone offset).
+                    Example: "2024-01-15 10:30:00" or "2024-01-15 10:30:00-08:00".
             enable_partial_failure: Whether to enable partial failure. Omit
                 to leave unset (proto-default rule).
             validate_only: Whether to only validate the request

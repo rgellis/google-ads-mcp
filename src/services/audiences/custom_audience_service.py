@@ -61,8 +61,8 @@ class CustomAudienceService:
         ctx: Context,
         customer_id: str,
         name: str,
-        description: str,
         members: List[Dict[str, Any]],
+        description: Optional[str] = None,
         type_: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -73,16 +73,18 @@ class CustomAudienceService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            name: The custom audience name
-            description: Description of the custom audience
+            name: The custom audience name (required)
             members: List of members with type and parameters
                 Example: [
                     {"type": "KEYWORD", "keyword": "running shoes"},
                     {"type": "URL", "url": "example.com/shoes"},
                     {"type": "APP", "app": "com.example.app"}
                 ]
-            type_: Optional type - AUTO, INTEREST, PURCHASE_INTENT, or SEARCH.
-                Omit to let the API default apply.
+            description: Description of the custom audience (optional, per proto)
+            type_: Optional type - AUTO or SEARCH for new audiences. Omit to
+                let the API default apply. INTEREST and PURCHASE_INTENT are
+                preserved on existing audiences but are NOT accepted on new
+                creates per the v23 proto.
 
         Returns:
             Created custom audience details
@@ -93,7 +95,8 @@ class CustomAudienceService:
             # Create custom audience
             custom_audience = CustomAudience()
             custom_audience.name = name
-            custom_audience.description = description
+            if description is not None:
+                custom_audience.description = description
             if type_ is not None:
                 custom_audience.type_ = getattr(
                     CustomAudienceTypeEnum.CustomAudienceType, type_
@@ -505,8 +508,8 @@ def create_custom_audience_tools(
         ctx: Context,
         customer_id: str,
         name: str,
-        description: str,
         members: List[Dict[str, Any]],
+        description: Optional[str] = None,
         type_: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -520,19 +523,20 @@ def create_custom_audience_tools(
 
         Args:
             customer_id: The customer ID
-            name: The custom audience name
-            description: Description of the custom audience
+            name: The custom audience name (required)
             members: List of audience members with type-specific parameters
                 Examples:
                 - {"type": "KEYWORD", "keyword": "running shoes"}
                 - {"type": "URL", "url": "example.com/shoes"}
                 - {"type": "PLACE_CATEGORY", "place_category": 1234}
                 - {"type": "APP", "app": "com.example.app"}
+            description: Description of the custom audience (optional, per proto)
             type_: Optional type of custom audience. Omit to use API default.
                 - AUTO: Google Ads will auto-select the best interpretation
-                - INTEREST: Interest-based segment
-                - PURCHASE_INTENT: Purchase intent segment
                 - SEARCH: Search-based segment
+                INTEREST and PURCHASE_INTENT exist on the enum and are
+                preserved on existing audiences, but the v23 proto explicitly
+                states they are NOT accepted on new creates.
 
         Returns:
             Created custom audience details with resource_name and custom_audience_id
@@ -541,8 +545,8 @@ def create_custom_audience_tools(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
-            description=description,
             members=members,
+            description=description,
             type_=type_,
             partial_failure=partial_failure,
             validate_only=validate_only,
