@@ -175,11 +175,19 @@ class BiddingSeasonalityAdjustmentService:
         end_date_time: Optional[str] = None,
         conversion_rate_modifier: Optional[float] = None,
         description: Optional[str] = None,
+        devices: Optional[List[str]] = None,
+        campaigns: Optional[List[str]] = None,
+        advertising_channel_types: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update a bidding seasonality adjustment.
+
+        Per the v23 proto, ``campaigns`` and ``advertising_channel_types``
+        are mutually exclusive (cannot both be set on one adjustment).
+        Empty list semantics: passing ``[]`` for any repeated field
+        clears it on the wire.
 
         Args:
             ctx: FastMCP context
@@ -190,6 +198,14 @@ class BiddingSeasonalityAdjustmentService:
             end_date_time: Optional new end date and time
             conversion_rate_modifier: Optional new conversion rate modifier
             description: Optional new description
+            devices: Optional new device list (DESKTOP, MOBILE, TABLET).
+                Pass ``[]`` to clear (apply to all devices).
+            campaigns: Optional new campaign resource-name list.
+                Only valid when scope is CAMPAIGN. Mutually exclusive
+                with advertising_channel_types.
+            advertising_channel_types: Optional new channel-type list
+                (DISPLAY, SEARCH, SHOPPING). Only valid when scope is
+                CHANNEL. Mutually exclusive with campaigns.
 
         Returns:
             Updated bidding seasonality adjustment details
@@ -223,6 +239,25 @@ class BiddingSeasonalityAdjustmentService:
             if description is not None:
                 adjustment.description = description
                 update_mask_paths.append("description")
+
+            if devices is not None:
+                for device in devices:
+                    adjustment.devices.append(getattr(DeviceEnum.Device, device))
+                update_mask_paths.append("devices")
+
+            if campaigns is not None:
+                adjustment.campaigns.extend(campaigns)
+                update_mask_paths.append("campaigns")
+
+            if advertising_channel_types is not None:
+                for channel_type in advertising_channel_types:
+                    adjustment.advertising_channel_types.append(
+                        getattr(
+                            AdvertisingChannelTypeEnum.AdvertisingChannelType,
+                            channel_type,
+                        )
+                    )
+                update_mask_paths.append("advertising_channel_types")
 
             # Create operation
             operation = BiddingSeasonalityAdjustmentOperation()
@@ -499,11 +534,19 @@ def create_bidding_seasonality_adjustment_tools(
         end_date_time: Optional[str] = None,
         conversion_rate_modifier: Optional[float] = None,
         description: Optional[str] = None,
+        devices: Optional[List[str]] = None,
+        campaigns: Optional[List[str]] = None,
+        advertising_channel_types: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update a bidding seasonality adjustment.
+
+        ``campaigns`` and ``advertising_channel_types`` are mutually
+        exclusive per the v23 proto — pick whichever matches the
+        adjustment's scope. Pass ``[]`` for any repeated field to clear
+        it (e.g. ``devices=[]`` re-applies to all devices).
 
         Args:
             customer_id: The customer ID
@@ -513,6 +556,13 @@ def create_bidding_seasonality_adjustment_tools(
             end_date_time: Optional new end date and time (YYYY-MM-DD HH:MM:SS)
             conversion_rate_modifier: Optional new conversion rate modifier (0.1 to 10.0)
             description: Optional new description
+            devices: Optional list of devices (DESKTOP, MOBILE, TABLET).
+                Pass ``[]`` to clear and apply to all devices.
+            campaigns: Optional list of campaign resource names. Only
+                valid when the adjustment's scope is CAMPAIGN.
+            advertising_channel_types: Optional list of channel types
+                (DISPLAY, SEARCH, SHOPPING). Only valid when scope is
+                CHANNEL.
 
         Returns:
             Updated bidding seasonality adjustment details with list of updated fields
@@ -526,6 +576,9 @@ def create_bidding_seasonality_adjustment_tools(
             end_date_time=end_date_time,
             conversion_rate_modifier=conversion_rate_modifier,
             description=description,
+            devices=devices,
+            campaigns=campaigns,
+            advertising_channel_types=advertising_channel_types,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

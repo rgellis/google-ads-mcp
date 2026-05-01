@@ -50,25 +50,47 @@ class BudgetService:
         ctx: Context,
         customer_id: str,
         name: str,
-        amount_micros: int,
+        amount_micros: Optional[int] = None,
+        total_amount_micros: Optional[int] = None,
         delivery_method: Optional[str] = None,
         explicitly_shared: Optional[bool] = None,
+        period: Optional[str] = None,
+        type_: Optional[str] = None,
+        aligned_bidding_strategy_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Create a new campaign budget.
 
+        ``amount_micros`` (used with period=DAILY) and ``total_amount_micros``
+        (used with period=CUSTOM_PERIOD) are mutually exclusive — set
+        exactly one. Both are typed Optional because either may be the
+        chosen one. ``period`` and ``type_`` are Immutable per proto
+        (settable on create only).
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             name: Budget name
-            amount_micros: Budget amount in micros (1 million micros = 1 unit)
+            amount_micros: Daily budget amount in micros (1 million micros =
+                1 unit). Used when ``period`` is DAILY (the default).
+                Mutually exclusive with ``total_amount_micros``.
+            total_amount_micros: Lifetime budget cap in micros. Used only
+                when ``period`` is CUSTOM_PERIOD. Mutually exclusive with
+                ``amount_micros``.
             delivery_method: Optional STANDARD or ACCELERATED. Omit to let the
                 API default apply.
             explicitly_shared: Whether the budget can be shared across
                 campaigns. Omit to leave unset (proto-default rule:
                 False is marked-set on the wire).
+            period: Immutable. Spend period. DAILY (default) or
+                CUSTOM_PERIOD. Cannot be changed after creation.
+            type_: Immutable. Budget type. One of STANDARD, FIXED_CPA,
+                SMART_CAMPAIGN, LOCAL_SERVICES. Cannot be changed after
+                creation.
+            aligned_bidding_strategy_id: ID of the portfolio bidding
+                strategy this shared budget is aligned with.
 
         Returns:
             Created budget details
@@ -79,15 +101,36 @@ class BudgetService:
             # Create a new campaign budget
             campaign_budget = CampaignBudget()
             campaign_budget.name = name
-            campaign_budget.amount_micros = amount_micros
+            if amount_micros is not None:
+                campaign_budget.amount_micros = amount_micros
+            if total_amount_micros is not None:
+                campaign_budget.total_amount_micros = total_amount_micros
             if explicitly_shared is not None:
                 campaign_budget.explicitly_shared = explicitly_shared
+            if aligned_bidding_strategy_id is not None:
+                campaign_budget.aligned_bidding_strategy_id = (
+                    aligned_bidding_strategy_id
+                )
 
             # Set delivery method only when supplied; otherwise let the API default apply.
             if delivery_method is not None:
                 campaign_budget.delivery_method = getattr(
                     BudgetDeliveryMethodEnum.BudgetDeliveryMethod, delivery_method
                 )
+
+            if period is not None:
+                from google.ads.googleads.v23.enums.types.budget_period import (
+                    BudgetPeriodEnum,
+                )
+
+                campaign_budget.period = getattr(BudgetPeriodEnum.BudgetPeriod, period)
+
+            if type_ is not None:
+                from google.ads.googleads.v23.enums.types.budget_type import (
+                    BudgetTypeEnum,
+                )
+
+                campaign_budget.type_ = getattr(BudgetTypeEnum.BudgetType, type_)
 
             # Create the operation
             operation = CampaignBudgetOperation()
@@ -129,20 +172,34 @@ class BudgetService:
         budget_id: str,
         name: Optional[str] = None,
         amount_micros: Optional[int] = None,
+        total_amount_micros: Optional[int] = None,
         delivery_method: Optional[str] = None,
+        explicitly_shared: Optional[bool] = None,
+        aligned_bidding_strategy_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
         """Update an existing campaign budget.
 
+        ``period`` and ``type_`` are Immutable per proto and cannot be
+        changed after creation; they are intentionally absent here.
+
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
             budget_id: The budget ID to update
             name: New budget name (optional)
-            amount_micros: New budget amount in micros (optional)
+            amount_micros: New daily amount in micros (optional, for
+                period=DAILY)
+            total_amount_micros: New lifetime amount in micros (optional,
+                for period=CUSTOM_PERIOD)
             delivery_method: New delivery method (optional)
+            explicitly_shared: Toggle the budget's explicit-shared flag.
+                A non-shared budget can become explicitly shared (must
+                also set name); a shared budget cannot become non-shared.
+            aligned_bidding_strategy_id: New aligned portfolio bidding
+                strategy ID (optional)
 
         Returns:
             Updated budget details
@@ -166,11 +223,25 @@ class BudgetService:
                 campaign_budget.amount_micros = amount_micros
                 update_mask_fields.append("amount_micros")
 
+            if total_amount_micros is not None:
+                campaign_budget.total_amount_micros = total_amount_micros
+                update_mask_fields.append("total_amount_micros")
+
             if delivery_method is not None:
                 campaign_budget.delivery_method = getattr(
                     BudgetDeliveryMethodEnum.BudgetDeliveryMethod, delivery_method
                 )
                 update_mask_fields.append("delivery_method")
+
+            if explicitly_shared is not None:
+                campaign_budget.explicitly_shared = explicitly_shared
+                update_mask_fields.append("explicitly_shared")
+
+            if aligned_bidding_strategy_id is not None:
+                campaign_budget.aligned_bidding_strategy_id = (
+                    aligned_bidding_strategy_id
+                )
+                update_mask_fields.append("aligned_bidding_strategy_id")
 
             # Create the operation
             operation = CampaignBudgetOperation()
@@ -276,22 +347,39 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
         ctx: Context,
         customer_id: str,
         name: str,
-        amount_micros: int,
+        amount_micros: Optional[int] = None,
+        total_amount_micros: Optional[int] = None,
         delivery_method: Optional[str] = None,
         explicitly_shared: Optional[bool] = None,
+        period: Optional[str] = None,
+        type_: Optional[str] = None,
+        aligned_bidding_strategy_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new campaign budget.
 
+        Set exactly one of ``amount_micros`` (for DAILY budgets, the
+        default) or ``total_amount_micros`` (only for CUSTOM_PERIOD
+        lifetime budgets) — they're mutually exclusive on the proto.
+        ``period`` and ``type_`` are Immutable and cannot be changed
+        after creation.
+
         Args:
             customer_id: The customer ID
             name: Budget name
-            amount_micros: Budget amount in micros (1 million micros = 1 unit)
-            delivery_method: Optional STANDARD or ACCELERATED. Omit to use API default.
+            amount_micros: Daily budget amount in micros (1 million = 1 unit).
+                Used when period=DAILY (default).
+            total_amount_micros: Lifetime budget cap in micros. Used only
+                when period=CUSTOM_PERIOD.
+            delivery_method: Optional STANDARD or ACCELERATED.
             explicitly_shared: Whether the budget can be shared across
-                campaigns. Omit to leave unset.
+                campaigns.
+            period: DAILY or CUSTOM_PERIOD (Immutable).
+            type_: STANDARD, FIXED_CPA, SMART_CAMPAIGN, or LOCAL_SERVICES (Immutable).
+            aligned_bidding_strategy_id: ID of the portfolio bidding
+                strategy this shared budget is aligned with.
 
         Returns:
             Created budget details including resource_name and budget_id
@@ -301,8 +389,12 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             customer_id=customer_id,
             name=name,
             amount_micros=amount_micros,
+            total_amount_micros=total_amount_micros,
             delivery_method=delivery_method,
             explicitly_shared=explicitly_shared,
+            period=period,
+            type_=type_,
+            aligned_bidding_strategy_id=aligned_bidding_strategy_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -314,19 +406,30 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
         budget_id: str,
         name: Optional[str] = None,
         amount_micros: Optional[int] = None,
+        total_amount_micros: Optional[int] = None,
         delivery_method: Optional[str] = None,
+        explicitly_shared: Optional[bool] = None,
+        aligned_bidding_strategy_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing campaign budget.
 
+        ``period`` and ``type_`` are Immutable and cannot be changed
+        after creation.
+
         Args:
             customer_id: The customer ID
             budget_id: The budget ID to update
             name: New budget name (optional)
-            amount_micros: New budget amount in micros (optional)
-            delivery_method: New delivery method - STANDARD or ACCELERATED (optional)
+            amount_micros: New daily amount in micros (period=DAILY)
+            total_amount_micros: New lifetime amount in micros (period=CUSTOM_PERIOD)
+            delivery_method: New delivery method - STANDARD or ACCELERATED
+            explicitly_shared: Toggle whether the budget is explicitly
+                shared. A non-shared budget can become shared (also set
+                name); a shared budget cannot become non-shared.
+            aligned_bidding_strategy_id: New aligned portfolio bidding strategy ID
 
         Returns:
             Updated budget details
@@ -337,7 +440,10 @@ def create_budget_tools(service: BudgetService) -> List[Callable[..., Awaitable[
             budget_id=budget_id,
             name=name,
             amount_micros=amount_micros,
+            total_amount_micros=total_amount_micros,
             delivery_method=delivery_method,
+            explicitly_shared=explicitly_shared,
+            aligned_bidding_strategy_id=aligned_bidding_strategy_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

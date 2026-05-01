@@ -290,6 +290,47 @@ async def test_generate_audience_composition_insights(
 
 
 @pytest.mark.asyncio
+async def test_generate_audience_composition_insights_attribute_groups(
+    audience_insights_service: AudienceInsightsService,
+    mock_ctx: Any,
+) -> None:
+    """audience_attribute_groups builds the 13-way oneof correctly."""
+    mock_client: Any = audience_insights_service.client
+    mock_client.generate_audience_composition_insights.return_value = Mock()
+    with patch(
+        "src.services.audiences.audience_insights_service.serialize_proto_message",
+        return_value={"sections": []},
+    ):
+        await audience_insights_service.generate_audience_composition_insights(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            audience_countries=["2840"],
+            dimensions=["AGE_RANGE"],
+            audience_attribute_groups=[
+                [
+                    {"type": "USER_INTEREST", "interest_id": "111"},
+                    {"type": "ENTITY", "knowledge_graph_machine_id": "/m/0xyz"},
+                ],
+                [{"type": "DEVICE", "device_type": "MOBILE"}],
+            ],
+        )
+    request = mock_client.generate_audience_composition_insights.call_args[1]["request"]
+    groups = request.audience.topic_audience_combinations
+    assert len(groups) == 2
+    g0 = groups[0]
+    assert len(g0.attributes) == 2
+    assert (
+        g0.attributes[0].user_interest.user_interest_category
+        == "customers/1234567890/userInterests/111"
+    )
+    assert g0.attributes[1].entity.knowledge_graph_machine_id == "/m/0xyz"
+    g1 = groups[1]
+    assert len(g1.attributes) == 1
+    # device.type_ is an enum; truthy = set
+    assert g1.attributes[0].device.type_
+
+
+@pytest.mark.asyncio
 async def test_generate_suggested_targeting_insights(
     audience_insights_service: AudienceInsightsService,
     mock_sdk_client: Any,

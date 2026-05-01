@@ -686,3 +686,65 @@ async def test_create_target_spend_strategy(
         level="info",
         message=f"Created Target Spend strategy '{name}'",
     )
+
+
+@pytest.mark.asyncio
+async def test_create_target_cpa_strategy_with_portfolio_fields(
+    bidding_strategy_service: BiddingStrategyService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """currency_code + aligned_campaign_budget_id wire through on create."""
+    mock_response = Mock(spec=MutateBiddingStrategiesResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = "customers/1234567890/biddingStrategies/1"
+    mock_client = bidding_strategy_service.client  # type: ignore
+    mock_client.mutate_bidding_strategies.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await bidding_strategy_service.create_target_cpa_strategy(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name="Portfolio CPA",
+            target_cpa_micros=50_000_000,
+            currency_code="EUR",
+            aligned_campaign_budget_id=99,
+        )
+
+    request = mock_client.mutate_bidding_strategies.call_args[1]["request"]  # type: ignore
+    create = request.operations[0].create
+    assert create.currency_code == "EUR"
+    assert create.aligned_campaign_budget_id == 99
+
+
+@pytest.mark.asyncio
+async def test_update_bidding_strategy_aligned_budget(
+    bidding_strategy_service: BiddingStrategyService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """aligned_campaign_budget_id is mutable on update."""
+    mock_response = Mock(spec=MutateBiddingStrategiesResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = "customers/1234567890/biddingStrategies/1"
+    mock_client = bidding_strategy_service.client  # type: ignore
+    mock_client.mutate_bidding_strategies.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.bidding.bidding_strategy_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await bidding_strategy_service.update_bidding_strategy(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            bidding_strategy_id="1",
+            aligned_campaign_budget_id=42,
+        )
+
+    request = mock_client.mutate_bidding_strategies.call_args[1]["request"]  # type: ignore
+    op = request.operations[0]
+    assert op.update.aligned_campaign_budget_id == 42
+    assert "aligned_campaign_budget_id" in list(op.update_mask.paths)

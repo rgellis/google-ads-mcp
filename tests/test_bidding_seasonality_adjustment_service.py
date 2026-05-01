@@ -205,6 +205,34 @@ async def test_update_bidding_seasonality_adjustment(
     mock_client.mutate_bidding_seasonality_adjustments.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_update_bidding_seasonality_adjustment_targeting_fields(
+    service: BiddingSeasonalityAdjustmentService,
+    mock_ctx: Context,
+) -> None:
+    """devices, campaigns, advertising_channel_types are mutable on update."""
+    mock_client: Any = service.client
+    mock_client.mutate_bidding_seasonality_adjustments.return_value = Mock()
+    with patch(
+        "src.services.bidding.bidding_seasonality_adjustment_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await service.update_bidding_seasonality_adjustment(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            adjustment_resource_name="customers/1234567890/biddingSeasonalityAdjustments/1",
+            devices=["MOBILE", "TABLET"],
+            advertising_channel_types=["SEARCH"],
+        )
+    request = mock_client.mutate_bidding_seasonality_adjustments.call_args[1]["request"]
+    op = request.operations[0]
+    assert len(op.update.devices) == 2
+    assert len(op.update.advertising_channel_types) == 1
+    paths = list(op.update_mask.paths)
+    assert "devices" in paths
+    assert "advertising_channel_types" in paths
+
+
 def test_register_tools() -> None:
     mock_mcp = Mock()
     service = register_bidding_seasonality_adjustment_tools(mock_mcp)

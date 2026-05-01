@@ -521,7 +521,7 @@ def test_register_ad_group_bid_modifier_tools() -> None:
     assert isinstance(service, AdGroupBidModifierService)
 
     # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 6  # 6 tools registered  # type: ignore
+    assert mock_mcp.tool.call_count == 9  # 9 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -531,9 +531,91 @@ def test_register_ad_group_bid_modifier_tools() -> None:
         "create_ad_group_device_bid_modifier",
         "create_ad_group_hotel_check_in_day_bid_modifier",
         "create_ad_group_hotel_date_selection_bid_modifier",
+        "create_ad_group_hotel_advance_booking_window_bid_modifier",
+        "create_ad_group_hotel_length_of_stay_bid_modifier",
+        "create_ad_group_hotel_check_in_date_range_bid_modifier",
         "update_ad_group_bid_modifier",
         "list_ad_group_bid_modifiers",
         "remove_ad_group_bid_modifier",
     ]
 
     assert set(tool_names) == set(expected_tools)
+
+
+@pytest.mark.asyncio
+async def test_create_hotel_advance_booking_window_bid_modifier(
+    ad_group_bid_modifier_service: AdGroupBidModifierService,
+    mock_ctx: Context,
+) -> None:
+    """advance booking window with both min/max wires through."""
+    mock_client: Any = ad_group_bid_modifier_service.client
+    mock_client.mutate_ad_group_bid_modifiers.return_value = Mock()
+    with patch(
+        "src.services.ad_group.ad_group_bid_modifier_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await ad_group_bid_modifier_service.create_hotel_advance_booking_window_bid_modifier(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            ad_group_id="123",
+            bid_modifier=1.5,
+            min_days=7,
+            max_days=30,
+        )
+    request = mock_client.mutate_ad_group_bid_modifiers.call_args[1]["request"]
+    create = request.operations[0].create
+    assert create.hotel_advance_booking_window.min_days == 7
+    assert create.hotel_advance_booking_window.max_days == 30
+    assert create.bid_modifier == 1.5
+
+
+@pytest.mark.asyncio
+async def test_create_hotel_length_of_stay_bid_modifier(
+    ad_group_bid_modifier_service: AdGroupBidModifierService,
+    mock_ctx: Context,
+) -> None:
+    """length-of-stay with min only."""
+    mock_client: Any = ad_group_bid_modifier_service.client
+    mock_client.mutate_ad_group_bid_modifiers.return_value = Mock()
+    with patch(
+        "src.services.ad_group.ad_group_bid_modifier_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await ad_group_bid_modifier_service.create_hotel_length_of_stay_bid_modifier(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            ad_group_id="123",
+            bid_modifier=2.0,
+            min_nights=2,
+        )
+    request = mock_client.mutate_ad_group_bid_modifiers.call_args[1]["request"]
+    create = request.operations[0].create
+    assert create.hotel_length_of_stay.min_nights == 2
+
+
+@pytest.mark.asyncio
+async def test_create_hotel_check_in_date_range_bid_modifier(
+    ad_group_bid_modifier_service: AdGroupBidModifierService,
+    mock_ctx: Context,
+) -> None:
+    """check-in date range wires through start/end dates."""
+    mock_client: Any = ad_group_bid_modifier_service.client
+    mock_client.mutate_ad_group_bid_modifiers.return_value = Mock()
+    with patch(
+        "src.services.ad_group.ad_group_bid_modifier_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await (
+            ad_group_bid_modifier_service.create_hotel_check_in_date_range_bid_modifier(
+                ctx=mock_ctx,
+                customer_id="1234567890",
+                ad_group_id="123",
+                bid_modifier=1.2,
+                start_date="2024-12-20",
+                end_date="2025-01-05",
+            )
+        )
+    request = mock_client.mutate_ad_group_bid_modifiers.call_args[1]["request"]
+    create = request.operations[0].create
+    assert create.hotel_check_in_date_range.start_date == "2024-12-20"
+    assert create.hotel_check_in_date_range.end_date == "2025-01-05"

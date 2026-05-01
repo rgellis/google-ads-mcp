@@ -1773,10 +1773,13 @@ class AdService:
         descriptions: List[str],
         videos: List[str],
         business_name: str,
+        final_urls: Optional[List[str]] = None,
         logo_images: Optional[List[str]] = None,
         call_to_action_asset_resource_names: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
         status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -1793,6 +1796,7 @@ class AdService:
             descriptions: List of description texts (1-5)
             videos: List of video asset resource names (1-5)
             business_name: Business name
+            final_urls: Optional list of landing page URLs.
             logo_images: Optional list of logo image asset resource names
             call_to_action_asset_resource_names: Optional list of CallToActionAsset
                 resource names (each must reference a pre-created Asset of type
@@ -1800,6 +1804,10 @@ class AdService:
                 free text.
             breadcrumb1: Optional first breadcrumb
             breadcrumb2: Optional second breadcrumb
+            tracking_url_template: Optional URL template for constructing
+                a tracking URL.
+            final_url_suffix: Optional URL template for appending params
+                to the final URL.
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
@@ -1843,6 +1851,12 @@ class AdService:
                 ad_info.breadcrumb2 = breadcrumb2
 
             ad_group_ad.ad.demand_gen_video_responsive_ad = ad_info
+            if final_urls:
+                ad_group_ad.ad.final_urls.extend(final_urls)
+            if tracking_url_template is not None:
+                ad_group_ad.ad.tracking_url_template = tracking_url_template
+            if final_url_suffix is not None:
+                ad_group_ad.ad.final_url_suffix = final_url_suffix
 
             operation = AdGroupAdOperation()
             operation.create = ad_group_ad
@@ -3296,10 +3310,13 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         descriptions: List[str],
         videos: List[str],
         business_name: str,
+        final_urls: Optional[List[str]] = None,
         logo_images: Optional[List[str]] = None,
         call_to_action_asset_resource_names: Optional[List[str]] = None,
         breadcrumb1: Optional[str] = None,
         breadcrumb2: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
         status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
@@ -3315,12 +3332,17 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             descriptions: List of description texts (1-5)
             videos: List of video asset resource names (1-5)
             business_name: Business name displayed in the ad
+            final_urls: Optional list of landing page URLs.
             logo_images: Optional logo image asset resource names
             call_to_action_asset_resource_names: Optional resource names of
                 pre-created CallToActionAsset Assets. Demand Gen v23 requires
                 AdCallToActionAsset references, not free CTA text.
             breadcrumb1: Optional first URL breadcrumb
             breadcrumb2: Optional second URL breadcrumb
+            tracking_url_template: Optional URL template for constructing
+                a tracking URL.
+            final_url_suffix: Optional URL template for appending params
+                to the final URL.
             status: Optional. ENABLED, PAUSED, or REMOVED. Omit to let
                 the API apply its default (ENABLED). Pass PAUSED
                 explicitly to create a non-serving ad.
@@ -3337,10 +3359,13 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             descriptions=descriptions,
             videos=videos,
             business_name=business_name,
+            final_urls=final_urls,
             logo_images=logo_images,
             call_to_action_asset_resource_names=call_to_action_asset_resource_names,
             breadcrumb1=breadcrumb1,
             breadcrumb2=breadcrumb2,
+            tracking_url_template=tracking_url_template,
+            final_url_suffix=final_url_suffix,
             status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,

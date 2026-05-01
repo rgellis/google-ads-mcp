@@ -56,6 +56,7 @@ class AssetSetService:
         asset_set_type: AssetSetTypeEnum.AssetSetType,
         merchant_id: Optional[int] = None,
         feed_label: Optional[str] = None,
+        location_group_parent_asset_set_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -81,6 +82,9 @@ class AssetSetService:
                 asset_set_type is MERCHANT_CENTER_FEED.
             feed_label: Optional Merchant Center feed label
                 (only used when asset_set_type is MERCHANT_CENTER_FEED).
+            location_group_parent_asset_set_id: Immutable. Required for
+                Location Group typed AssetSets — the sync-level location
+                AssetSet ID this LocationGroup AssetSet derives from.
 
         Returns:
             Created asset set details
@@ -127,6 +131,11 @@ class AssetSetService:
                 asset_set.merchant_center_feed.merchant_id = merchant_id  # type: ignore[arg-type]
                 if feed_label is not None:
                     asset_set.merchant_center_feed.feed_label = feed_label
+
+            if location_group_parent_asset_set_id is not None:
+                asset_set.location_group_parent_asset_set_id = (
+                    location_group_parent_asset_set_id
+                )
 
             # Create operation
             operation = AssetSetOperation()
@@ -403,6 +412,7 @@ def create_asset_set_tools(
         asset_set_type: str,
         merchant_id: Optional[int] = None,
         feed_label: Optional[str] = None,
+        location_group_parent_asset_set_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -431,6 +441,9 @@ def create_asset_set_tools(
                 Merchant Center merchant ID.
             feed_label: Optional Merchant Center feed label (only valid for
                 MERCHANT_CENTER_FEED).
+            location_group_parent_asset_set_id: Immutable. Required for
+                Location Group typed AssetSets — the sync-level location
+                AssetSet ID that this LocationGroup AssetSet derives from.
 
         Returns:
             Created asset set details including resource_name and asset_set_id
@@ -445,6 +458,7 @@ def create_asset_set_tools(
             asset_set_type=asset_set_type_enum,
             merchant_id=merchant_id,
             feed_label=feed_label,
+            location_group_parent_asset_set_id=location_group_parent_asset_set_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

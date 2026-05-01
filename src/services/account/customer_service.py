@@ -55,6 +55,7 @@ class CustomerService:
         time_zone: str,
         email_address: Optional[str] = None,
         access_role: Optional[str] = None,
+        validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a new client customer under a manager account.
 
@@ -73,6 +74,8 @@ class CustomerService:
                 Europe/London). Cannot be changed after the account is created.
             email_address: Email address for the new customer account
             access_role: Access role for the manager-client link (ADMIN, STANDARD, READ_ONLY, EMAIL_ONLY)
+            validate_only: If True, validate the request without creating
+                the customer client.
 
         Returns:
             Created customer details
@@ -96,6 +99,8 @@ class CustomerService:
                 )
 
                 request.access_role = getattr(AccessRoleEnum.AccessRole, access_role)
+            if validate_only:
+                request.validate_only = validate_only
 
             # Make the API call
             response: CreateCustomerClientResponse = self.client.create_customer_client(
@@ -171,6 +176,11 @@ class CustomerService:
         descriptive_name: Optional[str] = None,
         auto_tagging_enabled: Optional[bool] = None,
         tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
+        call_reporting_enabled: Optional[bool] = None,
+        call_conversion_reporting_enabled: Optional[bool] = None,
+        call_conversion_action: Optional[str] = None,
+        video_brand_safety_suitability: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -183,6 +193,18 @@ class CustomerService:
             descriptive_name: New descriptive name (optional)
             auto_tagging_enabled: Enable/disable auto-tagging (optional)
             tracking_url_template: New tracking URL template (optional)
+            final_url_suffix: URL template appending params to the final
+                URL (optional)
+            call_reporting_enabled: Enable phone-call event reporting via
+                Google System (optional)
+            call_conversion_reporting_enabled: Enable call conversion
+                reporting (optional)
+            call_conversion_action: Customer-level call conversion action
+                resource name. Only takes effect when
+                ``call_conversion_reporting_enabled`` is True.
+            video_brand_safety_suitability: Brand safety inventory type
+                for video ads. One of EXPANDED_INVENTORY,
+                STANDARD_INVENTORY, LIMITED_INVENTORY.
 
         Returns:
             Updated customer details
@@ -206,6 +228,45 @@ class CustomerService:
             if tracking_url_template is not None:
                 customer.tracking_url_template = tracking_url_template
                 update_mask_fields.append("tracking_url_template")
+
+            if final_url_suffix is not None:
+                customer.final_url_suffix = final_url_suffix
+                update_mask_fields.append("final_url_suffix")
+
+            if call_reporting_enabled is not None:
+                customer.call_reporting_setting.call_reporting_enabled = (
+                    call_reporting_enabled
+                )
+                update_mask_fields.append(
+                    "call_reporting_setting.call_reporting_enabled"
+                )
+
+            if call_conversion_reporting_enabled is not None:
+                customer.call_reporting_setting.call_conversion_reporting_enabled = (
+                    call_conversion_reporting_enabled
+                )
+                update_mask_fields.append(
+                    "call_reporting_setting.call_conversion_reporting_enabled"
+                )
+
+            if call_conversion_action is not None:
+                customer.call_reporting_setting.call_conversion_action = (
+                    call_conversion_action
+                )
+                update_mask_fields.append(
+                    "call_reporting_setting.call_conversion_action"
+                )
+
+            if video_brand_safety_suitability is not None:
+                from google.ads.googleads.v23.enums.types.brand_safety_suitability import (
+                    BrandSafetySuitabilityEnum,
+                )
+
+                customer.video_brand_safety_suitability = getattr(
+                    BrandSafetySuitabilityEnum.BrandSafetySuitability,
+                    video_brand_safety_suitability,
+                )
+                update_mask_fields.append("video_brand_safety_suitability")
 
             operation = CustomerOperation()
             operation.update = customer
@@ -262,6 +323,7 @@ def create_customer_tools(
         time_zone: str,
         email_address: Optional[str] = None,
         access_role: Optional[str] = None,
+        validate_only: bool = False,
     ) -> Dict[str, Any]:
         """Create a new client customer under a manager account.
 
@@ -278,6 +340,8 @@ def create_customer_tools(
                 Europe/London). Cannot be changed after the account is created.
             email_address: Email address for the new customer account
             access_role: Access role - ADMIN, STANDARD, READ_ONLY, or EMAIL_ONLY
+            validate_only: If True, validate the request without creating
+                the customer client.
 
         Returns:
             Created customer details
@@ -290,6 +354,7 @@ def create_customer_tools(
             time_zone=time_zone,
             email_address=email_address,
             access_role=access_role,
+            validate_only=validate_only,
         )
 
     async def list_accessible_customers(ctx: Context) -> Dict[str, Any]:
@@ -311,6 +376,11 @@ def create_customer_tools(
         descriptive_name: Optional[str] = None,
         auto_tagging_enabled: Optional[bool] = None,
         tracking_url_template: Optional[str] = None,
+        final_url_suffix: Optional[str] = None,
+        call_reporting_enabled: Optional[bool] = None,
+        call_conversion_reporting_enabled: Optional[bool] = None,
+        call_conversion_action: Optional[str] = None,
+        video_brand_safety_suitability: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -322,6 +392,17 @@ def create_customer_tools(
             descriptive_name: New descriptive name (optional)
             auto_tagging_enabled: Enable/disable auto-tagging (optional)
             tracking_url_template: New tracking URL template (optional)
+            final_url_suffix: URL template appending params to the final
+                URL (optional)
+            call_reporting_enabled: Enable phone-call event reporting via
+                Google System (optional)
+            call_conversion_reporting_enabled: Enable call conversion
+                reporting (optional)
+            call_conversion_action: Customer-level call conversion action
+                resource name (only takes effect when call conversion
+                reporting is enabled)
+            video_brand_safety_suitability: One of EXPANDED_INVENTORY,
+                STANDARD_INVENTORY, LIMITED_INVENTORY
 
         Returns:
             Updated customer details
@@ -332,6 +413,11 @@ def create_customer_tools(
             descriptive_name=descriptive_name,
             auto_tagging_enabled=auto_tagging_enabled,
             tracking_url_template=tracking_url_template,
+            final_url_suffix=final_url_suffix,
+            call_reporting_enabled=call_reporting_enabled,
+            call_conversion_reporting_enabled=call_conversion_reporting_enabled,
+            call_conversion_action=call_conversion_action,
+            video_brand_safety_suitability=video_brand_safety_suitability,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

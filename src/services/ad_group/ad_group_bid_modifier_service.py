@@ -6,8 +6,11 @@ from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
     DeviceInfo,
+    HotelAdvanceBookingWindowInfo,
+    HotelCheckInDateRangeInfo,
     HotelCheckInDayInfo,
     HotelDateSelectionTypeInfo,
+    HotelLengthOfStayInfo,
 )
 from google.ads.googleads.v23.enums.types.day_of_week import DayOfWeekEnum
 from google.ads.googleads.v23.enums.types.device import DeviceEnum
@@ -278,6 +281,234 @@ class AdGroupBidModifierService:
             raise Exception(error_msg) from e
         except Exception as e:
             error_msg = f"Failed to create hotel date selection bid modifier: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_hotel_advance_booking_window_bid_modifier(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        bid_modifier: float,
+        min_days: Optional[int] = None,
+        max_days: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a hotel advance booking window bid modifier.
+
+        Sets bid adjustment for bookings made N days prior to the stay.
+        ``min_days`` / ``max_days`` are both optional per proto — set
+        either or both to define the window.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            bid_modifier: Bid modifier value (0.1-10.0)
+            min_days: Low end of the booking window (days prior to stay)
+            max_days: High end of the booking window (days prior to stay)
+
+        Returns:
+            Created bid modifier details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            bid_modifier_obj = AdGroupBidModifier()
+            bid_modifier_obj.ad_group = ad_group_resource
+            bid_modifier_obj.bid_modifier = bid_modifier
+
+            window = HotelAdvanceBookingWindowInfo()
+            if min_days is not None:
+                window.min_days = min_days
+            if max_days is not None:
+                window.max_days = max_days
+            bid_modifier_obj.hotel_advance_booking_window = window
+
+            operation = AdGroupBidModifierOperation()
+            operation.create = bid_modifier_obj
+
+            request = MutateAdGroupBidModifiersRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupBidModifiersResponse = (
+                self.client.mutate_ad_group_bid_modifiers(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created hotel advance booking window bid modifier for ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = (
+                f"Failed to create hotel advance booking window bid modifier: {str(e)}"
+            )
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_hotel_length_of_stay_bid_modifier(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        bid_modifier: float,
+        min_nights: Optional[int] = None,
+        max_nights: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a hotel length-of-stay bid modifier.
+
+        Sets bid adjustment based on stay length in nights. Both min
+        and max are optional per proto.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            bid_modifier: Bid modifier value (0.1-10.0)
+            min_nights: Low end of the stay length, in nights
+            max_nights: High end of the stay length, in nights
+
+        Returns:
+            Created bid modifier details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            bid_modifier_obj = AdGroupBidModifier()
+            bid_modifier_obj.ad_group = ad_group_resource
+            bid_modifier_obj.bid_modifier = bid_modifier
+
+            stay = HotelLengthOfStayInfo()
+            if min_nights is not None:
+                stay.min_nights = min_nights
+            if max_nights is not None:
+                stay.max_nights = max_nights
+            bid_modifier_obj.hotel_length_of_stay = stay
+
+            operation = AdGroupBidModifierOperation()
+            operation.create = bid_modifier_obj
+
+            request = MutateAdGroupBidModifiersRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupBidModifiersResponse = (
+                self.client.mutate_ad_group_bid_modifiers(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created hotel length-of-stay bid modifier for ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create hotel length-of-stay bid modifier: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_hotel_check_in_date_range_bid_modifier(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        bid_modifier: float,
+        start_date: str,
+        end_date: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a hotel check-in date-range bid modifier.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            bid_modifier: Bid modifier value (0.1-10.0)
+            start_date: Range start in YYYY-MM-DD
+            end_date: Range end in YYYY-MM-DD
+
+        Returns:
+            Created bid modifier details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            bid_modifier_obj = AdGroupBidModifier()
+            bid_modifier_obj.ad_group = ad_group_resource
+            bid_modifier_obj.bid_modifier = bid_modifier
+
+            date_range = HotelCheckInDateRangeInfo()
+            date_range.start_date = start_date
+            date_range.end_date = end_date
+            bid_modifier_obj.hotel_check_in_date_range = date_range
+
+            operation = AdGroupBidModifierOperation()
+            operation.create = bid_modifier_obj
+
+            request = MutateAdGroupBidModifiersRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupBidModifiersResponse = (
+                self.client.mutate_ad_group_bid_modifiers(request=request)
+            )
+
+            await ctx.log(
+                level="info",
+                message=f"Created hotel check-in date range bid modifier for ad group {ad_group_id}",
+            )
+
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = (
+                f"Failed to create hotel check-in date range bid modifier: {str(e)}"
+            )
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
@@ -648,6 +879,117 @@ def create_ad_group_bid_modifier_tools(
             response_content_type=response_content_type,
         )
 
+    async def create_ad_group_hotel_advance_booking_window_bid_modifier(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        bid_modifier: float,
+        min_days: Optional[int] = None,
+        max_days: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a hotel advance booking window bid modifier.
+
+        Adjusts bids based on how many days before the stay the booking
+        is made. Specify either or both of ``min_days`` / ``max_days``.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            bid_modifier: Bid modifier value (0.1-10.0)
+            min_days: Low end of the booking window (days prior to stay)
+            max_days: High end of the booking window (days prior to stay)
+
+        Returns:
+            Created bid modifier details
+        """
+        return await service.create_hotel_advance_booking_window_bid_modifier(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            bid_modifier=bid_modifier,
+            min_days=min_days,
+            max_days=max_days,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_ad_group_hotel_length_of_stay_bid_modifier(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        bid_modifier: float,
+        min_nights: Optional[int] = None,
+        max_nights: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a hotel length-of-stay bid modifier.
+
+        Adjusts bids based on stay length in nights. Specify either or
+        both of ``min_nights`` / ``max_nights``.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            bid_modifier: Bid modifier value (0.1-10.0)
+            min_nights: Low end of stay length, in nights
+            max_nights: High end of stay length, in nights
+
+        Returns:
+            Created bid modifier details
+        """
+        return await service.create_hotel_length_of_stay_bid_modifier(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            bid_modifier=bid_modifier,
+            min_nights=min_nights,
+            max_nights=max_nights,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_ad_group_hotel_check_in_date_range_bid_modifier(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        bid_modifier: float,
+        start_date: str,
+        end_date: str,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a hotel check-in date-range bid modifier.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            bid_modifier: Bid modifier value (0.1-10.0)
+            start_date: Range start in YYYY-MM-DD
+            end_date: Range end in YYYY-MM-DD
+
+        Returns:
+            Created bid modifier details
+        """
+        return await service.create_hotel_check_in_date_range_bid_modifier(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            bid_modifier=bid_modifier,
+            start_date=start_date,
+            end_date=end_date,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     async def update_ad_group_bid_modifier(
         ctx: Context,
         customer_id: str,
@@ -736,6 +1078,9 @@ def create_ad_group_bid_modifier_tools(
             create_ad_group_device_bid_modifier,
             create_ad_group_hotel_check_in_day_bid_modifier,
             create_ad_group_hotel_date_selection_bid_modifier,
+            create_ad_group_hotel_advance_booking_window_bid_modifier,
+            create_ad_group_hotel_length_of_stay_bid_modifier,
+            create_ad_group_hotel_check_in_date_range_bid_modifier,
             update_ad_group_bid_modifier,
             list_ad_group_bid_modifiers,
             remove_ad_group_bid_modifier,

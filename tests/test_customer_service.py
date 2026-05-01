@@ -207,6 +207,81 @@ async def test_mutate_customer(
     )
 
 
+@pytest.mark.asyncio
+async def test_create_customer_client_validate_only(
+    customer_service: CustomerService,
+    mock_sdk_client: Any,
+    mock_ctx: AsyncMock,
+) -> None:
+    """validate_only flag should propagate to the request."""
+    mock_customer_client = customer_service.client  # type: ignore
+    mock_response = Mock()
+    mock_response.resource_name = "customers/1234567890"
+    mock_customer_client.create_customer_client.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.account.customer_service.serialize_proto_message",
+        return_value={"resource_name": "customers/1234567890"},
+    ):
+        await customer_service.create_customer_client(
+            ctx=mock_ctx,
+            manager_customer_id="1234567890",
+            descriptive_name="X",
+            currency_code="USD",
+            time_zone="America/New_York",
+            validate_only=True,
+        )
+
+    call_args = mock_customer_client.create_customer_client.call_args  # type: ignore
+    assert call_args[1]["request"].validate_only is True
+
+
+@pytest.mark.asyncio
+async def test_mutate_customer_full_field_set(
+    customer_service: CustomerService,
+    mock_sdk_client: Any,
+    mock_ctx: AsyncMock,
+) -> None:
+    """All Phase-14 fields should be wired through to the request."""
+    mock_customer_client = customer_service.client  # type: ignore
+    mock_response = Mock()
+    mock_response.resource_name = "customers/1234567890"
+    mock_customer_client.mutate_customer.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.account.customer_service.serialize_proto_message",
+        return_value={"resource_name": "customers/1234567890"},
+    ):
+        await customer_service.mutate_customer(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            final_url_suffix="utm_source=ads",
+            call_reporting_enabled=True,
+            call_conversion_reporting_enabled=True,
+            call_conversion_action="customers/1234567890/conversionActions/777",
+            video_brand_safety_suitability="LIMITED_INVENTORY",
+        )
+
+    call_args = mock_customer_client.mutate_customer.call_args  # type: ignore
+    request = call_args[1]["request"]
+    update = request.operation.update
+    assert update.final_url_suffix == "utm_source=ads"
+    assert update.call_reporting_setting.call_reporting_enabled is True
+    assert update.call_reporting_setting.call_conversion_reporting_enabled is True
+    assert (
+        update.call_reporting_setting.call_conversion_action
+        == "customers/1234567890/conversionActions/777"
+    )
+    # Brand safety enum: LIMITED_INVENTORY
+    assert update.video_brand_safety_suitability  # truthy = enum set
+    paths = list(request.operation.update_mask.paths)
+    assert "final_url_suffix" in paths
+    assert "call_reporting_setting.call_reporting_enabled" in paths
+    assert "call_reporting_setting.call_conversion_reporting_enabled" in paths
+    assert "call_reporting_setting.call_conversion_action" in paths
+    assert "video_brand_safety_suitability" in paths
+
+
 def test_create_customer_tools() -> None:
     """Test that tools are created correctly."""
     service = MagicMock()

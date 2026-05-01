@@ -96,6 +96,29 @@ async def test_update_campaign_group(
 
 
 @pytest.mark.asyncio
+async def test_update_campaign_group_status(
+    service: CampaignGroupService, mock_ctx: Context
+) -> None:
+    """status is mutable on update_campaign_group."""
+    mock_client = service.client
+    mock_client.mutate_campaign_groups.return_value = Mock()  # type: ignore
+    with patch(
+        "src.services.campaign.campaign_group_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await service.update_campaign_group(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            campaign_group_resource_name="customers/1234567890/campaignGroups/1",
+            status="ENABLED",
+        )
+    request = mock_client.mutate_campaign_groups.call_args[1]["request"]  # type: ignore
+    op = request.operations[0]
+    assert op.update.status  # enum truthiness — set
+    assert "status" in list(op.update_mask.paths)
+
+
+@pytest.mark.asyncio
 async def test_remove_campaign_group(
     service: CampaignGroupService, mock_ctx: Context
 ) -> None:

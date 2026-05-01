@@ -105,6 +105,7 @@ class CampaignGroupService:
         customer_id: str,
         campaign_group_resource_name: str,
         name: Optional[str] = None,
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -116,6 +117,8 @@ class CampaignGroupService:
             customer_id: The customer ID
             campaign_group_resource_name: Resource name of the campaign group
             name: New name (optional)
+            status: New status. ENABLED or REMOVED. (To remove, prefer
+                ``remove_campaign_group``.)
 
         Returns:
             Updated campaign group details
@@ -130,6 +133,16 @@ class CampaignGroupService:
             if name is not None:
                 campaign_group.name = name
                 update_mask_fields.append("name")
+
+            if status is not None:
+                from google.ads.googleads.v23.enums.types.campaign_group_status import (
+                    CampaignGroupStatusEnum,
+                )
+
+                campaign_group.status = getattr(
+                    CampaignGroupStatusEnum.CampaignGroupStatus, status
+                )
+                update_mask_fields.append("status")
 
             if not update_mask_fields:
                 raise ValueError("at least one updatable field must be provided")
@@ -322,6 +335,7 @@ def create_campaign_group_tools(
         customer_id: str,
         campaign_group_resource_name: str,
         name: Optional[str] = None,
+        status: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -332,6 +346,8 @@ def create_campaign_group_tools(
             customer_id: The customer ID
             campaign_group_resource_name: Resource name of the campaign group
             name: New name
+            status: New status. ENABLED or REMOVED. (To remove, prefer
+                ``remove_campaign_group``.)
 
         Returns:
             Updated campaign group details
@@ -341,6 +357,7 @@ def create_campaign_group_tools(
             customer_id=customer_id,
             campaign_group_resource_name=campaign_group_resource_name,
             name=name,
+            status=status,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

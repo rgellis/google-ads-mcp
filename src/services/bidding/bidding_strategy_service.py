@@ -61,6 +61,8 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_cpa_micros: int,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -82,6 +84,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Target CPA
             target_cpa = TargetCpa()
@@ -130,6 +136,8 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_roas: float,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -151,6 +159,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Target ROAS
             target_roas_strategy = TargetRoas()
@@ -199,6 +211,8 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_cpa_micros: Optional[int] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -220,6 +234,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Maximize Conversions
             maximize_conversions = MaximizeConversions()
@@ -268,6 +286,8 @@ class BiddingStrategyService:
         ctx: Context,
         customer_id: str,
         name: str,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -288,6 +308,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Enhanced CPC
             bidding_strategy.enhanced_cpc = EnhancedCpc()
@@ -334,6 +358,8 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_roas: Optional[float] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -355,6 +381,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Maximize Conversion Value
             mcv = MaximizeConversionValue()
@@ -404,6 +434,8 @@ class BiddingStrategyService:
         customer_id: str,
         name: str,
         target_spend_micros: Optional[int] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -425,6 +457,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Target Spend
             ts = TargetSpend()
@@ -476,6 +512,8 @@ class BiddingStrategyService:
         location: str,
         location_fraction_micros: int,
         max_cpc_bid_ceiling_micros: Optional[int] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -499,6 +537,10 @@ class BiddingStrategyService:
             # Create bidding strategy
             bidding_strategy = BiddingStrategy()
             bidding_strategy.name = name
+            if currency_code is not None:
+                bidding_strategy.currency_code = currency_code
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
 
             # Configure Target Impression Share
             target_impression_share = TargetImpressionShare()
@@ -563,6 +605,7 @@ class BiddingStrategyService:
         target_impression_share_location: Optional[str] = None,
         target_impression_share_location_fraction_micros: Optional[int] = None,
         target_impression_share_cpc_bid_ceiling_micros: Optional[int] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -571,7 +614,8 @@ class BiddingStrategyService:
 
         Note: BiddingStrategy.status is Output-only — it cannot be changed
         via update. Pause/enable a strategy by detaching it from its
-        campaigns instead.
+        campaigns instead. ``currency_code`` is Immutable and cannot be
+        changed after creation; it is intentionally absent from update.
 
         Args:
             ctx: FastMCP context
@@ -584,6 +628,8 @@ class BiddingStrategyService:
             target_impression_share_location: New location for TARGET_IMPRESSION_SHARE
             target_impression_share_location_fraction_micros: New location fraction for TARGET_IMPRESSION_SHARE
             target_impression_share_cpc_bid_ceiling_micros: New CPC bid ceiling for TARGET_IMPRESSION_SHARE
+            aligned_campaign_budget_id: ID of the campaign budget this
+                portfolio strategy is aligned with (mutable on update).
 
         Returns:
             Updated bidding strategy details
@@ -656,6 +702,10 @@ class BiddingStrategyService:
                         "target_impression_share.cpc_bid_ceiling_micros"
                     )
                 bidding_strategy.target_impression_share = tis
+
+            if aligned_campaign_budget_id is not None:
+                bidding_strategy.aligned_campaign_budget_id = aligned_campaign_budget_id
+                update_mask_fields.append("aligned_campaign_budget_id")
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")
@@ -774,6 +824,8 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_cpa_micros: int,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -793,6 +845,8 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=target_cpa_micros,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -803,6 +857,8 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_roas: float,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -822,6 +878,8 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_roas=target_roas,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -832,6 +890,8 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_cpa_micros: Optional[int] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -851,6 +911,8 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_cpa_micros=target_cpa_micros,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -863,6 +925,8 @@ def create_bidding_strategy_tools(
         location: str,
         location_fraction_micros: int,
         max_cpc_bid_ceiling_micros: Optional[int] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -886,6 +950,8 @@ def create_bidding_strategy_tools(
             location=location,
             location_fraction_micros=location_fraction_micros,
             max_cpc_bid_ceiling_micros=max_cpc_bid_ceiling_micros,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -895,6 +961,8 @@ def create_bidding_strategy_tools(
         ctx: Context,
         customer_id: str,
         name: str,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -912,6 +980,8 @@ def create_bidding_strategy_tools(
             ctx=ctx,
             customer_id=customer_id,
             name=name,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -922,6 +992,8 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_roas: Optional[float] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -941,6 +1013,8 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_roas=target_roas,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -951,6 +1025,8 @@ def create_bidding_strategy_tools(
         customer_id: str,
         name: str,
         target_spend_micros: Optional[int] = None,
+        currency_code: Optional[str] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -970,6 +1046,8 @@ def create_bidding_strategy_tools(
             customer_id=customer_id,
             name=name,
             target_spend_micros=target_spend_micros,
+            currency_code=currency_code,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -1012,6 +1090,7 @@ def create_bidding_strategy_tools(
         target_impression_share_location: Optional[str] = None,
         target_impression_share_location_fraction_micros: Optional[int] = None,
         target_impression_share_cpc_bid_ceiling_micros: Optional[int] = None,
+        aligned_campaign_budget_id: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -1020,6 +1099,7 @@ def create_bidding_strategy_tools(
 
         BiddingStrategy.status is Output-only and cannot be changed via
         update; pause/enable a strategy by detaching it from its campaigns.
+        ``currency_code`` is Immutable and cannot be changed after creation.
 
         Updatable fields:
             - name (str): Strategy name
@@ -1031,6 +1111,8 @@ def create_bidding_strategy_tools(
             - target_impression_share_location_fraction_micros (int): Target impression share in micros
                 (e.g., 650000 for 65%)
             - target_impression_share_cpc_bid_ceiling_micros (int): Max CPC bid ceiling in micros
+            - aligned_campaign_budget_id (int): ID of the campaign budget the
+                portfolio strategy is aligned with
 
         Args:
             customer_id: The customer ID
@@ -1050,6 +1132,7 @@ def create_bidding_strategy_tools(
             target_impression_share_location=target_impression_share_location,
             target_impression_share_location_fraction_micros=target_impression_share_location_fraction_micros,
             target_impression_share_cpc_bid_ceiling_micros=target_impression_share_cpc_bid_ceiling_micros,
+            aligned_campaign_budget_id=aligned_campaign_budget_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

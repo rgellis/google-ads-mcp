@@ -360,3 +360,73 @@ async def test_remove_campaign_budget(
 
     operation = request.operations[0]
     assert operation.remove == f"customers/{customer_id}/campaignBudgets/{budget_id}"
+
+
+@pytest.mark.asyncio
+async def test_create_campaign_budget_lifetime_with_period(
+    budget_service: BudgetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """total_amount_micros + period=CUSTOM_PERIOD wires through on create."""
+    mock_response = Mock(spec=MutateCampaignBudgetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = "customers/1234567890/campaignBudgets/1"
+    mock_client = budget_service.client  # type: ignore
+    mock_client.mutate_campaign_budgets.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.bidding.budget_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await budget_service.create_campaign_budget(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name="Custom Period Budget",
+            total_amount_micros=500_000_000,
+            period="CUSTOM_PERIOD",
+            type_="STANDARD",
+            aligned_bidding_strategy_id=42,
+        )
+
+    request = mock_client.mutate_campaign_budgets.call_args[1]["request"]  # type: ignore
+    create = request.operations[0].create
+    assert create.total_amount_micros == 500_000_000
+    assert create.aligned_bidding_strategy_id == 42
+    # period and type_ are enum-typed; presence is enough.
+    assert create.period
+    assert create.type_
+
+
+@pytest.mark.asyncio
+async def test_update_campaign_budget_aligned_strategy(
+    budget_service: BudgetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """aligned_bidding_strategy_id is mutable on update."""
+    mock_response = Mock(spec=MutateCampaignBudgetsResponse)
+    mock_response.results = [Mock()]
+    mock_response.results[0].resource_name = "customers/1234567890/campaignBudgets/1"
+    mock_client = budget_service.client  # type: ignore
+    mock_client.mutate_campaign_budgets.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.bidding.budget_service.serialize_proto_message",
+        return_value={"results": []},
+    ):
+        await budget_service.update_campaign_budget(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            budget_id="1",
+            aligned_bidding_strategy_id=99,
+            explicitly_shared=True,
+        )
+
+    request = mock_client.mutate_campaign_budgets.call_args[1]["request"]  # type: ignore
+    op = request.operations[0]
+    assert op.update.aligned_bidding_strategy_id == 99
+    assert op.update.explicitly_shared is True
+    paths = list(op.update_mask.paths)
+    assert "aligned_bidding_strategy_id" in paths
+    assert "explicitly_shared" in paths

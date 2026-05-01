@@ -89,6 +89,34 @@ async def test_create_batch_job(
 
 
 @pytest.mark.asyncio
+async def test_create_batch_job_with_execution_limit(
+    batch_job_service: BatchJobService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """execution_limit_seconds wires through to BatchJob.metadata."""
+    customer_id = "1234567890"
+    mock_response = Mock(spec=MutateBatchJobResponse)
+    mock_response.result = Mock()
+    mock_response.result.resource_name = f"customers/{customer_id}/batchJobs/1"  # type: ignore
+    mock_client = batch_job_service.client  # type: ignore
+    mock_client.mutate_batch_job.return_value = mock_response  # type: ignore
+
+    with patch(
+        "src.services.data_import.batch_job_service.serialize_proto_message",
+        return_value={"result": {}},
+    ):
+        await batch_job_service.create_batch_job(
+            ctx=mock_ctx,
+            customer_id=customer_id,
+            execution_limit_seconds=3600,
+        )
+
+    request = mock_client.mutate_batch_job.call_args[1]["request"]  # type: ignore
+    assert request.operation.create.metadata.execution_limit_seconds == 3600
+
+
+@pytest.mark.asyncio
 async def test_get_batch_job(
     batch_job_service: BatchJobService,
     mock_sdk_client: Any,

@@ -30,24 +30,132 @@ from google.ads.googleads.v23.services.types.audience_insights_service import (
 )
 from google.ads.googleads.v23.common.types.audience_insights_attribute import (
     AudienceInsightsAttribute,
+    AudienceInsightsCategory,
+    AudienceInsightsEntity,
+    AudienceInsightsLineup,
 )
 from google.ads.googleads.v23.common.types.criteria import (
     AgeRangeInfo,
+    DeviceInfo,
     GenderInfo,
+    IncomeRangeInfo,
     LocationInfo,
+    ParentalStatusInfo,
     UserInterestInfo,
+    UserListInfo,
+    YouTubeChannelInfo,
+    YouTubeVideoInfo,
 )
 from google.ads.googleads.v23.enums.types.audience_insights_dimension import (
     AudienceInsightsDimensionEnum,
 )
 from google.ads.googleads.v23.enums.types.age_range_type import AgeRangeTypeEnum
+from google.ads.googleads.v23.enums.types.device import DeviceEnum
 from google.ads.googleads.v23.enums.types.gender_type import GenderTypeEnum
+from google.ads.googleads.v23.enums.types.income_range_type import IncomeRangeTypeEnum
+from google.ads.googleads.v23.enums.types.parental_status_type import (
+    ParentalStatusTypeEnum,
+)
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
 from src.utils import format_customer_id, get_logger, serialize_proto_message
 
 logger = get_logger(__name__)
+
+
+def _build_audience_insights_attribute(
+    customer_id: str, spec: Dict[str, Any]
+) -> AudienceInsightsAttribute:
+    """Translate an LLM-supplied attribute dict into AudienceInsightsAttribute.
+
+    Each spec is a one-of-N dict keyed by ``type`` (uppercase enum-style),
+    plus the type-specific id field. Available types and required fields:
+
+        AGE_RANGE         {"type": "AGE_RANGE", "age_range_type": "AGE_RANGE_18_24"}
+        GENDER            {"type": "GENDER", "gender_type": "MALE"}
+        LOCATION          {"type": "LOCATION", "geo_target_constant_id": "2840"}
+        USER_INTEREST     {"type": "USER_INTEREST", "interest_id": "92929"}
+        ENTITY            {"type": "ENTITY", "knowledge_graph_machine_id": "/m/0_xyz"}
+        CATEGORY          {"type": "CATEGORY", "category_id": "12345"}
+        LINEUP            {"type": "LINEUP", "lineup_id": "67890"}
+        PARENTAL_STATUS   {"type": "PARENTAL_STATUS", "parental_status_type": "PARENT"}
+        INCOME_RANGE      {"type": "INCOME_RANGE", "income_range_type": "INCOME_RANGE_0_50"}
+        YOUTUBE_CHANNEL   {"type": "YOUTUBE_CHANNEL", "channel_id": "UCxxxxx"}
+        YOUTUBE_VIDEO     {"type": "YOUTUBE_VIDEO", "video_id": "abcd1234"}
+        DEVICE            {"type": "DEVICE", "device_type": "MOBILE"}
+        USER_LIST         {"type": "USER_LIST", "user_list_id": "123"}
+    """
+    attr = AudienceInsightsAttribute()
+    type_ = spec["type"]
+    if type_ == "AGE_RANGE":
+        info = AgeRangeInfo()
+        info.type_ = getattr(AgeRangeTypeEnum.AgeRangeType, spec["age_range_type"])
+        attr.age_range = info
+    elif type_ == "GENDER":
+        info_g = GenderInfo()
+        info_g.type_ = getattr(GenderTypeEnum.GenderType, spec["gender_type"])
+        attr.gender = info_g
+    elif type_ == "LOCATION":
+        info_l = LocationInfo()
+        info_l.geo_target_constant = (
+            f"geoTargetConstants/{spec['geo_target_constant_id']}"
+        )
+        attr.location = info_l
+    elif type_ == "USER_INTEREST":
+        info_ui = UserInterestInfo()
+        info_ui.user_interest_category = (
+            f"customers/{customer_id}/userInterests/{spec['interest_id']}"
+        )
+        attr.user_interest = info_ui
+    elif type_ == "ENTITY":
+        ent = AudienceInsightsEntity()
+        ent.knowledge_graph_machine_id = spec["knowledge_graph_machine_id"]
+        attr.entity = ent
+    elif type_ == "CATEGORY":
+        cat = AudienceInsightsCategory()
+        cat.category_id = spec["category_id"]
+        attr.category = cat
+    elif type_ == "LINEUP":
+        lu = AudienceInsightsLineup()
+        lu.lineup_id = spec["lineup_id"]
+        attr.lineup = lu
+    elif type_ == "PARENTAL_STATUS":
+        info_p = ParentalStatusInfo()
+        info_p.type_ = getattr(
+            ParentalStatusTypeEnum.ParentalStatusType, spec["parental_status_type"]
+        )
+        attr.parental_status = info_p
+    elif type_ == "INCOME_RANGE":
+        info_ir = IncomeRangeInfo()
+        info_ir.type_ = getattr(
+            IncomeRangeTypeEnum.IncomeRangeType, spec["income_range_type"]
+        )
+        attr.income_range = info_ir
+    elif type_ == "YOUTUBE_CHANNEL":
+        yc = YouTubeChannelInfo()
+        yc.channel_id = spec["channel_id"]
+        attr.youtube_channel = yc
+    elif type_ == "YOUTUBE_VIDEO":
+        yv = YouTubeVideoInfo()
+        yv.video_id = spec["video_id"]
+        attr.youtube_video = yv
+    elif type_ == "DEVICE":
+        info_d = DeviceInfo()
+        info_d.type_ = getattr(DeviceEnum.Device, spec["device_type"])
+        attr.device = info_d
+    elif type_ == "USER_LIST":
+        ul = UserListInfo()
+        ul.user_list = f"customers/{customer_id}/userLists/{spec['user_list_id']}"
+        attr.user_list = ul
+    else:
+        raise ValueError(
+            f"Unknown audience attribute type: {type_}. Valid types: "
+            "AGE_RANGE, GENDER, LOCATION, USER_INTEREST, ENTITY, CATEGORY, "
+            "LINEUP, PARENTAL_STATUS, INCOME_RANGE, YOUTUBE_CHANNEL, "
+            "YOUTUBE_VIDEO, DEVICE, USER_LIST."
+        )
+    return attr
 
 
 class AudienceInsightsService:
@@ -203,10 +311,28 @@ class AudienceInsightsService:
         audience_ages: Optional[List[str]] = None,
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
+        audience_attribute_groups: Optional[List[List[Dict[str, Any]]]] = None,
         customer_insights_group: Optional[str] = None,
         data_month: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate audience composition insights for a specific audience.
+
+        ``audience_attribute_groups`` is the full-fidelity way to add
+        topic combinations (any of the 13 ``AudienceInsightsAttribute``
+        oneof members). Each outer-list element is a *group* (OR within
+        the group, AND across groups). Each inner-list element is an
+        attribute spec — see ``_build_audience_insights_attribute`` for
+        the dict schema.
+
+        Quick example::
+
+            audience_attribute_groups=[
+                [
+                    {"type": "USER_INTEREST", "interest_id": "92929"},
+                    {"type": "USER_INTEREST", "interest_id": "12345"},
+                ],
+                [{"type": "ENTITY", "knowledge_graph_machine_id": "/m/0xyz"}],
+            ]
 
         Args:
             ctx: FastMCP context
@@ -215,8 +341,15 @@ class AudienceInsightsService:
             dimensions: List of dimensions to analyze
             audience_ages: Optional age ranges
             audience_genders: Optional genders
-            audience_user_interests: Optional user interest IDs (added via
-                topic_audience_combinations as user_interest attributes)
+            audience_user_interests: Optional user interest IDs (legacy
+                shortcut — for any other attribute type, use
+                ``audience_attribute_groups``).
+            audience_attribute_groups: Optional. Nested list of
+                attribute-spec dicts representing full-fidelity topic
+                combinations. Supports all 13 attribute types
+                (age_range, gender, location, user_interest, entity,
+                category, lineup, parental_status, income_range,
+                youtube_channel, youtube_video, device, user_list).
             customer_insights_group: Optional user-defined grouping label
             data_month: Optional specific month in YYYY-MM format
 
@@ -260,6 +393,15 @@ class AudienceInsightsService:
                     attr.user_interest = interest_info
                     attr_group.attributes.append(attr)
                 audience.topic_audience_combinations.append(attr_group)
+
+            if audience_attribute_groups:
+                for group_specs in audience_attribute_groups:
+                    group = InsightsAudienceAttributeGroup()
+                    for spec in group_specs:
+                        group.attributes.append(
+                            _build_audience_insights_attribute(customer_id, spec)
+                        )
+                    audience.topic_audience_combinations.append(group)
 
             # Create request
             request = GenerateAudienceCompositionInsightsRequest()
@@ -750,10 +892,33 @@ def create_audience_insights_tools(
         audience_ages: Optional[List[str]] = None,
         audience_genders: Optional[List[str]] = None,
         audience_user_interests: Optional[List[str]] = None,
+        audience_attribute_groups: Optional[List[List[Dict[str, Any]]]] = None,
         customer_insights_group: Optional[str] = None,
         data_month: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate detailed composition insights for a specific audience.
+
+        ``audience_attribute_groups`` is the full-fidelity way to combine
+        multiple ``AudienceInsightsAttribute`` types in one request. The
+        outer list is groups (AND across groups); the inner list is
+        attribute specs within a group (OR within a group).
+
+        Each attribute spec is a dict with a ``type`` field plus the
+        type-specific id field. Supported types and their fields:
+
+            AGE_RANGE         {"type": "AGE_RANGE", "age_range_type": "AGE_RANGE_18_24"}
+            GENDER            {"type": "GENDER", "gender_type": "MALE"}
+            LOCATION          {"type": "LOCATION", "geo_target_constant_id": "2840"}
+            USER_INTEREST     {"type": "USER_INTEREST", "interest_id": "92929"}
+            ENTITY            {"type": "ENTITY", "knowledge_graph_machine_id": "/m/0_xyz"}
+            CATEGORY          {"type": "CATEGORY", "category_id": "12345"}
+            LINEUP            {"type": "LINEUP", "lineup_id": "67890"}
+            PARENTAL_STATUS   {"type": "PARENTAL_STATUS", "parental_status_type": "PARENT"}
+            INCOME_RANGE      {"type": "INCOME_RANGE", "income_range_type": "INCOME_RANGE_0_50"}
+            YOUTUBE_CHANNEL   {"type": "YOUTUBE_CHANNEL", "channel_id": "UCxxx"}
+            YOUTUBE_VIDEO     {"type": "YOUTUBE_VIDEO", "video_id": "abcd"}
+            DEVICE            {"type": "DEVICE", "device_type": "MOBILE"}
+            USER_LIST         {"type": "USER_LIST", "user_list_id": "123"}
 
         Args:
             customer_id: The customer ID
@@ -761,8 +926,11 @@ def create_audience_insights_tools(
             dimensions: Dimensions to analyze (AGE_RANGE, GENDER, LOCATION, USER_INTEREST, etc.)
             audience_ages: Optional age ranges
             audience_genders: Optional genders
-            audience_user_interests: Optional user interest IDs (wired through
-                topic_audience_combinations as user_interest attributes)
+            audience_user_interests: Optional user interest IDs (legacy
+                shortcut for the USER_INTEREST attribute type — for any
+                other type, use ``audience_attribute_groups``).
+            audience_attribute_groups: Full-fidelity nested list of
+                attribute-spec dicts. See the type reference above.
             customer_insights_group: Optional user-defined grouping label
             data_month: Optional specific month in YYYY-MM format
 
@@ -777,6 +945,7 @@ def create_audience_insights_tools(
             audience_ages=audience_ages,
             audience_genders=audience_genders,
             audience_user_interests=audience_user_interests,
+            audience_attribute_groups=audience_attribute_groups,
             customer_insights_group=customer_insights_group,
             data_month=data_month,
         )

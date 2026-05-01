@@ -55,6 +55,7 @@ class BatchJobService:
         self,
         ctx: Context,
         customer_id: str,
+        execution_limit_seconds: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -64,6 +65,9 @@ class BatchJobService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
+            execution_limit_seconds: Immutable. Approximate upper bound on
+                how long the job can run. If exceeded the job is canceled.
+                Settable on create only (per ``BatchJobMetadata`` proto).
 
         Returns:
             Created batch job details
@@ -73,6 +77,8 @@ class BatchJobService:
 
             # Create batch job
             batch_job = BatchJob()
+            if execution_limit_seconds is not None:
+                batch_job.metadata.execution_limit_seconds = execution_limit_seconds
 
             # Create operation
             operation = BatchJobOperation()
@@ -521,6 +527,7 @@ def create_batch_job_tools(
     async def create_batch_job(
         ctx: Context,
         customer_id: str,
+        execution_limit_seconds: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -529,6 +536,9 @@ def create_batch_job_tools(
 
         Args:
             customer_id: The customer ID
+            execution_limit_seconds: Optional Immutable upper bound on how
+                long the job can run, in seconds. If the job exceeds this,
+                it is canceled. Settable on create only.
 
         Returns:
             Created batch job details with resource_name
@@ -536,6 +546,7 @@ def create_batch_job_tools(
         return await service.create_batch_job(
             ctx=ctx,
             customer_id=customer_id,
+            execution_limit_seconds=execution_limit_seconds,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
