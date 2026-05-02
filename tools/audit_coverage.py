@@ -766,7 +766,15 @@ def _attr_chain(node: ast.AST) -> str | None:
 def _method_kind(
     node: ast.AsyncFunctionDef | ast.FunctionDef, ancestry: list[ast.AST]
 ) -> str:
-    """Return 'tool' if defined inside ``create_*_tools``, else 'service'."""
+    """Return 'tool' if defined inside ``create_*_tools``, else 'service'.
+
+    Helpers nested inside the tool factory (``_get_<x>_enum`` etc.,
+    leading underscore by convention) are ``service`` kind — they
+    don't get registered as MCP tools and the docstring check
+    shouldn't flag their params.
+    """
+    if node.name.startswith("_"):
+        return "service"
     for parent in ancestry:
         if (
             isinstance(parent, ast.FunctionDef)
@@ -797,7 +805,7 @@ def _extract_documented_args(docstring: str) -> set[str]:
     return set(_DOCSTRING_ARG_RE.findall(block))
 
 
-SKIP_PREFIXES = ("list_", "search_", "get_", "register_", "_", "remove_")
+SKIP_PREFIXES = ("list_", "search_", "get_", "register_", "__", "remove_")
 
 
 def collect_wrappers(file_path: Path) -> list[WrapperMethod]:
@@ -861,6 +869,14 @@ def _build_wrapper_method(
                 p = _attr_chain(tgt)
                 if p:
                     wm.writes.add(p)
+                # Helper-passthrough: ``parent.<field> = <expr>`` where
+                # the wrapper has a same-named dict / list param. We
+                # treat that as dict-passthrough so leaves under
+                # ``<field>`` count as reachable, matching how
+                # ``set_optional_submessage`` / ``extend_repeated_submessages``
+                # would have tagged it.
+                if isinstance(tgt, ast.Attribute) and tgt.attr in wm.params:
+                    wm.dict_passthrough.add(tgt.attr)
         elif isinstance(sub, ast.AugAssign):
             p = _attr_chain(sub.target)
             if p:
@@ -901,6 +917,21 @@ def _build_wrapper_method(
                 and isinstance(sub.args[1].value, str)
             ):
                 wm.dict_passthrough.add(sub.args[1].value)
+            # Recognise the manual-helper passthrough pattern:
+            # ``parent.<field>.append(<helper_call_or_var>)`` where the
+            # wrapper has a same-named param. Several services use a
+            # private ``self._build_<thing>(dict)`` helper to convert
+            # caller dicts into proto submessages and then append them
+            # to a repeated field. Functionally identical to
+            # ``extend_repeated_submessages``; the audit treats it the
+            # same so leaves under that field count as reachable.
+            if (
+                isinstance(sub.func, ast.Attribute)
+                and sub.func.attr == "append"
+                and isinstance(sub.func.value, ast.Attribute)
+                and sub.func.value.attr in wm.params
+            ):
+                wm.dict_passthrough.add(sub.func.value.attr)
     return wm
 
 
@@ -1189,50 +1220,65 @@ def _ancestor_in_passthrough(
 ) -> str:
     """Return the reach mode if any ancestor in ``path`` is a passthrough.
 
-    The first ancestor (path[0]) is the field name on the parent
-    resource. Wrappers can mark *that* name as dict- or typed-
-    passthrough, which transitively covers every descendant leaf.
+    Walks the path up to (but not including) the leaf, checking each
+    segment against every wrapper's ``dict_passthrough`` /
+    ``typed_passthrough`` sets. The top-level resource field is the
+    common case (``shopping_setting`` is dict-passthrough on
+    ``create_campaign``), but mid-tree segments can also be the
+    passthrough boundary — e.g. ``listing_group.case_value`` where
+    ``case_value`` is the dict-typed param the wrapper accepts and
+    every leaf below it is reachable via that single dict.
     """
     if not path:
         return ""
-    head = path[0]
-    for wm in wrappers:
-        if head in wm.dict_passthrough:
-            return "dict_passthrough"
-        if head in wm.typed_passthrough:
-            return "typed_passthrough"
+    # For length-1 paths the only "ancestor" is the field itself
+    # (e.g. a top-level submessage whose only leaf is its scalar
+    # payload); otherwise drop the leaf and check every parent
+    # segment.
+    ancestors = path[:-1] if len(path) > 1 else path
+    for segment in ancestors:
+        for wm in wrappers:
+            if segment in wm.dict_passthrough:
+                return "dict_passthrough"
+            if segment in wm.typed_passthrough:
+                return "typed_passthrough"
     return ""
 
 
 def _wrapper_covers_leaf(path: tuple[str, ...], wrappers: list[WrapperMethod]) -> bool:
     """Explicit-write check at the leaf level.
 
-    A leaf is reachable when any wrapper:
+    A leaf is reachable when:
 
-    1. **Full suffix match** — writes a path ending in the dotted leaf
-       path (``<var>.text_ad.description1`` for leaf ``text_ad.description1``).
-       This handles plain ``parent.sub.leaf = param`` assignments.
+    1. **Full suffix match** — any wrapper in the file writes a path
+       ending in the dotted leaf path (``<var>.text_ad.description1``
+       for leaf ``text_ad.description1``). Handles plain
+       ``parent.sub.leaf = param`` assignments.
 
-    2. **Entry-class build pattern** — writes the leaf-name on its own
-       (``FrequencyCapEntry.cap`` from a ``FrequencyCapEntry(cap=...)``
-       constructor, or ``fc.cap`` from a ``fc = parent.frequency_caps.add()``
-       pattern) AND has a write referencing the top-level parent field
-       (``campaign.frequency_caps``). This catches repeated-field
-       building where leaf writes don't include the parent in their
-       attribute chain.
+    2. **Entry-class build pattern** — *any* wrapper in the file writes
+       the leaf-name on its own (``FrequencyCapEntry.cap`` from a
+       ``FrequencyCapEntry(cap=...)`` constructor, or ``fc.cap`` from
+       a ``fc = parent.frequency_caps.add()`` pattern) AND *any*
+       wrapper in the file writes a path referencing the top-level
+       parent field (``campaign.frequency_caps``). The two writes can
+       live in different functions — within a single service file the
+       pattern is still coherent (e.g. tool method calls a helper that
+       builds the entry).
     """
     full_suffix = "." + ".".join(path)
     full_path = ".".join(path)
     leaf = path[-1]
     parent = path[0]
     leaf_dot = "." + leaf
-    for wm in wrappers:
-        if any(w == full_path or w.endswith(full_suffix) for w in wm.writes):
-            return True
-        leaf_written = any(w == leaf or w.endswith(leaf_dot) for w in wm.writes)
-        if leaf_written and any(parent in w.split(".") for w in wm.writes):
-            return True
-    return False
+    if any(
+        w == full_path or w.endswith(full_suffix) for wm in wrappers for w in wm.writes
+    ):
+        return True
+    leaf_written = any(
+        w == leaf or w.endswith(leaf_dot) for wm in wrappers for w in wm.writes
+    )
+    parent_written = any(parent in w.split(".") for wm in wrappers for w in wm.writes)
+    return leaf_written and parent_written
 
 
 def merge_leaf_sources(
@@ -1348,6 +1394,7 @@ def score_submessage_coverage(
     parent_proto_text: str | None,
     wrappers: list[WrapperMethod],
     parent_unified_fields: list[UnifiedField] | None = None,
+    other_resource_names: set[str] | None = None,
 ) -> list[LeafCoverage]:
     """Recursively audit every reachable leaf inside resource submessages.
 
@@ -1357,11 +1404,25 @@ def score_submessage_coverage(
     (``merge_leaf_sources``) and check reachability against the
     wrapper code (explicit writes or ancestor-level passthrough).
 
+    Cross-resource cuts: when a submessage field's type is itself a
+    separately-audited top-level resource (e.g. ``AdGroupAd.ad`` is an
+    ``Ad`` reference), stop recursion. The same fields would
+    re-appear under that resource's own audit section, doubling the
+    leaf count and reporting them as unreachable here when they're
+    only reachable via that other resource's wrappers.
+
     Cycle protection: track visited ``module.qualname`` pairs per
     descent stack. The Google Ads schema doesn't have message cycles in
     practice, but the guard makes the audit defensive against future
     additions.
     """
+    cross_resource_skip = other_resource_names or set()
+    # Suppression registry already covers some top-level fields whose
+    # writes are routed through helpers the audit can't follow (e.g.
+    # ``CustomerCustomizer.value`` → ``value_type + string_value`` via
+    # ``create_<x>_customizer_operation``). Apply that suppression to
+    # every leaf whose path starts with one of those fields.
+    suppressed_top_level_fields = set(INTENTIONAL_NON_EXPOSURE.get(resource, {}).keys())
     out: list[LeafCoverage] = []
     parent_proto_cache: dict[str, str | None] = {}
     if parent_proto_text is not None:
@@ -1425,6 +1486,13 @@ def score_submessage_coverage(
         for nested_name, nested_class in nested.items():
             if nested_name in output_only_nested:
                 continue
+            # Cross-resource cut: another resource's audit section
+            # already covers this submessage tree.
+            if (
+                nested_class.__qualname__ != resource
+                and nested_class.__qualname__ in cross_resource_skip
+            ):
+                continue
             descend(nested_name, nested_class, path + (nested_name,), next_visited)
 
     # Annotation map from the parent resource's already-triangulated
@@ -1437,6 +1505,18 @@ def score_submessage_coverage(
             top_level_annotations[f.name] = f.annotation
     for top_name, top_class in iter_submessage_fields(resource_class):
         if top_level_annotations.get(top_name) == "output_only":
+            continue
+        # Cross-resource cut at the top level too.
+        if (
+            top_class.__qualname__ != resource
+            and top_class.__qualname__ in cross_resource_skip
+        ):
+            continue
+        # Skip subtrees rooted at a suppressed top-level field. The
+        # suppression reason already explains why the audit can't
+        # detect coverage; descending into the subtree just produces
+        # noise for leaves that are also covered by the same helper.
+        if top_name in suppressed_top_level_fields:
             continue
         descend(top_name, top_class, (top_name,), frozenset())
     return out
@@ -1801,6 +1881,16 @@ def build_reports(refresh: bool = False) -> list[ServiceReport]:
             wrappers_by_file[path] = ms
             tools_by_file[path] = collect_mcp_tool_names(path)
 
+    # Set of all top-level resources we audit, used for the
+    # cross-resource cut in score_submessage_coverage so that e.g.
+    # AdGroupAd's recursion into ``ad`` doesn't re-traverse Ad's whole
+    # field tree (Ad is its own audit section).
+    all_resource_names: set[str] = {
+        _resource_for_service(s)
+        for s in services
+        if s not in NO_RESOURCE_SERVICES and _resource_for_service(s)
+    }
+
     reports: list[ServiceReport] = []
     for svc in services:
         resource = _resource_for_service(svc)
@@ -1834,7 +1924,12 @@ def build_reports(refresh: bool = False) -> list[ServiceReport]:
         sdk_class = load_sdk_class(resource)
         leaf_coverage = (
             score_submessage_coverage(
-                resource, sdk_class, proto_text, wrappers, unified
+                resource,
+                sdk_class,
+                proto_text,
+                wrappers,
+                unified,
+                other_resource_names=all_resource_names,
             )
             if sdk_class is not None
             else []

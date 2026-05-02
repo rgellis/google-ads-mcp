@@ -29,6 +29,7 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     gaql_enum_name,
     get_logger,
@@ -67,6 +68,7 @@ class ExperimentService:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         sync_enabled: Optional[bool] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -86,6 +88,9 @@ class ExperimentService:
             end_date: End date (YYYY-MM-DD format)
             sync_enabled: Immutable. When True the experiment's trial campaigns
                 stay in sync with the base campaign on Search-style edits.
+            goals: List of dicts each building a ``MetricGoal``
+                (metric + direction) describing the metric thresholds
+                used to evaluate the experiment.
 
         Returns:
             Created experiment details
@@ -116,6 +121,12 @@ class ExperimentService:
                 experiment.end_date = end_date
             if sync_enabled is not None:
                 experiment.sync_enabled = sync_enabled
+            if goals is not None:
+                from google.ads.googleads.v23.common.types.metric_goal import (
+                    MetricGoal,
+                )
+
+                extend_repeated_submessages(experiment, "goals", goals, MetricGoal)
 
             # Create operation
             operation = ExperimentOperation()
@@ -657,6 +668,7 @@ def create_experiment_tools(
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         sync_enabled: Optional[bool] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -683,6 +695,7 @@ def create_experiment_tools(
             sync_enabled: Immutable. When True, the experiment's trial
                 campaigns stay in sync with their base campaigns on
                 Search-style edits.
+            goals: List of dicts each building a MetricGoal (metric + direction) describing the metric thresholds used to evaluate the experiment.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -700,6 +713,7 @@ def create_experiment_tools(
             start_date=start_date,
             end_date=end_date,
             sync_enabled=sync_enabled,
+            goals=goals,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

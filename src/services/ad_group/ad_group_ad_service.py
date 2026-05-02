@@ -25,6 +25,7 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     gaql_int,
     get_logger,
@@ -60,6 +61,7 @@ class AdGroupAdService:
         status: Optional[AdGroupAdStatusEnum.AdGroupAdStatus] = None,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
+        ad_group_ad_asset_automation_settings: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -76,6 +78,11 @@ class AdGroupAdService:
                 serving. Format ``YYYY-MM-DD HH:MM:SS+HH:MM``.
             end_date_time: Optional. The last date and time when the ad
                 serves. Format ``YYYY-MM-DD HH:MM:SS+HH:MM``.
+            ad_group_ad_asset_automation_settings: List of dicts each
+                building an ``AdGroupAdAssetAutomationSetting``
+                submessage (asset_automation_type +
+                asset_automation_status pair) controlling
+                asset-automation opt-in/out for this ad-group-ad.
 
         Returns:
             Created ad group ad details
@@ -98,6 +105,17 @@ class AdGroupAdService:
                 ad_group_ad.start_date_time = start_date_time
             if end_date_time is not None:
                 ad_group_ad.end_date_time = end_date_time
+            if ad_group_ad_asset_automation_settings is not None:
+                from google.ads.googleads.v23.resources.types.ad_group_ad import (
+                    AdGroupAdAssetAutomationSetting,
+                )
+
+                extend_repeated_submessages(
+                    ad_group_ad,
+                    "ad_group_ad_asset_automation_settings",
+                    ad_group_ad_asset_automation_settings,
+                    AdGroupAdAssetAutomationSetting,
+                )
 
             # Create operation
             operation = AdGroupAdOperation()
@@ -426,6 +444,7 @@ def create_ad_group_ad_tools(
         status: Optional[str] = None,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
+        ad_group_ad_asset_automation_settings: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -442,6 +461,7 @@ def create_ad_group_ad_tools(
                 (``YYYY-MM-DD HH:MM:SS+HH:MM``).
             end_date_time: Optional last day/time the ad serves
                 (``YYYY-MM-DD HH:MM:SS+HH:MM``).
+            ad_group_ad_asset_automation_settings: List of dicts each building an AdGroupAdAssetAutomationSetting (asset_automation_type + asset_automation_status) for this ad-group-ad.
             partial_failure: If True, valid operations succeed when others fail.
             validate_only: If True, validate the request without executing.
             response_content_type: Optional response content type override.
@@ -464,6 +484,7 @@ def create_ad_group_ad_tools(
             status=status_enum,
             start_date_time=start_date_time,
             end_date_time=end_date_time,
+            ad_group_ad_asset_automation_settings=ad_group_ad_asset_automation_settings,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

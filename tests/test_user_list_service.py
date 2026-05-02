@@ -511,7 +511,10 @@ def test_register_user_list_tools() -> None:
 
     # Verify that tools were registered. create_similar_user_list deleted
     # in S1.45 — Similar Audiences was sunset by Google in Aug 2023.
-    assert mock_mcp.tool.call_count == 5  # type: ignore
+    # create_lookalike_user_list and create_rule_based_user_list added in
+    # Phase 16.1 to expose the LookalikeUserListInfo / RuleBasedUserListInfo
+    # oneof members.
+    assert mock_mcp.tool.call_count == 7  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -521,6 +524,8 @@ def test_register_user_list_tools() -> None:
         "create_basic_user_list",
         "create_crm_based_user_list",
         "create_logical_user_list",
+        "create_lookalike_user_list",
+        "create_rule_based_user_list",
         "update_user_list",
         "remove_user_list",
     ]

@@ -1704,8 +1704,11 @@ def test_register_ad_group_criterion_tools() -> None:
     # Assert
     assert isinstance(service, AdGroupCriterionService)
 
-    # Verify that tools were registered
-    assert mock_mcp.tool.call_count == 25  # 25 tools registered  # type: ignore
+    # Verify that tools were registered. add_audience_resource_criteria
+    # and add_custom_intent_criteria added in Phase 16.1 to expose the
+    # AudienceInfo and CustomIntentInfo oneof members that the misnamed
+    # add_audience_criteria didn't cover (it actually wraps UserListInfo).
+    assert mock_mcp.tool.call_count == 27  # 27 tools registered  # type: ignore
 
     # Verify tool functions were passed
     registered_tools = [call[0][0] for call in mock_mcp.tool.call_args_list]  # type: ignore
@@ -1726,6 +1729,8 @@ def test_register_ad_group_criterion_tools() -> None:
         "add_custom_affinity_criteria",
         "add_custom_audience_criteria",
         "add_combined_audience_criteria",
+        "add_audience_resource_criteria",
+        "add_custom_intent_criteria",
         "add_location_criteria",
         "add_language_criteria",
         "add_life_event_criteria",

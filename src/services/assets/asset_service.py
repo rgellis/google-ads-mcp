@@ -84,6 +84,7 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     gaql_enum_name,
     gaql_int,
@@ -427,6 +428,8 @@ class AssetService:
         name: Optional[str] = None,
         tracking_url_template: Optional[str] = None,
         final_url_suffix: Optional[str] = None,
+        final_mobile_urls: Optional[List[str]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -442,6 +445,11 @@ class AssetService:
                 a tracking URL.
             final_url_suffix: Optional URL template for appending params
                 to the landing page URL served with parallel tracking.
+            final_mobile_urls: Mobile-specific final URLs that override
+                the asset's default ``final_urls`` for mobile devices.
+            url_custom_parameters: List of dicts each building a
+                ``CustomParameter`` (key + value) for {_param}
+                substitution in tracking_url_template / final_urls.
 
         Returns:
             Updated asset details
@@ -467,6 +475,21 @@ class AssetService:
             if final_url_suffix is not None:
                 asset.final_url_suffix = final_url_suffix
                 update_mask_fields.append("final_url_suffix")
+
+            if final_mobile_urls is not None:
+                asset.final_mobile_urls[:] = final_mobile_urls
+                update_mask_fields.append("final_mobile_urls")
+
+            if url_custom_parameters is not None:
+                from google.ads.googleads.v23.common.types import CustomParameter
+
+                extend_repeated_submessages(
+                    asset,
+                    "url_custom_parameters",
+                    url_custom_parameters,
+                    CustomParameter,
+                )
+                update_mask_fields.append("url_custom_parameters")
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")
@@ -2925,6 +2948,8 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         name: Optional[str] = None,
         tracking_url_template: Optional[str] = None,
         final_url_suffix: Optional[str] = None,
+        final_mobile_urls: Optional[List[str]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2935,6 +2960,8 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             - name (str): The name of the asset
             - tracking_url_template (str): URL template for constructing a tracking URL
             - final_url_suffix (str): URL template for appending params to the final URL
+            - final_mobile_urls (List[str]): Mobile-specific final URLs
+            - url_custom_parameters (List[Dict]): CustomParameter list for {_param} substitution
 
         Args:
             customer_id: The customer ID
@@ -2942,6 +2969,8 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             name: New name for the asset
             tracking_url_template: New tracking URL template
             final_url_suffix: New final URL suffix
+            final_mobile_urls: Mobile-specific final URLs that override the asset's default final_urls for mobile devices.
+            url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
             partial_failure: Whether to enable partial failure
             validate_only: Whether to only validate without executing
             response_content_type: Response content type
@@ -2956,6 +2985,8 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             name=name,
             tracking_url_template=tracking_url_template,
             final_url_suffix=final_url_suffix,
+            final_mobile_urls=final_mobile_urls,
+            url_custom_parameters=url_custom_parameters,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

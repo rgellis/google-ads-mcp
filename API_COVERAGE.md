@@ -14,13 +14,13 @@ Sources cross-checked, in order of preference:
 - Skipped (no resource / fetch error): **29**
 - Resources with **no wrapper file**: **0**
 - Total fields across all resources: **970**
-- Settable: **285 / 316** (90.2%)
-- Immutable (create-only): **290 / 296** (98.0%)
+- Settable: **316 / 316** (100.0%)
+- Immutable (create-only): **296 / 296** (100.0%)
 - Required: **15 / 15** (100.0%)
 - Output-only (skipped intentionally): **341**
 - Source disagreements (md vs proto vs sdk): **0**
-- Tool-wrapper docstring args documented: **2410 / 2410** (100.0%)
-- Submessage leaves reachable: **593 / 1377** (43.1%)
+- Tool-wrapper docstring args documented: **2479 / 2479** (100.0%)
+- Submessage leaves reachable: **929 / 1073** (86.6%)
 - Submessage leaf source disagreements: **0**
 
 Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 input-only · 🚫 output-only · ✅ exposed by wrapper · ❌ gap · 🛡️ intentionally suppressed · — n/a
@@ -96,7 +96,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `action_items` | 🚫 | — | — | — | agree | Output only |
 | `ad` | 🔒 | ✅ | — | create_ad_group_ad | agree | Immutable |
 | `ad_group` | 🔒 | ✅ | — | create_ad_group_ad | agree | Immutable |
-| `ad_group_ad_asset_automation_settings` | ✏️ | ❌ | — | — | agree | Settings that control the types of asset automation |
+| `ad_group_ad_asset_automation_settings` | ✏️ | ✅ | `create_ad_group_ad` | create_ad_group_ad | agree | Settings that control the types of asset automation |
 | `ad_strength` | 🚫 | — | — | — | agree | Output only |
 | `end_date_time` | ✏️ | ✅ | `create_ad_group_ad` | create_ad_group_ad | agree | The last day and time when ad group ad serves |
 | `labels` | 🚫 | — | — | — | agree | Output only |
@@ -107,311 +107,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `start_date_time` | ✏️ | ✅ | `create_ad_group_ad` | create_ad_group_ad | agree | The date and time when ad group ad starts serving |
 | `status` | ✏️ | ✅ | `create_ad_group_ad`, `update_ad_group_ad_status` | create_ad_group_ad, update_ad_group_ad_status | agree | The status of the ad. |
 
-**Field gaps:**
-- ✏️ `ad_group_ad_asset_automation_settings` — settable: Settings that control the types of asset automation
-
-**Submessage leaves**: 1/300 reachable (0.3%)
-
-Unreachable leaves:
-- `ad.device_preference` — ✏️ settable
-- `ad.display_url` — ✏️ settable
-- `ad.final_mobile_urls` — ✏️ settable
-- `ad.final_url_suffix` — ✏️ settable
-- `ad.final_urls` — ✏️ settable
-- `ad.name` — 🔒 immutable
-- `ad.tracking_url_template` — ✏️ settable
-- `ad.final_app_urls.os_type` — ✏️ settable
-- `ad.final_app_urls.url` — ✏️ settable
-- `ad.url_custom_parameters.key` — ✏️ settable
-- `ad.url_custom_parameters.value` — ✏️ settable
-- `ad.url_collections.final_mobile_urls` — ✏️ settable
-- `ad.url_collections.final_urls` — ✏️ settable
-- `ad.url_collections.tracking_url_template` — ✏️ settable
-- `ad.url_collections.url_collection_id` — ✏️ settable
-- `ad.text_ad.description1` — ✏️ settable
-- `ad.text_ad.description2` — ✏️ settable
-- `ad.text_ad.headline` — ✏️ settable
-- `ad.expanded_text_ad.description` — ✏️ settable
-- `ad.expanded_text_ad.description2` — ✏️ settable
-- `ad.expanded_text_ad.headline_part1` — ✏️ settable
-- `ad.expanded_text_ad.headline_part2` — ✏️ settable
-- `ad.expanded_text_ad.headline_part3` — ✏️ settable
-- `ad.expanded_text_ad.path1` — ✏️ settable
-- `ad.expanded_text_ad.path2` — ✏️ settable
-- `ad.expanded_dynamic_search_ad.description` — ✏️ settable
-- `ad.expanded_dynamic_search_ad.description2` — ✏️ settable
-- `ad.image_ad.ad_id_to_copy_image_from` — ✏️ settable
-- `ad.image_ad.data` — ✏️ settable
-- `ad.image_ad.image_url` — ✏️ settable
-- `ad.image_ad.mime_type` — ✏️ settable
-- `ad.image_ad.name` — ✏️ settable
-- `ad.image_ad.pixel_height` — ✏️ settable
-- `ad.image_ad.pixel_width` — ✏️ settable
-- `ad.image_ad.preview_image_url` — ✏️ settable
-- `ad.image_ad.preview_pixel_height` — ✏️ settable
-- `ad.image_ad.preview_pixel_width` — ✏️ settable
-- `ad.image_ad.image_asset.asset` — ✏️ settable
-- `ad.video_ad.video.asset` — ✏️ settable
-- `ad.video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.video_ad.video.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.video_ad.in_stream.action_button_label` — ✏️ settable
-- `ad.video_ad.in_stream.action_headline` — ✏️ settable
-- `ad.video_ad.in_stream.companion_banner.asset` — ✏️ settable
-- `ad.video_ad.bumper.action_button_label` — ✏️ settable
-- `ad.video_ad.bumper.action_headline` — ✏️ settable
-- `ad.video_ad.bumper.companion_banner.asset` — ✏️ settable
-- `ad.video_ad.out_stream.description` — ✏️ settable
-- `ad.video_ad.out_stream.headline` — ✏️ settable
-- `ad.video_ad.non_skippable.action_button_label` — ✏️ settable
-- `ad.video_ad.non_skippable.action_headline` — ✏️ settable
-- `ad.video_ad.non_skippable.companion_banner.asset` — ✏️ settable
-- `ad.video_ad.in_feed.description1` — ✏️ settable
-- `ad.video_ad.in_feed.description2` — ✏️ settable
-- `ad.video_ad.in_feed.headline` — ✏️ settable
-- `ad.video_ad.in_feed.thumbnail` — ✏️ settable
-- `ad.video_responsive_ad.breadcrumb1` — ✏️ settable
-- `ad.video_responsive_ad.breadcrumb2` — ✏️ settable
-- `ad.video_responsive_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.video_responsive_ad.headlines.pinned_field` — ✏️ settable
-- `ad.video_responsive_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.video_responsive_ad.headlines.text` — ✏️ settable
-- `ad.video_responsive_ad.long_headlines.asset_performance_label` — ✏️ settable
-- `ad.video_responsive_ad.long_headlines.pinned_field` — ✏️ settable
-- `ad.video_responsive_ad.long_headlines.policy_summary_info` — ✏️ settable
-- `ad.video_responsive_ad.long_headlines.text` — ✏️ settable
-- `ad.video_responsive_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.video_responsive_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.video_responsive_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.video_responsive_ad.descriptions.text` — ✏️ settable
-- `ad.video_responsive_ad.call_to_actions.asset_performance_label` — ✏️ settable
-- `ad.video_responsive_ad.call_to_actions.pinned_field` — ✏️ settable
-- `ad.video_responsive_ad.call_to_actions.policy_summary_info` — ✏️ settable
-- `ad.video_responsive_ad.call_to_actions.text` — ✏️ settable
-- `ad.video_responsive_ad.videos.asset` — ✏️ settable
-- `ad.video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.video_responsive_ad.business_name.asset_performance_label` — ✏️ settable
-- `ad.video_responsive_ad.business_name.pinned_field` — ✏️ settable
-- `ad.video_responsive_ad.business_name.policy_summary_info` — ✏️ settable
-- `ad.video_responsive_ad.business_name.text` — ✏️ settable
-- `ad.video_responsive_ad.logo_images.asset` — ✏️ settable
-- `ad.video_responsive_ad.companion_banners.asset` — ✏️ settable
-- `ad.responsive_search_ad.path1` — ✏️ settable
-- `ad.responsive_search_ad.path2` — ✏️ settable
-- `ad.responsive_search_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.responsive_search_ad.headlines.pinned_field` — ✏️ settable
-- `ad.responsive_search_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.responsive_search_ad.headlines.text` — ✏️ settable
-- `ad.responsive_search_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.responsive_search_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.responsive_search_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.responsive_search_ad.descriptions.text` — ✏️ settable
-- `ad.legacy_responsive_display_ad.accent_color` — ✏️ settable
-- `ad.legacy_responsive_display_ad.allow_flexible_color` — ✏️ settable
-- `ad.legacy_responsive_display_ad.business_name` — ✏️ settable
-- `ad.legacy_responsive_display_ad.call_to_action_text` — ✏️ settable
-- `ad.legacy_responsive_display_ad.description` — ✏️ settable
-- `ad.legacy_responsive_display_ad.format_setting` — ✏️ settable
-- `ad.legacy_responsive_display_ad.logo_image` — ✏️ settable
-- `ad.legacy_responsive_display_ad.long_headline` — ✏️ settable
-- `ad.legacy_responsive_display_ad.main_color` — ✏️ settable
-- `ad.legacy_responsive_display_ad.marketing_image` — ✏️ settable
-- `ad.legacy_responsive_display_ad.price_prefix` — ✏️ settable
-- `ad.legacy_responsive_display_ad.promo_text` — ✏️ settable
-- `ad.legacy_responsive_display_ad.short_headline` — ✏️ settable
-- `ad.legacy_responsive_display_ad.square_logo_image` — ✏️ settable
-- `ad.legacy_responsive_display_ad.square_marketing_image` — ✏️ settable
-- `ad.app_ad.mandatory_ad_text.asset_performance_label` — ✏️ settable
-- `ad.app_ad.mandatory_ad_text.pinned_field` — ✏️ settable
-- `ad.app_ad.mandatory_ad_text.policy_summary_info` — ✏️ settable
-- `ad.app_ad.mandatory_ad_text.text` — ✏️ settable
-- `ad.app_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.app_ad.headlines.pinned_field` — ✏️ settable
-- `ad.app_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.app_ad.headlines.text` — ✏️ settable
-- `ad.app_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.app_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.app_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.app_ad.descriptions.text` — ✏️ settable
-- `ad.app_ad.images.asset` — ✏️ settable
-- `ad.app_ad.youtube_videos.asset` — ✏️ settable
-- `ad.app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.app_ad.html5_media_bundles.asset` — ✏️ settable
-- `ad.app_ad.app_deep_link.asset` — ✏️ settable
-- `ad.legacy_app_install_ad.app_id` — ✏️ settable
-- `ad.legacy_app_install_ad.app_store` — ✏️ settable
-- `ad.legacy_app_install_ad.description1` — ✏️ settable
-- `ad.legacy_app_install_ad.description2` — ✏️ settable
-- `ad.legacy_app_install_ad.headline` — ✏️ settable
-- `ad.responsive_display_ad.accent_color` — ✏️ settable
-- `ad.responsive_display_ad.allow_flexible_color` — ✏️ settable
-- `ad.responsive_display_ad.business_name` — ✏️ settable
-- `ad.responsive_display_ad.call_to_action_text` — ✏️ settable
-- `ad.responsive_display_ad.format_setting` — ✏️ settable
-- `ad.responsive_display_ad.main_color` — ✏️ settable
-- `ad.responsive_display_ad.price_prefix` — ✏️ settable
-- `ad.responsive_display_ad.promo_text` — ✏️ settable
-- `ad.responsive_display_ad.marketing_images.asset` — ✏️ settable
-- `ad.responsive_display_ad.square_marketing_images.asset` — ✏️ settable
-- `ad.responsive_display_ad.logo_images.asset` — ✏️ settable
-- `ad.responsive_display_ad.square_logo_images.asset` — ✏️ settable
-- `ad.responsive_display_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.responsive_display_ad.headlines.pinned_field` — ✏️ settable
-- `ad.responsive_display_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.responsive_display_ad.headlines.text` — ✏️ settable
-- `ad.responsive_display_ad.long_headline.asset_performance_label` — ✏️ settable
-- `ad.responsive_display_ad.long_headline.pinned_field` — ✏️ settable
-- `ad.responsive_display_ad.long_headline.policy_summary_info` — ✏️ settable
-- `ad.responsive_display_ad.long_headline.text` — ✏️ settable
-- `ad.responsive_display_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.responsive_display_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.responsive_display_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.responsive_display_ad.descriptions.text` — ✏️ settable
-- `ad.responsive_display_ad.youtube_videos.asset` — ✏️ settable
-- `ad.responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.responsive_display_ad.control_spec.enable_asset_enhancements` — ✏️ settable
-- `ad.responsive_display_ad.control_spec.enable_autogen_video` — ✏️ settable
-- `ad.local_ad.path1` — ✏️ settable
-- `ad.local_ad.path2` — ✏️ settable
-- `ad.local_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.local_ad.headlines.pinned_field` — ✏️ settable
-- `ad.local_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.local_ad.headlines.text` — ✏️ settable
-- `ad.local_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.local_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.local_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.local_ad.descriptions.text` — ✏️ settable
-- `ad.local_ad.call_to_actions.asset_performance_label` — ✏️ settable
-- `ad.local_ad.call_to_actions.pinned_field` — ✏️ settable
-- `ad.local_ad.call_to_actions.policy_summary_info` — ✏️ settable
-- `ad.local_ad.call_to_actions.text` — ✏️ settable
-- `ad.local_ad.marketing_images.asset` — ✏️ settable
-- `ad.local_ad.logo_images.asset` — ✏️ settable
-- `ad.local_ad.videos.asset` — ✏️ settable
-- `ad.local_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.local_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.local_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.local_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.display_upload_ad.display_upload_product_type` — ✏️ settable
-- `ad.display_upload_ad.media_bundle.asset` — ✏️ settable
-- `ad.app_engagement_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.app_engagement_ad.headlines.pinned_field` — ✏️ settable
-- `ad.app_engagement_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.app_engagement_ad.headlines.text` — ✏️ settable
-- `ad.app_engagement_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.app_engagement_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.app_engagement_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.app_engagement_ad.descriptions.text` — ✏️ settable
-- `ad.app_engagement_ad.images.asset` — ✏️ settable
-- `ad.app_engagement_ad.videos.asset` — ✏️ settable
-- `ad.app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.shopping_comparison_listing_ad.headline` — ✏️ settable
-- `ad.smart_campaign_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.smart_campaign_ad.headlines.pinned_field` — ✏️ settable
-- `ad.smart_campaign_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.smart_campaign_ad.headlines.text` — ✏️ settable
-- `ad.smart_campaign_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.smart_campaign_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.smart_campaign_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.smart_campaign_ad.descriptions.text` — ✏️ settable
-- `ad.app_pre_registration_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.app_pre_registration_ad.headlines.pinned_field` — ✏️ settable
-- `ad.app_pre_registration_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.app_pre_registration_ad.headlines.text` — ✏️ settable
-- `ad.app_pre_registration_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.app_pre_registration_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.app_pre_registration_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.app_pre_registration_ad.descriptions.text` — ✏️ settable
-- `ad.app_pre_registration_ad.images.asset` — ✏️ settable
-- `ad.app_pre_registration_ad.youtube_videos.asset` — ✏️ settable
-- `ad.app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.business_name` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.call_to_action_text` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.marketing_images.asset` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.square_marketing_images.asset` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.portrait_marketing_images.asset` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.tall_portrait_marketing_images.asset` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.logo_images.asset` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.headlines.pinned_field` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.headlines.text` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_multi_asset_ad.descriptions.text` — ✏️ settable
-- `ad.demand_gen_carousel_ad.business_name` — ❗ required
-- `ad.demand_gen_carousel_ad.call_to_action_text` — ✏️ settable
-- `ad.demand_gen_carousel_ad.logo_image.asset` — ✏️ settable
-- `ad.demand_gen_carousel_ad.headline.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_carousel_ad.headline.pinned_field` — ✏️ settable
-- `ad.demand_gen_carousel_ad.headline.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_carousel_ad.headline.text` — ✏️ settable
-- `ad.demand_gen_carousel_ad.description.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_carousel_ad.description.pinned_field` — ✏️ settable
-- `ad.demand_gen_carousel_ad.description.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_carousel_ad.description.text` — ✏️ settable
-- `ad.demand_gen_carousel_ad.carousel_cards.asset` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.breadcrumb1` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.breadcrumb2` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.headlines.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.headlines.pinned_field` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.headlines.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.headlines.text` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.long_headlines.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.long_headlines.pinned_field` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.long_headlines.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.long_headlines.text` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.descriptions.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.descriptions.pinned_field` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.descriptions.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.descriptions.text` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.videos.asset` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.logo_images.asset` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.companion_banners.asset` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.business_name.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.business_name.pinned_field` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.business_name.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.business_name.text` — ✏️ settable
-- `ad.demand_gen_video_responsive_ad.call_to_actions.asset` — ✏️ settable
-- `ad.demand_gen_product_ad.breadcrumb1` — ✏️ settable
-- `ad.demand_gen_product_ad.breadcrumb2` — ✏️ settable
-- `ad.demand_gen_product_ad.headline.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_product_ad.headline.pinned_field` — ✏️ settable
-- `ad.demand_gen_product_ad.headline.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_product_ad.headline.text` — ✏️ settable
-- `ad.demand_gen_product_ad.description.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_product_ad.description.pinned_field` — ✏️ settable
-- `ad.demand_gen_product_ad.description.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_product_ad.description.text` — ✏️ settable
-- `ad.demand_gen_product_ad.logo_image.asset` — ✏️ settable
-- `ad.demand_gen_product_ad.business_name.asset_performance_label` — ✏️ settable
-- `ad.demand_gen_product_ad.business_name.pinned_field` — ✏️ settable
-- `ad.demand_gen_product_ad.business_name.policy_summary_info` — ✏️ settable
-- `ad.demand_gen_product_ad.business_name.text` — ✏️ settable
-- `ad.demand_gen_product_ad.call_to_action.asset` — ✏️ settable
-- `ad_group_ad_asset_automation_settings.asset_automation_status` — ✏️ settable
-- `ad_group_ad_asset_automation_settings.asset_automation_type` — ✏️ settable
+**Submessage leaves**: 2/2 reachable (100.0%)
 
 ## AdGroupAssetService
 
@@ -426,7 +122,7 @@ Unreachable leaves:
 |---|---|---|---|---|---|---|
 | `ad_group` | 🔒 | ✅ | — | link_asset_to_ad_group, link_multiple_assets_to_ad_group | agree | Required |
 | `asset` | 🔒 | ✅ | — | link_asset_to_ad_group, link_multiple_assets_to_ad_group | agree | Required |
-| `field_type` | 🔒 | ✅ | `link_asset_to_ad_group`, `update_ad_group_asset_status` | link_asset_to_ad_group, link_multiple_assets_to_ad_group, update_ad_group_asset_status | agree | Required |
+| `field_type` | 🔒 | ✅ | `link_asset_to_ad_group`, `update_ad_group_asset_status` | _asset_field_type_segment, link_asset_to_ad_group, link_multiple_assets_to_ad_group, update_ad_group_asset_status | agree | Required |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
 | `primary_status_details` | 🚫 | — | — | — | agree | Output only |
 | `primary_status_reasons` | 🚫 | — | — | — | agree | Output only |
@@ -511,26 +207,26 @@ Unreachable leaves:
 - **Resource**: `AdGroupCriterion`
 - **Sources**: md ✅ · proto ✅ · sdk ✅
 - **Wrapper file**: `src/services/ad_group/ad_group_criterion_service.py`
-- **MCP tools registered** (25): `add_keywords`, `add_audience_criteria`, `add_demographic_criteria`, `add_placement_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_youtube_video_criteria`, `add_youtube_channel_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_webpage_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_combined_audience_criteria`, `add_location_criteria`, `add_language_criteria`, `add_life_event_criteria`, `add_video_lineup_criteria`, `add_extended_demographic_criteria`, `add_brand_list_criteria`, `add_listing_group_criteria`, `add_app_payment_model_criteria`, `add_vertical_ads_item_group_rule_list_criteria`, `update_criterion_bid`, `remove_ad_group_criterion`
+- **MCP tools registered** (27): `add_keywords`, `add_audience_criteria`, `add_demographic_criteria`, `add_placement_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_youtube_video_criteria`, `add_youtube_channel_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_webpage_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_combined_audience_criteria`, `add_audience_resource_criteria`, `add_custom_intent_criteria`, `add_location_criteria`, `add_language_criteria`, `add_life_event_criteria`, `add_video_lineup_criteria`, `add_extended_demographic_criteria`, `add_brand_list_criteria`, `add_listing_group_criteria`, `add_app_payment_model_criteria`, `add_vertical_ads_item_group_rule_list_criteria`, `update_criterion_bid`, `remove_ad_group_criterion`
 
 ### Fields
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `ad_group` | 🔒 | ✅ | — | add_app_payment_model_criteria, add_audience_criteria, add_brand_list_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_keywords, add_language_criteria, add_life_event_criteria, add_listing_group_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_vertical_ads_item_group_rule_list_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria | agree | Immutable |
+| `ad_group` | 🔒 | ✅ | — | add_app_payment_model_criteria, add_audience_criteria, add_audience_resource_criteria, add_brand_list_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_custom_intent_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_keywords, add_language_criteria, add_life_event_criteria, add_listing_group_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_vertical_ads_item_group_rule_list_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria | agree | Immutable |
 | `approval_status` | 🚫 | — | — | — | agree | Output only |
-| `bid_modifier` | ✏️ | ✅ | `add_app_payment_model_criteria`, `add_audience_criteria`, `add_combined_audience_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_extended_demographic_criteria`, `add_life_event_criteria`, `add_location_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_placement_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria`, `add_youtube_channel_criteria`, `add_youtube_video_criteria`, `update_criterion_bid` | add_app_payment_model_criteria, add_audience_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_life_event_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria, update_criterion_bid | agree | The modifier for the bid when the criterion matches |
+| `bid_modifier` | ✏️ | ✅ | `add_app_payment_model_criteria`, `add_audience_criteria`, `add_audience_resource_criteria`, `add_combined_audience_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_custom_intent_criteria`, `add_extended_demographic_criteria`, `add_life_event_criteria`, `add_location_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_placement_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria`, `add_youtube_channel_criteria`, `add_youtube_video_criteria`, `update_criterion_bid` | add_app_payment_model_criteria, add_audience_criteria, add_audience_resource_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_custom_intent_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_life_event_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria, update_criterion_bid | agree | The modifier for the bid when the criterion matches |
 | `cpc_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | add_keywords, update_criterion_bid | agree | The CPC (cost-per-click) bid. |
 | `cpm_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The CPM (cost-per-thousand viewable impressions) bid. |
 | `cpv_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The CPV (cost-per-view) bid. |
 | `age_range` | 🔒 | ✅ | — | add_demographic_criteria | agree | Immutable |
 | `app_payment_model` | 🔒 | ✅ | — | add_app_payment_model_criteria | agree | Immutable |
-| `audience` | 🔒 | ❌ | — | — | agree | Immutable |
+| `audience` | 🔒 | ✅ | — | add_audience_resource_criteria | agree | Immutable |
 | `brand_list` | 🔒 | ✅ | — | add_brand_list_criteria | agree | Immutable |
 | `combined_audience` | 🔒 | ✅ | — | add_combined_audience_criteria | agree | Immutable |
 | `custom_affinity` | 🔒 | ✅ | — | add_custom_affinity_criteria | agree | Immutable |
 | `custom_audience` | 🔒 | ✅ | — | add_custom_audience_criteria | agree | Immutable |
-| `custom_intent` | 🔒 | ❌ | — | — | agree | Immutable |
+| `custom_intent` | 🔒 | ✅ | — | add_custom_intent_criteria | agree | Immutable |
 | `extended_demographic` | 🔒 | ✅ | — | add_extended_demographic_criteria | agree | Immutable |
 | `gender` | 🔒 | ✅ | — | add_demographic_criteria | agree | Immutable |
 | `income_range` | 🔒 | ✅ | — | add_demographic_criteria | agree | Immutable |
@@ -562,11 +258,11 @@ Unreachable leaves:
 | `effective_cpv_bid_source` | 🚫 | — | — | — | agree | Output only |
 | `effective_percent_cpc_bid_micros` | 🚫 | — | — | — | agree | Output only |
 | `effective_percent_cpc_bid_source` | 🚫 | — | — | — | agree | Output only |
-| `final_mobile_urls` | ✏️ | ❌ | — | — | agree | The list of possible final mobile URLs after all cross-domain redirects. |
+| `final_mobile_urls` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The list of possible final mobile URLs after all cross-domain redirects. |
 | `final_url_suffix` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | URL template for appending params to final URL. |
-| `final_urls` | ✏️ | ❌ | — | — | agree | The list of possible final URLs after all cross-domain redirects for the ad. |
+| `final_urls` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The list of possible final URLs after all cross-domain redirects for the ad. |
 | `labels` | 🚫 | — | — | — | agree | Output only |
-| `negative` | 🔒 | ✅ | `add_audience_criteria`, `add_brand_list_criteria`, `add_combined_audience_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_extended_demographic_criteria`, `add_keywords`, `add_life_event_criteria`, `add_location_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_placement_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_vertical_ads_item_group_rule_list_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria`, `add_youtube_channel_criteria`, `add_youtube_video_criteria` | add_audience_criteria, add_brand_list_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_keywords, add_life_event_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_vertical_ads_item_group_rule_list_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria | agree | Immutable |
+| `negative` | 🔒 | ✅ | `add_audience_criteria`, `add_audience_resource_criteria`, `add_brand_list_criteria`, `add_combined_audience_criteria`, `add_custom_affinity_criteria`, `add_custom_audience_criteria`, `add_custom_intent_criteria`, `add_extended_demographic_criteria`, `add_keywords`, `add_life_event_criteria`, `add_location_criteria`, `add_mobile_app_category_criteria`, `add_mobile_application_criteria`, `add_placement_criteria`, `add_topic_criteria`, `add_user_interest_criteria`, `add_vertical_ads_item_group_rule_list_criteria`, `add_video_lineup_criteria`, `add_webpage_criteria`, `add_youtube_channel_criteria`, `add_youtube_video_criteria` | add_audience_criteria, add_audience_resource_criteria, add_brand_list_criteria, add_combined_audience_criteria, add_custom_affinity_criteria, add_custom_audience_criteria, add_custom_intent_criteria, add_demographic_criteria, add_extended_demographic_criteria, add_keywords, add_life_event_criteria, add_location_criteria, add_mobile_app_category_criteria, add_mobile_application_criteria, add_placement_criteria, add_topic_criteria, add_user_interest_criteria, add_vertical_ads_item_group_rule_list_criteria, add_video_lineup_criteria, add_webpage_criteria, add_youtube_channel_criteria, add_youtube_video_criteria | agree | Immutable |
 | `percent_cpc_bid_micros` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The CPC bid amount, expressed as a fraction of the advertised price for some good or service |
 | `position_estimates` | 🚫 | — | — | — | agree | Output only |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
@@ -577,72 +273,18 @@ Unreachable leaves:
 | `system_serving_status` | 🚫 | — | — | — | agree | Output only |
 | `tracking_url_template` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The URL template for constructing a tracking URL. |
 | `type` | 🚫 | — | — | add_app_payment_model_criteria, add_demographic_criteria, add_listing_group_criteria | agree | Output only |
-| `url_custom_parameters` | ✏️ | ❌ | — | — | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
+| `url_custom_parameters` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
 
-**Field gaps:**
-- 🔒 `audience` — immutable: Immutable
-- 🔒 `custom_intent` — immutable: Immutable
-- ✏️ `final_mobile_urls` — settable: The list of possible final mobile URLs after all cross-domain redirects.
-- ✏️ `final_urls` — settable: The list of possible final URLs after all cross-domain redirects for the ad.
-- ✏️ `url_custom_parameters` — settable: The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`.
-
-**Submessage leaves**: 25/89 reachable (28.1%)
+**Submessage leaves**: 74/89 reachable (83.1%)
 
 Unreachable leaves:
-- `url_custom_parameters.key` — ✏️ settable
-- `url_custom_parameters.value` — ✏️ settable
 - `mobile_application.name` — ✏️ settable
 - `listing_group.type` — ✏️ settable
-- `listing_group.case_value.hotel_id.value` — ✏️ settable
-- `listing_group.case_value.hotel_class.value` — ✏️ settable
-- `listing_group.case_value.hotel_country_region.country_region_criterion` — ✏️ settable
-- `listing_group.case_value.hotel_state.state_criterion` — ✏️ settable
-- `listing_group.case_value.hotel_city.city_criterion` — ✏️ settable
-- `listing_group.case_value.product_category.category_id` — ✏️ settable
-- `listing_group.case_value.product_category.level` — ✏️ settable
-- `listing_group.case_value.product_brand.value` — ✏️ settable
-- `listing_group.case_value.product_channel.channel` — ✏️ settable
-- `listing_group.case_value.product_channel_exclusivity.channel_exclusivity` — ✏️ settable
-- `listing_group.case_value.product_condition.condition` — ✏️ settable
-- `listing_group.case_value.product_custom_attribute.index` — ✏️ settable
-- `listing_group.case_value.product_custom_attribute.value` — ✏️ settable
-- `listing_group.case_value.product_item_id.value` — ✏️ settable
-- `listing_group.case_value.product_type.level` — ✏️ settable
-- `listing_group.case_value.product_type.value` — ✏️ settable
-- `listing_group.case_value.product_grouping.value` — ✏️ settable
-- `listing_group.case_value.product_labels.value` — ✏️ settable
-- `listing_group.case_value.product_legacy_condition.value` — ✏️ settable
-- `listing_group.case_value.product_type_full.value` — ✏️ settable
-- `listing_group.case_value.activity_id.value` — ✏️ settable
-- `listing_group.case_value.activity_rating.value` — ✏️ settable
-- `listing_group.case_value.activity_country.value` — ✏️ settable
-- `listing_group.case_value.activity_state.value` — ✏️ settable
-- `listing_group.case_value.activity_city.value` — ✏️ settable
-- `listing_group.path.dimensions.hotel_id.value` — ✏️ settable
-- `listing_group.path.dimensions.hotel_class.value` — ✏️ settable
 - `listing_group.path.dimensions.hotel_country_region.country_region_criterion` — ✏️ settable
 - `listing_group.path.dimensions.hotel_state.state_criterion` — ✏️ settable
 - `listing_group.path.dimensions.hotel_city.city_criterion` — ✏️ settable
 - `listing_group.path.dimensions.product_category.category_id` — ✏️ settable
-- `listing_group.path.dimensions.product_category.level` — ✏️ settable
-- `listing_group.path.dimensions.product_brand.value` — ✏️ settable
-- `listing_group.path.dimensions.product_channel.channel` — ✏️ settable
 - `listing_group.path.dimensions.product_channel_exclusivity.channel_exclusivity` — ✏️ settable
-- `listing_group.path.dimensions.product_condition.condition` — ✏️ settable
-- `listing_group.path.dimensions.product_custom_attribute.index` — ✏️ settable
-- `listing_group.path.dimensions.product_custom_attribute.value` — ✏️ settable
-- `listing_group.path.dimensions.product_item_id.value` — ✏️ settable
-- `listing_group.path.dimensions.product_type.level` — ✏️ settable
-- `listing_group.path.dimensions.product_type.value` — ✏️ settable
-- `listing_group.path.dimensions.product_grouping.value` — ✏️ settable
-- `listing_group.path.dimensions.product_labels.value` — ✏️ settable
-- `listing_group.path.dimensions.product_legacy_condition.value` — ✏️ settable
-- `listing_group.path.dimensions.product_type_full.value` — ✏️ settable
-- `listing_group.path.dimensions.activity_id.value` — ✏️ settable
-- `listing_group.path.dimensions.activity_rating.value` — ✏️ settable
-- `listing_group.path.dimensions.activity_country.value` — ✏️ settable
-- `listing_group.path.dimensions.activity_state.value` — ✏️ settable
-- `listing_group.path.dimensions.activity_city.value` — ✏️ settable
 - `age_range.type` — ✏️ settable
 - `gender.type` — ✏️ settable
 - `income_range.type` — ✏️ settable
@@ -651,8 +293,6 @@ Unreachable leaves:
 - `webpage.coverage_percentage` — ✏️ settable
 - `webpage.sample.sample_urls` — ✏️ settable
 - `app_payment_model.type` — ✏️ settable
-- `custom_intent.custom_intent` — ✏️ settable
-- `audience.audience` — ✏️ settable
 
 ## AdGroupCustomizerService
 
@@ -670,11 +310,6 @@ Unreachable leaves:
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `value` | ❗ | 🛡️ _Wired through value_type + string_value via create_ad_group_customizer_operation helper._ | — | — | agree | Required |
-
-**Submessage leaves**: 1/2 reachable (50.0%)
-
-Unreachable leaves:
-- `value.type` — ❗ required
 
 ## AdGroupLabelService
 
@@ -709,8 +344,8 @@ Unreachable leaves:
 | `effective_target_roas` | 🚫 | — | — | — | agree | Output only |
 | `effective_target_roas_source` | 🚫 | — | — | — | agree | Output only |
 | `exclude_demographic_expansion` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | When this value is true, demographics will be excluded from the types of targeting which are expanded when optimized_targeting_enabled is true |
-| `excluded_parent_asset_field_types` | ✏️ | ❌ | — | — | agree | The asset field types that should be excluded from this ad group |
-| `excluded_parent_asset_set_types` | ✏️ | ❌ | — | — | agree | The asset set types that should be excluded from this ad group |
+| `excluded_parent_asset_field_types` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The asset field types that should be excluded from this ad group |
+| `excluded_parent_asset_set_types` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The asset set types that should be excluded from this ad group |
 | `final_url_suffix` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | URL template for appending params to Final URL. |
 | `fixed_cpm_micros` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The fixed amount in micros that the advertiser pays for every thousand impressions of the ad. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
@@ -730,20 +365,11 @@ Unreachable leaves:
 | `targeting_setting` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Setting for targeting related features. |
 | `tracking_url_template` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The URL template for constructing a tracking URL. |
 | `type` | 🔒 | ✅ | `create_ad_group` | create_ad_group | agree | Immutable |
-| `url_custom_parameters` | ✏️ | ❌ | — | — | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
+| `url_custom_parameters` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
 | `vertical_ads_format_setting` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Vertical ads setting feature to enable/disable ad group format controls in search campaigns |
 | `video_ad_group_settings` | ✏️ | ✅ | `create_ad_group` | create_ad_group | agree | Settings for video ad groups. |
 
-**Field gaps:**
-- ✏️ `excluded_parent_asset_field_types` — settable: The asset field types that should be excluded from this ad group
-- ✏️ `excluded_parent_asset_set_types` — settable: The asset set types that should be excluded from this ad group
-- ✏️ `url_custom_parameters` — settable: The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`.
-
-**Submessage leaves**: 18/20 reachable (90.0%)
-
-Unreachable leaves:
-- `url_custom_parameters.key` — ✏️ settable
-- `url_custom_parameters.value` — ✏️ settable
+**Submessage leaves**: 20/20 reachable (100.0%)
 
 ## AdParameterService
 
@@ -784,59 +410,38 @@ Unreachable leaves:
 | `expanded_text_ad` | ✏️ | ✅ | — | create_expanded_text_ad | agree | Details pertaining to an expanded text ad. |
 | `hotel_ad` | ✏️ | ✅ | — | create_hotel_ad | agree | Details pertaining to a hotel ad. |
 | `image_ad` | 🔒 | ✅ | — | create_image_ad | agree | Immutable |
-| `legacy_app_install_ad` | 🔒 | ❌ | — | — | agree | Immutable |
-| `legacy_responsive_display_ad` | ✏️ | ❌ | — | — | agree | Details pertaining to a legacy responsive display ad. |
+| `legacy_app_install_ad` | 🔒 | ✅ | `update_ad` | update_ad | agree | Immutable |
+| `legacy_responsive_display_ad` | ✏️ | ✅ | `update_ad` | update_ad | agree | Details pertaining to a legacy responsive display ad. |
 | `local_ad` | ✏️ | ✅ | — | create_local_ad | agree | Details pertaining to a local ad. |
 | `responsive_display_ad` | ✏️ | ✅ | — | create_responsive_display_ad | agree | Details pertaining to a responsive display ad. |
 | `responsive_search_ad` | ✏️ | ✅ | — | create_responsive_search_ad, update_ad | agree | Details pertaining to a responsive search ad. |
 | `shopping_comparison_listing_ad` | ✏️ | ✅ | — | create_shopping_comparison_listing_ad | agree | Details pertaining to a Shopping Comparison Listing ad. |
 | `shopping_product_ad` | ✏️ | ✅ | — | create_shopping_product_ad | agree | Details pertaining to a Shopping product ad. |
-| `shopping_smart_ad` | ✏️ | ❌ | — | — | agree | Details pertaining to a Smart Shopping ad. |
+| `shopping_smart_ad` | ✏️ | ✅ | `update_ad` | update_ad | agree | Details pertaining to a Smart Shopping ad. |
 | `smart_campaign_ad` | ✏️ | ✅ | — | create_smart_campaign_ad | agree | Details pertaining to a Smart campaign ad. |
-| `text_ad` | 🔒 | ❌ | — | — | agree | Immutable |
+| `text_ad` | 🔒 | ✅ | `update_ad` | update_ad | agree | Immutable |
 | `travel_ad` | ✏️ | ✅ | — | create_travel_ad | agree | Details pertaining to a travel ad. |
 | `video_ad` | ✏️ | ✅ | — | create_video_ad | agree | Details pertaining to a Video ad. |
 | `video_responsive_ad` | ✏️ | ✅ | — | create_video_responsive_ad | agree | Details pertaining to a Video responsive ad. |
 | `added_by_google_ads` | 🚫 | — | — | — | agree | Output only |
 | `device_preference` | ✏️ | ✅ | `update_ad` | update_ad | agree | The device preference for the ad |
 | `display_url` | ✏️ | ✅ | `update_ad` | update_ad | agree | The URL that appears in the ad description for some ad formats. |
-| `final_app_urls` | ✏️ | ❌ | — | — | agree | A list of final app URLs that will be used on mobile if the user has the specific app installed. |
-| `final_mobile_urls` | ✏️ | ❌ | — | — | agree | The list of possible final mobile URLs after all cross-domain redirects for the ad. |
-| `final_url_suffix` | ✏️ | ✅ | `create_demand_gen_video_responsive_ad_tool` | create_demand_gen_video_responsive_ad | agree | The suffix to use when constructing a final URL. |
+| `final_app_urls` | ✏️ | ✅ | `update_ad` | update_ad | agree | A list of final app URLs that will be used on mobile if the user has the specific app installed. |
+| `final_mobile_urls` | ✏️ | ✅ | `update_ad` | update_ad | agree | The list of possible final mobile URLs after all cross-domain redirects for the ad. |
+| `final_url_suffix` | ✏️ | ✅ | `create_demand_gen_video_responsive_ad_tool`, `update_ad` | create_demand_gen_video_responsive_ad, update_ad | agree | The suffix to use when constructing a final URL. |
 | `final_urls` | ✏️ | ✅ | `create_app_ad`, `create_demand_gen_carousel_ad`, `create_demand_gen_multi_asset_ad`, `create_demand_gen_product_ad`, `create_demand_gen_video_responsive_ad_tool`, `create_display_upload_ad`, `create_expanded_text_ad`, `create_image_ad`, `create_local_ad`, `create_responsive_display_ad`, `create_responsive_search_ad`, `create_smart_campaign_ad`, `create_video_ad`, `create_video_responsive_ad`, `update_ad` | create_app_ad, create_demand_gen_carousel_ad, create_demand_gen_multi_asset_ad, create_demand_gen_product_ad, create_demand_gen_video_responsive_ad, create_display_upload_ad, create_expanded_text_ad, create_image_ad, create_local_ad, create_responsive_display_ad, create_responsive_search_ad, create_smart_campaign_ad, create_video_ad, create_video_responsive_ad, update_ad | agree | The list of possible final URLs after all cross-domain redirects for the ad. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | 🔒 | ✅ | `create_image_ad` | create_image_ad | agree | Immutable |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `system_managed_resource_source` | 🚫 | — | — | — | agree | Output only |
-| `tracking_url_template` | ✏️ | ✅ | `create_demand_gen_video_responsive_ad_tool` | create_demand_gen_video_responsive_ad | agree | The URL template for constructing a tracking URL. |
+| `tracking_url_template` | ✏️ | ✅ | `create_demand_gen_video_responsive_ad_tool`, `update_ad` | create_demand_gen_video_responsive_ad, update_ad | agree | The URL template for constructing a tracking URL. |
 | `type` | 🚫 | — | — | — | agree | Output only |
-| `url_collections` | ✏️ | ❌ | — | — | agree | Additional URLs for the ad that are tagged with a unique identifier that can be referenced from other fields in the ad. |
-| `url_custom_parameters` | ✏️ | ❌ | — | — | agree | The list of mappings that can be used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls` |
+| `url_collections` | ✏️ | ✅ | `update_ad` | update_ad | agree | Additional URLs for the ad that are tagged with a unique identifier that can be referenced from other fields in the ad. |
+| `url_custom_parameters` | ✏️ | ✅ | `update_ad` | update_ad | agree | The list of mappings that can be used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls` |
 
-**Field gaps:**
-- 🔒 `legacy_app_install_ad` — immutable: Immutable
-- ✏️ `legacy_responsive_display_ad` — settable: Details pertaining to a legacy responsive display ad.
-- ✏️ `shopping_smart_ad` — settable: Details pertaining to a Smart Shopping ad.
-- 🔒 `text_ad` — immutable: Immutable
-- ✏️ `final_app_urls` — settable: A list of final app URLs that will be used on mobile if the user has the specific app installed.
-- ✏️ `final_mobile_urls` — settable: The list of possible final mobile URLs after all cross-domain redirects for the ad.
-- ✏️ `url_collections` — settable: Additional URLs for the ad that are tagged with a unique identifier that can be referenced from other fields in the ad.
-- ✏️ `url_custom_parameters` — settable: The list of mappings that can be used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`
-
-**Submessage leaves**: 109/290 reachable (37.6%)
+**Submessage leaves**: 266/290 reachable (91.7%)
 
 Unreachable leaves:
-- `final_app_urls.os_type` — ✏️ settable
-- `final_app_urls.url` — ✏️ settable
-- `url_custom_parameters.key` — ✏️ settable
-- `url_custom_parameters.value` — ✏️ settable
-- `url_collections.final_mobile_urls` — ✏️ settable
-- `url_collections.final_urls` — ✏️ settable
-- `url_collections.tracking_url_template` — ✏️ settable
-- `url_collections.url_collection_id` — ✏️ settable
-- `text_ad.description1` — ✏️ settable
-- `text_ad.description2` — ✏️ settable
-- `text_ad.headline` — ✏️ settable
 - `image_ad.ad_id_to_copy_image_from` — ✏️ settable
 - `image_ad.image_url` — ✏️ settable
 - `image_ad.mime_type` — ✏️ settable
@@ -849,164 +454,18 @@ Unreachable leaves:
 - `video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
 - `video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
 - `video_ad.video.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `video_ad.out_stream.description` — ✏️ settable
 - `video_ad.in_feed.thumbnail` — ✏️ settable
-- `video_responsive_ad.headlines.asset_performance_label` — ✏️ settable
-- `video_responsive_ad.headlines.pinned_field` — ✏️ settable
-- `video_responsive_ad.headlines.policy_summary_info` — ✏️ settable
-- `video_responsive_ad.long_headlines.asset_performance_label` — ✏️ settable
-- `video_responsive_ad.long_headlines.pinned_field` — ✏️ settable
-- `video_responsive_ad.long_headlines.policy_summary_info` — ✏️ settable
-- `video_responsive_ad.descriptions.asset_performance_label` — ✏️ settable
-- `video_responsive_ad.descriptions.pinned_field` — ✏️ settable
-- `video_responsive_ad.descriptions.policy_summary_info` — ✏️ settable
-- `video_responsive_ad.call_to_actions.asset_performance_label` — ✏️ settable
-- `video_responsive_ad.call_to_actions.pinned_field` — ✏️ settable
-- `video_responsive_ad.call_to_actions.policy_summary_info` — ✏️ settable
-- `video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `video_responsive_ad.business_name.asset_performance_label` — ✏️ settable
-- `video_responsive_ad.business_name.pinned_field` — ✏️ settable
-- `video_responsive_ad.business_name.policy_summary_info` — ✏️ settable
-- `responsive_search_ad.headlines.asset_performance_label` — ✏️ settable
-- `responsive_search_ad.headlines.pinned_field` — ✏️ settable
-- `responsive_search_ad.headlines.policy_summary_info` — ✏️ settable
-- `responsive_search_ad.descriptions.asset_performance_label` — ✏️ settable
-- `responsive_search_ad.descriptions.pinned_field` — ✏️ settable
-- `responsive_search_ad.descriptions.policy_summary_info` — ✏️ settable
-- `legacy_responsive_display_ad.accent_color` — ✏️ settable
-- `legacy_responsive_display_ad.allow_flexible_color` — ✏️ settable
-- `legacy_responsive_display_ad.business_name` — ✏️ settable
-- `legacy_responsive_display_ad.call_to_action_text` — ✏️ settable
-- `legacy_responsive_display_ad.description` — ✏️ settable
-- `legacy_responsive_display_ad.format_setting` — ✏️ settable
-- `legacy_responsive_display_ad.logo_image` — ✏️ settable
-- `legacy_responsive_display_ad.long_headline` — ✏️ settable
-- `legacy_responsive_display_ad.main_color` — ✏️ settable
-- `legacy_responsive_display_ad.marketing_image` — ✏️ settable
-- `legacy_responsive_display_ad.price_prefix` — ✏️ settable
-- `legacy_responsive_display_ad.promo_text` — ✏️ settable
-- `legacy_responsive_display_ad.short_headline` — ✏️ settable
-- `legacy_responsive_display_ad.square_logo_image` — ✏️ settable
-- `legacy_responsive_display_ad.square_marketing_image` — ✏️ settable
 - `app_ad.mandatory_ad_text.asset_performance_label` — ✏️ settable
 - `app_ad.mandatory_ad_text.pinned_field` — ✏️ settable
 - `app_ad.mandatory_ad_text.policy_summary_info` — ✏️ settable
-- `app_ad.headlines.asset_performance_label` — ✏️ settable
-- `app_ad.headlines.pinned_field` — ✏️ settable
-- `app_ad.headlines.policy_summary_info` — ✏️ settable
-- `app_ad.descriptions.asset_performance_label` — ✏️ settable
-- `app_ad.descriptions.pinned_field` — ✏️ settable
-- `app_ad.descriptions.policy_summary_info` — ✏️ settable
-- `app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `app_ad.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `legacy_app_install_ad.app_id` — ✏️ settable
-- `legacy_app_install_ad.app_store` — ✏️ settable
-- `legacy_app_install_ad.description1` — ✏️ settable
-- `legacy_app_install_ad.description2` — ✏️ settable
-- `legacy_app_install_ad.headline` — ✏️ settable
 - `responsive_display_ad.accent_color` — ✏️ settable
 - `responsive_display_ad.allow_flexible_color` — ✏️ settable
-- `responsive_display_ad.call_to_action_text` — ✏️ settable
 - `responsive_display_ad.format_setting` — ✏️ settable
 - `responsive_display_ad.main_color` — ✏️ settable
 - `responsive_display_ad.price_prefix` — ✏️ settable
 - `responsive_display_ad.promo_text` — ✏️ settable
-- `responsive_display_ad.headlines.asset_performance_label` — ✏️ settable
-- `responsive_display_ad.headlines.pinned_field` — ✏️ settable
-- `responsive_display_ad.headlines.policy_summary_info` — ✏️ settable
-- `responsive_display_ad.long_headline.asset_performance_label` — ✏️ settable
-- `responsive_display_ad.long_headline.pinned_field` — ✏️ settable
-- `responsive_display_ad.long_headline.policy_summary_info` — ✏️ settable
-- `responsive_display_ad.descriptions.asset_performance_label` — ✏️ settable
-- `responsive_display_ad.descriptions.pinned_field` — ✏️ settable
-- `responsive_display_ad.descriptions.policy_summary_info` — ✏️ settable
-- `responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `responsive_display_ad.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
 - `responsive_display_ad.control_spec.enable_asset_enhancements` — ✏️ settable
 - `responsive_display_ad.control_spec.enable_autogen_video` — ✏️ settable
-- `local_ad.headlines.asset_performance_label` — ✏️ settable
-- `local_ad.headlines.pinned_field` — ✏️ settable
-- `local_ad.headlines.policy_summary_info` — ✏️ settable
-- `local_ad.descriptions.asset_performance_label` — ✏️ settable
-- `local_ad.descriptions.pinned_field` — ✏️ settable
-- `local_ad.descriptions.policy_summary_info` — ✏️ settable
-- `local_ad.call_to_actions.asset_performance_label` — ✏️ settable
-- `local_ad.call_to_actions.pinned_field` — ✏️ settable
-- `local_ad.call_to_actions.policy_summary_info` — ✏️ settable
-- `local_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `local_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `local_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `local_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `app_engagement_ad.headlines.asset_performance_label` — ✏️ settable
-- `app_engagement_ad.headlines.pinned_field` — ✏️ settable
-- `app_engagement_ad.headlines.policy_summary_info` — ✏️ settable
-- `app_engagement_ad.descriptions.asset_performance_label` — ✏️ settable
-- `app_engagement_ad.descriptions.pinned_field` — ✏️ settable
-- `app_engagement_ad.descriptions.policy_summary_info` — ✏️ settable
-- `app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `app_engagement_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `smart_campaign_ad.headlines.asset_performance_label` — ✏️ settable
-- `smart_campaign_ad.headlines.pinned_field` — ✏️ settable
-- `smart_campaign_ad.headlines.policy_summary_info` — ✏️ settable
-- `smart_campaign_ad.descriptions.asset_performance_label` — ✏️ settable
-- `smart_campaign_ad.descriptions.pinned_field` — ✏️ settable
-- `smart_campaign_ad.descriptions.policy_summary_info` — ✏️ settable
-- `app_pre_registration_ad.headlines.asset_performance_label` — ✏️ settable
-- `app_pre_registration_ad.headlines.pinned_field` — ✏️ settable
-- `app_pre_registration_ad.headlines.policy_summary_info` — ✏️ settable
-- `app_pre_registration_ad.descriptions.asset_performance_label` — ✏️ settable
-- `app_pre_registration_ad.descriptions.pinned_field` — ✏️ settable
-- `app_pre_registration_ad.descriptions.policy_summary_info` — ✏️ settable
-- `app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `app_pre_registration_ad.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `demand_gen_multi_asset_ad.headlines.asset_performance_label` — ✏️ settable
-- `demand_gen_multi_asset_ad.headlines.pinned_field` — ✏️ settable
-- `demand_gen_multi_asset_ad.headlines.policy_summary_info` — ✏️ settable
-- `demand_gen_multi_asset_ad.descriptions.asset_performance_label` — ✏️ settable
-- `demand_gen_multi_asset_ad.descriptions.pinned_field` — ✏️ settable
-- `demand_gen_multi_asset_ad.descriptions.policy_summary_info` — ✏️ settable
-- `demand_gen_carousel_ad.headline.asset_performance_label` — ✏️ settable
-- `demand_gen_carousel_ad.headline.pinned_field` — ✏️ settable
-- `demand_gen_carousel_ad.headline.policy_summary_info` — ✏️ settable
-- `demand_gen_carousel_ad.description.asset_performance_label` — ✏️ settable
-- `demand_gen_carousel_ad.description.pinned_field` — ✏️ settable
-- `demand_gen_carousel_ad.description.policy_summary_info` — ✏️ settable
-- `demand_gen_video_responsive_ad.headlines.asset_performance_label` — ✏️ settable
-- `demand_gen_video_responsive_ad.headlines.pinned_field` — ✏️ settable
-- `demand_gen_video_responsive_ad.headlines.policy_summary_info` — ✏️ settable
-- `demand_gen_video_responsive_ad.long_headlines.asset_performance_label` — ✏️ settable
-- `demand_gen_video_responsive_ad.long_headlines.pinned_field` — ✏️ settable
-- `demand_gen_video_responsive_ad.long_headlines.policy_summary_info` — ✏️ settable
-- `demand_gen_video_responsive_ad.descriptions.asset_performance_label` — ✏️ settable
-- `demand_gen_video_responsive_ad.descriptions.pinned_field` — ✏️ settable
-- `demand_gen_video_responsive_ad.descriptions.policy_summary_info` — ✏️ settable
-- `demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `demand_gen_video_responsive_ad.videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `demand_gen_video_responsive_ad.business_name.asset_performance_label` — ✏️ settable
-- `demand_gen_video_responsive_ad.business_name.pinned_field` — ✏️ settable
-- `demand_gen_video_responsive_ad.business_name.policy_summary_info` — ✏️ settable
-- `demand_gen_product_ad.headline.asset_performance_label` — ✏️ settable
-- `demand_gen_product_ad.headline.pinned_field` — ✏️ settable
-- `demand_gen_product_ad.headline.policy_summary_info` — ✏️ settable
-- `demand_gen_product_ad.description.asset_performance_label` — ✏️ settable
-- `demand_gen_product_ad.description.pinned_field` — ✏️ settable
-- `demand_gen_product_ad.description.policy_summary_info` — ✏️ settable
-- `demand_gen_product_ad.business_name.asset_performance_label` — ✏️ settable
-- `demand_gen_product_ad.business_name.pinned_field` — ✏️ settable
-- `demand_gen_product_ad.business_name.policy_summary_info` — ✏️ settable
 
 ## AssetGenerationService
 
@@ -1046,7 +505,7 @@ Unreachable leaves:
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `asset_group` | 🔒 | ✅ | — | create_listing_group_filter | agree | Immutable |
-| `case_value` | ✏️ | ✅ | `create_listing_group_filter`, `update_listing_group_filter` | create_listing_group_filter, update_listing_group_filter | agree | Dimension value with which this listing group is refining its parent |
+| `case_value` | ✏️ | ✅ | `create_listing_group_filter`, `update_listing_group_filter` | _build_listing_dimension, create_listing_group_filter, update_listing_group_filter | agree | Dimension value with which this listing group is refining its parent |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `listing_source` | 🔒 | ✅ | `create_listing_group_filter` | create_listing_group_filter | agree | Immutable |
 | `parent_listing_group_filter` | 🔒 | ✅ | `create_listing_group_filter` | create_listing_group_filter | agree | Immutable |
@@ -1054,21 +513,7 @@ Unreachable leaves:
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `type` | 🔒 | ✅ | — | create_listing_group_filter | agree | Immutable |
 
-**Submessage leaves**: 0/12 reachable (0.0%)
-
-Unreachable leaves:
-- `case_value.product_category.category_id` — ✏️ settable
-- `case_value.product_category.level` — ✏️ settable
-- `case_value.product_brand.value` — ✏️ settable
-- `case_value.product_channel.channel` — ✏️ settable
-- `case_value.product_condition.condition` — ✏️ settable
-- `case_value.product_custom_attribute.index` — ✏️ settable
-- `case_value.product_custom_attribute.value` — ✏️ settable
-- `case_value.product_item_id.value` — ✏️ settable
-- `case_value.product_type.level` — ✏️ settable
-- `case_value.product_type.value` — ✏️ settable
-- `case_value.webpage.conditions.custom_label` — ✏️ settable
-- `case_value.webpage.conditions.url_contains` — ✏️ settable
+**Submessage leaves**: 12/12 reachable (100.0%)
 
 ## AssetGroupService
 
@@ -1113,10 +558,7 @@ Unreachable leaves:
 | `audience` | 🔒 | ✅ | `mutate_asset_group_signals` | create_asset_group_signal_operation, create_asset_group_signal_tools, create_audience_signal | agree | Immutable |
 | `search_theme` | 🔒 | ✅ | `create_search_theme_signal` | create_asset_group_signal_operation, create_search_theme_signal | agree | Immutable |
 
-**Submessage leaves**: 1/2 reachable (50.0%)
-
-Unreachable leaves:
-- `search_theme.text` — ✏️ settable
+**Submessage leaves**: 2/2 reachable (100.0%)
 
 ## AssetService
 
@@ -1160,7 +602,7 @@ Unreachable leaves:
 | `youtube_video_asset` | 🔒 | ✅ | — | create_youtube_video_asset | agree | Immutable |
 | `youtube_video_list_asset` | 🔒 | ✅ | — | create_youtube_video_list_asset | agree | Immutable |
 | `field_type_policy_summaries` | 🚫 | — | — | — | agree | Output only |
-| `final_mobile_urls` | ✏️ | ❌ | — | — | agree | A list of possible final mobile URLs after all cross domain redirects. |
+| `final_mobile_urls` | ✏️ | ✅ | `update_asset` | update_asset | agree | A list of possible final mobile URLs after all cross domain redirects. |
 | `final_url_suffix` | ✏️ | ✅ | `update_asset` | update_asset | agree | URL template for appending params to landing page URLs served with parallel tracking. |
 | `final_urls` | ✏️ | ✅ | — | create_sitelink_asset | agree | A list of possible final URLs after all cross domain redirects. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
@@ -1171,17 +613,11 @@ Unreachable leaves:
 | `source` | 🚫 | — | — | — | agree | Output only |
 | `tracking_url_template` | ✏️ | ✅ | `update_asset` | update_asset | agree | URL template for constructing a tracking URL. |
 | `type` | 🚫 | — | `create_price_asset` | create_price_asset | agree | Output only |
-| `url_custom_parameters` | ✏️ | ❌ | — | — | agree | A list of mappings to be used for substituting URL custom parameter tags in the tracking_url_template, final_urls, and/or final_mobile_urls. |
+| `url_custom_parameters` | ✏️ | ✅ | `update_asset` | update_asset | agree | A list of mappings to be used for substituting URL custom parameter tags in the tracking_url_template, final_urls, and/or final_mobile_urls. |
 
-**Field gaps:**
-- ✏️ `final_mobile_urls` — settable: A list of possible final mobile URLs after all cross domain redirects.
-- ✏️ `url_custom_parameters` — settable: A list of mappings to be used for substituting URL custom parameter tags in the tracking_url_template, final_urls, and/or final_mobile_urls.
-
-**Submessage leaves**: 186/248 reachable (75.0%)
+**Submessage leaves**: 199/248 reachable (80.2%)
 
 Unreachable leaves:
-- `url_custom_parameters.key` — ✏️ settable
-- `url_custom_parameters.value` — ✏️ settable
 - `youtube_video_asset.youtube_video_title` — ✏️ settable
 - `lead_form_asset.background_image_asset` — ✏️ settable
 - `lead_form_asset.custom_disclosure` — ✏️ settable
@@ -1189,8 +625,6 @@ Unreachable leaves:
 - `lead_form_asset.post_submit_call_to_action_type` — ✏️ settable
 - `lead_form_asset.post_submit_description` — ✏️ settable
 - `lead_form_asset.post_submit_headline` — ✏️ settable
-- `lead_form_asset.fields.has_location_answer` — ✏️ settable
-- `lead_form_asset.fields.single_choice_answers.answers` — ✏️ settable
 - `lead_form_asset.custom_question_fields.has_location_answer` — ✏️ settable
 - `lead_form_asset.custom_question_fields.custom_question_text` — ✏️ settable
 - `lead_form_asset.custom_question_fields.single_choice_answers.answers` — ✏️ settable
@@ -1221,8 +655,6 @@ Unreachable leaves:
 - `sitelink_asset.ad_schedule_targets.end_minute` — ✏️ settable
 - `sitelink_asset.ad_schedule_targets.start_hour` — ✏️ settable
 - `sitelink_asset.ad_schedule_targets.start_minute` — ✏️ settable
-- `mobile_app_asset.end_date` — ✏️ settable
-- `mobile_app_asset.start_date` — ✏️ settable
 - `call_asset.call_conversion_action` — ✏️ settable
 - `call_asset.call_conversion_reporting_state` — ✏️ settable
 - `call_asset.ad_schedule_targets.day_of_week` — ✏️ settable
@@ -1231,17 +663,10 @@ Unreachable leaves:
 - `call_asset.ad_schedule_targets.start_hour` — ✏️ settable
 - `call_asset.ad_schedule_targets.start_minute` — ✏️ settable
 - `price_asset.type` — ❗ required
-- `price_asset.price_offerings.final_mobile_url` — ✏️ settable
 - `hotel_property_asset.hotel_address` — ✏️ settable
-- `business_message_asset.whatsapp_info.country_code` — ❗ required
-- `business_message_asset.whatsapp_info.phone_number` — ❗ required
 - `business_message_asset.facebook_messenger_info.page_name` — ❗ required
 - `business_message_asset.zalo_info.custom_name` — ✏️ settable
 - `business_message_asset.zalo_info.oa_id` — ✏️ settable
-- `youtube_video_list_asset.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `youtube_video_list_asset.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `youtube_video_list_asset.youtube_videos.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `youtube_video_list_asset.youtube_videos.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
 
 ## AssetSetAssetService
 
@@ -1309,24 +734,7 @@ Unreachable leaves:
 | `scope` | ✏️ | ✅ | `create_combined_audience` | create_combined_audience | agree | Defines the scope this audience can be used in |
 | `status` | 🚫 | — | — | — | agree | Output only |
 
-**Submessage leaves**: 0/15 reachable (0.0%)
-
-Unreachable leaves:
-- `dimensions.age.include_undetermined` — ✏️ settable
-- `dimensions.age.age_ranges.max_age` — ✏️ settable
-- `dimensions.age.age_ranges.min_age` — ✏️ settable
-- `dimensions.gender.genders` — ✏️ settable
-- `dimensions.gender.include_undetermined` — ✏️ settable
-- `dimensions.household_income.include_undetermined` — ✏️ settable
-- `dimensions.household_income.income_ranges` — ✏️ settable
-- `dimensions.parental_status.include_undetermined` — ✏️ settable
-- `dimensions.parental_status.parental_statuses` — ✏️ settable
-- `dimensions.audience_segments.segments.user_list.user_list` — ✏️ settable
-- `dimensions.audience_segments.segments.user_interest.user_interest_category` — ✏️ settable
-- `dimensions.audience_segments.segments.life_event.life_event` — ✏️ settable
-- `dimensions.audience_segments.segments.detailed_demographic.detailed_demographic` — ✏️ settable
-- `dimensions.audience_segments.segments.custom_audience.custom_audience` — ✏️ settable
-- `exclusion_dimension.exclusions.user_list.user_list` — ✏️ settable
+**Submessage leaves**: 15/15 reachable (100.0%)
 
 ## AutomaticallyCreatedAssetRemovalService
 
@@ -1430,17 +838,13 @@ Unreachable leaves:
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🚫 | — | — | — | agree | Output only |
 
-**Submessage leaves**: 11/19 reachable (57.9%)
+**Submessage leaves**: 15/19 reachable (78.9%)
 
 Unreachable leaves:
-- `maximize_conversion_value.cpc_bid_ceiling_micros` — ✏️ settable
 - `maximize_conversion_value.cpc_bid_floor_micros` — ✏️ settable
 - `maximize_conversion_value.target_roas_tolerance_percent_millis` — ✏️ settable
 - `maximize_conversions.cpc_bid_floor_micros` — ✏️ settable
 - `target_cpa.cpc_bid_floor_micros` — ✏️ settable
-- `target_roas.cpc_bid_floor_micros` — ✏️ settable
-- `target_roas.target_roas_tolerance_percent_millis` — ✏️ settable
-- `target_spend.cpc_bid_ceiling_micros` — ✏️ settable
 
 ## BillingSetupService
 
@@ -1482,7 +886,7 @@ Unreachable leaves:
 |---|---|---|---|---|---|---|
 | `asset` | 🔒 | ✅ | — | link_asset_to_campaign, link_multiple_assets_to_campaign | agree | Immutable |
 | `campaign` | 🔒 | ✅ | — | link_asset_to_campaign, link_multiple_assets_to_campaign | agree | Immutable |
-| `field_type` | 🔒 | ✅ | `link_asset_to_campaign`, `update_campaign_asset` | link_asset_to_campaign, link_multiple_assets_to_campaign, update_campaign_asset | agree | Immutable |
+| `field_type` | 🔒 | ✅ | `link_asset_to_campaign`, `update_campaign_asset` | _asset_field_type_segment, link_asset_to_campaign, link_multiple_assets_to_campaign, update_campaign_asset | agree | Immutable |
 | `primary_status` | 🚫 | — | — | — | agree | Output only |
 | `primary_status_details` | 🚫 | — | — | — | agree | Output only |
 | `primary_status_reasons` | 🚫 | — | — | — | agree | Output only |
@@ -1628,7 +1032,7 @@ Unreachable leaves:
 | `status` | ✏️ | ✅ | `update_campaign_criterion` | update_campaign_criterion | agree | The status of the criterion. |
 | `type` | 🚫 | — | — | add_age_range_criteria, add_content_label_criteria, add_device_criteria, add_gender_criteria, add_income_range_criteria, add_parental_status_criteria | agree | Output only |
 
-**Submessage leaves**: 46/88 reachable (52.3%)
+**Submessage leaves**: 77/88 reachable (87.5%)
 
 Unreachable leaves:
 - `mobile_application.name` — ✏️ settable
@@ -1637,38 +1041,7 @@ Unreachable leaves:
 - `gender.type` — ✏️ settable
 - `income_range.type` — ✏️ settable
 - `parental_status.type` — ✏️ settable
-- `proximity.address.city_name` — ✏️ settable
-- `proximity.address.country_code` — ✏️ settable
-- `proximity.address.postal_code` — ✏️ settable
-- `proximity.address.province_code` — ✏️ settable
-- `proximity.address.province_name` — ✏️ settable
-- `proximity.address.street_address2` — ✏️ settable
 - `topic.path` — ✏️ settable
-- `listing_scope.dimensions.hotel_id.value` — ✏️ settable
-- `listing_scope.dimensions.hotel_class.value` — ✏️ settable
-- `listing_scope.dimensions.hotel_country_region.country_region_criterion` — ✏️ settable
-- `listing_scope.dimensions.hotel_state.state_criterion` — ✏️ settable
-- `listing_scope.dimensions.hotel_city.city_criterion` — ✏️ settable
-- `listing_scope.dimensions.product_category.category_id` — ✏️ settable
-- `listing_scope.dimensions.product_category.level` — ✏️ settable
-- `listing_scope.dimensions.product_brand.value` — ✏️ settable
-- `listing_scope.dimensions.product_channel.channel` — ✏️ settable
-- `listing_scope.dimensions.product_channel_exclusivity.channel_exclusivity` — ✏️ settable
-- `listing_scope.dimensions.product_condition.condition` — ✏️ settable
-- `listing_scope.dimensions.product_custom_attribute.index` — ✏️ settable
-- `listing_scope.dimensions.product_custom_attribute.value` — ✏️ settable
-- `listing_scope.dimensions.product_item_id.value` — ✏️ settable
-- `listing_scope.dimensions.product_type.level` — ✏️ settable
-- `listing_scope.dimensions.product_type.value` — ✏️ settable
-- `listing_scope.dimensions.product_grouping.value` — ✏️ settable
-- `listing_scope.dimensions.product_labels.value` — ✏️ settable
-- `listing_scope.dimensions.product_legacy_condition.value` — ✏️ settable
-- `listing_scope.dimensions.product_type_full.value` — ✏️ settable
-- `listing_scope.dimensions.activity_id.value` — ✏️ settable
-- `listing_scope.dimensions.activity_rating.value` — ✏️ settable
-- `listing_scope.dimensions.activity_country.value` — ✏️ settable
-- `listing_scope.dimensions.activity_state.value` — ✏️ settable
-- `listing_scope.dimensions.activity_city.value` — ✏️ settable
 - `content_label.type` — ✏️ settable
 - `webpage.coverage_percentage` — ✏️ settable
 - `webpage.sample.sample_urls` — ✏️ settable
@@ -1690,11 +1063,6 @@ Unreachable leaves:
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `value` | ❗ | 🛡️ _Wired through value_type + string_value via create_campaign_customizer_operation helper._ | — | — | agree | Required |
-
-**Submessage leaves**: 1/2 reachable (50.0%)
-
-Unreachable leaves:
-- `value.type` — ❗ required
 
 ## CampaignDraftService
 
@@ -1733,12 +1101,7 @@ Unreachable leaves:
 | `goal_type` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
-**Submessage leaves**: 0/3 reachable (0.0%)
-
-Unreachable leaves:
-- `campaign_retention_settings.target_option` — ✏️ settable
-- `campaign_retention_settings.value_settings_override.additional_high_lifetime_value` — ✏️ settable
-- `campaign_retention_settings.value_settings_override.additional_value` — ✏️ settable
+**Submessage leaves**: 3/3 reachable (100.0%)
 
 ## CampaignGroupService
 
@@ -1792,7 +1155,7 @@ Unreachable leaves:
 | `advertising_channel_type` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `ai_max_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for AI Max in search campaigns. |
 | `app_campaign_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting related to App Campaign. |
-| `asset_automation_settings` | ✏️ | ❌ | — | — | agree | Contains the opt-in/out status of each AssetAutomationType |
+| `asset_automation_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Contains the opt-in/out status of each AssetAutomationType |
 | `audience_setting` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `base_campaign` | 🚫 | — | — | — | agree | Output only |
 | `bidding_strategy_system_status` | 🚫 | — | — | — | agree | Output only |
@@ -1800,19 +1163,19 @@ Unreachable leaves:
 | `brand_guidelines` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | These settings control how your brand appears in automatically generated assets and formats within this campaign |
 | `brand_guidelines_enabled` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `bidding_strategy` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The resource name of the portfolio bidding strategy used by the campaign. |
-| `commission` | ✏️ | ❌ | — | — | agree | Commission is an automatic bidding strategy in which the advertiser pays a certain portion of the conversion value. |
-| `fixed_cpm` | ✏️ | ❌ | — | — | agree | A manual bidding strategy with a fixed CPM. |
-| `manual_cpa` | ✏️ | ❌ | — | — | agree | Standard Manual CPA bidding strategy |
+| `commission` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Commission is an automatic bidding strategy in which the advertiser pays a certain portion of the conversion value. |
+| `fixed_cpm` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A manual bidding strategy with a fixed CPM. |
+| `manual_cpa` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Manual CPA bidding strategy |
 | `manual_cpc` | ✏️ | ✅ | — | create_campaign | agree | Standard Manual CPC bidding strategy |
-| `manual_cpm` | ✏️ | ❌ | — | — | agree | Standard Manual CPM bidding strategy |
-| `manual_cpv` | ✏️ | ❌ | — | — | agree | A bidding strategy that pays a configurable amount per video view. |
+| `manual_cpm` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Manual CPM bidding strategy |
+| `manual_cpv` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A bidding strategy that pays a configurable amount per video view. |
 | `maximize_conversion_value` | ✏️ | ✅ | — | create_campaign | agree | Standard Maximize Conversion Value bidding strategy that automatically sets bids to maximize revenue while spending your budget. |
 | `maximize_conversions` | ✏️ | ✅ | — | create_campaign | agree | Standard Maximize Conversions bidding strategy that automatically maximizes number of conversions while spending your budget. |
-| `percent_cpc` | ✏️ | ❌ | — | — | agree | Standard Percent Cpc bidding strategy where bids are a fraction of the advertised price for some good or service. |
+| `percent_cpc` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Percent Cpc bidding strategy where bids are a fraction of the advertised price for some good or service. |
 | `target_cpa` | ✏️ | ✅ | — | create_campaign | agree | Standard Target CPA bidding strategy that automatically sets bids to help get as many conversions as possible at the target cost-per-acquisition (CPA) you set. |
-| `target_cpc` | ✏️ | ❌ | — | — | agree | An automated bidding strategy that sets bids to help get as many clicks as possible at the target cost-per-click (CPC) you set. |
-| `target_cpm` | ✏️ | ❌ | — | — | agree | A bidding strategy that automatically optimizes cost per thousand impressions. |
-| `target_cpv` | ✏️ | ❌ | — | — | agree | An automated bidding strategy that sets bids to optimize performance given the target CPV you set. |
+| `target_cpc` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | An automated bidding strategy that sets bids to help get as many clicks as possible at the target cost-per-click (CPC) you set. |
+| `target_cpm` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A bidding strategy that automatically optimizes cost per thousand impressions. |
+| `target_cpv` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | An automated bidding strategy that sets bids to optimize performance given the target CPV you set. |
 | `target_impression_share` | ✏️ | ✅ | — | create_campaign | agree | Target Impression Share bidding strategy |
 | `target_roas` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Target ROAS bidding strategy that automatically maximizes revenue while averaging a specific target return on ad spend (ROAS). |
 | `target_spend` | ✏️ | ✅ | — | create_campaign | agree | Standard Target Spend bidding strategy that automatically sets your bids to help get as many clicks as possible within your budget. |
@@ -1822,12 +1185,12 @@ Unreachable leaves:
 | `demand_gen_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Demand Gen campaign. |
 | `dynamic_search_ads_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting for controlling Dynamic Search Ads (DSA). |
 | `end_date_time` | ✏️ | ✅ | — | create_campaign, update_campaign | agree | The last day and time of the campaign in serving customer's timezone in "yyyy-MM-dd HH:mm:ss" format |
-| `excluded_parent_asset_field_types` | ✏️ | ❌ | — | — | agree | The asset field types that should be excluded from this campaign |
-| `excluded_parent_asset_set_types` | ✏️ | ❌ | — | — | agree | The asset set types that should be excluded from this campaign |
+| `excluded_parent_asset_field_types` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The asset field types that should be excluded from this campaign |
+| `excluded_parent_asset_set_types` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The asset set types that should be excluded from this campaign |
 | `experiment_type` | 🚫 | — | — | — | agree | Output only |
 | `feed_types` | 🚫 | — | — | — | agree | Output only |
 | `final_url_suffix` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Suffix used to append query parameters to landing pages that are served with parallel tracking. |
-| `frequency_caps` | ✏️ | ❌ | — | — | agree | A list that limits how often each user will see this campaign's ads. |
+| `frequency_caps` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A list that limits how often each user will see this campaign's ads. |
 | `geo_target_type_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The setting for ads geotargeting. |
 | `hotel_property_asset_set` | 🔒 | ✅ | `create_campaign` | create_campaign | agree | Immutable |
 | `hotel_setting` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The hotel setting for the campaign. |
@@ -1860,42 +1223,16 @@ Unreachable leaves:
 | `tracking_setting` | 🚫 | — | — | — | agree | Output only |
 | `tracking_url_template` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The URL template for constructing a tracking URL. |
 | `travel_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Travel campaign. |
-| `url_custom_parameters` | ✏️ | ❌ | — | — | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
+| `url_custom_parameters` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
 | `vanity_pharma` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Describes how unbranded pharma ads will be displayed. |
 | `video_brand_safety_suitability` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Brand Safety setting at the individual campaign level |
 | `video_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Video campaign. |
 
-**Field gaps:**
-- ✏️ `asset_automation_settings` — settable: Contains the opt-in/out status of each AssetAutomationType
-- ✏️ `commission` — settable: Commission is an automatic bidding strategy in which the advertiser pays a certain portion of the conversion value.
-- ✏️ `fixed_cpm` — settable: A manual bidding strategy with a fixed CPM.
-- ✏️ `manual_cpa` — settable: Standard Manual CPA bidding strategy
-- ✏️ `manual_cpm` — settable: Standard Manual CPM bidding strategy
-- ✏️ `manual_cpv` — settable: A bidding strategy that pays a configurable amount per video view.
-- ✏️ `percent_cpc` — settable: Standard Percent Cpc bidding strategy where bids are a fraction of the advertised price for some good or service.
-- ✏️ `target_cpc` — settable: An automated bidding strategy that sets bids to help get as many clicks as possible at the target cost-per-click (CPC) you set.
-- ✏️ `target_cpm` — settable: A bidding strategy that automatically optimizes cost per thousand impressions.
-- ✏️ `target_cpv` — settable: An automated bidding strategy that sets bids to optimize performance given the target CPV you set.
-- ✏️ `excluded_parent_asset_field_types` — settable: The asset field types that should be excluded from this campaign
-- ✏️ `excluded_parent_asset_set_types` — settable: The asset set types that should be excluded from this campaign
-- ✏️ `frequency_caps` — settable: A list that limits how often each user will see this campaign's ads.
-- ✏️ `url_custom_parameters` — settable: The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`.
-
-**Submessage leaves**: 81/117 reachable (69.2%)
+**Submessage leaves**: 102/117 reachable (87.2%)
 
 Unreachable leaves:
-- `url_custom_parameters.key` — ✏️ settable
-- `url_custom_parameters.value` — ✏️ settable
 - `network_settings.target_google_tv_network` — ✏️ settable
 - `network_settings.target_youtube` — ✏️ settable
-- `frequency_caps.cap` — ✏️ settable
-- `frequency_caps.key.event_type` — ✏️ settable
-- `frequency_caps.key.level` — ✏️ settable
-- `frequency_caps.key.time_length` — ✏️ settable
-- `frequency_caps.key.time_unit` — ✏️ settable
-- `asset_automation_settings.asset_automation_status` — ✏️ settable
-- `asset_automation_settings.asset_automation_type` — ✏️ settable
-- `commission.commission_rate_micros` — ✏️ settable
 - `manual_cpc.enhanced_cpc_enabled` — ✏️ settable
 - `maximize_conversions.cpc_bid_ceiling_micros` — ✏️ settable
 - `maximize_conversions.cpc_bid_floor_micros` — ✏️ settable
@@ -1907,19 +1244,8 @@ Unreachable leaves:
 - `target_impression_share.cpc_bid_ceiling_micros` — ✏️ settable
 - `target_impression_share.location` — ✏️ settable
 - `target_impression_share.location_fraction_micros` — ✏️ settable
-- `target_roas.cpc_bid_ceiling_micros` — ✏️ settable
-- `target_roas.cpc_bid_floor_micros` — ✏️ settable
-- `target_roas.target_roas_tolerance_percent_millis` — ✏️ settable
 - `target_spend.cpc_bid_ceiling_micros` — ✏️ settable
 - `target_spend.target_spend_micros` — ✏️ settable
-- `percent_cpc.cpc_bid_ceiling_micros` — ✏️ settable
-- `percent_cpc.enhanced_cpc_enabled` — ✏️ settable
-- `target_cpm.target_frequency_goal.target_count` — ✏️ settable
-- `target_cpm.target_frequency_goal.time_unit` — ✏️ settable
-- `fixed_cpm.goal` — ✏️ settable
-- `fixed_cpm.target_frequency_info.target_count` — ✏️ settable
-- `fixed_cpm.target_frequency_info.time_unit` — ✏️ settable
-- `target_cpc.target_cpc_micros` — ✏️ settable
 
 ## CampaignSharedSetService
 
@@ -1975,10 +1301,7 @@ Unreachable leaves:
 | `value_settings` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action, update_conversion_action | agree | Settings related to the value for conversion events associated with this conversion action. |
 | `view_through_lookback_window_days` | ✏️ | ✅ | `create_conversion_action` | create_conversion_action | agree | The maximum number of days which may elapse between an impression and a conversion without an interaction. |
 
-**Submessage leaves**: 3/4 reachable (75.0%)
-
-Unreachable leaves:
-- `value_settings.default_currency_code` — ✏️ settable
+**Submessage leaves**: 4/4 reachable (100.0%)
 
 ## ConversionAdjustmentUploadService
 
@@ -2064,16 +1387,13 @@ Unreachable leaves:
 |---|---|---|---|---|---|---|
 | `attachment_type` | 🔒 | ✅ | `create_conversion_value_rule_set` | create_conversion_value_rule_set | agree | Immutable |
 | `campaign` | ✏️ | ✅ | `create_conversion_value_rule_set` | create_conversion_value_rule_set | agree | The resource name of the campaign when the conversion value rule set is attached to a campaign. |
-| `conversion_action_categories` | 🔒 | ❌ | — | — | agree | Immutable |
+| `conversion_action_categories` | 🔒 | ✅ | `create_conversion_value_rule_set` | create_conversion_value_rule_set | agree | Immutable |
 | `conversion_value_rules` | ✏️ | ✅ | `create_conversion_value_rule_set`, `update_conversion_value_rule_set` | create_conversion_value_rule_set, update_conversion_value_rule_set | agree | Resource names of rules within the rule set. |
 | `dimensions` | ✏️ | ✅ | `create_conversion_value_rule_set` | create_conversion_value_rule_set | agree | Defines dimensions for Value Rule conditions |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `owner_customer` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
-
-**Field gaps:**
-- 🔒 `conversion_action_categories` — immutable: Immutable
 
 ## CustomAudienceService
 
@@ -2218,11 +1538,6 @@ Unreachable leaves:
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `value` | ❗ | 🛡️ _Wired through value_type + string_value via create_customer_customizer_operation helper (audit can't follow sync helpers)._ | — | — | agree | Required |
-
-**Submessage leaves**: 1/2 reachable (50.0%)
-
-Unreachable leaves:
-- `value.type` — ❗ required
 
 ## CustomerLabelService
 
@@ -2434,7 +1749,7 @@ Unreachable leaves:
 | `description` | ✏️ | ✅ | `create_experiment`, `update_experiment` | create_experiment, update_experiment | agree | The description of the experiment |
 | `end_date` | ✏️ | ✅ | `create_experiment` | create_experiment | agree | Date when the experiment ends |
 | `experiment_id` | 🚫 | — | `end_experiment`, `graduate_experiment`, `promote_experiment`, `schedule_experiment`, `update_experiment` | end_experiment, graduate_experiment, promote_experiment, schedule_experiment, update_experiment | agree | Output only |
-| `goals` | ✏️ | ❌ | — | — | agree | The goals of this experiment. |
+| `goals` | ✏️ | ✅ | `create_experiment` | create_experiment | agree | The goals of this experiment. |
 | `long_running_operation` | 🚫 | — | — | — | agree | Output only |
 | `name` | ❗ | ✅ | `create_experiment`, `update_experiment` | create_experiment, update_experiment | agree | Required |
 | `promote_status` | 🚫 | — | — | — | agree | Output only |
@@ -2445,14 +1760,7 @@ Unreachable leaves:
 | `sync_enabled` | 🔒 | ✅ | `create_experiment` | create_experiment | agree | Immutable |
 | `type` | ❗ | ✅ | — | create_experiment | agree | Required |
 
-**Field gaps:**
-- ✏️ `goals` — settable: The goals of this experiment.
-
-**Submessage leaves**: 0/2 reachable (0.0%)
-
-Unreachable leaves:
-- `goals.direction` — ✏️ settable
-- `goals.metric` — ✏️ settable
+**Submessage leaves**: 2/2 reachable (100.0%)
 
 ## GeoTargetConstantService
 
@@ -2476,11 +1784,7 @@ Unreachable leaves:
 | `owner_customer` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
-**Submessage leaves**: 0/2 reachable (0.0%)
-
-Unreachable leaves:
-- `retention_goal_settings.value_settings.additional_high_lifetime_value` — ✏️ settable
-- `retention_goal_settings.value_settings.additional_value` — ✏️ settable
+**Submessage leaves**: 2/2 reachable (100.0%)
 
 ## GoogleAdsFieldService
 
@@ -2840,7 +2144,7 @@ Unreachable leaves:
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `name` | ✏️ | ✅ | `create_remarketing_action`, `update_remarketing_action` | create_remarketing_action, update_remarketing_action | agree | The name of the remarketing action |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
-| `tag_snippets` | 🚫 | — | — | — | agree | Output only |
+| `tag_snippets` | 🚫 | — | — | _get_remarketing_action | agree | Output only |
 
 ## ReservationService
 
@@ -2974,7 +2278,7 @@ Unreachable leaves:
 - **Resource**: `UserList`
 - **Sources**: md ✅ · proto ✅ · sdk ✅
 - **Wrapper file**: `src/services/audiences/user_list_service.py`
-- **MCP tools registered** (5): `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `update_user_list`, `remove_user_list`
+- **MCP tools registered** (7): `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `create_lookalike_user_list`, `create_rule_based_user_list`, `update_user_list`, `remove_user_list`
 
 ### Fields
 
@@ -2983,15 +2287,15 @@ Unreachable leaves:
 | `access_reason` | 🚫 | — | — | — | agree | Output only |
 | `account_user_list_status` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | Indicates if this share is still enabled |
 | `closing_reason` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | Indicating the reason why this user list membership status is closed |
-| `description` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, update_user_list | agree | Description of this user list. |
+| `description` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `create_lookalike_user_list`, `create_rule_based_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, create_lookalike_user_list, create_rule_based_user_list, update_user_list | agree | Description of this user list. |
 | `eligible_for_display` | 🚫 | — | — | — | agree | Output only |
 | `eligible_for_search` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | Indicates if this user list is eligible for Google Search Network. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `integration_code` | ✏️ | ✅ | `update_user_list` | update_user_list | agree | An ID from external system |
 | `match_rate_percentage` | 🚫 | — | — | — | agree | Output only |
-| `membership_life_span` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, update_user_list | agree | Number of days a user's cookie stays on your list since its most recent addition to the list |
-| `membership_status` | ✏️ | ✅ | `create_basic_user_list`, `update_user_list` | create_basic_user_list, update_user_list | agree | Membership status of this user list |
-| `name` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, update_user_list | agree | Name of this user list |
+| `membership_life_span` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `create_lookalike_user_list`, `create_rule_based_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, create_lookalike_user_list, create_rule_based_user_list, update_user_list | agree | Number of days a user's cookie stays on your list since its most recent addition to the list |
+| `membership_status` | ✏️ | ✅ | `create_basic_user_list`, `create_rule_based_user_list`, `update_user_list` | create_basic_user_list, create_rule_based_user_list, update_user_list | agree | Membership status of this user list |
+| `name` | ✏️ | ✅ | `create_basic_user_list`, `create_crm_based_user_list`, `create_logical_user_list`, `create_lookalike_user_list`, `create_rule_based_user_list`, `update_user_list` | create_basic_user_list, create_crm_based_user_list, create_logical_user_list, create_lookalike_user_list, create_rule_based_user_list, update_user_list | agree | Name of this user list |
 | `read_only` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `size_for_display` | 🚫 | — | — | — | agree | Output only |
@@ -3002,43 +2306,14 @@ Unreachable leaves:
 | `basic_user_list` | ✏️ | ✅ | — | create_basic_user_list | agree | User list targeting as a collection of conversion or remarketing actions. |
 | `crm_based_user_list` | ✏️ | ✅ | — | create_crm_based_user_list | agree | User list of CRM users provided by the advertiser. |
 | `logical_user_list` | ✏️ | ✅ | — | create_logical_user_list | agree | User list that is a custom combination of user lists and user interests. |
-| `lookalike_user_list` | 🔒 | ❌ | — | — | agree | Immutable |
-| `rule_based_user_list` | ✏️ | ❌ | — | — | agree | User list generated by a rule. |
+| `lookalike_user_list` | 🔒 | ✅ | `create_lookalike_user_list` | create_lookalike_user_list | agree | Immutable |
+| `rule_based_user_list` | ✏️ | ✅ | `create_rule_based_user_list` | create_rule_based_user_list | agree | User list generated by a rule. |
 | `similar_user_list` | 🚫 | — | — | — | agree | Output only |
 
-**Field gaps:**
-- 🔒 `lookalike_user_list` — immutable: Immutable
-- ✏️ `rule_based_user_list` — settable: User list generated by a rule.
-
-**Submessage leaves**: 6/32 reachable (18.8%)
+**Submessage leaves**: 31/32 reachable (96.9%)
 
 Unreachable leaves:
 - `crm_based_user_list.app_id` — ✏️ settable
-- `rule_based_user_list.prepopulation_status` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_rule_operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.lookback_window_days` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_type` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.name` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.number_rule_item.operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.number_rule_item.value` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.string_rule_item.operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.string_rule_item.value` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.date_rule_item.offset_in_days` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.date_rule_item.operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.inclusive_operands.rule.rule_item_groups.rule_items.date_rule_item.value` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.lookback_window_days` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_type` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.name` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.number_rule_item.operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.number_rule_item.value` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.string_rule_item.operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.string_rule_item.value` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.date_rule_item.offset_in_days` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.date_rule_item.operator` — ✏️ settable
-- `rule_based_user_list.flexible_rule_user_list.exclusive_operands.rule.rule_item_groups.rule_items.date_rule_item.value` — ✏️ settable
-- `lookalike_user_list.country_codes` — ✏️ settable
-- `lookalike_user_list.expansion_level` — ✏️ settable
-- `lookalike_user_list.seed_user_list_ids` — ✏️ settable
 
 ## YouTubeVideoUploadService
 

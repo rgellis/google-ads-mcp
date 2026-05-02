@@ -7,10 +7,12 @@ from google.ads.googleads.errors import GoogleAdsException
 from google.ads.googleads.v23.common.types.criteria import (
     AgeRangeInfo,
     AppPaymentModelInfo,
+    AudienceInfo,
     BrandListInfo,
     CombinedAudienceInfo,
     CustomAffinityInfo,
     CustomAudienceInfo,
+    CustomIntentInfo,
     ExtendedDemographicInfo,
     GenderInfo,
     IncomeRangeInfo,
@@ -72,6 +74,7 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     get_logger,
     serialize_proto_message,
@@ -1363,6 +1366,167 @@ class AdGroupCriterionService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def add_audience_resource_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        audience_resource_names: List[str],
+        negative: Optional[bool] = None,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add Audience-resource targeting criteria to an ad group.
+
+        Distinct from ``add_audience_criteria`` (which is misnamed and
+        actually creates UserList criteria). This wraps the
+        ``AudienceInfo`` oneof on AdGroupCriterion — pass resource names
+        of ``Audience`` resources (created via AudienceService).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            audience_resource_names: Resource names of Audience resources
+                (e.g. ``customers/123/audiences/456``).
+            negative: Pass True to exclude. Omit to leave unset.
+            bid_modifier: Multiplier on base bid. Not valid on negative.
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in audience_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                if negative:
+                    ad_group_criterion.negative = True
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                audience_info = AudienceInfo()
+                audience_info.audience = resource_name
+                ad_group_criterion.audience = audience_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+            await ctx.log(
+                level="info",
+                message=(
+                    f"Added {len(operations)} audience-resource criteria "
+                    f"to ad group {ad_group_id}"
+                ),
+            )
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add audience-resource criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def add_custom_intent_criteria(
+        self,
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        custom_intent_resource_names: List[str],
+        negative: Optional[bool] = None,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Add custom-intent audience criteria to an ad group.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            custom_intent_resource_names: Resource names of CustomIntent
+                resources (e.g. ``customers/123/customInterests/456``).
+            negative: Pass True to exclude.
+            bid_modifier: Multiplier on base bid. Not valid on negative.
+
+        Returns:
+            Mutation response with created ad group criteria
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+            ad_group_resource = f"customers/{customer_id}/adGroups/{ad_group_id}"
+
+            operations = []
+            for resource_name in custom_intent_resource_names:
+                ad_group_criterion = AdGroupCriterion()
+                ad_group_criterion.ad_group = ad_group_resource
+                if negative:
+                    ad_group_criterion.negative = True
+                if bid_modifier is not None and not negative:
+                    ad_group_criterion.bid_modifier = bid_modifier
+
+                custom_intent_info = CustomIntentInfo()
+                custom_intent_info.custom_intent = resource_name
+                ad_group_criterion.custom_intent = custom_intent_info
+
+                operation = AdGroupCriterionOperation()
+                operation.create = ad_group_criterion
+                operations.append(operation)
+
+            request = MutateAdGroupCriteriaRequest()
+            request.customer_id = customer_id
+            request.operations = operations
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateAdGroupCriteriaResponse = (
+                self.client.mutate_ad_group_criteria(request=request)
+            )
+            await ctx.log(
+                level="info",
+                message=(
+                    f"Added {len(operations)} custom-intent criteria "
+                    f"to ad group {ad_group_id}"
+                ),
+            )
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to add custom-intent criteria: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def add_location_criteria(
         self,
         ctx: Context,
@@ -2077,11 +2241,14 @@ class AdGroupCriterionService:
         status: Optional[str] = None,
         tracking_url_template: Optional[str] = None,
         final_url_suffix: Optional[str] = None,
+        final_urls: Optional[List[str]] = None,
+        final_mobile_urls: Optional[List[str]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Update an ad group criterion (bids, status, URL templates).
+        """Update an ad group criterion (bids, status, URLs, parameters).
 
         Args:
             ctx: FastMCP context
@@ -2099,6 +2266,12 @@ class AdGroupCriterionService:
             tracking_url_template: New URL template for tracking URL.
             final_url_suffix: New URL template for appending params to
                 the final URL.
+            final_urls: New list of final landing-page URLs for the
+                criterion (overrides ad-level URLs).
+            final_mobile_urls: New list of mobile-specific final URLs.
+            url_custom_parameters: List of dicts each building a
+                ``CustomParameter`` (key + value) for {_param}
+                substitution in tracking_url_template / final_urls.
 
         Returns:
             Updated criterion details
@@ -2150,6 +2323,25 @@ class AdGroupCriterionService:
             if final_url_suffix is not None:
                 ad_group_criterion.final_url_suffix = final_url_suffix
                 update_mask_fields.append("final_url_suffix")
+
+            if final_urls is not None:
+                ad_group_criterion.final_urls[:] = final_urls
+                update_mask_fields.append("final_urls")
+
+            if final_mobile_urls is not None:
+                ad_group_criterion.final_mobile_urls[:] = final_mobile_urls
+                update_mask_fields.append("final_mobile_urls")
+
+            if url_custom_parameters is not None:
+                from google.ads.googleads.v23.common.types import CustomParameter
+
+                extend_repeated_submessages(
+                    ad_group_criterion,
+                    "url_custom_parameters",
+                    url_custom_parameters,
+                    CustomParameter,
+                )
+                update_mask_fields.append("url_custom_parameters")
 
             if not update_mask_fields:
                 raise ValueError("at least one updatable field must be provided")
@@ -2801,6 +2993,80 @@ def create_ad_group_criterion_tools(
             response_content_type=response_content_type,
         )
 
+    async def add_audience_resource_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        audience_resource_names: List[str],
+        negative: Optional[bool] = None,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add Audience-resource targeting criteria to an ad group.
+
+        Distinct from add_audience_criteria (misnamed: that one wraps
+        UserListInfo). This wraps the AudienceInfo oneof — accepts
+        resource names of Audience resources.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            audience_resource_names: List of Audience resource names (e.g. customers/123/audiences/456).
+            negative: Pass True to exclude. Omit to leave unset.
+            bid_modifier: Multiplier on base bid. Not valid on negative.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+        """
+        return await service.add_audience_resource_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            audience_resource_names=audience_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def add_custom_intent_criteria(
+        ctx: Context,
+        customer_id: str,
+        ad_group_id: str,
+        custom_intent_resource_names: List[str],
+        negative: Optional[bool] = None,
+        bid_modifier: Optional[float] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add custom-intent audience criteria to an ad group.
+
+        Args:
+            customer_id: The customer ID
+            ad_group_id: The ad group ID
+            custom_intent_resource_names: Resource names of CustomIntent resources (e.g. customers/123/customInterests/456).
+            negative: Pass True to exclude. Omit to leave unset.
+            bid_modifier: Multiplier on base bid. Not valid on negative.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+        """
+        return await service.add_custom_intent_criteria(
+            ctx=ctx,
+            customer_id=customer_id,
+            ad_group_id=ad_group_id,
+            custom_intent_resource_names=custom_intent_resource_names,
+            negative=negative,
+            bid_modifier=bid_modifier,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     async def add_location_criteria(
         ctx: Context,
         customer_id: str,
@@ -3144,14 +3410,18 @@ def create_ad_group_criterion_tools(
         status: Optional[str] = None,
         tracking_url_template: Optional[str] = None,
         final_url_suffix: Optional[str] = None,
+        final_urls: Optional[List[str]] = None,
+        final_mobile_urls: Optional[List[str]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update an ad group criterion (bids, status, URL templates).
+        """Update an ad group criterion (bids, status, URLs, parameters).
 
         Despite the legacy name ``update_criterion_bid``, this tool now
-        also updates status and URL templates.
+        also updates status, URL templates, the criterion's own URLs
+        and custom parameters.
 
         Args:
             customer_id: The customer ID
@@ -3168,6 +3438,9 @@ def create_ad_group_criterion_tools(
             tracking_url_template: New tracking URL template.
             final_url_suffix: New URL template for appending params to the
                 final URL.
+            final_urls: New list of final landing-page URLs (overrides ad-level URLs).
+            final_mobile_urls: New list of mobile-specific final URLs.
+            url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution in tracking_url_template / final_urls.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -3186,6 +3459,9 @@ def create_ad_group_criterion_tools(
             status=status,
             tracking_url_template=tracking_url_template,
             final_url_suffix=final_url_suffix,
+            final_urls=final_urls,
+            final_mobile_urls=final_mobile_urls,
+            url_custom_parameters=url_custom_parameters,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -3233,6 +3509,8 @@ def create_ad_group_criterion_tools(
             add_custom_affinity_criteria,
             add_custom_audience_criteria,
             add_combined_audience_criteria,
+            add_audience_resource_criteria,
+            add_custom_intent_criteria,
             add_location_criteria,
             add_language_criteria,
             add_life_event_criteria,

@@ -67,9 +67,11 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -394,11 +396,21 @@ class AdService:
         headlines: Optional[List[str]] = None,
         descriptions: Optional[List[str]] = None,
         final_urls: Optional[List[str]] = None,
+        final_mobile_urls: Optional[List[str]] = None,
+        final_url_suffix: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
         ad_type: Optional[str] = None,
         device_preference: Optional[str] = None,
         display_url: Optional[str] = None,
+        legacy_app_install_ad: Optional[Dict[str, Any]] = None,
+        legacy_responsive_display_ad: Optional[Dict[str, Any]] = None,
+        shopping_smart_ad: Optional[Dict[str, Any]] = None,
+        text_ad: Optional[Dict[str, Any]] = None,
+        final_app_urls: Optional[List[Dict[str, Any]]] = None,
+        url_collections: Optional[List[Dict[str, Any]]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -416,6 +428,11 @@ class AdService:
                 is supported by this wrapper.
             descriptions: New description texts. RESPONSIVE_SEARCH_AD only.
             final_urls: New landing page URLs (works for any ad type)
+            final_mobile_urls: Mobile-specific landing page URLs (any ad type).
+            final_url_suffix: URL template appended to every final URL after
+                cross-domain redirects (any ad type).
+            tracking_url_template: URL template for constructing the
+                tracking URL (any ad type).
             path1: New first path component for display URL.
                 RESPONSIVE_SEARCH_AD only.
             path2: New second path component. RESPONSIVE_SEARCH_AD only.
@@ -427,6 +444,26 @@ class AdService:
                 (e.g. ``MOBILE``). Applies to any ad type.
             display_url: Optional display URL shown in the ad description for
                 ad formats that support it.
+            legacy_app_install_ad: Immutable. Dict that builds a
+                ``LegacyAppInstallAdInfo`` submessage (legacy app-install).
+                Settable on create only — included on update_ad for
+                completeness even though the API rejects it.
+            legacy_responsive_display_ad: Dict that builds a
+                ``LegacyResponsiveDisplayAdInfo`` submessage.
+            shopping_smart_ad: Dict that builds a ``ShoppingSmartAdInfo``
+                submessage (Smart Shopping ads).
+            text_ad: Immutable. Dict that builds a ``TextAdInfo`` submessage
+                (legacy expanded-text ads on retired campaigns).
+            final_app_urls: List of dicts each building a ``FinalAppUrl``
+                (os_type + url) — final URLs invoked when the user has the
+                advertised mobile app installed.
+            url_collections: List of dicts each building a
+                ``UrlCollection`` (url_collection_id + final_urls /
+                final_mobile_urls / tracking_url_template) — multi-URL
+                bundles addressable from elsewhere in the ad.
+            url_custom_parameters: List of dicts each building a
+                ``CustomParameter`` (key + value) for {_param}
+                substitution in tracking_url_template / final_urls.
 
         Returns:
             Updated ad details
@@ -443,6 +480,18 @@ class AdService:
                 ad.final_urls[:] = final_urls
                 update_mask_fields.append("final_urls")
 
+            if final_mobile_urls is not None:
+                ad.final_mobile_urls[:] = final_mobile_urls
+                update_mask_fields.append("final_mobile_urls")
+
+            if final_url_suffix is not None:
+                ad.final_url_suffix = final_url_suffix
+                update_mask_fields.append("final_url_suffix")
+
+            if tracking_url_template is not None:
+                ad.tracking_url_template = tracking_url_template
+                update_mask_fields.append("tracking_url_template")
+
             if device_preference is not None:
                 from google.ads.googleads.v23.enums.types.device import DeviceEnum
 
@@ -452,6 +501,73 @@ class AdService:
             if display_url is not None:
                 ad.display_url = display_url
                 update_mask_fields.append("display_url")
+
+            # Legacy / immutable ad-type oneof submessages. ``immutable``
+            # ones (legacy_app_install_ad, text_ad) are accepted by the
+            # wrapper but the API will reject them on update — pass at
+            # create time only.
+            if legacy_app_install_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    LegacyAppInstallAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "legacy_app_install_ad",
+                    legacy_app_install_ad,
+                    LegacyAppInstallAdInfo,
+                )
+                update_mask_fields.append("legacy_app_install_ad")
+            if legacy_responsive_display_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    LegacyResponsiveDisplayAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "legacy_responsive_display_ad",
+                    legacy_responsive_display_ad,
+                    LegacyResponsiveDisplayAdInfo,
+                )
+                update_mask_fields.append("legacy_responsive_display_ad")
+            if shopping_smart_ad is not None:
+                from google.ads.googleads.v23.common.types import ShoppingSmartAdInfo
+
+                set_optional_submessage(
+                    ad, "shopping_smart_ad", shopping_smart_ad, ShoppingSmartAdInfo
+                )
+                update_mask_fields.append("shopping_smart_ad")
+            if text_ad is not None:
+                from google.ads.googleads.v23.common.types import TextAdInfo
+
+                set_optional_submessage(ad, "text_ad", text_ad, TextAdInfo)
+                update_mask_fields.append("text_ad")
+
+            # Repeated submessage / parameter lists.
+            if final_app_urls is not None:
+                from google.ads.googleads.v23.common.types import FinalAppUrl
+
+                extend_repeated_submessages(
+                    ad, "final_app_urls", final_app_urls, FinalAppUrl
+                )
+                update_mask_fields.append("final_app_urls")
+            if url_collections is not None:
+                from google.ads.googleads.v23.common.types import UrlCollection
+
+                extend_repeated_submessages(
+                    ad, "url_collections", url_collections, UrlCollection
+                )
+                update_mask_fields.append("url_collections")
+            if url_custom_parameters is not None:
+                from google.ads.googleads.v23.common.types import CustomParameter
+
+                extend_repeated_submessages(
+                    ad,
+                    "url_custom_parameters",
+                    url_custom_parameters,
+                    CustomParameter,
+                )
+                update_mask_fields.append("url_custom_parameters")
 
             rsa_fields_supplied = (
                 headlines is not None
@@ -2653,10 +2769,21 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         headlines: Optional[List[str]] = None,
         descriptions: Optional[List[str]] = None,
         final_urls: Optional[List[str]] = None,
+        final_mobile_urls: Optional[List[str]] = None,
+        final_url_suffix: Optional[str] = None,
+        tracking_url_template: Optional[str] = None,
         path1: Optional[str] = None,
         path2: Optional[str] = None,
+        ad_type: Optional[str] = None,
         device_preference: Optional[str] = None,
         display_url: Optional[str] = None,
+        legacy_app_install_ad: Optional[Dict[str, Any]] = None,
+        legacy_responsive_display_ad: Optional[Dict[str, Any]] = None,
+        shopping_smart_ad: Optional[Dict[str, Any]] = None,
+        text_ad: Optional[Dict[str, Any]] = None,
+        final_app_urls: Optional[List[Dict[str, Any]]] = None,
+        url_collections: Optional[List[Dict[str, Any]]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -2672,11 +2799,23 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             headlines: New headline texts (for responsive search ads)
             descriptions: New description texts (for responsive search ads)
             final_urls: New landing page URLs
+            final_mobile_urls: Mobile-specific landing page URLs (any ad type).
+            final_url_suffix: URL template appended to every final URL.
+            tracking_url_template: URL template for constructing the tracking URL.
             path1: New first display URL path component
             path2: New second display URL path component
+            ad_type: Required when updating headlines / descriptions / paths
+                (RESPONSIVE_SEARCH_AD only is supported by this wrapper).
             device_preference: Optional device-preference enum value (e.g. ``MOBILE``).
             display_url: Optional display URL shown in the ad description for
                 ad formats that support it.
+            legacy_app_install_ad: Immutable. Dict that builds a LegacyAppInstallAdInfo (legacy app-install ad type — settable on create only).
+            legacy_responsive_display_ad: Dict that builds a LegacyResponsiveDisplayAdInfo submessage.
+            shopping_smart_ad: Dict that builds a ShoppingSmartAdInfo submessage (Smart Shopping).
+            text_ad: Immutable. Dict that builds a TextAdInfo submessage (legacy expanded-text ad).
+            final_app_urls: List of dicts each building a FinalAppUrl (os_type + url) for installed-app deep links.
+            url_collections: List of dicts each building a UrlCollection (url_collection_id + final_urls / final_mobile_urls / tracking_url_template) for multi-URL bundles.
+            url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
             partial_failure: If True, valid operations succeed when others fail.
             validate_only: If True, validate the request without executing.
             response_content_type: Optional response content type override.
@@ -2691,10 +2830,21 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             headlines=headlines,
             descriptions=descriptions,
             final_urls=final_urls,
+            final_mobile_urls=final_mobile_urls,
+            final_url_suffix=final_url_suffix,
+            tracking_url_template=tracking_url_template,
             path1=path1,
             path2=path2,
+            ad_type=ad_type,
             device_preference=device_preference,
             display_url=display_url,
+            legacy_app_install_ad=legacy_app_install_ad,
+            legacy_responsive_display_ad=legacy_responsive_display_ad,
+            shopping_smart_ad=shopping_smart_ad,
+            text_ad=text_ad,
+            final_app_urls=final_app_urls,
+            url_collections=url_collections,
+            url_custom_parameters=url_custom_parameters,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

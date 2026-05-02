@@ -52,6 +52,7 @@ class ConversionValueRuleSetService:
         conversion_value_rules: List[str],
         attachment_type: str,
         campaign: Optional[str] = None,
+        conversion_action_categories: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -65,6 +66,10 @@ class ConversionValueRuleSetService:
             conversion_value_rules: List of conversion value rule resource names
             attachment_type: Attachment type (CUSTOMER, CAMPAIGN)
             campaign: Campaign resource name (required if attachment_type is CAMPAIGN)
+            conversion_action_categories: Immutable. List of
+                ``ConversionActionCategory`` enum names (e.g.
+                ``DEFAULT``, ``PAGE_VIEW``) that this rule set applies
+                to. Settable on create only.
 
         Returns:
             Created conversion value rule set details
@@ -91,6 +96,18 @@ class ConversionValueRuleSetService:
             )
             if campaign:
                 rule_set.campaign = campaign
+            if conversion_action_categories is not None:
+                from google.ads.googleads.v23.enums.types.conversion_action_category import (
+                    ConversionActionCategoryEnum,
+                )
+
+                for name in conversion_action_categories:
+                    rule_set.conversion_action_categories.append(
+                        getattr(
+                            ConversionActionCategoryEnum.ConversionActionCategory,
+                            name,
+                        )
+                    )
 
             operation = ConversionValueRuleSetOperation()
             operation.create = rule_set
@@ -262,6 +279,7 @@ def create_conversion_value_rule_set_tools(
         conversion_value_rules: List[str],
         attachment_type: str,
         campaign: Optional[str] = None,
+        conversion_action_categories: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -274,6 +292,7 @@ def create_conversion_value_rule_set_tools(
             conversion_value_rules: List of conversion value rule resource names
             attachment_type: CUSTOMER or CAMPAIGN
             campaign: Campaign resource name (required for CAMPAIGN attachment)
+            conversion_action_categories: Immutable. List of ConversionActionCategory enum names (e.g. DEFAULT, PAGE_VIEW) the rule set applies to.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -287,6 +306,7 @@ def create_conversion_value_rule_set_tools(
             conversion_value_rules=conversion_value_rules,
             attachment_type=attachment_type,
             campaign=campaign,
+            conversion_action_categories=conversion_action_categories,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

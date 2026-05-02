@@ -19,6 +19,7 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     get_logger,
     serialize_proto_message,
@@ -75,6 +76,9 @@ class AdGroupService:
         ai_max_ad_group_setting: Optional[Dict[str, Any]] = None,
         demand_gen_ad_group_settings: Optional[Dict[str, Any]] = None,
         video_ad_group_settings: Optional[Dict[str, Any]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        excluded_parent_asset_field_types: Optional[List[str]] = None,
+        excluded_parent_asset_set_types: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -141,6 +145,15 @@ class AdGroupService:
                 ``DemandGenAdGroupSettings`` submessage.
             video_ad_group_settings: Dict that builds a
                 ``VideoAdGroupSettings`` submessage.
+            url_custom_parameters: List of dicts each building a
+                ``CustomParameter`` (key + value) for {_param}
+                substitution in tracking_url_template / final URLs.
+            excluded_parent_asset_field_types: List of
+                ``AssetFieldType`` enum names that should NOT inherit
+                from the parent campaign's asset set.
+            excluded_parent_asset_set_types: List of ``AssetSetType``
+                enum names that should NOT inherit from the parent
+                campaign.
 
         Returns:
             Created ad group details
@@ -261,6 +274,34 @@ class AdGroupService:
                     video_ad_group_settings,
                     AdGroup.VideoAdGroupSettings,
                 )
+
+            if url_custom_parameters is not None:
+                from google.ads.googleads.v23.common.types import CustomParameter
+
+                extend_repeated_submessages(
+                    ad_group,
+                    "url_custom_parameters",
+                    url_custom_parameters,
+                    CustomParameter,
+                )
+            if excluded_parent_asset_field_types is not None:
+                from google.ads.googleads.v23.enums.types.asset_field_type import (
+                    AssetFieldTypeEnum,
+                )
+
+                for name_ in excluded_parent_asset_field_types:
+                    ad_group.excluded_parent_asset_field_types.append(
+                        getattr(AssetFieldTypeEnum.AssetFieldType, name_)
+                    )
+            if excluded_parent_asset_set_types is not None:
+                from google.ads.googleads.v23.enums.types.asset_set_type import (
+                    AssetSetTypeEnum,
+                )
+
+                for name_ in excluded_parent_asset_set_types:
+                    ad_group.excluded_parent_asset_set_types.append(
+                        getattr(AssetSetTypeEnum.AssetSetType, name_)
+                    )
 
             # Create the operation
             operation = AdGroupOperation()
@@ -488,6 +529,9 @@ def create_ad_group_tools(
         ai_max_ad_group_setting: Optional[Dict[str, Any]] = None,
         demand_gen_ad_group_settings: Optional[Dict[str, Any]] = None,
         video_ad_group_settings: Optional[Dict[str, Any]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        excluded_parent_asset_field_types: Optional[List[str]] = None,
+        excluded_parent_asset_set_types: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -535,6 +579,9 @@ def create_ad_group_tools(
             targeting_setting: Dict that builds a TargetingSetting submessage controlling targeting-type filters.
             audience_setting: Dict that builds the resource's AudienceSetting submessage (Immutable on Campaign/AdGroup).
             vertical_ads_format_setting: Dict that builds a VerticalAdsFormatSetting submessage (search-ads vertical formats).
+            url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
+            excluded_parent_asset_field_types: List of AssetFieldType enum names that should NOT inherit from the parent campaign's asset set.
+            excluded_parent_asset_set_types: List of AssetSetType enum names that should NOT inherit from the parent campaign.
         """
         # Convert string enums to proper enum types. status is Optional;
         # only convert when caller supplied a value.
@@ -574,6 +621,9 @@ def create_ad_group_tools(
             ai_max_ad_group_setting=ai_max_ad_group_setting,
             demand_gen_ad_group_settings=demand_gen_ad_group_settings,
             video_ad_group_settings=video_ad_group_settings,
+            url_custom_parameters=url_custom_parameters,
+            excluded_parent_asset_field_types=excluded_parent_asset_field_types,
+            excluded_parent_asset_set_types=excluded_parent_asset_set_types,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

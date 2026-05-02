@@ -29,6 +29,7 @@ from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
 from src.utils import (
+    extend_repeated_submessages,
     format_customer_id,
     get_logger,
     serialize_proto_message,
@@ -121,6 +122,20 @@ class CampaignService:
         local_campaign_setting: Optional[Dict[str, Any]] = None,
         local_services_campaign_settings: Optional[Dict[str, Any]] = None,
         real_time_bidding_setting: Optional[Dict[str, Any]] = None,
+        commission: Optional[Dict[str, Any]] = None,
+        fixed_cpm: Optional[Dict[str, Any]] = None,
+        manual_cpa: Optional[Dict[str, Any]] = None,
+        manual_cpm: Optional[Dict[str, Any]] = None,
+        manual_cpv: Optional[Dict[str, Any]] = None,
+        percent_cpc: Optional[Dict[str, Any]] = None,
+        target_cpc: Optional[Dict[str, Any]] = None,
+        target_cpm: Optional[Dict[str, Any]] = None,
+        target_cpv: Optional[Dict[str, Any]] = None,
+        asset_automation_settings: Optional[List[Dict[str, Any]]] = None,
+        frequency_caps: Optional[List[Dict[str, Any]]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        excluded_parent_asset_field_types: Optional[List[str]] = None,
+        excluded_parent_asset_set_types: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -229,6 +244,43 @@ class CampaignService:
             local_services_campaign_settings:
                 ``Campaign.LocalServicesCampaignSettings`` (LOCAL_SERVICES).
             real_time_bidding_setting: ``RealTimeBiddingSetting`` (Ad Exchange).
+
+            **Inline bidding-strategy oneofs** — alternative to passing
+            ``bidding_strategy`` as a string + ``target_*_micros`` /
+            ``target_roas`` scalars. Each is a dict that builds the
+            matching proto submessage so callers can set bid ceilings,
+            floors, ROAS tolerance, etc. that the string-based path
+            doesn't expose. Mutually exclusive with each other and with
+            ``bidding_strategy_resource_name``.
+
+            commission: ``Commission`` — pay a portion of conversion
+                value (hotel campaigns).
+            fixed_cpm: ``FixedCpm`` — manual fixed CPM (video/audio).
+            manual_cpa: ``ManualCpa`` — manual cost-per-acquisition.
+            manual_cpm: ``ManualCpm`` — manual cost-per-1000-impressions.
+            manual_cpv: ``ManualCpv`` — manual cost-per-view (video).
+            percent_cpc: ``PercentCpc`` — percent CPC (hotel only).
+            target_cpc: ``TargetCpc`` — automated target-CPC.
+            target_cpm: ``TargetCpm`` — automated target-CPM with a
+                target_frequency_goal submessage.
+            target_cpv: ``TargetCpv`` — automated target-CPV.
+
+            **Repeated submessages / enum lists.**
+
+            asset_automation_settings: List of dicts each building a
+                ``Campaign.AssetAutomationSetting`` (asset_automation_type +
+                asset_automation_status pair).
+            frequency_caps: List of dicts each building a
+                ``FrequencyCapEntry`` (cap + key.event_type/level/
+                time_unit/time_length).
+            url_custom_parameters: List of dicts each building a
+                ``CustomParameter`` (key + value pair) used to substitute
+                ``{_param}`` tags in tracking_url_template / final_urls.
+            excluded_parent_asset_field_types: List of
+                ``AssetFieldType`` enum names (e.g. ``HEADLINE``) that
+                should NOT inherit from the customer-level asset set.
+            excluded_parent_asset_set_types: List of ``AssetSetType``
+                enum names that should NOT inherit from customer level.
 
         Returns:
             Created campaign details
@@ -564,6 +616,100 @@ class CampaignService:
                     RealTimeBiddingSetting,
                 )
 
+            # Inline bidding-strategy oneof submessages. Each is a oneof
+            # member of ``campaign_bidding_strategy``; the API rejects
+            # setting more than one at a time. We let the API enforce
+            # mutual exclusion rather than pre-validating here, so
+            # callers see a clear server-side error if they mix them.
+            if commission is not None:
+                from google.ads.googleads.v23.common.types import Commission
+
+                set_optional_submessage(campaign, "commission", commission, Commission)
+            if fixed_cpm is not None:
+                from google.ads.googleads.v23.common.types import FixedCpm
+
+                set_optional_submessage(campaign, "fixed_cpm", fixed_cpm, FixedCpm)
+            if manual_cpa is not None:
+                from google.ads.googleads.v23.common.types import ManualCpa
+
+                set_optional_submessage(campaign, "manual_cpa", manual_cpa, ManualCpa)
+            if manual_cpm is not None:
+                from google.ads.googleads.v23.common.types import ManualCpm
+
+                set_optional_submessage(campaign, "manual_cpm", manual_cpm, ManualCpm)
+            if manual_cpv is not None:
+                from google.ads.googleads.v23.common.types import ManualCpv
+
+                set_optional_submessage(campaign, "manual_cpv", manual_cpv, ManualCpv)
+            if percent_cpc is not None:
+                from google.ads.googleads.v23.common.types import PercentCpc
+
+                set_optional_submessage(
+                    campaign, "percent_cpc", percent_cpc, PercentCpc
+                )
+            if target_cpc is not None:
+                from google.ads.googleads.v23.common.types import TargetCpc
+
+                set_optional_submessage(campaign, "target_cpc", target_cpc, TargetCpc)
+            if target_cpm is not None:
+                from google.ads.googleads.v23.common.types import TargetCpm
+
+                set_optional_submessage(campaign, "target_cpm", target_cpm, TargetCpm)
+            if target_cpv is not None:
+                from google.ads.googleads.v23.common.types import TargetCpv
+
+                set_optional_submessage(campaign, "target_cpv", target_cpv, TargetCpv)
+
+            # Repeated submessage lists.
+            if asset_automation_settings is not None:
+                extend_repeated_submessages(
+                    campaign,
+                    "asset_automation_settings",
+                    asset_automation_settings,
+                    Campaign.AssetAutomationSetting,
+                )
+            if frequency_caps is not None:
+                from google.ads.googleads.v23.common.types import FrequencyCapEntry
+
+                extend_repeated_submessages(
+                    campaign,
+                    "frequency_caps",
+                    frequency_caps,
+                    FrequencyCapEntry,
+                )
+            if url_custom_parameters is not None:
+                from google.ads.googleads.v23.common.types import CustomParameter
+
+                extend_repeated_submessages(
+                    campaign,
+                    "url_custom_parameters",
+                    url_custom_parameters,
+                    CustomParameter,
+                )
+
+            # Repeated enum lists (per the proto these accept the
+            # parent-level asset_field_type / asset_set_type enums; we
+            # let proto-plus convert via getattr-by-name so callers pass
+            # human-readable enum names).
+            if excluded_parent_asset_field_types is not None:
+                from google.ads.googleads.v23.enums.types.asset_field_type import (
+                    AssetFieldTypeEnum,
+                )
+
+                for name in excluded_parent_asset_field_types:
+                    campaign.excluded_parent_asset_field_types.append(
+                        getattr(AssetFieldTypeEnum.AssetFieldType, name)
+                    )
+            if excluded_parent_asset_set_types is not None:
+                from google.ads.googleads.v23.enums.types.asset_set_type import (
+                    AssetSetTypeEnum,
+                )
+
+                for name in excluded_parent_asset_set_types:
+                    campaign.excluded_parent_asset_set_types.append(
+                        getattr(AssetSetTypeEnum.AssetSetType, name)
+                    )
+
             # Create the operation
             operation = CampaignOperation()
             operation.create = campaign
@@ -893,6 +1039,20 @@ def create_campaign_tools(
         local_campaign_setting: Optional[Dict[str, Any]] = None,
         local_services_campaign_settings: Optional[Dict[str, Any]] = None,
         real_time_bidding_setting: Optional[Dict[str, Any]] = None,
+        commission: Optional[Dict[str, Any]] = None,
+        fixed_cpm: Optional[Dict[str, Any]] = None,
+        manual_cpa: Optional[Dict[str, Any]] = None,
+        manual_cpm: Optional[Dict[str, Any]] = None,
+        manual_cpv: Optional[Dict[str, Any]] = None,
+        percent_cpc: Optional[Dict[str, Any]] = None,
+        target_cpc: Optional[Dict[str, Any]] = None,
+        target_cpm: Optional[Dict[str, Any]] = None,
+        target_cpv: Optional[Dict[str, Any]] = None,
+        asset_automation_settings: Optional[List[Dict[str, Any]]] = None,
+        frequency_caps: Optional[List[Dict[str, Any]]] = None,
+        url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        excluded_parent_asset_field_types: Optional[List[str]] = None,
+        excluded_parent_asset_set_types: Optional[List[str]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -980,6 +1140,20 @@ def create_campaign_tools(
             ai_max_setting: Dict that builds a Campaign.AiMaxSetting submessage (AI Max for search campaigns).
             brand_guidelines: Dict that builds a Campaign.BrandGuidelines submessage (auto-generated brand controls).
             pmax_campaign_settings: Dict that builds a Campaign.PmaxCampaignSettings submessage (PMax campaigns).
+            commission: Dict that builds a Commission submessage (hotel commission bidding).
+            fixed_cpm: Dict that builds a FixedCpm submessage (manual fixed CPM for video/audio).
+            manual_cpa: Dict that builds a ManualCpa submessage (manual CPA bidding).
+            manual_cpm: Dict that builds a ManualCpm submessage (manual CPM bidding).
+            manual_cpv: Dict that builds a ManualCpv submessage (manual CPV bidding for video).
+            percent_cpc: Dict that builds a PercentCpc submessage (percent-CPC for hotel campaigns).
+            target_cpc: Dict that builds a TargetCpc submessage (automated target-CPC bidding).
+            target_cpm: Dict that builds a TargetCpm submessage (automated target-CPM with target_frequency_goal).
+            target_cpv: Dict that builds a TargetCpv submessage (automated target-CPV bidding).
+            asset_automation_settings: List of dicts each building a Campaign.AssetAutomationSetting (asset_automation_type + asset_automation_status).
+            frequency_caps: List of dicts each building a FrequencyCapEntry (cap + key.event_type/level/time_unit/time_length).
+            url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
+            excluded_parent_asset_field_types: List of AssetFieldType enum names that should NOT inherit from customer-level asset set.
+            excluded_parent_asset_set_types: List of AssetSetType enum names that should NOT inherit from customer level.
         """
         channel_type_enum = getattr(
             AdvertisingChannelTypeEnum.AdvertisingChannelType, advertising_channel_type
@@ -1041,6 +1215,20 @@ def create_campaign_tools(
             local_campaign_setting=local_campaign_setting,
             local_services_campaign_settings=local_services_campaign_settings,
             real_time_bidding_setting=real_time_bidding_setting,
+            commission=commission,
+            fixed_cpm=fixed_cpm,
+            manual_cpa=manual_cpa,
+            manual_cpm=manual_cpm,
+            manual_cpv=manual_cpv,
+            percent_cpc=percent_cpc,
+            target_cpc=target_cpc,
+            target_cpm=target_cpm,
+            target_cpv=target_cpv,
+            asset_automation_settings=asset_automation_settings,
+            frequency_caps=frequency_caps,
+            url_custom_parameters=url_custom_parameters,
+            excluded_parent_asset_field_types=excluded_parent_asset_field_types,
+            excluded_parent_asset_set_types=excluded_parent_asset_set_types,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

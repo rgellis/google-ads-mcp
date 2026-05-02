@@ -9,6 +9,8 @@ from google.ads.googleads.v23.common.types.user_lists import (
     CrmBasedUserListInfo,
     LogicalUserListInfo,
     LogicalUserListOperandInfo,
+    LookalikeUserListInfo,
+    RuleBasedUserListInfo,
     UserListActionInfo,
     UserListLogicalRuleInfo,
 )
@@ -34,6 +36,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -383,6 +386,170 @@ class UserListService:
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
 
+    async def create_lookalike_user_list(
+        self,
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        lookalike_user_list: Dict[str, Any],
+        description: Optional[str] = None,
+        membership_life_span: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a lookalike user list (Immutable on the resource).
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            name: User list name
+            lookalike_user_list: Dict that builds a ``LookalikeUserListInfo``
+                submessage. See the v23 reference for fields:
+                ``seed_user_list_ids`` (list of seed list IDs),
+                ``expansion_level`` (NARROW / BALANCED / BROAD),
+                ``country_codes``.
+            description: Optional description
+            membership_life_span: How long users remain in the list (days,
+                0-540). Omit to use the API default.
+
+        Returns:
+            Created user list details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            user_list = UserList()
+            user_list.name = name
+            if description:
+                user_list.description = description
+            if membership_life_span is not None:
+                user_list.membership_life_span = membership_life_span
+
+            set_optional_submessage(
+                user_list,
+                "lookalike_user_list",
+                lookalike_user_list,
+                LookalikeUserListInfo,
+            )
+
+            operation = UserListOperation()
+            operation.create = user_list
+
+            request = MutateUserListsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateUserListsResponse = self.client.mutate_user_lists(
+                request=request
+            )
+            await ctx.log(
+                level="info",
+                message=f"Created lookalike user list '{name}'",
+            )
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create lookalike user list: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
+    async def create_rule_based_user_list(
+        self,
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        rule_based_user_list: Dict[str, Any],
+        description: Optional[str] = None,
+        membership_life_span: Optional[int] = None,
+        membership_status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Any = None,
+    ) -> Dict[str, Any]:
+        """Create a rule-based user list.
+
+        Args:
+            ctx: FastMCP context
+            customer_id: The customer ID
+            name: User list name
+            rule_based_user_list: Dict that builds a
+                ``RuleBasedUserListInfo`` submessage. See the v23
+                reference for fields: ``prepopulation_status`` (REQUESTED
+                / FINISHED / FAILED),
+                ``flexible_rule_user_list``/``rule_event_filters`` etc.
+            description: Optional description
+            membership_life_span: How long users remain in the list
+                (days, 0-540). Omit to use the API default.
+            membership_status: OPEN or CLOSED. Omit to use the API
+                default (OPEN).
+
+        Returns:
+            Created user list details
+        """
+        try:
+            customer_id = format_customer_id(customer_id)
+
+            user_list = UserList()
+            user_list.name = name
+            if description:
+                user_list.description = description
+            if membership_life_span is not None:
+                user_list.membership_life_span = membership_life_span
+            if membership_status is not None:
+                user_list.membership_status = getattr(
+                    UserListMembershipStatusEnum.UserListMembershipStatus,
+                    membership_status,
+                )
+
+            set_optional_submessage(
+                user_list,
+                "rule_based_user_list",
+                rule_based_user_list,
+                RuleBasedUserListInfo,
+            )
+
+            operation = UserListOperation()
+            operation.create = user_list
+
+            request = MutateUserListsRequest()
+            request.customer_id = customer_id
+            request.operations = [operation]
+            set_request_options(
+                request,
+                partial_failure=partial_failure,
+                validate_only=validate_only,
+                response_content_type=response_content_type,
+            )
+
+            response: MutateUserListsResponse = self.client.mutate_user_lists(
+                request=request
+            )
+            await ctx.log(
+                level="info",
+                message=f"Created rule-based user list '{name}'",
+            )
+            return serialize_proto_message(response)
+
+        except GoogleAdsException as e:
+            error_msg = f"Google Ads API error: {e.failure}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+        except Exception as e:
+            error_msg = f"Failed to create rule-based user list: {str(e)}"
+            await ctx.log(level="error", message=error_msg)
+            raise Exception(error_msg) from e
+
     async def update_user_list(
         self,
         ctx: Context,
@@ -721,6 +888,79 @@ def create_user_list_tools(
             response_content_type=response_content_type,
         )
 
+    async def create_lookalike_user_list(
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        lookalike_user_list: Dict[str, Any],
+        description: Optional[str] = None,
+        membership_life_span: Optional[int] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a lookalike user list (Immutable on the resource).
+
+        Args:
+            customer_id: The customer ID
+            name: User list name
+            lookalike_user_list: Dict that builds a LookalikeUserListInfo submessage. See v23 reference for fields (seed_user_list_ids, expansion_level, country_codes).
+            description: Optional description
+            membership_life_span: Membership lifespan in days (0-540).
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+        """
+        return await service.create_lookalike_user_list(
+            ctx=ctx,
+            customer_id=customer_id,
+            name=name,
+            lookalike_user_list=lookalike_user_list,
+            description=description,
+            membership_life_span=membership_life_span,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
+    async def create_rule_based_user_list(
+        ctx: Context,
+        customer_id: str,
+        name: str,
+        rule_based_user_list: Dict[str, Any],
+        description: Optional[str] = None,
+        membership_life_span: Optional[int] = None,
+        membership_status: Optional[str] = None,
+        partial_failure: bool = False,
+        validate_only: bool = False,
+        response_content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a rule-based user list.
+
+        Args:
+            customer_id: The customer ID
+            name: User list name
+            rule_based_user_list: Dict that builds a RuleBasedUserListInfo submessage. See v23 reference for fields (prepopulation_status, flexible_rule_user_list, rule_event_filters).
+            description: Optional description
+            membership_life_span: Membership lifespan in days (0-540).
+            membership_status: OPEN or CLOSED. Omit to use API default.
+            partial_failure: If True, valid operations succeed when others fail in the same request.
+            validate_only: If True, validate the request without executing it.
+            response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
+        """
+        return await service.create_rule_based_user_list(
+            ctx=ctx,
+            customer_id=customer_id,
+            name=name,
+            rule_based_user_list=rule_based_user_list,
+            description=description,
+            membership_life_span=membership_life_span,
+            membership_status=membership_status,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+            response_content_type=response_content_type,
+        )
+
     async def update_user_list(
         ctx: Context,
         customer_id: str,
@@ -806,6 +1046,8 @@ def create_user_list_tools(
             create_basic_user_list,
             create_crm_based_user_list,
             create_logical_user_list,
+            create_lookalike_user_list,
+            create_rule_based_user_list,
             update_user_list,
             remove_user_list,
         ]
