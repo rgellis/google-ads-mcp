@@ -252,7 +252,7 @@ class AssetGroupService:
         include_removed: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List asset groups.
+        """List Performance Max asset groups on a customer, optionally filtered by parent campaign or status. Returns each AssetGroup's resource_name, id, name, status, ad_strength, primary_status, and final URLs. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         Args:
             ctx: FastMCP context
@@ -526,7 +526,7 @@ def create_asset_group_tools(
         include_removed: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List asset groups.
+        """List Performance Max asset groups on a customer, optionally filtered by parent campaign or status. Returns each AssetGroup's resource_name, id, name, status, ad_strength, primary_status, and final URLs. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         For filters beyond the structured params here (substring-on-name,
         date ranges, metric thresholds, custom SELECT/ORDER BY,

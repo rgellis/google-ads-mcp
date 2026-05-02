@@ -225,7 +225,7 @@ class AdGroupAdService:
         include_policy_data: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List ad group ads.
+        """List ad-group-ad associations on a customer, optionally filtered by ad group, status, or ad type. Each row carries the ad-group-ad resource_name plus the underlying Ad's id, name, type, status, and final URLs. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         Args:
             ctx: FastMCP context
@@ -531,7 +531,7 @@ def create_ad_group_ad_tools(
         include_policy_data: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List ad group ads.
+        """List ad-group-ad associations on a customer, optionally filtered by ad group, status, or ad type. Each row carries the ad-group-ad resource_name plus the underlying Ad's id, name, type, status, and final URLs. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         For filters beyond the structured params here (substring-on-name,
         date ranges, metric thresholds, custom SELECT/ORDER BY,

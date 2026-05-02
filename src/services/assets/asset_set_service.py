@@ -316,7 +316,7 @@ class AssetSetService:
         include_removed: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List asset sets.
+        """List asset sets on a customer, optionally filtered by type or status. Asset sets group related assets (locations, hotel properties, dynamic feeds) for linking to campaigns or ad groups; this returns each set's resource_name, id, name, type, status, and any business-profile / location-group / hotel-property submessage. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         Args:
             ctx: FastMCP context
@@ -577,7 +577,7 @@ def create_asset_set_tools(
         include_removed: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List asset sets.
+        """List asset sets on a customer, optionally filtered by type or status. Asset sets group related assets (locations, hotel properties, dynamic feeds) for linking to campaigns or ad groups; this returns each set's resource_name, id, name, type, status, and any business-profile / location-group / hotel-property submessage. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         For filters beyond the structured params here (substring-on-name,
         date ranges, metric thresholds, custom SELECT/ORDER BY,

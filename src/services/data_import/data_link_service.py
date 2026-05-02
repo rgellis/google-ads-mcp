@@ -55,7 +55,7 @@ class DataLinkService:
         youtube_video_channel_id: Optional[str] = None,
         youtube_video_video_id: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create a data link.
+        """Create a third-party data link on a customer. Data links connect a Google Ads customer to an external data source (currently a YouTube video) so its metrics flow into the customer's reports. Pass exactly one link-type oneof (today: ``youtube_video``); the API rejects empty data-link operations.
 
         At least one of youtube_video_channel_id or youtube_video_video_id
         must be supplied — an empty DataLink is rejected by the API.
@@ -115,7 +115,7 @@ class DataLinkService:
         customer_id: str,
         resource_name: str,
     ) -> Dict[str, Any]:
-        """Remove a data link.
+        """Remove a third-party data link from a customer. Soft-delete: the DataLink resource is marked REMOVED rather than physically deleted, so its historical metrics still appear in reports for the period when it was active. Pass the full data-link resource_name (``customers/{cid}/dataLinks/{product_link_id}~{link_id}``).
 
         Note: RemoveDataLinkRequest does not support partial_failure,
         validate_only, or response_content_type — those parameters were
@@ -272,7 +272,7 @@ def create_data_link_tools(
         youtube_video_channel_id: Optional[str] = None,
         youtube_video_video_id: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create a data link.
+        """Create a third-party data link on a customer. Data links connect a Google Ads customer to an external data source (currently a YouTube video) so its metrics flow into the customer's reports. Pass exactly one link-type oneof (today: ``youtube_video``); the API rejects empty data-link operations.
 
         Args:
             customer_id: The customer ID
@@ -294,7 +294,7 @@ def create_data_link_tools(
         customer_id: str,
         resource_name: str,
     ) -> Dict[str, Any]:
-        """Remove a data link.
+        """Remove a third-party data link from a customer. Soft-delete: the DataLink resource is marked REMOVED rather than physically deleted, so its historical metrics still appear in reports for the period when it was active. Pass the full data-link resource_name (``customers/{cid}/dataLinks/{product_link_id}~{link_id}``).
 
         Args:
             customer_id: The customer ID

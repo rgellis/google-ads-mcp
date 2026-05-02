@@ -357,7 +357,7 @@ class AudienceService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Update an audience.
+        """Update a combined-segment Audience on a customer. Mutable fields are ``name``, ``description``, ``status`` (ENABLED, REMOVED), and ``dimensions`` (whose internal sub-dimensions are Immutable on the resource — pass the same dimension shape used at create time). The ``scope`` and ``asset_group`` fields are Immutable; this method does not write them.
 
         Per the v23 Audience proto, ``status`` is Output-only and cannot
         be updated; it's no longer exposed as a parameter.
@@ -440,7 +440,7 @@ class AudienceService:
         include_removed: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List audiences.
+        """List combined-segment audiences on a customer, optionally filtered by status. Combined audiences (the Audience resource) blend up to 5 audience-segment dimensions (age, gender, parental_status, household_income, audience_segments, life_events) into a single targetable audience; this returns each Audience's resource_name, id, name, description, status, scope, and dimension summary. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         Args:
             ctx: FastMCP context
@@ -595,7 +595,7 @@ def create_audience_tools(
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update an audience.
+        """Update a combined-segment Audience on a customer. Mutable fields are ``name``, ``description``, ``status`` (ENABLED, REMOVED), and ``dimensions`` (whose internal sub-dimensions are Immutable on the resource — pass the same dimension shape used at create time). The ``scope`` and ``asset_group`` fields are Immutable; this method does not write them.
 
         Per the v23 Audience proto, ``status`` is Output-only and cannot be
         updated. The v23 AudienceService also does not support remove —
@@ -632,7 +632,7 @@ def create_audience_tools(
         include_removed: bool = False,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
-        """List audiences.
+        """List combined-segment audiences on a customer, optionally filtered by status. Combined audiences (the Audience resource) blend up to 5 audience-segment dimensions (age, gender, parental_status, household_income, audience_segments, life_events) into a single targetable audience; this returns each Audience's resource_name, id, name, description, status, scope, and dimension summary. For substring-on-name, date ranges, metric thresholds, custom SELECT/ORDER BY, or multi-condition filters, use ``search_google_ads`` with a free-form GAQL query.
 
         For filters beyond the structured params here (substring-on-name,
         date ranges, metric thresholds, custom SELECT/ORDER BY,

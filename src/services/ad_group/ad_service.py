@@ -999,7 +999,7 @@ class AdService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create a video ad.
+        """Create a video ad in an ad group, building a VideoAdInfo submessage. Supports the four video formats (in_stream, bumper, non_skippable, in_feed); ``video_format`` drives which oneof of VideoAdInfo gets populated. Use ``create_video_responsive_ad`` for VideoResponsiveAdInfo (auto-generated headlines/descriptions).
 
         Args:
             ctx: FastMCP context
@@ -1351,7 +1351,7 @@ class AdService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create an app ad.
+        """Create an app-install ad in an ad group, building an AppAdInfo submessage. For app campaigns where Google auto-assembles the ad from supplied headlines, descriptions, images, videos, and HTML5 bundles. Use ``create_app_engagement_ad`` for re-engagement ads on already-installed apps.
 
         Args:
             ctx: FastMCP context
@@ -1518,7 +1518,7 @@ class AdService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create a hotel ad.
+        """Create a hotel ad in an ad group, building a HotelAdInfo submessage. Hotel ads use the Hotel Ads format and pull pricing/availability from a linked Hotel Center feed; they require a HOTEL channel-type campaign. The ad itself carries no creative — Google assembles it from feed data and the campaign's hotel listing setup.
 
         HotelAdInfo has no fields - hotel data comes from the Hotel Center feed.
 
@@ -1737,7 +1737,7 @@ class AdService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create a local ad.
+        """Create a local ad in an ad group, building a LocalAdInfo submessage. Local ads promote nearby store locations across Search, Display, Maps, and YouTube; they require a LOCAL channel-type campaign with linked Business Profile locations. Auto-assembles from supplied headlines, descriptions, marketing images, logos, and videos.
 
         Args:
             ctx: FastMCP context
@@ -1855,7 +1855,7 @@ class AdService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create a travel ad.
+        """Create a travel ad in an ad group, building a TravelAdInfo submessage. Travel ads serve flight/destination/property results from a Travel Feed (Things-to-Do or similar) and require a TRAVEL channel-type campaign. Like hotel ads, the creative is feed-driven — this method just creates the placeholder ad container.
 
         TravelAdInfo has no fields - travel data comes from the feed.
 
@@ -2726,7 +2726,7 @@ class AdService:
         validate_only: bool = False,
         response_content_type: Any = None,
     ) -> Dict[str, Any]:
-        """Create an image ad.
+        """Create a (legacy) static image ad in an ad group, building an ImageAdInfo submessage. Provide either ``image_asset`` (existing asset resource name) or ``data`` (raw image bytes) — exactly one is required. For modern responsive display creatives, use ``create_responsive_display_ad`` instead; image_ad is retained for legacy and uploaded-image workflows.
 
         Supply either image_asset (asset resource name) or data (raw bytes).
 
@@ -3206,7 +3206,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create a video ad.
+        """Create a video ad in an ad group, building a VideoAdInfo submessage. Supports the four video formats (in_stream, bumper, non_skippable, in_feed); ``video_format`` drives which oneof of VideoAdInfo gets populated. Use ``create_video_responsive_ad`` for VideoResponsiveAdInfo (auto-generated headlines/descriptions).
 
         Args:
             customer_id: The customer ID
@@ -3381,7 +3381,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create an app ad.
+        """Create an app-install ad in an ad group, building an AppAdInfo submessage. For app campaigns where Google auto-assembles the ad from supplied headlines, descriptions, images, videos, and HTML5 bundles. Use ``create_app_engagement_ad`` for re-engagement ads on already-installed apps.
 
         Args:
             customer_id: The customer ID
@@ -3469,7 +3469,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create a hotel ad.
+        """Create a hotel ad in an ad group, building a HotelAdInfo submessage. Hotel ads use the Hotel Ads format and pull pricing/availability from a linked Hotel Center feed; they require a HOTEL channel-type campaign. The ad itself carries no creative — Google assembles it from feed data and the campaign's hotel listing setup.
 
         Hotel data comes from the Hotel Center feed - no ad-specific fields needed.
 
@@ -3589,7 +3589,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create a local ad.
+        """Create a local ad in an ad group, building a LocalAdInfo submessage. Local ads promote nearby store locations across Search, Display, Maps, and YouTube; they require a LOCAL channel-type campaign with linked Business Profile locations. Auto-assembles from supplied headlines, descriptions, marketing images, logos, and videos.
 
         Args:
             customer_id: The customer ID
@@ -3645,7 +3645,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create a travel ad.
+        """Create a travel ad in an ad group, building a TravelAdInfo submessage. Travel ads serve flight/destination/property results from a Travel Feed (Things-to-Do or similar) and require a TRAVEL channel-type campaign. Like hotel ads, the creative is feed-driven — this method just creates the placeholder ad container.
 
         Travel data comes from the feed - no ad-specific fields needed.
 
@@ -4121,7 +4121,7 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Create an image ad.
+        """Create a (legacy) static image ad in an ad group, building an ImageAdInfo submessage. Provide either ``image_asset`` (existing asset resource name) or ``data`` (raw image bytes) — exactly one is required. For modern responsive display creatives, use ``create_responsive_display_ad`` instead; image_ad is retained for legacy and uploaded-image workflows.
 
         Supply either image_asset (asset resource name) or data (raw bytes).
 
