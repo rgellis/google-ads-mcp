@@ -78,6 +78,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -2244,6 +2245,10 @@ class AdGroupCriterionService:
         final_urls: Optional[List[str]] = None,
         final_mobile_urls: Optional[List[str]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        mobile_application: Optional[Dict[str, Any]] = None,
+        listing_group: Optional[Dict[str, Any]] = None,
+        topic: Optional[Dict[str, Any]] = None,
+        webpage: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2342,6 +2347,39 @@ class AdGroupCriterionService:
                     CustomParameter,
                 )
                 update_mask_fields.append("url_custom_parameters")
+
+            # Criterion oneof submessages — dict-passthrough lets
+            # callers update sub-fields the legacy add_* methods don't
+            # expose (e.g. mobile_application.name,
+            # webpage.coverage_percentage, listing_group.path.*).
+            if mobile_application is not None:
+                from google.ads.googleads.v23.common.types import (
+                    MobileApplicationInfo,
+                )
+
+                set_optional_submessage(
+                    ad_group_criterion,
+                    "mobile_application",
+                    mobile_application,
+                    MobileApplicationInfo,
+                )
+                update_mask_fields.append("mobile_application")
+            if listing_group is not None:
+                set_optional_submessage(
+                    ad_group_criterion,
+                    "listing_group",
+                    listing_group,
+                    ListingGroupInfo,
+                )
+                update_mask_fields.append("listing_group")
+            if topic is not None:
+                set_optional_submessage(ad_group_criterion, "topic", topic, TopicInfo)
+                update_mask_fields.append("topic")
+            if webpage is not None:
+                set_optional_submessage(
+                    ad_group_criterion, "webpage", webpage, WebpageInfo
+                )
+                update_mask_fields.append("webpage")
 
             if not update_mask_fields:
                 raise ValueError("at least one updatable field must be provided")
@@ -3413,6 +3451,10 @@ def create_ad_group_criterion_tools(
         final_urls: Optional[List[str]] = None,
         final_mobile_urls: Optional[List[str]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        mobile_application: Optional[Dict[str, Any]] = None,
+        listing_group: Optional[Dict[str, Any]] = None,
+        topic: Optional[Dict[str, Any]] = None,
+        webpage: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -3441,6 +3483,10 @@ def create_ad_group_criterion_tools(
             final_urls: New list of final landing-page URLs (overrides ad-level URLs).
             final_mobile_urls: New list of mobile-specific final URLs.
             url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution in tracking_url_template / final_urls.
+            mobile_application: Dict that builds a MobileApplicationInfo submessage (mobile_app_id + name).
+            listing_group: Dict that builds a ListingGroupInfo submessage (type + path.dimensions.* hierarchy).
+            topic: Dict that builds a TopicInfo submessage (topic_constant + path).
+            webpage: Dict that builds a WebpageInfo submessage (criterion_name, conditions, sample.sample_urls, coverage_percentage).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -3462,6 +3508,10 @@ def create_ad_group_criterion_tools(
             final_urls=final_urls,
             final_mobile_urls=final_mobile_urls,
             url_custom_parameters=url_custom_parameters,
+            mobile_application=mobile_application,
+            listing_group=listing_group,
+            topic=topic,
+            webpage=webpage,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -19,8 +19,8 @@ Sources cross-checked, in order of preference:
 - Required: **15 / 15** (100.0%)
 - Output-only (skipped intentionally): **341**
 - Source disagreements (md vs proto vs sdk): **0**
-- Tool-wrapper docstring args documented: **2479 / 2479** (100.0%)
-- Submessage leaves reachable: **929 / 1073** (86.6%)
+- Tool-wrapper docstring args documented: **2546 / 2546** (100.0%)
+- Submessage leaves reachable: **1073 / 1073** (100.0%)
 - Submessage leaf source disagreements: **0**
 
 Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 input-only · 🚫 output-only · ✅ exposed by wrapper · ❌ gap · 🛡️ intentionally suppressed · — n/a
@@ -170,11 +170,7 @@ Legend: ✏️ settable · 🔒 immutable (create-only) · ❗ required · 📥 
 | `criterion_id` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
-**Submessage leaves**: 7/9 reachable (77.8%)
-
-Unreachable leaves:
-- `hotel_date_selection_type.type` — ✏️ settable
-- `device.type` — ✏️ settable
+**Submessage leaves**: 9/9 reachable (100.0%)
 
 ## AdGroupCriterionCustomizerService
 
@@ -193,10 +189,7 @@ Unreachable leaves:
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `value` | ❗ | ✅ | — | mutate_ad_group_criterion_customizers | agree | Required |
 
-**Submessage leaves**: 1/2 reachable (50.0%)
-
-Unreachable leaves:
-- `value.type` — ❗ required
+**Submessage leaves**: 2/2 reachable (100.0%)
 
 ## AdGroupCriterionLabelService
 
@@ -233,18 +226,18 @@ Unreachable leaves:
 | `keyword` | 🔒 | ✅ | — | add_keywords | agree | Immutable |
 | `language` | 🔒 | ✅ | — | add_language_criteria | agree | Immutable |
 | `life_event` | 🔒 | ✅ | — | add_life_event_criteria | agree | Immutable |
-| `listing_group` | 🔒 | ✅ | — | add_listing_group_criteria | agree | Immutable |
+| `listing_group` | 🔒 | ✅ | `update_criterion_bid` | add_listing_group_criteria, update_criterion_bid | agree | Immutable |
 | `location` | 🔒 | ✅ | — | add_location_criteria | agree | Immutable |
 | `mobile_app_category` | 🔒 | ✅ | — | add_mobile_app_category_criteria | agree | Immutable |
-| `mobile_application` | 🔒 | ✅ | — | add_mobile_application_criteria | agree | Immutable |
+| `mobile_application` | 🔒 | ✅ | `update_criterion_bid` | add_mobile_application_criteria, update_criterion_bid | agree | Immutable |
 | `parental_status` | 🔒 | ✅ | — | add_demographic_criteria | agree | Immutable |
 | `placement` | 🔒 | ✅ | — | add_placement_criteria | agree | Immutable |
-| `topic` | 🔒 | ✅ | — | add_topic_criteria | agree | Immutable |
+| `topic` | 🔒 | ✅ | `update_criterion_bid` | add_topic_criteria, update_criterion_bid | agree | Immutable |
 | `user_interest` | 🔒 | ✅ | — | add_user_interest_criteria | agree | Immutable |
 | `user_list` | 🔒 | ✅ | — | add_audience_criteria | agree | Immutable |
 | `vertical_ads_item_group_rule_list` | 🔒 | ✅ | — | add_vertical_ads_item_group_rule_list_criteria | agree | Immutable |
 | `video_lineup` | 🔒 | ✅ | — | add_video_lineup_criteria | agree | Immutable |
-| `webpage` | 🔒 | ✅ | — | add_webpage_criteria | agree | Immutable |
+| `webpage` | 🔒 | ✅ | `update_criterion_bid` | add_webpage_criteria, update_criterion_bid | agree | Immutable |
 | `youtube_channel` | 🔒 | ✅ | — | add_youtube_channel_criteria | agree | Immutable |
 | `youtube_video` | 🔒 | ✅ | — | add_youtube_video_criteria | agree | Immutable |
 | `criterion_id` | 🚫 | — | — | add_audience_criteria | agree | Output only |
@@ -275,24 +268,7 @@ Unreachable leaves:
 | `type` | 🚫 | — | — | add_app_payment_model_criteria, add_demographic_criteria, add_listing_group_criteria | agree | Output only |
 | `url_custom_parameters` | ✏️ | ✅ | `update_criterion_bid` | update_criterion_bid | agree | The list of mappings used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls`. |
 
-**Submessage leaves**: 74/89 reachable (83.1%)
-
-Unreachable leaves:
-- `mobile_application.name` — ✏️ settable
-- `listing_group.type` — ✏️ settable
-- `listing_group.path.dimensions.hotel_country_region.country_region_criterion` — ✏️ settable
-- `listing_group.path.dimensions.hotel_state.state_criterion` — ✏️ settable
-- `listing_group.path.dimensions.hotel_city.city_criterion` — ✏️ settable
-- `listing_group.path.dimensions.product_category.category_id` — ✏️ settable
-- `listing_group.path.dimensions.product_channel_exclusivity.channel_exclusivity` — ✏️ settable
-- `age_range.type` — ✏️ settable
-- `gender.type` — ✏️ settable
-- `income_range.type` — ✏️ settable
-- `parental_status.type` — ✏️ settable
-- `topic.path` — ✏️ settable
-- `webpage.coverage_percentage` — ✏️ settable
-- `webpage.sample.sample_urls` — ✏️ settable
-- `app_payment_model.type` — ✏️ settable
+**Submessage leaves**: 89/89 reachable (100.0%)
 
 ## AdGroupCustomizerService
 
@@ -398,31 +374,31 @@ Unreachable leaves:
 
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
-| `app_ad` | ✏️ | ✅ | — | create_app_ad | agree | Details pertaining to an app ad. |
-| `app_engagement_ad` | ✏️ | ✅ | — | create_app_engagement_ad | agree | Details pertaining to an app engagement ad. |
-| `app_pre_registration_ad` | ✏️ | ✅ | — | create_app_pre_registration_ad | agree | Details pertaining to an app pre-registration ad. |
-| `demand_gen_carousel_ad` | ✏️ | ✅ | — | create_demand_gen_carousel_ad | agree | Details pertaining to a Demand Gen carousel ad. |
-| `demand_gen_multi_asset_ad` | ✏️ | ✅ | — | create_demand_gen_multi_asset_ad | agree | Details pertaining to a Demand Gen multi asset ad. |
-| `demand_gen_product_ad` | ✏️ | ✅ | — | create_demand_gen_product_ad | agree | Details pertaining to a Demand Gen product ad. |
-| `demand_gen_video_responsive_ad` | ✏️ | ✅ | — | create_demand_gen_video_responsive_ad | agree | Details pertaining to a Demand Gen video responsive ad. |
-| `display_upload_ad` | ✏️ | ✅ | — | create_display_upload_ad | agree | Details pertaining to a display upload ad. |
-| `expanded_dynamic_search_ad` | 🔒 | ✅ | — | create_expanded_dynamic_search_ad | agree | Immutable |
-| `expanded_text_ad` | ✏️ | ✅ | — | create_expanded_text_ad | agree | Details pertaining to an expanded text ad. |
-| `hotel_ad` | ✏️ | ✅ | — | create_hotel_ad | agree | Details pertaining to a hotel ad. |
-| `image_ad` | 🔒 | ✅ | — | create_image_ad | agree | Immutable |
+| `app_ad` | ✏️ | ✅ | `update_ad` | create_app_ad, update_ad | agree | Details pertaining to an app ad. |
+| `app_engagement_ad` | ✏️ | ✅ | `update_ad` | create_app_engagement_ad, update_ad | agree | Details pertaining to an app engagement ad. |
+| `app_pre_registration_ad` | ✏️ | ✅ | `update_ad` | create_app_pre_registration_ad, update_ad | agree | Details pertaining to an app pre-registration ad. |
+| `demand_gen_carousel_ad` | ✏️ | ✅ | `update_ad` | create_demand_gen_carousel_ad, update_ad | agree | Details pertaining to a Demand Gen carousel ad. |
+| `demand_gen_multi_asset_ad` | ✏️ | ✅ | `update_ad` | create_demand_gen_multi_asset_ad, update_ad | agree | Details pertaining to a Demand Gen multi asset ad. |
+| `demand_gen_product_ad` | ✏️ | ✅ | `update_ad` | create_demand_gen_product_ad, update_ad | agree | Details pertaining to a Demand Gen product ad. |
+| `demand_gen_video_responsive_ad` | ✏️ | ✅ | `update_ad` | create_demand_gen_video_responsive_ad, update_ad | agree | Details pertaining to a Demand Gen video responsive ad. |
+| `display_upload_ad` | ✏️ | ✅ | `update_ad` | create_display_upload_ad, update_ad | agree | Details pertaining to a display upload ad. |
+| `expanded_dynamic_search_ad` | 🔒 | ✅ | `update_ad` | create_expanded_dynamic_search_ad, update_ad | agree | Immutable |
+| `expanded_text_ad` | ✏️ | ✅ | `update_ad` | create_expanded_text_ad, update_ad | agree | Details pertaining to an expanded text ad. |
+| `hotel_ad` | ✏️ | ✅ | `update_ad` | create_hotel_ad, update_ad | agree | Details pertaining to a hotel ad. |
+| `image_ad` | 🔒 | ✅ | `update_ad` | create_image_ad, update_ad | agree | Immutable |
 | `legacy_app_install_ad` | 🔒 | ✅ | `update_ad` | update_ad | agree | Immutable |
 | `legacy_responsive_display_ad` | ✏️ | ✅ | `update_ad` | update_ad | agree | Details pertaining to a legacy responsive display ad. |
-| `local_ad` | ✏️ | ✅ | — | create_local_ad | agree | Details pertaining to a local ad. |
-| `responsive_display_ad` | ✏️ | ✅ | — | create_responsive_display_ad | agree | Details pertaining to a responsive display ad. |
-| `responsive_search_ad` | ✏️ | ✅ | — | create_responsive_search_ad, update_ad | agree | Details pertaining to a responsive search ad. |
-| `shopping_comparison_listing_ad` | ✏️ | ✅ | — | create_shopping_comparison_listing_ad | agree | Details pertaining to a Shopping Comparison Listing ad. |
-| `shopping_product_ad` | ✏️ | ✅ | — | create_shopping_product_ad | agree | Details pertaining to a Shopping product ad. |
+| `local_ad` | ✏️ | ✅ | `update_ad` | create_local_ad, update_ad | agree | Details pertaining to a local ad. |
+| `responsive_display_ad` | ✏️ | ✅ | `update_ad` | create_responsive_display_ad, update_ad | agree | Details pertaining to a responsive display ad. |
+| `responsive_search_ad` | ✏️ | ✅ | `update_ad` | create_responsive_search_ad, update_ad | agree | Details pertaining to a responsive search ad. |
+| `shopping_comparison_listing_ad` | ✏️ | ✅ | `update_ad` | create_shopping_comparison_listing_ad, update_ad | agree | Details pertaining to a Shopping Comparison Listing ad. |
+| `shopping_product_ad` | ✏️ | ✅ | `update_ad` | create_shopping_product_ad, update_ad | agree | Details pertaining to a Shopping product ad. |
 | `shopping_smart_ad` | ✏️ | ✅ | `update_ad` | update_ad | agree | Details pertaining to a Smart Shopping ad. |
-| `smart_campaign_ad` | ✏️ | ✅ | — | create_smart_campaign_ad | agree | Details pertaining to a Smart campaign ad. |
+| `smart_campaign_ad` | ✏️ | ✅ | `update_ad` | create_smart_campaign_ad, update_ad | agree | Details pertaining to a Smart campaign ad. |
 | `text_ad` | 🔒 | ✅ | `update_ad` | update_ad | agree | Immutable |
-| `travel_ad` | ✏️ | ✅ | — | create_travel_ad | agree | Details pertaining to a travel ad. |
-| `video_ad` | ✏️ | ✅ | — | create_video_ad | agree | Details pertaining to a Video ad. |
-| `video_responsive_ad` | ✏️ | ✅ | — | create_video_responsive_ad | agree | Details pertaining to a Video responsive ad. |
+| `travel_ad` | ✏️ | ✅ | `update_ad` | create_travel_ad, update_ad | agree | Details pertaining to a travel ad. |
+| `video_ad` | ✏️ | ✅ | `update_ad` | create_video_ad, update_ad | agree | Details pertaining to a Video ad. |
+| `video_responsive_ad` | ✏️ | ✅ | `update_ad` | create_video_responsive_ad, update_ad | agree | Details pertaining to a Video responsive ad. |
 | `added_by_google_ads` | 🚫 | — | — | — | agree | Output only |
 | `device_preference` | ✏️ | ✅ | `update_ad` | update_ad | agree | The device preference for the ad |
 | `display_url` | ✏️ | ✅ | `update_ad` | update_ad | agree | The URL that appears in the ad description for some ad formats. |
@@ -439,33 +415,7 @@ Unreachable leaves:
 | `url_collections` | ✏️ | ✅ | `update_ad` | update_ad | agree | Additional URLs for the ad that are tagged with a unique identifier that can be referenced from other fields in the ad. |
 | `url_custom_parameters` | ✏️ | ✅ | `update_ad` | update_ad | agree | The list of mappings that can be used to substitute custom parameter tags in a `tracking_url_template`, `final_urls`, or `mobile_final_urls` |
 
-**Submessage leaves**: 266/290 reachable (91.7%)
-
-Unreachable leaves:
-- `image_ad.ad_id_to_copy_image_from` — ✏️ settable
-- `image_ad.image_url` — ✏️ settable
-- `image_ad.mime_type` — ✏️ settable
-- `image_ad.pixel_height` — ✏️ settable
-- `image_ad.pixel_width` — ✏️ settable
-- `image_ad.preview_image_url` — ✏️ settable
-- `image_ad.preview_pixel_height` — ✏️ settable
-- `image_ad.preview_pixel_width` — ✏️ settable
-- `video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.in_feed_preference` — ✏️ settable
-- `video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.in_stream_preference` — ✏️ settable
-- `video_ad.video.ad_video_asset_info.ad_video_asset_inventory_preferences.shorts_preference` — ✏️ settable
-- `video_ad.video.ad_video_asset_info.ad_video_asset_feature_control.allow_youtube_comments` — ✏️ settable
-- `video_ad.in_feed.thumbnail` — ✏️ settable
-- `app_ad.mandatory_ad_text.asset_performance_label` — ✏️ settable
-- `app_ad.mandatory_ad_text.pinned_field` — ✏️ settable
-- `app_ad.mandatory_ad_text.policy_summary_info` — ✏️ settable
-- `responsive_display_ad.accent_color` — ✏️ settable
-- `responsive_display_ad.allow_flexible_color` — ✏️ settable
-- `responsive_display_ad.format_setting` — ✏️ settable
-- `responsive_display_ad.main_color` — ✏️ settable
-- `responsive_display_ad.price_prefix` — ✏️ settable
-- `responsive_display_ad.promo_text` — ✏️ settable
-- `responsive_display_ad.control_spec.enable_asset_enhancements` — ✏️ settable
-- `responsive_display_ad.control_spec.enable_autogen_video` — ✏️ settable
+**Submessage leaves**: 290/290 reachable (100.0%)
 
 ## AssetGenerationService
 
@@ -573,10 +523,10 @@ Unreachable leaves:
 |---|---|---|---|---|---|---|
 | `app_deep_link_asset` | 🔒 | ✅ | — | create_app_deep_link_asset | agree | Immutable |
 | `book_on_google_asset` | ✏️ | ✅ | — | create_book_on_google_asset | agree | A book on google asset. |
-| `business_message_asset` | ✏️ | ✅ | — | create_business_message_asset | agree | A business message asset. |
-| `call_asset` | ✏️ | ✅ | — | create_call_asset | agree | A call asset. |
+| `business_message_asset` | ✏️ | ✅ | `update_asset` | create_business_message_asset, update_asset | agree | A business message asset. |
+| `call_asset` | ✏️ | ✅ | `update_asset` | create_call_asset, update_asset | agree | A call asset. |
 | `call_to_action_asset` | 🔒 | ✅ | — | create_call_to_action_asset | agree | Immutable |
-| `callout_asset` | ✏️ | ✅ | — | create_callout_asset | agree | A callout asset. |
+| `callout_asset` | ✏️ | ✅ | `update_asset` | create_callout_asset, update_asset | agree | A callout asset. |
 | `demand_gen_carousel_card_asset` | 🔒 | ✅ | — | create_demand_gen_carousel_card_asset | agree | Immutable |
 | `dynamic_custom_asset` | ✏️ | ✅ | — | create_dynamic_custom_asset | agree | A dynamic custom asset. |
 | `dynamic_education_asset` | ✏️ | ✅ | — | create_dynamic_education_asset | agree | A dynamic education asset. |
@@ -587,20 +537,20 @@ Unreachable leaves:
 | `dynamic_real_estate_asset` | ✏️ | ✅ | — | create_dynamic_real_estate_asset | agree | A dynamic real estate asset. |
 | `dynamic_travel_asset` | ✏️ | ✅ | — | create_dynamic_travel_asset | agree | A dynamic travel asset. |
 | `hotel_callout_asset` | ✏️ | ✅ | — | create_hotel_callout_asset | agree | A hotel callout asset. |
-| `hotel_property_asset` | 🔒 | ✅ | — | create_hotel_property_asset | agree | Immutable |
+| `hotel_property_asset` | 🔒 | ✅ | `update_asset` | create_hotel_property_asset, update_asset | agree | Immutable |
 | `image_asset` | 🚫 | — | — | create_image_asset | agree | Output only |
-| `lead_form_asset` | ✏️ | ✅ | — | create_lead_form_asset | agree | A lead form asset. |
+| `lead_form_asset` | ✏️ | ✅ | `update_asset` | create_lead_form_asset, update_asset | agree | A lead form asset. |
 | `location_asset` | 🚫 | — | — | create_location_asset | agree | Output only |
 | `media_bundle_asset` | 🔒 | ✅ | — | create_media_bundle_asset | agree | Immutable |
 | `mobile_app_asset` | ✏️ | ✅ | — | create_mobile_app_asset | agree | A mobile app asset. |
 | `page_feed_asset` | ✏️ | ✅ | — | create_page_feed_asset | agree | A page feed asset. |
-| `price_asset` | ✏️ | ✅ | — | create_price_asset | agree | A price asset. |
-| `promotion_asset` | ✏️ | ✅ | — | create_promotion_asset | agree | A promotion asset. |
-| `sitelink_asset` | ✏️ | ✅ | — | create_sitelink_asset | agree | A sitelink asset. |
+| `price_asset` | ✏️ | ✅ | `update_asset` | create_price_asset, update_asset | agree | A price asset. |
+| `promotion_asset` | ✏️ | ✅ | `update_asset` | create_promotion_asset, update_asset | agree | A promotion asset. |
+| `sitelink_asset` | ✏️ | ✅ | `update_asset` | create_sitelink_asset, update_asset | agree | A sitelink asset. |
 | `structured_snippet_asset` | ✏️ | ✅ | — | create_structured_snippet_asset | agree | A structured snippet asset. |
 | `text_asset` | 🔒 | ✅ | — | create_text_asset | agree | Immutable |
-| `youtube_video_asset` | 🔒 | ✅ | — | create_youtube_video_asset | agree | Immutable |
-| `youtube_video_list_asset` | 🔒 | ✅ | — | create_youtube_video_list_asset | agree | Immutable |
+| `youtube_video_asset` | 🔒 | ✅ | `update_asset` | create_youtube_video_asset, update_asset | agree | Immutable |
+| `youtube_video_list_asset` | 🔒 | ✅ | `update_asset` | create_youtube_video_list_asset, update_asset | agree | Immutable |
 | `field_type_policy_summaries` | 🚫 | — | — | — | agree | Output only |
 | `final_mobile_urls` | ✏️ | ✅ | `update_asset` | update_asset | agree | A list of possible final mobile URLs after all cross domain redirects. |
 | `final_url_suffix` | ✏️ | ✅ | `update_asset` | update_asset | agree | URL template for appending params to landing page URLs served with parallel tracking. |
@@ -615,58 +565,7 @@ Unreachable leaves:
 | `type` | 🚫 | — | `create_price_asset` | create_price_asset | agree | Output only |
 | `url_custom_parameters` | ✏️ | ✅ | `update_asset` | update_asset | agree | A list of mappings to be used for substituting URL custom parameter tags in the tracking_url_template, final_urls, and/or final_mobile_urls. |
 
-**Submessage leaves**: 199/248 reachable (80.2%)
-
-Unreachable leaves:
-- `youtube_video_asset.youtube_video_title` — ✏️ settable
-- `lead_form_asset.background_image_asset` — ✏️ settable
-- `lead_form_asset.custom_disclosure` — ✏️ settable
-- `lead_form_asset.desired_intent` — ✏️ settable
-- `lead_form_asset.post_submit_call_to_action_type` — ✏️ settable
-- `lead_form_asset.post_submit_description` — ✏️ settable
-- `lead_form_asset.post_submit_headline` — ✏️ settable
-- `lead_form_asset.custom_question_fields.has_location_answer` — ✏️ settable
-- `lead_form_asset.custom_question_fields.custom_question_text` — ✏️ settable
-- `lead_form_asset.custom_question_fields.single_choice_answers.answers` — ✏️ settable
-- `lead_form_asset.delivery_methods.webhook.advertiser_webhook_url` — ✏️ settable
-- `lead_form_asset.delivery_methods.webhook.google_secret` — ✏️ settable
-- `lead_form_asset.delivery_methods.webhook.payload_schema_version` — ✏️ settable
-- `promotion_asset.discount_modifier` — ✏️ settable
-- `promotion_asset.occasion` — ✏️ settable
-- `promotion_asset.redemption_end_date` — ✏️ settable
-- `promotion_asset.redemption_start_date` — ✏️ settable
-- `promotion_asset.terms_and_conditions_text` — ✏️ settable
-- `promotion_asset.terms_and_conditions_uri` — ✏️ settable
-- `promotion_asset.ad_schedule_targets.day_of_week` — ✏️ settable
-- `promotion_asset.ad_schedule_targets.end_hour` — ✏️ settable
-- `promotion_asset.ad_schedule_targets.end_minute` — ✏️ settable
-- `promotion_asset.ad_schedule_targets.start_hour` — ✏️ settable
-- `promotion_asset.ad_schedule_targets.start_minute` — ✏️ settable
-- `promotion_asset.promotion_barcode_info.barcode_content` — ✏️ settable
-- `promotion_asset.promotion_barcode_info.type` — ✏️ settable
-- `promotion_asset.promotion_qr_code_info.qr_code_content` — ✏️ settable
-- `callout_asset.ad_schedule_targets.day_of_week` — ✏️ settable
-- `callout_asset.ad_schedule_targets.end_hour` — ✏️ settable
-- `callout_asset.ad_schedule_targets.end_minute` — ✏️ settable
-- `callout_asset.ad_schedule_targets.start_hour` — ✏️ settable
-- `callout_asset.ad_schedule_targets.start_minute` — ✏️ settable
-- `sitelink_asset.ad_schedule_targets.day_of_week` — ✏️ settable
-- `sitelink_asset.ad_schedule_targets.end_hour` — ✏️ settable
-- `sitelink_asset.ad_schedule_targets.end_minute` — ✏️ settable
-- `sitelink_asset.ad_schedule_targets.start_hour` — ✏️ settable
-- `sitelink_asset.ad_schedule_targets.start_minute` — ✏️ settable
-- `call_asset.call_conversion_action` — ✏️ settable
-- `call_asset.call_conversion_reporting_state` — ✏️ settable
-- `call_asset.ad_schedule_targets.day_of_week` — ✏️ settable
-- `call_asset.ad_schedule_targets.end_hour` — ✏️ settable
-- `call_asset.ad_schedule_targets.end_minute` — ✏️ settable
-- `call_asset.ad_schedule_targets.start_hour` — ✏️ settable
-- `call_asset.ad_schedule_targets.start_minute` — ✏️ settable
-- `price_asset.type` — ❗ required
-- `hotel_property_asset.hotel_address` — ✏️ settable
-- `business_message_asset.facebook_messenger_info.page_name` — ❗ required
-- `business_message_asset.zalo_info.custom_name` — ✏️ settable
-- `business_message_asset.zalo_info.oa_id` — ✏️ settable
+**Submessage leaves**: 248/248 reachable (100.0%)
 
 ## AssetSetAssetService
 
@@ -838,13 +737,7 @@ Unreachable leaves:
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🚫 | — | — | — | agree | Output only |
 
-**Submessage leaves**: 15/19 reachable (78.9%)
-
-Unreachable leaves:
-- `maximize_conversion_value.cpc_bid_floor_micros` — ✏️ settable
-- `maximize_conversion_value.target_roas_tolerance_percent_millis` — ✏️ settable
-- `maximize_conversions.cpc_bid_floor_micros` — ✏️ settable
-- `target_cpa.cpc_bid_floor_micros` — ✏️ settable
+**Submessage leaves**: 19/19 reachable (100.0%)
 
 ## BillingSetupService
 
@@ -1003,7 +896,7 @@ Unreachable leaves:
 | `income_range` | 🔒 | ✅ | — | add_income_range_criteria | agree | Immutable |
 | `ip_block` | 🔒 | ✅ | — | add_ip_block_criteria | agree | Immutable |
 | `keyword` | 🔒 | ✅ | — | add_negative_keyword_criteria | agree | Immutable |
-| `keyword_theme` | 🔒 | ✅ | — | add_keyword_theme_criteria | agree | Immutable |
+| `keyword_theme` | 🔒 | ✅ | `update_campaign_criterion` | add_keyword_theme_criteria, update_campaign_criterion | agree | Immutable |
 | `language` | 🔒 | ✅ | — | add_language_criteria | agree | Immutable |
 | `life_event` | 🔒 | ✅ | — | add_life_event_criteria | agree | Immutable |
 | `listing_scope` | 🔒 | ✅ | — | add_listing_scope_criteria | agree | Immutable |
@@ -1011,17 +904,17 @@ Unreachable leaves:
 | `location` | 🔒 | ✅ | — | add_location_criteria | agree | Immutable |
 | `location_group` | 🔒 | ✅ | — | add_location_group_criteria | agree | Immutable |
 | `mobile_app_category` | 🔒 | ✅ | — | add_mobile_app_category_criteria | agree | Immutable |
-| `mobile_application` | 🔒 | ✅ | — | add_mobile_application_criteria | agree | Immutable |
+| `mobile_application` | 🔒 | ✅ | `update_campaign_criterion` | add_mobile_application_criteria, update_campaign_criterion | agree | Immutable |
 | `mobile_device` | 🔒 | ✅ | — | add_mobile_device_criteria | agree | Immutable |
 | `operating_system_version` | 🔒 | ✅ | — | add_operating_system_criteria | agree | Immutable |
 | `parental_status` | 🔒 | ✅ | — | add_parental_status_criteria | agree | Immutable |
 | `placement` | 🔒 | ✅ | — | add_placement_criteria | agree | Immutable |
-| `proximity` | 🔒 | ✅ | — | add_proximity_criteria | agree | Immutable |
-| `topic` | 🔒 | ✅ | — | add_topic_criteria | agree | Immutable |
+| `proximity` | 🔒 | ✅ | `update_campaign_criterion` | add_proximity_criteria, update_campaign_criterion | agree | Immutable |
+| `topic` | 🔒 | ✅ | `update_campaign_criterion` | add_topic_criteria, update_campaign_criterion | agree | Immutable |
 | `user_interest` | 🔒 | ✅ | — | add_user_interest_criteria | agree | Immutable |
 | `user_list` | 🔒 | ✅ | — | add_audience_criteria | agree | Immutable |
 | `video_lineup` | 🔒 | ✅ | — | add_video_lineup_criteria | agree | Immutable |
-| `webpage` | 🔒 | ✅ | — | add_webpage_criteria | agree | Immutable |
+| `webpage` | 🔒 | ✅ | `update_campaign_criterion` | add_webpage_criteria, update_campaign_criterion | agree | Immutable |
 | `webpage_list` | 🔒 | ✅ | — | add_webpage_list_criteria | agree | Immutable |
 | `youtube_channel` | 🔒 | ✅ | — | add_youtube_channel_criteria | agree | Immutable |
 | `youtube_video` | 🔒 | ✅ | — | add_youtube_video_criteria | agree | Immutable |
@@ -1032,20 +925,7 @@ Unreachable leaves:
 | `status` | ✏️ | ✅ | `update_campaign_criterion` | update_campaign_criterion | agree | The status of the criterion. |
 | `type` | 🚫 | — | — | add_age_range_criteria, add_content_label_criteria, add_device_criteria, add_gender_criteria, add_income_range_criteria, add_parental_status_criteria | agree | Output only |
 
-**Submessage leaves**: 77/88 reachable (87.5%)
-
-Unreachable leaves:
-- `mobile_application.name` — ✏️ settable
-- `device.type` — ✏️ settable
-- `age_range.type` — ✏️ settable
-- `gender.type` — ✏️ settable
-- `income_range.type` — ✏️ settable
-- `parental_status.type` — ✏️ settable
-- `topic.path` — ✏️ settable
-- `content_label.type` — ✏️ settable
-- `webpage.coverage_percentage` — ✏️ settable
-- `webpage.sample.sample_urls` — ✏️ settable
-- `keyword_theme.free_form_keyword_theme` — ✏️ settable
+**Submessage leaves**: 88/88 reachable (100.0%)
 
 ## CampaignCustomizerService
 
@@ -1166,19 +1046,19 @@ Unreachable leaves:
 | `commission` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Commission is an automatic bidding strategy in which the advertiser pays a certain portion of the conversion value. |
 | `fixed_cpm` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A manual bidding strategy with a fixed CPM. |
 | `manual_cpa` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Manual CPA bidding strategy |
-| `manual_cpc` | ✏️ | ✅ | — | create_campaign | agree | Standard Manual CPC bidding strategy |
+| `manual_cpc` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Manual CPC bidding strategy |
 | `manual_cpm` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Manual CPM bidding strategy |
 | `manual_cpv` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A bidding strategy that pays a configurable amount per video view. |
-| `maximize_conversion_value` | ✏️ | ✅ | — | create_campaign | agree | Standard Maximize Conversion Value bidding strategy that automatically sets bids to maximize revenue while spending your budget. |
-| `maximize_conversions` | ✏️ | ✅ | — | create_campaign | agree | Standard Maximize Conversions bidding strategy that automatically maximizes number of conversions while spending your budget. |
+| `maximize_conversion_value` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Maximize Conversion Value bidding strategy that automatically sets bids to maximize revenue while spending your budget. |
+| `maximize_conversions` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Maximize Conversions bidding strategy that automatically maximizes number of conversions while spending your budget. |
 | `percent_cpc` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Percent Cpc bidding strategy where bids are a fraction of the advertised price for some good or service. |
-| `target_cpa` | ✏️ | ✅ | — | create_campaign | agree | Standard Target CPA bidding strategy that automatically sets bids to help get as many conversions as possible at the target cost-per-acquisition (CPA) you set. |
+| `target_cpa` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Target CPA bidding strategy that automatically sets bids to help get as many conversions as possible at the target cost-per-acquisition (CPA) you set. |
 | `target_cpc` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | An automated bidding strategy that sets bids to help get as many clicks as possible at the target cost-per-click (CPC) you set. |
 | `target_cpm` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | A bidding strategy that automatically optimizes cost per thousand impressions. |
 | `target_cpv` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | An automated bidding strategy that sets bids to optimize performance given the target CPV you set. |
-| `target_impression_share` | ✏️ | ✅ | — | create_campaign | agree | Target Impression Share bidding strategy |
+| `target_impression_share` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Target Impression Share bidding strategy |
 | `target_roas` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Target ROAS bidding strategy that automatically maximizes revenue while averaging a specific target return on ad spend (ROAS). |
-| `target_spend` | ✏️ | ✅ | — | create_campaign | agree | Standard Target Spend bidding strategy that automatically sets your bids to help get as many clicks as possible within your budget. |
+| `target_spend` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Standard Target Spend bidding strategy that automatically sets your bids to help get as many clicks as possible within your budget. |
 | `campaign_budget` | ✏️ | ✅ | — | create_campaign | agree | The resource name of the campaign budget of the campaign. |
 | `campaign_group` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | The resource name of the campaign group that this campaign belongs to. |
 | `contains_eu_political_advertising` | ✏️ | ✅ | — | create_campaign | agree | The advertiser should self-declare whether this campaign contains political advertising content targeted towards the European Union. |
@@ -1228,24 +1108,7 @@ Unreachable leaves:
 | `video_brand_safety_suitability` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Brand Safety setting at the individual campaign level |
 | `video_campaign_settings` | ✏️ | ✅ | `create_campaign` | create_campaign | agree | Settings for Video campaign. |
 
-**Submessage leaves**: 102/117 reachable (87.2%)
-
-Unreachable leaves:
-- `network_settings.target_google_tv_network` — ✏️ settable
-- `network_settings.target_youtube` — ✏️ settable
-- `manual_cpc.enhanced_cpc_enabled` — ✏️ settable
-- `maximize_conversions.cpc_bid_ceiling_micros` — ✏️ settable
-- `maximize_conversions.cpc_bid_floor_micros` — ✏️ settable
-- `maximize_conversion_value.cpc_bid_ceiling_micros` — ✏️ settable
-- `maximize_conversion_value.cpc_bid_floor_micros` — ✏️ settable
-- `maximize_conversion_value.target_roas_tolerance_percent_millis` — ✏️ settable
-- `target_cpa.cpc_bid_ceiling_micros` — ✏️ settable
-- `target_cpa.cpc_bid_floor_micros` — ✏️ settable
-- `target_impression_share.cpc_bid_ceiling_micros` — ✏️ settable
-- `target_impression_share.location` — ✏️ settable
-- `target_impression_share.location_fraction_micros` — ✏️ settable
-- `target_spend.cpc_bid_ceiling_micros` — ✏️ settable
-- `target_spend.target_spend_micros` — ✏️ settable
+**Submessage leaves**: 117/117 reachable (100.0%)
 
 ## CampaignSharedSetService
 
@@ -1357,22 +1220,16 @@ Unreachable leaves:
 | Field | Annot. | Status | MCP tool(s) | Service method(s) | Sources | Description |
 |---|---|---|---|---|---|---|
 | `action` | ✏️ | ✅ | — | create_conversion_value_rule, update_conversion_value_rule | agree | Action applied when the rule is triggered. |
-| `audience_condition` | ✏️ | ✅ | — | create_conversion_value_rule | agree | Condition for audience that must be satisfied for the value rule to apply. |
+| `audience_condition` | ✏️ | ✅ | `create_conversion_value_rule` | create_conversion_value_rule | agree | Condition for audience that must be satisfied for the value rule to apply. |
 | `device_condition` | ✏️ | ✅ | — | create_conversion_value_rule | agree | Condition for device type that must be satisfied for the value rule to apply. |
-| `geo_location_condition` | ✏️ | ✅ | — | create_conversion_value_rule | agree | Condition for Geo location that must be satisfied for the value rule to apply. |
+| `geo_location_condition` | ✏️ | ✅ | `create_conversion_value_rule` | create_conversion_value_rule | agree | Condition for Geo location that must be satisfied for the value rule to apply. |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
 | `itinerary_condition` | ✏️ | ✅ | `create_conversion_value_rule` | create_conversion_value_rule | agree | Condition for itinerary that must be satisfied for the value rule to apply. |
 | `owner_customer` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | ✏️ | ✅ | `create_conversion_value_rule`, `update_conversion_value_rule` | create_conversion_value_rule, update_conversion_value_rule | agree | The status of the conversion value rule. |
 
-**Submessage leaves**: 16/20 reachable (80.0%)
-
-Unreachable leaves:
-- `geo_location_condition.excluded_geo_match_type` — ✏️ settable
-- `geo_location_condition.excluded_geo_target_constants` — ✏️ settable
-- `geo_location_condition.geo_match_type` — ✏️ settable
-- `audience_condition.user_interests` — ✏️ settable
+**Submessage leaves**: 20/20 reachable (100.0%)
 
 ## ConversionValueRuleSetService
 
@@ -1598,11 +1455,7 @@ Unreachable leaves:
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `type` | 🚫 | — | — | add_content_label_exclusions | agree | Output only |
 
-**Submessage leaves**: 8/10 reachable (80.0%)
-
-Unreachable leaves:
-- `content_label.type` — ✏️ settable
-- `mobile_application.name` — ✏️ settable
+**Submessage leaves**: 10/10 reachable (100.0%)
 
 ## CustomerService
 
@@ -1902,11 +1755,7 @@ Unreachable leaves:
 | `name` | ✏️ | ✅ | `create_keyword_plan`, `create_keyword_plan_campaign`, `update_keyword_plan` | create_keyword_plan, create_keyword_plan_campaign, update_keyword_plan | agree | The name of the keyword plan |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 
-**Submessage leaves**: 1/3 reachable (33.3%)
-
-Unreachable leaves:
-- `forecast_period.date_range.end_date` — ✏️ settable
-- `forecast_period.date_range.start_date` — ✏️ settable
+**Submessage leaves**: 3/3 reachable (100.0%)
 
 ## KeywordThemeConstantService
 
@@ -1970,24 +1819,14 @@ Unreachable leaves:
 | `external_id` | 🔒 | ✅ | `create_offline_user_data_job` | create_offline_user_data_job | agree | Immutable |
 | `failure_reason` | 🚫 | — | — | — | agree | Output only |
 | `id` | 🚫 | — | — | (structural) | agree | Output only |
-| `customer_match_user_list_metadata` | 🔒 | ✅ | — | create_offline_user_data_job | agree | Immutable |
-| `store_sales_metadata` | 🔒 | ✅ | — | create_offline_user_data_job | agree | Immutable |
+| `customer_match_user_list_metadata` | 🔒 | ✅ | `create_offline_user_data_job` | create_offline_user_data_job | agree | Immutable |
+| `store_sales_metadata` | 🔒 | ✅ | `create_offline_user_data_job` | create_offline_user_data_job | agree | Immutable |
 | `operation_metadata` | 🚫 | — | — | — | agree | Output only |
 | `resource_name` | 🔒 | ✅ | — | (structural) | agree | Immutable |
 | `status` | 🚫 | — | — | — | agree | Output only |
 | `type` | 🔒 | ✅ | — | create_offline_user_data_job | agree | Immutable |
 
-**Submessage leaves**: 4/12 reachable (33.3%)
-
-Unreachable leaves:
-- `customer_match_user_list_metadata.consent.ad_personalization` — ✏️ settable
-- `customer_match_user_list_metadata.consent.ad_user_data` — ✏️ settable
-- `store_sales_metadata.third_party_metadata.advertiser_upload_date_time` — ✏️ settable
-- `store_sales_metadata.third_party_metadata.bridge_map_version_id` — ✏️ settable
-- `store_sales_metadata.third_party_metadata.partner_id` — ✏️ settable
-- `store_sales_metadata.third_party_metadata.partner_match_fraction` — ✏️ settable
-- `store_sales_metadata.third_party_metadata.partner_upload_fraction` — ✏️ settable
-- `store_sales_metadata.third_party_metadata.valid_transaction_fraction` — ✏️ settable
+**Submessage leaves**: 12/12 reachable (100.0%)
 
 ## PaymentsAccountService
 
@@ -2180,15 +2019,7 @@ Unreachable leaves:
 | `shared_set` | 🔒 | ✅ | — | add_brands_to_shared_set, add_keywords_to_shared_set, add_mobile_app_categories_to_shared_set, add_mobile_applications_to_shared_set, add_placements_to_shared_set, add_vertical_ads_item_group_rules_to_shared_set, add_webpages_to_shared_set, add_youtube_channels_to_shared_set, add_youtube_videos_to_shared_set | agree | Immutable |
 | `type` | 🚫 | — | — | — | agree | Output only |
 
-**Submessage leaves**: 14/20 reachable (70.0%)
-
-Unreachable leaves:
-- `mobile_application.name` — ✏️ settable
-- `webpage.coverage_percentage` — ✏️ settable
-- `webpage.conditions.argument` — ✏️ settable
-- `webpage.conditions.operand` — ✏️ settable
-- `webpage.conditions.operator` — ✏️ settable
-- `webpage.sample.sample_urls` — ✏️ settable
+**Submessage leaves**: 20/20 reachable (100.0%)
 
 ## SharedSetService
 
@@ -2310,10 +2141,7 @@ Unreachable leaves:
 | `rule_based_user_list` | ✏️ | ✅ | `create_rule_based_user_list` | create_rule_based_user_list | agree | User list generated by a rule. |
 | `similar_user_list` | 🚫 | — | — | — | agree | Output only |
 
-**Submessage leaves**: 31/32 reachable (96.9%)
-
-Unreachable leaves:
-- `crm_based_user_list.app_id` — ✏️ settable
+**Submessage leaves**: 32/32 reachable (100.0%)
 
 ## YouTubeVideoUploadService
 

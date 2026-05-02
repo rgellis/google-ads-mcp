@@ -63,6 +63,8 @@ class BiddingStrategyService:
         target_cpa_micros: int,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -74,6 +76,10 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Target cost per acquisition in micros
+            cpc_bid_ceiling_micros: Maximum CPC bid the strategy is
+                allowed to set, in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid the strategy is
+                allowed to set, in micros. Optional.
 
         Returns:
             Created bidding strategy details
@@ -92,6 +98,10 @@ class BiddingStrategyService:
             # Configure Target CPA
             target_cpa = TargetCpa()
             target_cpa.target_cpa_micros = target_cpa_micros
+            if cpc_bid_ceiling_micros is not None:
+                target_cpa.cpc_bid_ceiling_micros = cpc_bid_ceiling_micros
+            if cpc_bid_floor_micros is not None:
+                target_cpa.cpc_bid_floor_micros = cpc_bid_floor_micros
             bidding_strategy.target_cpa = target_cpa
 
             # Create operation
@@ -138,6 +148,9 @@ class BiddingStrategyService:
         target_roas: float,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
+        target_roas_tolerance_percent_millis: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -149,6 +162,12 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_roas: Target return on ad spend (e.g., 4.0 for 400% ROAS)
+            cpc_bid_ceiling_micros: Maximum CPC bid the strategy is
+                allowed to set, in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid the strategy is
+                allowed to set, in micros. Optional.
+            target_roas_tolerance_percent_millis: Allowed ROAS
+                degradation tolerance in millis (e.g. 10000 = 10%).
 
         Returns:
             Created bidding strategy details
@@ -167,6 +186,14 @@ class BiddingStrategyService:
             # Configure Target ROAS
             target_roas_strategy = TargetRoas()
             target_roas_strategy.target_roas = target_roas
+            if cpc_bid_ceiling_micros is not None:
+                target_roas_strategy.cpc_bid_ceiling_micros = cpc_bid_ceiling_micros
+            if cpc_bid_floor_micros is not None:
+                target_roas_strategy.cpc_bid_floor_micros = cpc_bid_floor_micros
+            if target_roas_tolerance_percent_millis is not None:
+                target_roas_strategy.target_roas_tolerance_percent_millis = (
+                    target_roas_tolerance_percent_millis
+                )
             bidding_strategy.target_roas = target_roas_strategy
 
             # Create operation
@@ -213,6 +240,8 @@ class BiddingStrategyService:
         target_cpa_micros: Optional[int] = None,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -224,6 +253,8 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Optional target CPA constraint
+            cpc_bid_ceiling_micros: Maximum CPC bid in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid in micros. Optional.
 
         Returns:
             Created bidding strategy details
@@ -243,6 +274,10 @@ class BiddingStrategyService:
             maximize_conversions = MaximizeConversions()
             if target_cpa_micros is not None:
                 maximize_conversions.target_cpa_micros = target_cpa_micros
+            if cpc_bid_ceiling_micros is not None:
+                maximize_conversions.cpc_bid_ceiling_micros = cpc_bid_ceiling_micros
+            if cpc_bid_floor_micros is not None:
+                maximize_conversions.cpc_bid_floor_micros = cpc_bid_floor_micros
             bidding_strategy.maximize_conversions = maximize_conversions
 
             # Create operation
@@ -360,6 +395,9 @@ class BiddingStrategyService:
         target_roas: Optional[float] = None,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
+        target_roas_tolerance_percent_millis: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -371,6 +409,10 @@ class BiddingStrategyService:
             customer_id: The customer ID
             name: Strategy name
             target_roas: Optional target return on ad spend
+            cpc_bid_ceiling_micros: Maximum CPC bid in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid in micros. Optional.
+            target_roas_tolerance_percent_millis: Allowed ROAS
+                degradation tolerance in millis (e.g. 10000 = 10%).
 
         Returns:
             Created bidding strategy details
@@ -390,6 +432,14 @@ class BiddingStrategyService:
             mcv = MaximizeConversionValue()
             if target_roas is not None:
                 mcv.target_roas = target_roas
+            if cpc_bid_ceiling_micros is not None:
+                mcv.cpc_bid_ceiling_micros = cpc_bid_ceiling_micros
+            if cpc_bid_floor_micros is not None:
+                mcv.cpc_bid_floor_micros = cpc_bid_floor_micros
+            if target_roas_tolerance_percent_millis is not None:
+                mcv.target_roas_tolerance_percent_millis = (
+                    target_roas_tolerance_percent_millis
+                )
             bidding_strategy.maximize_conversion_value = mcv
 
             # Create operation
@@ -826,6 +876,8 @@ def create_bidding_strategy_tools(
         target_cpa_micros: int,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -836,6 +888,8 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Target cost per acquisition in micros (1 million micros = 1 unit)
+            cpc_bid_ceiling_micros: Maximum CPC bid the strategy is allowed to set, in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid the strategy is allowed to set, in micros. Optional.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -852,6 +906,8 @@ def create_bidding_strategy_tools(
             target_cpa_micros=target_cpa_micros,
             currency_code=currency_code,
             aligned_campaign_budget_id=aligned_campaign_budget_id,
+            cpc_bid_ceiling_micros=cpc_bid_ceiling_micros,
+            cpc_bid_floor_micros=cpc_bid_floor_micros,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -864,6 +920,9 @@ def create_bidding_strategy_tools(
         target_roas: float,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
+        target_roas_tolerance_percent_millis: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -874,6 +933,9 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_roas: Target return on ad spend (e.g., 4.0 for 400% ROAS)
+            cpc_bid_ceiling_micros: Maximum CPC bid in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid in micros. Optional.
+            target_roas_tolerance_percent_millis: Allowed ROAS degradation tolerance in millis (e.g. 10000 = 10%).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -890,6 +952,9 @@ def create_bidding_strategy_tools(
             target_roas=target_roas,
             currency_code=currency_code,
             aligned_campaign_budget_id=aligned_campaign_budget_id,
+            cpc_bid_ceiling_micros=cpc_bid_ceiling_micros,
+            cpc_bid_floor_micros=cpc_bid_floor_micros,
+            target_roas_tolerance_percent_millis=target_roas_tolerance_percent_millis,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -902,6 +967,8 @@ def create_bidding_strategy_tools(
         target_cpa_micros: Optional[int] = None,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -912,6 +979,8 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_cpa_micros: Optional target CPA constraint in micros
+            cpc_bid_ceiling_micros: Maximum CPC bid in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid in micros. Optional.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -928,6 +997,8 @@ def create_bidding_strategy_tools(
             target_cpa_micros=target_cpa_micros,
             currency_code=currency_code,
             aligned_campaign_budget_id=aligned_campaign_budget_id,
+            cpc_bid_ceiling_micros=cpc_bid_ceiling_micros,
+            cpc_bid_floor_micros=cpc_bid_floor_micros,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,
@@ -1019,6 +1090,9 @@ def create_bidding_strategy_tools(
         target_roas: Optional[float] = None,
         currency_code: Optional[str] = None,
         aligned_campaign_budget_id: Optional[int] = None,
+        cpc_bid_ceiling_micros: Optional[int] = None,
+        cpc_bid_floor_micros: Optional[int] = None,
+        target_roas_tolerance_percent_millis: Optional[int] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -1029,6 +1103,9 @@ def create_bidding_strategy_tools(
             customer_id: The customer ID
             name: Strategy name
             target_roas: Optional target return on ad spend (e.g., 2.0 for 200% return)
+            cpc_bid_ceiling_micros: Maximum CPC bid in micros. Optional.
+            cpc_bid_floor_micros: Minimum CPC bid in micros. Optional.
+            target_roas_tolerance_percent_millis: Allowed ROAS degradation tolerance in millis (e.g. 10000 = 10%).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -1045,6 +1122,9 @@ def create_bidding_strategy_tools(
             target_roas=target_roas,
             currency_code=currency_code,
             aligned_campaign_budget_id=aligned_campaign_budget_id,
+            cpc_bid_ceiling_micros=cpc_bid_ceiling_micros,
+            cpc_bid_floor_micros=cpc_bid_floor_micros,
+            target_roas_tolerance_percent_millis=target_roas_tolerance_percent_millis,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

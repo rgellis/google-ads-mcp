@@ -36,7 +36,6 @@ from __future__ import annotations
 import argparse
 import ast
 import importlib
-import inspect
 import re
 import sys
 import time
@@ -357,7 +356,6 @@ def _find_message_body(proto_text: str, qualname: str) -> str | None:
             return None
         depth = 1
         j = m.end()
-        n = len(text)
         # Strip string literals just within this scan window so braces
         # inside ``"customers/{customer_id}"`` don't confuse the depth
         # counter. (We strip lazily here rather than across the whole
@@ -857,11 +855,17 @@ def _build_wrapper_method(
     # ``Sequence``/``List`` etc. The param name doubles as the parent
     # resource's field name (every wrapper in this codebase preserves
     # field naming).
+    # Dict / List-of-Dict params — used to gate the shared-name
+    # passthrough heuristic so a same-named scalar param doesn't
+    # falsely mark a submessage as dict-passthrough.
+    dict_params: set[str] = set()
     for arg in (*node.args.args, *node.args.kwonlyargs):
         if arg.arg in {"self", "ctx"}:
             continue
         if _annotation_is_message_class(arg.annotation):
             wm.typed_passthrough.add(arg.arg)
+        if _annotation_is_dict_or_list_of_dict(arg.annotation):
+            dict_params.add(arg.arg)
 
     for sub in ast.walk(node):
         if isinstance(sub, ast.Assign):
@@ -870,12 +874,18 @@ def _build_wrapper_method(
                 if p:
                     wm.writes.add(p)
                 # Helper-passthrough: ``parent.<field> = <expr>`` where
-                # the wrapper has a same-named dict / list param. We
-                # treat that as dict-passthrough so leaves under
-                # ``<field>`` count as reachable, matching how
-                # ``set_optional_submessage`` / ``extend_repeated_submessages``
-                # would have tagged it.
-                if isinstance(tgt, ast.Attribute) and tgt.attr in wm.params:
+                # the wrapper has a same-named **dict / list of dict**
+                # param. We treat that as dict-passthrough so leaves
+                # under ``<field>`` count as reachable, matching how
+                # ``set_optional_submessage`` /
+                # ``extend_repeated_submessages`` would have tagged it.
+                # Gated on a dict-typed annotation to avoid scalar
+                # false positives like ``target_roas: Optional[float]``
+                # being treated as a passthrough for the ``target_roas``
+                # submessage (whose siblings include
+                # ``cpc_bid_ceiling_micros`` etc. that the scalar can't
+                # actually carry).
+                if isinstance(tgt, ast.Attribute) and tgt.attr in dict_params:
                     wm.dict_passthrough.add(tgt.attr)
         elif isinstance(sub, ast.AugAssign):
             p = _attr_chain(sub.target)
@@ -919,17 +929,19 @@ def _build_wrapper_method(
                 wm.dict_passthrough.add(sub.args[1].value)
             # Recognise the manual-helper passthrough pattern:
             # ``parent.<field>.append(<helper_call_or_var>)`` where the
-            # wrapper has a same-named param. Several services use a
-            # private ``self._build_<thing>(dict)`` helper to convert
-            # caller dicts into proto submessages and then append them
-            # to a repeated field. Functionally identical to
+            # wrapper has a same-named **dict / list of dict** param.
+            # Several services use a private
+            # ``self._build_<thing>(dict)`` helper to convert caller
+            # dicts into proto submessages and then append them to a
+            # repeated field. Functionally identical to
             # ``extend_repeated_submessages``; the audit treats it the
             # same so leaves under that field count as reachable.
+            # Same dict-typed gating as the assign case above.
             if (
                 isinstance(sub.func, ast.Attribute)
                 and sub.func.attr == "append"
                 and isinstance(sub.func.value, ast.Attribute)
-                and sub.func.value.attr in wm.params
+                and sub.func.value.attr in dict_params
             ):
                 wm.dict_passthrough.add(sub.func.value.attr)
     return wm
@@ -984,6 +996,22 @@ def _annotation_is_message_class(annotation: ast.AST | None) -> bool:
                 found_message_like = True
     # ``Optional[Dict[str, Any]]`` has Dict — not a message passthrough.
     return found_message_like and not found_dict_like
+
+
+def _annotation_is_dict_or_list_of_dict(annotation: ast.AST | None) -> bool:
+    """Return True if the annotation is a Dict, Mapping, or List/Sequence of Dict.
+
+    Used to gate the "shared-name field write" dict-passthrough heuristic
+    so a same-named scalar param (e.g. ``target_roas: Optional[float]``)
+    isn't mistakenly flagged as dict-passthrough just because the wrapper
+    happens to write to the matching proto field.
+    """
+    if annotation is None:
+        return False
+    for node in ast.walk(annotation):
+        if isinstance(node, ast.Name) and node.id in {"Dict", "Mapping"}:
+            return True
+    return False
 
 
 # --------------------------------------------------------------------------- #
@@ -1090,15 +1118,15 @@ def merge_field_sources(
     }
     for md in md_fields:
         pf = proto_by_name.get(md.name)
-        in_proto = pf is not None
         # Python-keyword aliasing: proto-plus exposes `type` as `type_` and
         # so on for any field whose name collides with a Python keyword.
         in_sdk = md.name in sdk_fields or f"{md.name}_" in sdk_fields
         agree = True
-        if in_proto and pf is not None and md.annotation != pf.behavior:
+        if pf is not None and md.annotation != pf.behavior:
             pair = frozenset({md.annotation, pf.behavior})
             if pair not in EQUIVALENT_ANNOTATIONS:
                 agree = False
+        in_proto = pf is not None
         if not in_proto:
             agree = False
         if not in_sdk:
@@ -1147,6 +1175,15 @@ def _wrapper_covers(field_name: str, wm: WrapperMethod) -> bool:
     for w in wm.writes:
         if candidates & set(w.split(".")):
             return True
+    # Dict-passthrough / typed-passthrough on the field name also
+    # counts as top-level coverage: a wrapper that does
+    # ``set_optional_submessage(parent, "webpage", webpages_dict_list,
+    # WebpageInfo)`` covers the ``webpage`` field even when the
+    # function param is named differently (``webpages`` plural).
+    if candidates & wm.dict_passthrough:
+        return True
+    if candidates & wm.typed_passthrough:
+        return True
     return False
 
 
@@ -1264,20 +1301,42 @@ def _wrapper_covers_leaf(path: tuple[str, ...], wrappers: list[WrapperMethod]) -
        live in different functions — within a single service file the
        pattern is still coherent (e.g. tool method calls a helper that
        builds the entry).
+
+    proto-plus keyword aliasing is normalised at both ends so a leaf
+    named ``type`` (md/proto canonical) is matched by wrapper writes
+    that end in ``.type`` *or* ``.type_`` (the SDK name when ``type``
+    collides with a Python keyword).
     """
-    full_suffix = "." + ".".join(path)
-    full_path = ".".join(path)
+
+    def _aliases(name: str) -> tuple[str, ...]:
+        if name.endswith("_"):
+            return (name, name[:-1])
+        return (name, name + "_")
+
     leaf = path[-1]
     parent = path[0]
-    leaf_dot = "." + leaf
+    leaf_aliases = _aliases(leaf)
+    parent_aliases = _aliases(parent)
+    full_paths = tuple(".".join(path[:-1] + (a,)) for a in leaf_aliases)
+    full_suffixes = tuple("." + p for p in full_paths)
+    leaf_dots = tuple("." + a for a in leaf_aliases)
+
     if any(
-        w == full_path or w.endswith(full_suffix) for wm in wrappers for w in wm.writes
+        any(w == fp for fp in full_paths) or any(w.endswith(fs) for fs in full_suffixes)
+        for wm in wrappers
+        for w in wm.writes
     ):
         return True
     leaf_written = any(
-        w == leaf or w.endswith(leaf_dot) for wm in wrappers for w in wm.writes
+        w in leaf_aliases or any(w.endswith(ld) for ld in leaf_dots)
+        for wm in wrappers
+        for w in wm.writes
     )
-    parent_written = any(parent in w.split(".") for wm in wrappers for w in wm.writes)
+    parent_written = any(
+        any(p in w.split(".") for p in parent_aliases)
+        for wm in wrappers
+        for w in wm.writes
+    )
     return leaf_written and parent_written
 
 
@@ -1321,13 +1380,13 @@ def merge_leaf_sources(
     out: list[LeafField] = []
     for md in md_fields:
         pf = proto_by_name.get(md.name)
-        in_proto = pf is not None
         in_sdk = md.name in sdk_field_set or f"{md.name}_" in sdk_field_set
         agree = True
-        if in_proto and pf is not None and md.annotation != pf.behavior:
+        if pf is not None and md.annotation != pf.behavior:
             pair = frozenset({md.annotation, pf.behavior})
             if pair not in EQUIVALENT_ANNOTATIONS:
                 agree = False
+        in_proto = pf is not None
         if not in_proto:
             agree = False
         if not in_sdk:
@@ -1975,8 +2034,12 @@ def main(argv: Iterable[str]) -> int:
         ),
     )
     args = parser.parse_args(list(argv))
+    # ``PROTO_REF`` is module-level configuration; this is the one
+    # site that mutates it (per CLI flag at startup). pyright flags
+    # uppercase names as constants; suppress here rather than rename
+    # the symbol used in ~20 other call sites.
     global PROTO_REF
-    PROTO_REF = args.proto_ref
+    PROTO_REF = args.proto_ref  # pyright: ignore[reportConstantRedefinition]
     reports = build_reports(refresh=args.refresh)
     text = render_report(reports)
     args.out.write_text(text)

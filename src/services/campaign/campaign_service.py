@@ -83,10 +83,12 @@ class CampaignService:
         target_search_network: Optional[bool] = None,
         target_content_network: Optional[bool] = None,
         target_partner_search_network: Optional[bool] = None,
+        target_google_tv_network: Optional[bool] = None,
+        target_youtube: Optional[bool] = None,
         bidding_strategy: Optional[str] = None,
         bidding_strategy_resource_name: Optional[str] = None,
         target_cpa_micros: Optional[int] = None,
-        target_roas: Optional[float] = None,
+        target_roas_value: Optional[float] = None,
         eu_political_advertising: str = "DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
@@ -125,12 +127,19 @@ class CampaignService:
         commission: Optional[Dict[str, Any]] = None,
         fixed_cpm: Optional[Dict[str, Any]] = None,
         manual_cpa: Optional[Dict[str, Any]] = None,
+        manual_cpc: Optional[Dict[str, Any]] = None,
         manual_cpm: Optional[Dict[str, Any]] = None,
         manual_cpv: Optional[Dict[str, Any]] = None,
         percent_cpc: Optional[Dict[str, Any]] = None,
+        target_cpa: Optional[Dict[str, Any]] = None,
         target_cpc: Optional[Dict[str, Any]] = None,
         target_cpm: Optional[Dict[str, Any]] = None,
         target_cpv: Optional[Dict[str, Any]] = None,
+        target_impression_share: Optional[Dict[str, Any]] = None,
+        target_roas: Optional[Dict[str, Any]] = None,
+        target_spend: Optional[Dict[str, Any]] = None,
+        maximize_conversions: Optional[Dict[str, Any]] = None,
+        maximize_conversion_value: Optional[Dict[str, Any]] = None,
         asset_automation_settings: Optional[List[Dict[str, Any]]] = None,
         frequency_caps: Optional[List[Dict[str, Any]]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
@@ -170,13 +179,21 @@ class CampaignService:
                 Omit to leave the network setting unset.
             target_partner_search_network: Show ads on the partner search
                 network. Omit to leave the network setting unset.
+            target_google_tv_network: Show ads on Google TV. Omit to
+                leave the network setting unset.
+            target_youtube: Show ads on YouTube. Omit to leave the
+                network setting unset.
             bidding_strategy: Bidding strategy type - MANUAL_CPC, MAXIMIZE_CONVERSIONS,
                 MAXIMIZE_CONVERSION_VALUE, TARGET_CPA, TARGET_ROAS, TARGET_SPEND,
                 TARGET_IMPRESSION_SHARE. If not set, defaults to MANUAL_CPC.
             bidding_strategy_resource_name: Resource name of a portfolio bidding strategy
                 (overrides bidding_strategy if set)
             target_cpa_micros: Target CPA in micros (for TARGET_CPA strategy)
-            target_roas: Target ROAS (for TARGET_ROAS strategy, e.g. 1.5 for 150%)
+            target_roas_value: Target ROAS scalar (for the legacy
+                ``bidding_strategy="TARGET_ROAS"`` / ``MAXIMIZE_CONVERSION_VALUE``
+                string-path, e.g. 1.5 for 150%). For full ``TargetRoas``
+                submessage control (cpc bid floor/ceiling, tolerance),
+                use the ``target_roas`` dict-passthrough param below.
             eu_political_advertising: EU political advertising status -
                 DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING or CONTAINS_EU_POLITICAL_ADVERTISING
             start_date: Campaign start. Accepts "YYYY-MM-DD" (interpreted as
@@ -257,13 +274,29 @@ class CampaignService:
                 value (hotel campaigns).
             fixed_cpm: ``FixedCpm`` — manual fixed CPM (video/audio).
             manual_cpa: ``ManualCpa`` — manual cost-per-acquisition.
+            manual_cpc: ``ManualCpc`` — manual cost-per-click with
+                optional enhanced_cpc_enabled.
             manual_cpm: ``ManualCpm`` — manual cost-per-1000-impressions.
             manual_cpv: ``ManualCpv`` — manual cost-per-view (video).
             percent_cpc: ``PercentCpc`` — percent CPC (hotel only).
+            target_cpa: ``TargetCpa`` — automated target-CPA with cpc
+                bid floor/ceiling.
             target_cpc: ``TargetCpc`` — automated target-CPC.
             target_cpm: ``TargetCpm`` — automated target-CPM with a
                 target_frequency_goal submessage.
             target_cpv: ``TargetCpv`` — automated target-CPV.
+            target_impression_share: ``TargetImpressionShare`` —
+                location, location_fraction_micros, cpc bid ceiling.
+            target_roas: ``TargetRoas`` — full submessage control
+                (target_roas, cpc bid floor/ceiling, tolerance).
+                Mutually exclusive with the ``target_roas_value``
+                scalar above.
+            target_spend: ``TargetSpend`` — target_spend_micros + cpc
+                bid ceiling.
+            maximize_conversions: ``MaximizeConversions`` —
+                target_cpa_micros, cpc bid floor/ceiling.
+            maximize_conversion_value: ``MaximizeConversionValue`` —
+                target_roas, cpc bid floor/ceiling, tolerance.
 
             **Repeated submessages / enum lists.**
 
@@ -308,6 +341,12 @@ class CampaignService:
                 campaign.network_settings.target_partner_search_network = (
                     target_partner_search_network
                 )
+            if target_google_tv_network is not None:
+                campaign.network_settings.target_google_tv_network = (
+                    target_google_tv_network
+                )
+            if target_youtube is not None:
+                campaign.network_settings.target_youtube = target_youtube
 
             # Set advertising channel type (Required, Immutable per proto)
             campaign.advertising_channel_type = advertising_channel_type
@@ -336,8 +375,8 @@ class CampaignService:
                 )
 
                 mcv = MaximizeConversionValue()
-                if target_roas is not None:
-                    mcv.target_roas = target_roas
+                if target_roas_value is not None:
+                    mcv.target_roas = target_roas_value
                 campaign.maximize_conversion_value = mcv
             elif bidding_strategy == "TARGET_CPA":
                 from google.ads.googleads.v23.common.types import TargetCpa
@@ -350,8 +389,8 @@ class CampaignService:
                 from google.ads.googleads.v23.common.types import TargetRoas
 
                 tr = TargetRoas()
-                if target_roas is not None:
-                    tr.target_roas = target_roas
+                if target_roas_value is not None:
+                    tr.target_roas = target_roas_value
                 campaign.target_roas = tr
             elif bidding_strategy == "TARGET_SPEND":
                 from google.ads.googleads.v23.common.types import TargetSpend
@@ -633,6 +672,8 @@ class CampaignService:
                 from google.ads.googleads.v23.common.types import ManualCpa
 
                 set_optional_submessage(campaign, "manual_cpa", manual_cpa, ManualCpa)
+            if manual_cpc is not None:
+                set_optional_submessage(campaign, "manual_cpc", manual_cpc, ManualCpc)
             if manual_cpm is not None:
                 from google.ads.googleads.v23.common.types import ManualCpm
 
@@ -659,6 +700,53 @@ class CampaignService:
                 from google.ads.googleads.v23.common.types import TargetCpv
 
                 set_optional_submessage(campaign, "target_cpv", target_cpv, TargetCpv)
+            if target_cpa is not None:
+                from google.ads.googleads.v23.common.types import TargetCpa
+
+                set_optional_submessage(campaign, "target_cpa", target_cpa, TargetCpa)
+            if target_impression_share is not None:
+                from google.ads.googleads.v23.common.types import (
+                    TargetImpressionShare,
+                )
+
+                set_optional_submessage(
+                    campaign,
+                    "target_impression_share",
+                    target_impression_share,
+                    TargetImpressionShare,
+                )
+            if target_roas is not None:
+                from google.ads.googleads.v23.common.types import TargetRoas
+
+                set_optional_submessage(
+                    campaign, "target_roas", target_roas, TargetRoas
+                )
+            if target_spend is not None:
+                from google.ads.googleads.v23.common.types import TargetSpend
+
+                set_optional_submessage(
+                    campaign, "target_spend", target_spend, TargetSpend
+                )
+            if maximize_conversions is not None:
+                from google.ads.googleads.v23.common.types import MaximizeConversions
+
+                set_optional_submessage(
+                    campaign,
+                    "maximize_conversions",
+                    maximize_conversions,
+                    MaximizeConversions,
+                )
+            if maximize_conversion_value is not None:
+                from google.ads.googleads.v23.common.types import (
+                    MaximizeConversionValue,
+                )
+
+                set_optional_submessage(
+                    campaign,
+                    "maximize_conversion_value",
+                    maximize_conversion_value,
+                    MaximizeConversionValue,
+                )
 
             # Repeated submessage lists.
             if asset_automation_settings is not None:
@@ -1000,10 +1088,12 @@ def create_campaign_tools(
         target_search_network: Optional[bool] = None,
         target_content_network: Optional[bool] = None,
         target_partner_search_network: Optional[bool] = None,
+        target_google_tv_network: Optional[bool] = None,
+        target_youtube: Optional[bool] = None,
         bidding_strategy: Optional[str] = None,
         bidding_strategy_resource_name: Optional[str] = None,
         target_cpa_micros: Optional[int] = None,
-        target_roas: Optional[float] = None,
+        target_roas_value: Optional[float] = None,
         eu_political_advertising: str = "DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
@@ -1042,12 +1132,19 @@ def create_campaign_tools(
         commission: Optional[Dict[str, Any]] = None,
         fixed_cpm: Optional[Dict[str, Any]] = None,
         manual_cpa: Optional[Dict[str, Any]] = None,
+        manual_cpc: Optional[Dict[str, Any]] = None,
         manual_cpm: Optional[Dict[str, Any]] = None,
         manual_cpv: Optional[Dict[str, Any]] = None,
         percent_cpc: Optional[Dict[str, Any]] = None,
+        target_cpa: Optional[Dict[str, Any]] = None,
         target_cpc: Optional[Dict[str, Any]] = None,
         target_cpm: Optional[Dict[str, Any]] = None,
         target_cpv: Optional[Dict[str, Any]] = None,
+        target_impression_share: Optional[Dict[str, Any]] = None,
+        target_roas: Optional[Dict[str, Any]] = None,
+        target_spend: Optional[Dict[str, Any]] = None,
+        maximize_conversions: Optional[Dict[str, Any]] = None,
+        maximize_conversion_value: Optional[Dict[str, Any]] = None,
         asset_automation_settings: Optional[List[Dict[str, Any]]] = None,
         frequency_caps: Optional[List[Dict[str, Any]]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
@@ -1089,6 +1186,8 @@ def create_campaign_tools(
                 (omit to leave unset)
             target_partner_search_network: Show ads on partner search
                 network (omit to leave unset)
+            target_google_tv_network: Show ads on Google TV (omit to leave unset).
+            target_youtube: Show ads on YouTube (omit to leave unset).
             bidding_strategy: Bidding strategy type - MANUAL_CPC (default), MAXIMIZE_CONVERSIONS,
                 MAXIMIZE_CONVERSION_VALUE, TARGET_CPA, TARGET_ROAS, TARGET_SPEND,
                 TARGET_IMPRESSION_SHARE
@@ -1096,7 +1195,7 @@ def create_campaign_tools(
                 (overrides bidding_strategy if set)
             target_cpa_micros: Target CPA in micros for TARGET_CPA or MAXIMIZE_CONVERSIONS
                 (e.g. 5000000 for $5.00)
-            target_roas: Target ROAS for TARGET_ROAS or MAXIMIZE_CONVERSION_VALUE
+            target_roas_value: Target ROAS scalar (legacy bidding_strategy="TARGET_ROAS" / "MAXIMIZE_CONVERSION_VALUE" path; for full submessage use target_roas dict).
                 (e.g. 1.5 for 150% return)
             eu_political_advertising: EU political advertising status -
                 DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING or CONTAINS_EU_POLITICAL_ADVERTISING
@@ -1143,12 +1242,19 @@ def create_campaign_tools(
             commission: Dict that builds a Commission submessage (hotel commission bidding).
             fixed_cpm: Dict that builds a FixedCpm submessage (manual fixed CPM for video/audio).
             manual_cpa: Dict that builds a ManualCpa submessage (manual CPA bidding).
+            manual_cpc: Dict that builds a ManualCpc submessage (enhanced_cpc_enabled toggle).
             manual_cpm: Dict that builds a ManualCpm submessage (manual CPM bidding).
             manual_cpv: Dict that builds a ManualCpv submessage (manual CPV bidding for video).
             percent_cpc: Dict that builds a PercentCpc submessage (percent-CPC for hotel campaigns).
+            target_cpa: Dict that builds a TargetCpa submessage (target_cpa_micros + cpc bid floor/ceiling).
             target_cpc: Dict that builds a TargetCpc submessage (automated target-CPC bidding).
             target_cpm: Dict that builds a TargetCpm submessage (automated target-CPM with target_frequency_goal).
             target_cpv: Dict that builds a TargetCpv submessage (automated target-CPV bidding).
+            target_impression_share: Dict that builds a TargetImpressionShare submessage (location, location_fraction_micros, cpc bid ceiling).
+            target_roas: Dict that builds a TargetRoas submessage (full sub-message control: target_roas, cpc bid floor/ceiling, tolerance). Mutually exclusive with target_roas_value.
+            target_spend: Dict that builds a TargetSpend submessage (target_spend_micros, cpc bid ceiling).
+            maximize_conversions: Dict that builds a MaximizeConversions submessage (target_cpa_micros, cpc bid floor/ceiling).
+            maximize_conversion_value: Dict that builds a MaximizeConversionValue submessage (target_roas, cpc bid floor/ceiling, tolerance).
             asset_automation_settings: List of dicts each building a Campaign.AssetAutomationSetting (asset_automation_type + asset_automation_status).
             frequency_caps: List of dicts each building a FrequencyCapEntry (cap + key.event_type/level/time_unit/time_length).
             url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
@@ -1176,10 +1282,12 @@ def create_campaign_tools(
             target_search_network=target_search_network,
             target_content_network=target_content_network,
             target_partner_search_network=target_partner_search_network,
+            target_google_tv_network=target_google_tv_network,
+            target_youtube=target_youtube,
             bidding_strategy=bidding_strategy,
             bidding_strategy_resource_name=bidding_strategy_resource_name,
             target_cpa_micros=target_cpa_micros,
-            target_roas=target_roas,
+            target_roas_value=target_roas_value,
             eu_political_advertising=eu_political_advertising,
             start_date=start_date,
             end_date=end_date,
@@ -1218,12 +1326,19 @@ def create_campaign_tools(
             commission=commission,
             fixed_cpm=fixed_cpm,
             manual_cpa=manual_cpa,
+            manual_cpc=manual_cpc,
             manual_cpm=manual_cpm,
             manual_cpv=manual_cpv,
             percent_cpc=percent_cpc,
+            target_cpa=target_cpa,
             target_cpc=target_cpc,
             target_cpm=target_cpm,
             target_cpv=target_cpv,
+            target_impression_share=target_impression_share,
+            target_roas=target_roas,
+            target_spend=target_spend,
+            maximize_conversions=maximize_conversions,
+            maximize_conversion_value=maximize_conversion_value,
             asset_automation_settings=asset_automation_settings,
             frequency_caps=frequency_caps,
             url_custom_parameters=url_custom_parameters,

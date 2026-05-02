@@ -36,6 +36,7 @@ from src.utils import (
     gaql_int,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -494,7 +495,8 @@ class SharedCriterionService:
         ctx: Context,
         customer_id: str,
         shared_set_id: str,
-        app_ids: List[str],
+        app_ids: Optional[List[str]] = None,
+        mobile_applications: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -505,22 +507,44 @@ class SharedCriterionService:
             ctx: FastMCP context
             customer_id: The customer ID
             shared_set_id: The shared set ID
-            app_ids: List of mobile app IDs
+            app_ids: List of mobile app IDs (legacy convenience path —
+                each entry builds a ``MobileApplicationInfo`` with just
+                ``app_id`` set).
+            mobile_applications: Optional list of dicts each building a
+                ``MobileApplicationInfo`` submessage (``app_id`` +
+                ``name``). Use this to set the human-readable
+                ``name`` field that the legacy ``app_ids`` path
+                doesn't expose.
 
         Returns:
             List of created shared criteria
         """
+        if not app_ids and not mobile_applications:
+            raise ValueError("Provide either app_ids or mobile_applications (or both).")
         try:
             customer_id = format_customer_id(customer_id)
             shared_set_resource = f"customers/{customer_id}/sharedSets/{shared_set_id}"
 
             operations = []
-            for app_id in app_ids:
+            for app_id in app_ids or []:
                 shared_criterion = SharedCriterion()
                 shared_criterion.shared_set = shared_set_resource
                 mobile_app_info = MobileApplicationInfo()
                 mobile_app_info.app_id = app_id
                 shared_criterion.mobile_application = mobile_app_info
+
+                operation = SharedCriterionOperation()
+                operation.create = shared_criterion
+                operations.append(operation)
+            for entry in mobile_applications or []:
+                shared_criterion = SharedCriterion()
+                shared_criterion.shared_set = shared_set_resource
+                set_optional_submessage(
+                    shared_criterion,
+                    "mobile_application",
+                    entry,
+                    MobileApplicationInfo,
+                )
 
                 operation = SharedCriterionOperation()
                 operation.create = shared_criterion
@@ -540,6 +564,13 @@ class SharedCriterionService:
                 request=request
             )
 
+            # Combine the two source lists in the order operations were
+            # appended above so the per-entry result has the right
+            # app_id label.
+            ordered_app_ids = list(app_ids or []) + [
+                entry.get("app_id", "") for entry in (mobile_applications or [])
+            ]
+
             results = []
             for i, result in enumerate(response.results):
                 criterion_resource = result.resource_name
@@ -551,7 +582,9 @@ class SharedCriterionService:
                         "resource_name": criterion_resource,
                         "shared_criterion_id": criterion_id,
                         "type": "MOBILE_APPLICATION",
-                        "app_id": app_ids[i],
+                        "app_id": ordered_app_ids[i]
+                        if i < len(ordered_app_ids)
+                        else "",
                     }
                 )
 
@@ -690,10 +723,12 @@ class SharedCriterionService:
             for webpage in webpages:
                 shared_criterion = SharedCriterion()
                 shared_criterion.shared_set = shared_set_resource
-                webpage_info = WebpageInfo()
-                if "criterion_name" in webpage:
-                    webpage_info.criterion_name = webpage["criterion_name"]
-                shared_criterion.webpage = webpage_info
+                # Build the full WebpageInfo from the dict so callers
+                # can set conditions / sample.sample_urls /
+                # coverage_percentage in addition to criterion_name.
+                set_optional_submessage(
+                    shared_criterion, "webpage", webpage, WebpageInfo
+                )
 
                 operation = SharedCriterionOperation()
                 operation.create = shared_criterion

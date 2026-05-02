@@ -68,6 +68,8 @@ class ConversionValueRuleService:
         geo_location_geo_target_constants: Optional[List[str]] = None,
         audience_user_lists: Optional[List[str]] = None,
         itinerary_condition: Optional[Dict[str, Any]] = None,
+        geo_location_condition: Optional[Dict[str, Any]] = None,
+        audience_condition: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -90,6 +92,18 @@ class ConversionValueRuleService:
                 ``ConversionValueRule.ValueRuleItineraryCondition``
                 proto reference for the schema (advance booking
                 window, travel start day, length-of-stay range, etc.).
+            geo_location_condition: Optional dict that builds a
+                ``ConversionValueRule.ValueRuleGeoLocationCondition``
+                submessage with full control over
+                ``geo_target_constants``, ``excluded_geo_target_constants``,
+                ``geo_match_type`` and ``excluded_geo_match_type``.
+                Mutually exclusive with the legacy
+                ``geo_location_geo_target_constants`` scalar list.
+            audience_condition: Optional dict that builds a
+                ``ConversionValueRule.ValueRuleAudienceCondition``
+                submessage with full control over ``user_lists`` and
+                ``user_interests``. Mutually exclusive with the legacy
+                ``audience_user_lists`` scalar list.
 
         Returns:
             Created conversion value rule details
@@ -134,6 +148,20 @@ class ConversionValueRuleService:
                 itinerary_condition,
                 ConversionValueRule.ValueRuleItineraryCondition,
             )
+            if geo_location_condition is not None:
+                set_optional_submessage(
+                    rule,
+                    "geo_location_condition",
+                    geo_location_condition,
+                    ConversionValueRule.ValueRuleGeoLocationCondition,
+                )
+            if audience_condition is not None:
+                set_optional_submessage(
+                    rule,
+                    "audience_condition",
+                    audience_condition,
+                    ConversionValueRule.ValueRuleAudienceCondition,
+                )
 
             operation = ConversionValueRuleOperation()
             operation.create = rule
@@ -383,6 +411,8 @@ def create_conversion_value_rule_tools(
         geo_location_geo_target_constants: Optional[List[str]] = None,
         audience_user_lists: Optional[List[str]] = None,
         itinerary_condition: Optional[Dict[str, Any]] = None,
+        geo_location_condition: Optional[Dict[str, Any]] = None,
+        audience_condition: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -403,6 +433,8 @@ def create_conversion_value_rule_tools(
                 start day, length-of-stay range). See the v23
                 ``ConversionValueRule.ValueRuleItineraryCondition`` proto
                 reference for the schema.
+            geo_location_condition: Dict that builds a ValueRuleGeoLocationCondition (geo_target_constants, excluded_geo_target_constants, geo_match_type, excluded_geo_match_type).
+            audience_condition: Dict that builds a ValueRuleAudienceCondition (user_lists, user_interests).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -424,6 +456,8 @@ def create_conversion_value_rule_tools(
             geo_location_geo_target_constants=geo_location_geo_target_constants,
             audience_user_lists=audience_user_lists,
             itinerary_condition=itinerary_condition,
+            geo_location_condition=geo_location_condition,
+            audience_condition=audience_condition,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

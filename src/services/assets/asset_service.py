@@ -90,6 +90,7 @@ from src.utils import (
     gaql_int,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -430,6 +431,16 @@ class AssetService:
         final_url_suffix: Optional[str] = None,
         final_mobile_urls: Optional[List[str]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        promotion_asset: Optional[Dict[str, Any]] = None,
+        lead_form_asset: Optional[Dict[str, Any]] = None,
+        call_asset: Optional[Dict[str, Any]] = None,
+        sitelink_asset: Optional[Dict[str, Any]] = None,
+        callout_asset: Optional[Dict[str, Any]] = None,
+        youtube_video_list_asset: Optional[Dict[str, Any]] = None,
+        business_message_asset: Optional[Dict[str, Any]] = None,
+        youtube_video_asset: Optional[Dict[str, Any]] = None,
+        price_asset: Optional[Dict[str, Any]] = None,
+        hotel_property_asset: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -450,6 +461,22 @@ class AssetService:
             url_custom_parameters: List of dicts each building a
                 ``CustomParameter`` (key + value) for {_param}
                 substitution in tracking_url_template / final_urls.
+            promotion_asset: Dict that builds a ``PromotionAsset``
+                submessage. Mutually exclusive with the other
+                ``*_asset`` oneofs.
+            lead_form_asset: Dict that builds a ``LeadFormAsset``.
+            call_asset: Dict that builds a ``CallAsset``.
+            sitelink_asset: Dict that builds a ``SitelinkAsset``.
+            callout_asset: Dict that builds a ``CalloutAsset``.
+            youtube_video_list_asset: Dict that builds a
+                ``YoutubeVideoListAsset``.
+            business_message_asset: Dict that builds a
+                ``BusinessMessageAsset``.
+            youtube_video_asset: Dict that builds a
+                ``YoutubeVideoAsset``.
+            price_asset: Dict that builds a ``PriceAsset``.
+            hotel_property_asset: Dict that builds a
+                ``HotelPropertyAsset``.
 
         Returns:
             Updated asset details
@@ -490,6 +517,107 @@ class AssetService:
                     CustomParameter,
                 )
                 update_mask_fields.append("url_custom_parameters")
+
+            # Asset-type oneof submessages — alternative to the
+            # dedicated ``create_<asset_type>_asset`` methods.
+            if promotion_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    PromotionAsset as _PromotionAsset,
+                )
+
+                set_optional_submessage(
+                    asset, "promotion_asset", promotion_asset, _PromotionAsset
+                )
+                update_mask_fields.append("promotion_asset")
+            if lead_form_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    LeadFormAsset as _LeadFormAsset,
+                )
+
+                set_optional_submessage(
+                    asset, "lead_form_asset", lead_form_asset, _LeadFormAsset
+                )
+                update_mask_fields.append("lead_form_asset")
+            if call_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    CallAsset as _CallAsset,
+                )
+
+                set_optional_submessage(asset, "call_asset", call_asset, _CallAsset)
+                update_mask_fields.append("call_asset")
+            if sitelink_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    SitelinkAsset as _SitelinkAsset,
+                )
+
+                set_optional_submessage(
+                    asset, "sitelink_asset", sitelink_asset, _SitelinkAsset
+                )
+                update_mask_fields.append("sitelink_asset")
+            if callout_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    CalloutAsset as _CalloutAsset,
+                )
+
+                set_optional_submessage(
+                    asset, "callout_asset", callout_asset, _CalloutAsset
+                )
+                update_mask_fields.append("callout_asset")
+            if youtube_video_list_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    YouTubeVideoListAsset as _YouTubeVideoListAsset,
+                )
+
+                set_optional_submessage(
+                    asset,
+                    "youtube_video_list_asset",
+                    youtube_video_list_asset,
+                    _YouTubeVideoListAsset,
+                )
+                update_mask_fields.append("youtube_video_list_asset")
+            if business_message_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    BusinessMessageAsset as _BusinessMessageAsset,
+                )
+
+                set_optional_submessage(
+                    asset,
+                    "business_message_asset",
+                    business_message_asset,
+                    _BusinessMessageAsset,
+                )
+                update_mask_fields.append("business_message_asset")
+            if youtube_video_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    YoutubeVideoAsset as _YoutubeVideoAsset,
+                )
+
+                set_optional_submessage(
+                    asset,
+                    "youtube_video_asset",
+                    youtube_video_asset,
+                    _YoutubeVideoAsset,
+                )
+                update_mask_fields.append("youtube_video_asset")
+            if price_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    PriceAsset as _PriceAsset,
+                )
+
+                set_optional_submessage(asset, "price_asset", price_asset, _PriceAsset)
+                update_mask_fields.append("price_asset")
+            if hotel_property_asset is not None:
+                from google.ads.googleads.v23.common.types import (
+                    HotelPropertyAsset as _HotelPropertyAsset,
+                )
+
+                set_optional_submessage(
+                    asset,
+                    "hotel_property_asset",
+                    hotel_property_asset,
+                    _HotelPropertyAsset,
+                )
+                update_mask_fields.append("hotel_property_asset")
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")
@@ -2950,18 +3078,21 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         final_url_suffix: Optional[str] = None,
         final_mobile_urls: Optional[List[str]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
+        promotion_asset: Optional[Dict[str, Any]] = None,
+        lead_form_asset: Optional[Dict[str, Any]] = None,
+        call_asset: Optional[Dict[str, Any]] = None,
+        sitelink_asset: Optional[Dict[str, Any]] = None,
+        callout_asset: Optional[Dict[str, Any]] = None,
+        youtube_video_list_asset: Optional[Dict[str, Any]] = None,
+        business_message_asset: Optional[Dict[str, Any]] = None,
+        youtube_video_asset: Optional[Dict[str, Any]] = None,
+        price_asset: Optional[Dict[str, Any]] = None,
+        hotel_property_asset: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Update an existing asset using partial update with field mask.
-
-        Updatable fields:
-            - name (str): The name of the asset
-            - tracking_url_template (str): URL template for constructing a tracking URL
-            - final_url_suffix (str): URL template for appending params to the final URL
-            - final_mobile_urls (List[str]): Mobile-specific final URLs
-            - url_custom_parameters (List[Dict]): CustomParameter list for {_param} substitution
 
         Args:
             customer_id: The customer ID
@@ -2971,6 +3102,16 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             final_url_suffix: New final URL suffix
             final_mobile_urls: Mobile-specific final URLs that override the asset's default final_urls for mobile devices.
             url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
+            promotion_asset: Dict that builds a PromotionAsset submessage. Mutually exclusive with the other *_asset oneofs.
+            lead_form_asset: Dict that builds a LeadFormAsset.
+            call_asset: Dict that builds a CallAsset.
+            sitelink_asset: Dict that builds a SitelinkAsset.
+            callout_asset: Dict that builds a CalloutAsset.
+            youtube_video_list_asset: Dict that builds a YoutubeVideoListAsset.
+            business_message_asset: Dict that builds a BusinessMessageAsset.
+            youtube_video_asset: Dict that builds a YoutubeVideoAsset.
+            price_asset: Dict that builds a PriceAsset.
+            hotel_property_asset: Dict that builds a HotelPropertyAsset.
             partial_failure: Whether to enable partial failure
             validate_only: Whether to only validate without executing
             response_content_type: Response content type
@@ -2987,6 +3128,16 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             final_url_suffix=final_url_suffix,
             final_mobile_urls=final_mobile_urls,
             url_custom_parameters=url_custom_parameters,
+            promotion_asset=promotion_asset,
+            lead_form_asset=lead_form_asset,
+            call_asset=call_asset,
+            sitelink_asset=sitelink_asset,
+            callout_asset=callout_asset,
+            youtube_video_list_asset=youtube_video_list_asset,
+            business_message_asset=business_message_asset,
+            youtube_video_asset=youtube_video_asset,
+            price_asset=price_asset,
+            hotel_property_asset=hotel_property_asset,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

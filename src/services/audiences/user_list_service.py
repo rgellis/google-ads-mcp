@@ -183,6 +183,7 @@ class UserListService:
         membership_life_span: Optional[int] = None,
         upload_key_type: Optional[str] = None,
         data_source_type: Optional[str] = None,
+        app_id: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -201,6 +202,9 @@ class UserListService:
             data_source_type: Optional source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
                 THIRD_PARTY_PARTNER_DATA. Omit to let the API default apply.
+            app_id: Immutable. Mobile app identifier (only valid when
+                ``upload_key_type`` is ``MOBILE_ADVERTISING_ID``).
+                Required by the API for mobile-ID lists.
 
         Returns:
             Created user list details
@@ -242,6 +246,9 @@ class UserListService:
                     UserListCrmDataSourceTypeEnum.UserListCrmDataSourceType,
                     data_source_type,
                 )
+
+            if app_id is not None:
+                crm_user_list.app_id = app_id
 
             user_list.crm_based_user_list = crm_user_list
 
@@ -811,6 +818,7 @@ def create_user_list_tools(
         membership_life_span: Optional[int] = None,
         upload_key_type: Optional[str] = None,
         data_source_type: Optional[str] = None,
+        app_id: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -828,6 +836,7 @@ def create_user_list_tools(
             data_source_type: Optional CRM data source. One of FIRST_PARTY,
                 THIRD_PARTY_CREDIT_BUREAU, THIRD_PARTY_VOTER_FILE,
                 THIRD_PARTY_PARTNER_DATA. Omit to use API default.
+            app_id: Immutable. Mobile app identifier (only valid when upload_key_type=MOBILE_ADVERTISING_ID).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -842,6 +851,7 @@ def create_user_list_tools(
             membership_life_span=membership_life_span,
             upload_key_type=upload_key_type,
             data_source_type=data_source_type,
+            app_id=app_id,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -37,6 +37,7 @@ from src.utils import (
     gaql_enum_name,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -239,7 +240,8 @@ class CustomerNegativeCriterionService:
         self,
         ctx: Context,
         customer_id: str,
-        app_ids: List[str],
+        app_ids: Optional[List[str]] = None,
+        mobile_applications: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -249,20 +251,39 @@ class CustomerNegativeCriterionService:
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            app_ids: List of mobile app IDs to exclude
+            app_ids: Optional list of mobile app IDs to exclude (legacy
+                convenience path — each entry sets only ``app_id``).
+            mobile_applications: Optional list of dicts each building a
+                full ``MobileApplicationInfo`` (``app_id`` + ``name``).
+                Use this to set the human-readable ``name`` field that
+                the legacy ``app_ids`` path doesn't expose.
 
         Returns:
             List of created customer negative criteria
         """
+        if not app_ids and not mobile_applications:
+            raise ValueError("Provide either app_ids or mobile_applications (or both).")
         try:
             customer_id = format_customer_id(customer_id)
 
             operations = []
-            for app_id in app_ids:
+            for app_id in app_ids or []:
                 customer_negative_criterion = CustomerNegativeCriterion()
                 mobile_app_info = MobileApplicationInfo()
                 mobile_app_info.app_id = app_id
                 customer_negative_criterion.mobile_application = mobile_app_info
+
+                operation = CustomerNegativeCriterionOperation()
+                operation.create = customer_negative_criterion
+                operations.append(operation)
+            for entry in mobile_applications or []:
+                customer_negative_criterion = CustomerNegativeCriterion()
+                set_optional_submessage(
+                    customer_negative_criterion,
+                    "mobile_application",
+                    entry,
+                    MobileApplicationInfo,
+                )
 
                 operation = CustomerNegativeCriterionOperation()
                 operation.create = customer_negative_criterion
@@ -282,6 +303,9 @@ class CustomerNegativeCriterionService:
                 self.client.mutate_customer_negative_criteria(request=request)
             )
 
+            ordered_app_ids = list(app_ids or []) + [
+                entry.get("app_id", "") for entry in (mobile_applications or [])
+            ]
             results = []
             for i, result in enumerate(response.results):
                 criterion_resource = result.resource_name
@@ -293,7 +317,9 @@ class CustomerNegativeCriterionService:
                         "resource_name": criterion_resource,
                         "criterion_id": criterion_id,
                         "type": "MOBILE_APPLICATION",
-                        "app_id": app_ids[i],
+                        "app_id": ordered_app_ids[i]
+                        if i < len(ordered_app_ids)
+                        else "",
                     }
                 )
 
@@ -1039,7 +1065,8 @@ def create_customer_negative_criterion_tools(
     async def add_mobile_application_exclusions(
         ctx: Context,
         customer_id: str,
-        app_ids: List[str],
+        app_ids: Optional[List[str]] = None,
+        mobile_applications: Optional[List[Dict[str, Any]]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -1048,7 +1075,8 @@ def create_customer_negative_criterion_tools(
 
         Args:
             customer_id: The customer ID
-            app_ids: List of mobile app IDs to exclude (e.g., ["com.example.app"])
+            app_ids: List of mobile app IDs to exclude (e.g., ["com.example.app"]). Legacy convenience path.
+            mobile_applications: Optional list of dicts each building a MobileApplicationInfo (app_id + name).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -1059,6 +1087,7 @@ def create_customer_negative_criterion_tools(
             ctx=ctx,
             customer_id=customer_id,
             app_ids=app_ids,
+            mobile_applications=mobile_applications,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

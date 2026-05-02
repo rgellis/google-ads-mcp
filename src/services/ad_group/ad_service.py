@@ -408,6 +408,27 @@ class AdService:
         legacy_responsive_display_ad: Optional[Dict[str, Any]] = None,
         shopping_smart_ad: Optional[Dict[str, Any]] = None,
         text_ad: Optional[Dict[str, Any]] = None,
+        expanded_text_ad: Optional[Dict[str, Any]] = None,
+        expanded_dynamic_search_ad: Optional[Dict[str, Any]] = None,
+        hotel_ad: Optional[Dict[str, Any]] = None,
+        shopping_product_ad: Optional[Dict[str, Any]] = None,
+        image_ad: Optional[Dict[str, Any]] = None,
+        video_ad: Optional[Dict[str, Any]] = None,
+        video_responsive_ad: Optional[Dict[str, Any]] = None,
+        responsive_search_ad: Optional[Dict[str, Any]] = None,
+        app_ad: Optional[Dict[str, Any]] = None,
+        responsive_display_ad: Optional[Dict[str, Any]] = None,
+        local_ad: Optional[Dict[str, Any]] = None,
+        display_upload_ad: Optional[Dict[str, Any]] = None,
+        app_engagement_ad: Optional[Dict[str, Any]] = None,
+        shopping_comparison_listing_ad: Optional[Dict[str, Any]] = None,
+        smart_campaign_ad: Optional[Dict[str, Any]] = None,
+        app_pre_registration_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_multi_asset_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_carousel_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_video_responsive_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_product_ad: Optional[Dict[str, Any]] = None,
+        travel_ad: Optional[Dict[str, Any]] = None,
         final_app_urls: Optional[List[Dict[str, Any]]] = None,
         url_collections: Optional[List[Dict[str, Any]]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
@@ -542,6 +563,198 @@ class AdService:
 
                 set_optional_submessage(ad, "text_ad", text_ad, TextAdInfo)
                 update_mask_fields.append("text_ad")
+
+            # All other ad-type oneof submessages — each is an
+            # alternative to the existing dedicated ``create_<ad_type>``
+            # methods; on update_ad they accept a dict that builds the
+            # full info submessage so callers can override every
+            # sub-field. Mutually exclusive with each other (the API
+            # rejects setting more than one at a time).
+            if expanded_text_ad is not None:
+                from google.ads.googleads.v23.common.types import ExpandedTextAdInfo
+
+                set_optional_submessage(
+                    ad, "expanded_text_ad", expanded_text_ad, ExpandedTextAdInfo
+                )
+                update_mask_fields.append("expanded_text_ad")
+            if expanded_dynamic_search_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    ExpandedDynamicSearchAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "expanded_dynamic_search_ad",
+                    expanded_dynamic_search_ad,
+                    ExpandedDynamicSearchAdInfo,
+                )
+                update_mask_fields.append("expanded_dynamic_search_ad")
+            if hotel_ad is not None:
+                from google.ads.googleads.v23.common.types import HotelAdInfo
+
+                set_optional_submessage(ad, "hotel_ad", hotel_ad, HotelAdInfo)
+                update_mask_fields.append("hotel_ad")
+            if shopping_product_ad is not None:
+                from google.ads.googleads.v23.common.types import ShoppingProductAdInfo
+
+                set_optional_submessage(
+                    ad,
+                    "shopping_product_ad",
+                    shopping_product_ad,
+                    ShoppingProductAdInfo,
+                )
+                update_mask_fields.append("shopping_product_ad")
+            if image_ad is not None:
+                from google.ads.googleads.v23.common.types import ImageAdInfo
+
+                set_optional_submessage(ad, "image_ad", image_ad, ImageAdInfo)
+                update_mask_fields.append("image_ad")
+            if video_ad is not None:
+                from google.ads.googleads.v23.common.types import VideoAdInfo
+
+                set_optional_submessage(ad, "video_ad", video_ad, VideoAdInfo)
+                update_mask_fields.append("video_ad")
+            if video_responsive_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    VideoResponsiveAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "video_responsive_ad",
+                    video_responsive_ad,
+                    VideoResponsiveAdInfo,
+                )
+                update_mask_fields.append("video_responsive_ad")
+            if responsive_search_ad is not None:
+                # ResponsiveSearchAdInfo already imported at module level.
+                set_optional_submessage(
+                    ad,
+                    "responsive_search_ad",
+                    responsive_search_ad,
+                    ResponsiveSearchAdInfo,
+                )
+                update_mask_fields.append("responsive_search_ad")
+            if app_ad is not None:
+                from google.ads.googleads.v23.common.types import AppAdInfo
+
+                set_optional_submessage(ad, "app_ad", app_ad, AppAdInfo)
+                update_mask_fields.append("app_ad")
+            if responsive_display_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    ResponsiveDisplayAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "responsive_display_ad",
+                    responsive_display_ad,
+                    ResponsiveDisplayAdInfo,
+                )
+                update_mask_fields.append("responsive_display_ad")
+            if local_ad is not None:
+                from google.ads.googleads.v23.common.types import LocalAdInfo
+
+                set_optional_submessage(ad, "local_ad", local_ad, LocalAdInfo)
+                update_mask_fields.append("local_ad")
+            if display_upload_ad is not None:
+                from google.ads.googleads.v23.common.types import DisplayUploadAdInfo
+
+                set_optional_submessage(
+                    ad, "display_upload_ad", display_upload_ad, DisplayUploadAdInfo
+                )
+                update_mask_fields.append("display_upload_ad")
+            if app_engagement_ad is not None:
+                from google.ads.googleads.v23.common.types import AppEngagementAdInfo
+
+                set_optional_submessage(
+                    ad, "app_engagement_ad", app_engagement_ad, AppEngagementAdInfo
+                )
+                update_mask_fields.append("app_engagement_ad")
+            if shopping_comparison_listing_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    ShoppingComparisonListingAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "shopping_comparison_listing_ad",
+                    shopping_comparison_listing_ad,
+                    ShoppingComparisonListingAdInfo,
+                )
+                update_mask_fields.append("shopping_comparison_listing_ad")
+            if smart_campaign_ad is not None:
+                from google.ads.googleads.v23.common.types import SmartCampaignAdInfo
+
+                set_optional_submessage(
+                    ad, "smart_campaign_ad", smart_campaign_ad, SmartCampaignAdInfo
+                )
+                update_mask_fields.append("smart_campaign_ad")
+            if app_pre_registration_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    AppPreRegistrationAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "app_pre_registration_ad",
+                    app_pre_registration_ad,
+                    AppPreRegistrationAdInfo,
+                )
+                update_mask_fields.append("app_pre_registration_ad")
+            if demand_gen_multi_asset_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    DemandGenMultiAssetAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "demand_gen_multi_asset_ad",
+                    demand_gen_multi_asset_ad,
+                    DemandGenMultiAssetAdInfo,
+                )
+                update_mask_fields.append("demand_gen_multi_asset_ad")
+            if demand_gen_carousel_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    DemandGenCarouselAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "demand_gen_carousel_ad",
+                    demand_gen_carousel_ad,
+                    DemandGenCarouselAdInfo,
+                )
+                update_mask_fields.append("demand_gen_carousel_ad")
+            if demand_gen_video_responsive_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    DemandGenVideoResponsiveAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "demand_gen_video_responsive_ad",
+                    demand_gen_video_responsive_ad,
+                    DemandGenVideoResponsiveAdInfo,
+                )
+                update_mask_fields.append("demand_gen_video_responsive_ad")
+            if demand_gen_product_ad is not None:
+                from google.ads.googleads.v23.common.types import (
+                    DemandGenProductAdInfo,
+                )
+
+                set_optional_submessage(
+                    ad,
+                    "demand_gen_product_ad",
+                    demand_gen_product_ad,
+                    DemandGenProductAdInfo,
+                )
+                update_mask_fields.append("demand_gen_product_ad")
+            if travel_ad is not None:
+                from google.ads.googleads.v23.common.types import TravelAdInfo
+
+                set_optional_submessage(ad, "travel_ad", travel_ad, TravelAdInfo)
+                update_mask_fields.append("travel_ad")
 
             # Repeated submessage / parameter lists.
             if final_app_urls is not None:
@@ -2781,6 +2994,27 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
         legacy_responsive_display_ad: Optional[Dict[str, Any]] = None,
         shopping_smart_ad: Optional[Dict[str, Any]] = None,
         text_ad: Optional[Dict[str, Any]] = None,
+        expanded_text_ad: Optional[Dict[str, Any]] = None,
+        expanded_dynamic_search_ad: Optional[Dict[str, Any]] = None,
+        hotel_ad: Optional[Dict[str, Any]] = None,
+        shopping_product_ad: Optional[Dict[str, Any]] = None,
+        image_ad: Optional[Dict[str, Any]] = None,
+        video_ad: Optional[Dict[str, Any]] = None,
+        video_responsive_ad: Optional[Dict[str, Any]] = None,
+        responsive_search_ad: Optional[Dict[str, Any]] = None,
+        app_ad: Optional[Dict[str, Any]] = None,
+        responsive_display_ad: Optional[Dict[str, Any]] = None,
+        local_ad: Optional[Dict[str, Any]] = None,
+        display_upload_ad: Optional[Dict[str, Any]] = None,
+        app_engagement_ad: Optional[Dict[str, Any]] = None,
+        shopping_comparison_listing_ad: Optional[Dict[str, Any]] = None,
+        smart_campaign_ad: Optional[Dict[str, Any]] = None,
+        app_pre_registration_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_multi_asset_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_carousel_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_video_responsive_ad: Optional[Dict[str, Any]] = None,
+        demand_gen_product_ad: Optional[Dict[str, Any]] = None,
+        travel_ad: Optional[Dict[str, Any]] = None,
         final_app_urls: Optional[List[Dict[str, Any]]] = None,
         url_collections: Optional[List[Dict[str, Any]]] = None,
         url_custom_parameters: Optional[List[Dict[str, Any]]] = None,
@@ -2813,6 +3047,27 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             legacy_responsive_display_ad: Dict that builds a LegacyResponsiveDisplayAdInfo submessage.
             shopping_smart_ad: Dict that builds a ShoppingSmartAdInfo submessage (Smart Shopping).
             text_ad: Immutable. Dict that builds a TextAdInfo submessage (legacy expanded-text ad).
+            expanded_text_ad: Dict that builds an ExpandedTextAdInfo submessage.
+            expanded_dynamic_search_ad: Dict that builds an ExpandedDynamicSearchAdInfo submessage.
+            hotel_ad: Dict that builds a HotelAdInfo submessage.
+            shopping_product_ad: Dict that builds a ShoppingProductAdInfo submessage.
+            image_ad: Dict that builds an ImageAdInfo submessage.
+            video_ad: Dict that builds a VideoAdInfo submessage.
+            video_responsive_ad: Dict that builds a VideoResponsiveAdInfo submessage.
+            responsive_search_ad: Dict that builds a ResponsiveSearchAdInfo submessage.
+            app_ad: Dict that builds an AppAdInfo submessage.
+            responsive_display_ad: Dict that builds a ResponsiveDisplayAdInfo submessage.
+            local_ad: Dict that builds a LocalAdInfo submessage.
+            display_upload_ad: Dict that builds a DisplayUploadAdInfo submessage.
+            app_engagement_ad: Dict that builds an AppEngagementAdInfo submessage.
+            shopping_comparison_listing_ad: Dict that builds a ShoppingComparisonListingAdInfo submessage.
+            smart_campaign_ad: Dict that builds a SmartCampaignAdInfo submessage.
+            app_pre_registration_ad: Dict that builds an AppPreRegistrationAdInfo submessage.
+            demand_gen_multi_asset_ad: Dict that builds a DemandGenMultiAssetAdInfo submessage.
+            demand_gen_carousel_ad: Dict that builds a DemandGenCarouselAdInfo submessage.
+            demand_gen_video_responsive_ad: Dict that builds a DemandGenVideoResponsiveAdInfo submessage.
+            demand_gen_product_ad: Dict that builds a DemandGenProductAdInfo submessage.
+            travel_ad: Dict that builds a TravelAdInfo submessage.
             final_app_urls: List of dicts each building a FinalAppUrl (os_type + url) for installed-app deep links.
             url_collections: List of dicts each building a UrlCollection (url_collection_id + final_urls / final_mobile_urls / tracking_url_template) for multi-URL bundles.
             url_custom_parameters: List of dicts each building a CustomParameter (key + value) for {_param} substitution.
@@ -2842,6 +3097,27 @@ def create_ad_tools(service: AdService) -> List[Callable[..., Awaitable[Any]]]:
             legacy_responsive_display_ad=legacy_responsive_display_ad,
             shopping_smart_ad=shopping_smart_ad,
             text_ad=text_ad,
+            expanded_text_ad=expanded_text_ad,
+            expanded_dynamic_search_ad=expanded_dynamic_search_ad,
+            hotel_ad=hotel_ad,
+            shopping_product_ad=shopping_product_ad,
+            image_ad=image_ad,
+            video_ad=video_ad,
+            video_responsive_ad=video_responsive_ad,
+            responsive_search_ad=responsive_search_ad,
+            app_ad=app_ad,
+            responsive_display_ad=responsive_display_ad,
+            local_ad=local_ad,
+            display_upload_ad=display_upload_ad,
+            app_engagement_ad=app_engagement_ad,
+            shopping_comparison_listing_ad=shopping_comparison_listing_ad,
+            smart_campaign_ad=smart_campaign_ad,
+            app_pre_registration_ad=app_pre_registration_ad,
+            demand_gen_multi_asset_ad=demand_gen_multi_asset_ad,
+            demand_gen_carousel_ad=demand_gen_carousel_ad,
+            demand_gen_video_responsive_ad=demand_gen_video_responsive_ad,
+            demand_gen_product_ad=demand_gen_product_ad,
+            travel_ad=travel_ad,
             final_app_urls=final_app_urls,
             url_collections=url_collections,
             url_custom_parameters=url_custom_parameters,

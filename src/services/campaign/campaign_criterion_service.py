@@ -88,6 +88,7 @@ from src.utils import (
     format_customer_id,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
     set_request_options,
 )
 
@@ -2879,6 +2880,11 @@ class CampaignCriterionService:
         criterion_id: str,
         bid_modifier: Optional[float] = None,
         status: Optional[str] = None,
+        mobile_application: Optional[Dict[str, Any]] = None,
+        proximity: Optional[Dict[str, Any]] = None,
+        topic: Optional[Dict[str, Any]] = None,
+        webpage: Optional[Dict[str, Any]] = None,
+        keyword_theme: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -2892,6 +2898,22 @@ class CampaignCriterionService:
             criterion_id: The criterion ID to update
             bid_modifier: New bid modifier (e.g., 1.2 for +20%, 0.8 for -20%)
             status: New criterion status. ENABLED, PAUSED, or REMOVED.
+            mobile_application: Dict that builds a
+                ``MobileApplicationInfo`` submessage (mobile_app_id +
+                name).
+            proximity: Dict that builds a ``ProximityInfo`` submessage
+                (geo_point + radius + radius_units + address sub-fields
+                like city_name, country_code, postal_code,
+                province_code, province_name, street_address,
+                street_address2).
+            topic: Dict that builds a ``TopicInfo`` submessage
+                (topic_constant + path).
+            webpage: Dict that builds a ``WebpageInfo`` submessage
+                (criterion_name, conditions, sample.sample_urls,
+                coverage_percentage).
+            keyword_theme: Dict that builds a ``KeywordThemeInfo``
+                submessage (keyword_theme_constant or
+                free_form_keyword_theme).
 
         Returns:
             Updated campaign criterion details
@@ -2920,6 +2942,36 @@ class CampaignCriterionService:
                     CampaignCriterionStatusEnum.CampaignCriterionStatus, status
                 )
                 update_mask_fields.append("status")
+
+            if mobile_application is not None:
+                set_optional_submessage(
+                    campaign_criterion,
+                    "mobile_application",
+                    mobile_application,
+                    MobileApplicationInfo,
+                )
+                update_mask_fields.append("mobile_application")
+            if proximity is not None:
+                set_optional_submessage(
+                    campaign_criterion, "proximity", proximity, ProximityInfo
+                )
+                update_mask_fields.append("proximity")
+            if topic is not None:
+                set_optional_submessage(campaign_criterion, "topic", topic, TopicInfo)
+                update_mask_fields.append("topic")
+            if webpage is not None:
+                set_optional_submessage(
+                    campaign_criterion, "webpage", webpage, WebpageInfo
+                )
+                update_mask_fields.append("webpage")
+            if keyword_theme is not None:
+                set_optional_submessage(
+                    campaign_criterion,
+                    "keyword_theme",
+                    keyword_theme,
+                    KeywordThemeInfo,
+                )
+                update_mask_fields.append("keyword_theme")
 
             if not update_mask_fields:
                 raise ValueError("At least one field must be provided for update")
@@ -4451,6 +4503,11 @@ def create_campaign_criterion_tools(
         criterion_id: str,
         bid_modifier: Optional[float] = None,
         status: Optional[str] = None,
+        mobile_application: Optional[Dict[str, Any]] = None,
+        proximity: Optional[Dict[str, Any]] = None,
+        topic: Optional[Dict[str, Any]] = None,
+        webpage: Optional[Dict[str, Any]] = None,
+        keyword_theme: Optional[Dict[str, Any]] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -4458,10 +4515,10 @@ def create_campaign_criterion_tools(
         """Update a campaign criterion using partial update with field mask.
 
         Updatable fields:
-            - bid_modifier (float): Bid modifier for the criterion. Use values like
-                1.2 for +20%, 0.8 for -20%, 0.0 to remove the modifier.
-                Not applicable to negative criteria.
+            - bid_modifier (float): Bid modifier for the criterion.
             - status (str): ENABLED, PAUSED, or REMOVED.
+            - criterion oneof submessages (mobile_application, proximity,
+              topic, webpage, keyword_theme).
 
         Args:
             customer_id: The customer ID
@@ -4469,6 +4526,11 @@ def create_campaign_criterion_tools(
             criterion_id: The criterion ID to update
             bid_modifier: New bid modifier value
             status: New criterion status (ENABLED, PAUSED, or REMOVED)
+            mobile_application: Dict that builds a MobileApplicationInfo submessage (mobile_app_id + name).
+            proximity: Dict that builds a ProximityInfo submessage (geo_point + radius + radius_units + address sub-fields).
+            topic: Dict that builds a TopicInfo submessage (topic_constant + path).
+            webpage: Dict that builds a WebpageInfo submessage (criterion_name, conditions, sample.sample_urls, coverage_percentage).
+            keyword_theme: Dict that builds a KeywordThemeInfo submessage (keyword_theme_constant or free_form_keyword_theme).
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -4482,6 +4544,11 @@ def create_campaign_criterion_tools(
             criterion_id=criterion_id,
             bid_modifier=bid_modifier,
             status=status,
+            mobile_application=mobile_application,
+            proximity=proximity,
+            topic=topic,
+            webpage=webpage,
+            keyword_theme=keyword_theme,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

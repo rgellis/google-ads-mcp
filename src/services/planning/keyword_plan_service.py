@@ -61,6 +61,8 @@ class KeywordPlanService:
         customer_id: str,
         name: str,
         forecast_period_days: int = 30,
+        forecast_period_start_date: Optional[str] = None,
+        forecast_period_end_date: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Any = None,
@@ -71,7 +73,16 @@ class KeywordPlanService:
             ctx: FastMCP context
             customer_id: The customer ID
             name: The keyword plan name
-            forecast_period_days: Forecast period in days (default 30)
+            forecast_period_days: Forecast period in days (default 30).
+                Used when ``forecast_period_start_date`` /
+                ``forecast_period_end_date`` are omitted.
+            forecast_period_start_date: Optional explicit start date
+                (``YYYY-MM-DD``) for a custom forecast date range.
+                Mutually exclusive with the named-interval path
+                (``forecast_period_days``). Both start and end must be
+                supplied together.
+            forecast_period_end_date: Optional explicit end date
+                (``YYYY-MM-DD``) for a custom forecast date range.
 
         Returns:
             Created keyword plan details
@@ -83,19 +94,32 @@ class KeywordPlanService:
             keyword_plan = KeywordPlan()
             keyword_plan.name = name
 
-            # Set forecast period. The proto exposes only NEXT_WEEK / NEXT_MONTH /
-            # NEXT_QUARTER as named intervals, so values >90 cannot be honored
-            # without a custom date range — raise rather than silently snap to
-            # NEXT_MONTH (which is the bug this branch used to hide).
-            if forecast_period_days <= 30:
+            if (
+                forecast_period_start_date is not None
+                or forecast_period_end_date is not None
+            ):
+                if not (forecast_period_start_date and forecast_period_end_date):
+                    raise ValueError(
+                        "Both forecast_period_start_date and "
+                        "forecast_period_end_date are required for a "
+                        "custom date range."
+                    )
+                keyword_plan.forecast_period.date_range.start_date = (
+                    forecast_period_start_date
+                )
+                keyword_plan.forecast_period.date_range.end_date = (
+                    forecast_period_end_date
+                )
+            elif forecast_period_days <= 30:
                 keyword_plan.forecast_period.date_interval = KeywordPlanForecastIntervalEnum.KeywordPlanForecastInterval.NEXT_MONTH
             elif forecast_period_days <= 90:
                 keyword_plan.forecast_period.date_interval = KeywordPlanForecastIntervalEnum.KeywordPlanForecastInterval.NEXT_QUARTER
             else:
                 raise ValueError(
                     f"forecast_period_days={forecast_period_days} exceeds the "
-                    "90-day limit of the named forecast intervals. Use a custom "
-                    "date range (not yet exposed) or pick a value <= 90."
+                    "90-day limit of the named forecast intervals. Pass "
+                    "forecast_period_start_date and forecast_period_end_date "
+                    "for a custom date range, or pick a value <= 90."
                 )
 
             # Create operation
@@ -591,6 +615,8 @@ def create_keyword_plan_tools(
         customer_id: str,
         name: str,
         forecast_period_days: int = 30,
+        forecast_period_start_date: Optional[str] = None,
+        forecast_period_end_date: Optional[str] = None,
         partial_failure: bool = False,
         validate_only: bool = False,
         response_content_type: Optional[str] = None,
@@ -600,7 +626,9 @@ def create_keyword_plan_tools(
         Args:
             customer_id: The customer ID
             name: The keyword plan name
-            forecast_period_days: Forecast period in days (default 30)
+            forecast_period_days: Forecast period in days (default 30). Used when start/end dates are omitted.
+            forecast_period_start_date: Optional explicit start date (YYYY-MM-DD) for a custom forecast date range. Mutually exclusive with forecast_period_days.
+            forecast_period_end_date: Optional explicit end date (YYYY-MM-DD) for a custom forecast date range.
             partial_failure: If True, valid operations succeed when others fail in the same request.
             validate_only: If True, validate the request without executing it.
             response_content_type: Optional response-content-type override (e.g. 'MUTABLE_RESOURCE').
@@ -612,6 +640,8 @@ def create_keyword_plan_tools(
             customer_id=customer_id,
             name=name,
             forecast_period_days=forecast_period_days,
+            forecast_period_start_date=forecast_period_start_date,
+            forecast_period_end_date=forecast_period_end_date,
             partial_failure=partial_failure,
             validate_only=validate_only,
             response_content_type=response_content_type,

@@ -37,6 +37,7 @@ from src.utils import (
     gaql_int,
     get_logger,
     serialize_proto_message,
+    set_optional_submessage,
 )
 
 logger = get_logger(__name__)
@@ -68,6 +69,8 @@ class OfflineUserDataJobService:
         store_sales_transaction_upload_fraction: Optional[float] = None,
         store_sales_custom_key: Optional[str] = None,
         external_id: Optional[int] = None,
+        customer_match_user_list_metadata: Optional[Dict[str, Any]] = None,
+        store_sales_metadata: Optional[Dict[str, Any]] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
@@ -101,6 +104,21 @@ class OfflineUserDataJobService:
             external_id: Immutable. Optional caller-supplied identifier
                 stored on the job. Useful for reconciling jobs created
                 via the API back to your own system.
+            customer_match_user_list_metadata: Dict that builds a
+                ``CustomerMatchUserListMetadata`` submessage (consent
+                fields ad_personalization / ad_user_data plus
+                user_list). Alternative to passing the scalar
+                ``user_list`` arg above for callers that need full
+                consent control.
+            store_sales_metadata: Dict that builds a
+                ``StoreSalesMetadata`` submessage (third_party_metadata
+                with partner_id / partner_match_fraction /
+                partner_upload_fraction / valid_transaction_fraction /
+                advertiser_upload_date_time / bridge_map_version_id,
+                plus loyalty_fraction / transaction_upload_fraction /
+                custom_key). Alternative to passing the
+                ``store_sales_*`` scalar args above for callers that
+                need full third-party metadata control.
 
         Returns:
             Created job details with resource_name
@@ -163,6 +181,27 @@ class OfflineUserDataJobService:
 
             if external_id is not None:
                 job.external_id = external_id
+
+            if customer_match_user_list_metadata is not None:
+                from google.ads.googleads.v23.common.types import (
+                    CustomerMatchUserListMetadata,
+                )
+
+                set_optional_submessage(
+                    job,
+                    "customer_match_user_list_metadata",
+                    customer_match_user_list_metadata,
+                    CustomerMatchUserListMetadata,
+                )
+            if store_sales_metadata is not None:
+                from google.ads.googleads.v23.common.types import StoreSalesMetadata
+
+                set_optional_submessage(
+                    job,
+                    "store_sales_metadata",
+                    store_sales_metadata,
+                    StoreSalesMetadata,
+                )
 
             # Create request
             request = CreateOfflineUserDataJobRequest()
@@ -750,6 +789,8 @@ def create_offline_user_data_job_tools(
         store_sales_transaction_upload_fraction: Optional[float] = None,
         store_sales_custom_key: Optional[str] = None,
         external_id: Optional[int] = None,
+        customer_match_user_list_metadata: Optional[Dict[str, Any]] = None,
+        store_sales_metadata: Optional[Dict[str, Any]] = None,
         validate_only: bool = False,
         enable_match_rate_range_preview: bool = False,
     ) -> Dict[str, Any]:
@@ -775,6 +816,8 @@ def create_offline_user_data_job_tools(
                 sales (only valid on allow-listed customers).
             external_id: Immutable. Optional caller-supplied identifier
                 stored on the job for reconciling back to your own system.
+            customer_match_user_list_metadata: Dict that builds a CustomerMatchUserListMetadata submessage (consent.ad_personalization, consent.ad_user_data, user_list).
+            store_sales_metadata: Dict that builds a StoreSalesMetadata submessage with full third_party_metadata sub-fields.
             validate_only: Whether to only validate the request
             enable_match_rate_range_preview: Whether to enable match rate range preview
 
@@ -790,6 +833,8 @@ def create_offline_user_data_job_tools(
             store_sales_transaction_upload_fraction=store_sales_transaction_upload_fraction,
             store_sales_custom_key=store_sales_custom_key,
             external_id=external_id,
+            customer_match_user_list_metadata=customer_match_user_list_metadata,
+            store_sales_metadata=store_sales_metadata,
             validate_only=validate_only,
             enable_match_rate_range_preview=enable_match_rate_range_preview,
         )
