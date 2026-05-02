@@ -531,9 +531,13 @@ def test_register_ad_group_bid_modifier_tools() -> None:
         "create_ad_group_device_bid_modifier",
         "create_ad_group_hotel_check_in_day_bid_modifier",
         "create_ad_group_hotel_date_selection_bid_modifier",
-        "create_ad_group_hotel_advance_booking_window_bid_modifier",
+        # These two drop the `_ad_group_` prefix to keep the
+        # `ag_bid_mod_…` registered tool name under Claude's 64-char
+        # limit (see main.py). The service-class method names already
+        # drop the prefix.
+        "create_hotel_advance_booking_window_bid_modifier",
         "create_ad_group_hotel_length_of_stay_bid_modifier",
-        "create_ad_group_hotel_check_in_date_range_bid_modifier",
+        "create_hotel_check_in_date_range_bid_modifier",
         "update_ad_group_bid_modifier",
         "list_ad_group_bid_modifiers",
         "remove_ad_group_bid_modifier",

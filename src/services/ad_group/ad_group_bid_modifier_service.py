@@ -885,7 +885,7 @@ def create_ad_group_bid_modifier_tools(
             response_content_type=response_content_type,
         )
 
-    async def create_ad_group_hotel_advance_booking_window_bid_modifier(
+    async def create_hotel_advance_booking_window_bid_modifier(
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
@@ -965,7 +965,7 @@ def create_ad_group_bid_modifier_tools(
             response_content_type=response_content_type,
         )
 
-    async def create_ad_group_hotel_check_in_date_range_bid_modifier(
+    async def create_hotel_check_in_date_range_bid_modifier(
         ctx: Context,
         customer_id: str,
         ad_group_id: str,
@@ -1092,9 +1092,13 @@ def create_ad_group_bid_modifier_tools(
             create_ad_group_device_bid_modifier,
             create_ad_group_hotel_check_in_day_bid_modifier,
             create_ad_group_hotel_date_selection_bid_modifier,
-            create_ad_group_hotel_advance_booking_window_bid_modifier,
+            # Renamed without the redundant `ad_group_` prefix because the
+            # full prefixed names (`ag_bid_mod_create_ad_group_hotel_…`)
+            # blew past Claude's 64-char tool-name limit (see main.py).
+            # The service-class method names already drop the prefix.
+            create_hotel_advance_booking_window_bid_modifier,
             create_ad_group_hotel_length_of_stay_bid_modifier,
-            create_ad_group_hotel_check_in_date_range_bid_modifier,
+            create_hotel_check_in_date_range_bid_modifier,
             update_ad_group_bid_modifier,
             list_ad_group_bid_modifiers,
             remove_ad_group_bid_modifier,
