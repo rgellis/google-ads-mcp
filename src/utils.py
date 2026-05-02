@@ -190,6 +190,40 @@ def set_optional_submessage(
     )
 
 
+def extend_repeated_submessages(
+    parent: Any,
+    field_name: str,
+    items: Any,
+    message_class: Any,
+) -> None:
+    """Append ``items`` to ``parent.<field_name>`` as proto submessages.
+
+    No-op when ``items`` is ``None``. Each entry may be a dict (built
+    via ``message_class(mapping=entry)``) or an existing
+    ``message_class`` instance. This is the repeated-submessage twin of
+    ``set_optional_submessage`` — same proto-plus dict-building rules.
+
+    Args:
+        parent: The proto message that owns the repeated field.
+        field_name: The repeated field's name on ``parent``.
+        items: An iterable of dicts / ``message_class`` instances, or None.
+        message_class: The proto-plus class for each entry.
+    """
+    if items is None:
+        return
+    repeated = getattr(parent, field_name)
+    for entry in items:
+        if isinstance(entry, message_class):
+            repeated.append(entry)
+        elif isinstance(entry, dict):
+            repeated.append(message_class(mapping=entry))
+        else:
+            raise TypeError(
+                f"{field_name}[*] must be a dict or {message_class.__name__}, "
+                f"got {type(entry).__name__}"
+            )
+
+
 def set_request_options(
     request: Any,
     partial_failure: bool = False,
