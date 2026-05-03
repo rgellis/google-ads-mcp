@@ -89,10 +89,14 @@ class CampaignConversionGoalService:
             customer_id = format_customer_id(customer_id)
 
             # Create resource name based on campaign, category, and origin.
-            # The category and origin segments are integer enum values, not names.
+            # The category and origin segments are the enum NAMES (e.g.
+            # ``PURCHASE`` / ``WEBSITE``), not their integer values —
+            # Google's API rejects integer paths (``~4~2``) as malformed
+            # and the SDK's ``campaign_conversion_goal_path`` builder
+            # treats both segments as free-form strings.
             resource_name = (
                 f"customers/{customer_id}/campaignConversionGoals/"
-                f"{campaign_id}~{int(category)}~{int(origin)}"
+                f"{campaign_id}~{category.name}~{origin.name}"
             )
 
             # Create campaign conversion goal. Only biddable is mutable —

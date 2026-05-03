@@ -81,10 +81,9 @@ class TestCampaignConversionGoalService:
         assert request.validate_only is False
 
         operation = request.operations[0]
-        # Resource name uses integer enum values (PURCHASE=4, WEBSITE=2),
-        # not enum names.
+        # Resource name uses the enum NAMES, not integer values.
         assert operation.update.resource_name == (
-            "customers/1234567890/campaignConversionGoals/9876543210~4~2"
+            "customers/1234567890/campaignConversionGoals/9876543210~PURCHASE~WEBSITE"
         )
         # campaign / category / origin are Immutable per proto and are
         # encoded in the resource_name; the wrapper no longer assigns them
@@ -120,10 +119,9 @@ class TestCampaignConversionGoalService:
 
         request = mock_client.mutate_campaign_conversion_goals.call_args[1]["request"]  # type: ignore
         operation = request.operations[0]
-        # Resource name uses integer enum values (IMPORTED_LEAD=12, APP=4),
-        # not enum names.
+        # Resource name uses the enum NAMES, not integer values.
         assert operation.update.resource_name == (
-            "customers/1234567890/campaignConversionGoals/1111111111~12~4"
+            "customers/1234567890/campaignConversionGoals/1111111111~IMPORTED_LEAD~APP"
         )
         # category / origin are Immutable and not assigned on the update
         # message (S1.6); they're encoded in the resource_name.

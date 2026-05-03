@@ -154,10 +154,14 @@ class AssetGroupAssetService:
             customer_id = format_customer_id(customer_id)
 
             # Construct resource name using the unique ~ delimiter format.
-            # The third segment is the integer enum value, not the name.
+            # The third segment is the AssetFieldType enum NAME (e.g.
+            # ``HEADLINE``, ``CALL``), not its integer value — Google's
+            # API rejects integer paths (``~16``) as malformed and the
+            # SDK's own ``asset_group_asset_path`` builder treats this
+            # segment as a free-form string.
             resource_name = (
                 f"customers/{customer_id}/assetGroupAssets/"
-                f"{asset_group_id}~{asset_id}~{int(field_type)}"
+                f"{asset_group_id}~{asset_id}~{field_type.name}"
             )
 
             # Create asset group asset with resource name and new status
@@ -227,10 +231,14 @@ class AssetGroupAssetService:
             customer_id = format_customer_id(customer_id)
 
             # Construct resource name using the unique ~ delimiter format.
-            # The third segment is the integer enum value, not the name.
+            # The third segment is the AssetFieldType enum NAME (e.g.
+            # ``HEADLINE``, ``CALL``), not its integer value — Google's
+            # API rejects integer paths (``~16``) as malformed and the
+            # SDK's own ``asset_group_asset_path`` builder treats this
+            # segment as a free-form string.
             resource_name = (
                 f"customers/{customer_id}/assetGroupAssets/"
-                f"{asset_group_id}~{asset_id}~{int(field_type)}"
+                f"{asset_group_id}~{asset_id}~{field_type.name}"
             )
 
             # Create the operation
