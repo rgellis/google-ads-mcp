@@ -257,10 +257,10 @@ async def test_update_ad_group_asset_status(
     assert len(request.operations) == 1
 
     operation = request.operations[0]
-    field_type_segment = AssetFieldTypeEnum.AssetFieldType[field_type].value
+    # Compound resource names use the enum NAME, not its integer value.
     assert (
         operation.update.resource_name
-        == f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type_segment}"
+        == f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type}"
     )
     assert operation.update.status == AssetLinkStatusEnum.AssetLinkStatus.PAUSED
     assert operation.update_mask.paths == ["status"]
@@ -493,10 +493,10 @@ async def test_remove_asset_from_ad_group(
     assert len(request.operations) == 1
 
     operation = request.operations[0]
-    field_type_segment = AssetFieldTypeEnum.AssetFieldType[field_type].value
+    # Compound resource names use the enum NAME, not its integer value.
     assert (
         operation.remove
-        == f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type_segment}"
+        == f"customers/{customer_id}/adGroupAssets/{ad_group_id}~{asset_id}~{field_type}"
     )
 
     # Verify logging

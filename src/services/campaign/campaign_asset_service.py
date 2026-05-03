@@ -34,15 +34,29 @@ logger = get_logger(__name__)
 
 
 def _asset_field_type_segment(field_type: Any) -> str:
-    """Convert an AssetFieldType enum name or value to its integer wire value.
+    """Return the AssetFieldType enum NAME for the third segment of a
+    CampaignAsset compound resource name.
 
-    CampaignAsset compound resource names use the integer enum value in
-    the third segment, not the enum name. Accepts a string ("HEADLINE"),
-    an int (3), or an enum instance.
+    Google Ads' compound resource_name format for CampaignAsset is
+    ``customers/{cid}/campaignAssets/{campaign_id}~{asset_id}~{field_type}``
+    where ``{field_type}`` is the **enum name string** (``CALL``,
+    ``SITELINK``, ``HEADLINE`` etc.), not the integer value. The SDK's
+    own ``CampaignAssetServiceClient.campaign_asset_path()`` constructor
+    treats this segment as a free-form string, and Google's API rejects
+    paths that use the integer (e.g. ``~16``) as malformed.
+
+    Accepts a string (``"CALL"``), an enum instance
+    (``AssetFieldTypeEnum.AssetFieldType.CALL``), or an int (16, the
+    legacy form), and always emits the canonical name.
     """
     if isinstance(field_type, str):
-        return str(getattr(AssetFieldTypeEnum.AssetFieldType, field_type).value)
-    return str(int(field_type))
+        # Validate it resolves; raises AttributeError on a typo.
+        getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
+        return field_type
+    if isinstance(field_type, int):
+        return AssetFieldTypeEnum.AssetFieldType(field_type).name
+    # proto-plus enum instance — has a ``.name`` attribute.
+    return field_type.name
 
 
 class CampaignAssetService:
